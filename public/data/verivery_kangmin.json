@@ -1,0 +1,39 @@
+{
+  "name": "KANGMIN (VERIVERY)",
+  "korean_name": "유강민",
+  "artistType": "solo_male",
+  "generation": 4,
+  "debut": "2023-04-29",
+  "releases": [
+    {
+      "title": "Free Falling",
+      "dailyValues": {
+        "2026-04-01": { "value": 3318, "source": "show_champion", "episode": 591 }
+      },
+      "embeds": {
+        "2026-04-08": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://youtu.be/dy79Xj9Dfpc?si=JKiE8C8mj26C2m74" }
+            ]
+          }
+        ],
+        "2026-03-30": [
+          {
+            "eventType": "release_date",
+            "links": [
+              { "url": "https://music.apple.com/us/album/daydream/1888138163" }
+            ]
+          },
+          {
+            "eventType": "mv",
+            "links": [
+              { "url": "https://youtu.be/Gk3sKhxTN74?si=M1KjueJBK3iQxBkB" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

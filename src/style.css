@@ -139,21 +139,25 @@ body {
   color: #666;
   margin-left: 0;
   max-width: 200px;
+  cursor: pointer;
 }
 
 .bar__name--outside {
   color: #213547;
   font-size: 0.8rem;
+  cursor: pointer;
 }
 
 .bar__gen--outside {
   color: #888;
   font-size: 0.65rem;
+  cursor: pointer;
 }
 
 .bar__type-indicator--outside {
   color: #888;
   font-size: 0.7rem;
+  cursor: pointer;
 }
 
 .bar__wins {

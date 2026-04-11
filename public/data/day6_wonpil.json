@@ -6,7 +6,7 @@
   "debut": "2022-02-07",
   "releases": [
     {
-      "title": "love ward",
+      "title": "Highs and Lows",
       "dailyValues": {
         "2026-04-11": { "value": 3912, "source": "show_music_core", "episode": 940 }
       },
@@ -21,7 +21,7 @@
           {
             "eventType": "mv",
             "links": [
-              { "url": "https://youtu.be/b4iVv91Z6lY?si=NTtHoNhMcayxxjXL", "description": "MV" }
+              { "url": "https://youtu.be/yiPTOpGWaeM?si=VEnq4AOgxiw18g5e", "description": "MV" }
             ]
           }
         ]

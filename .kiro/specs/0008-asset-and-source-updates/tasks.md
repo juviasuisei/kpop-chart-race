@@ -25,7 +25,7 @@ Update source code to add two new chart sources (`m_countdown`, `show_music_core
     - In `tests/unit/detail-panel.test.ts`: add test that `SOURCE_LOGO_MAP` contains all 6 sources and every value ends with `.png`
     - _Requirements: 3.4, 4.4, 5.1, 5.2_
 
-- [-] 2. Replace artist logo SVGs with PNGs and update JSON data files
+- [x] 2. Replace artist logo SVGs with PNGs and update JSON data files
   - [x] 2.1 Delete the 9 SVG files in `public/assets/logos/` and create 9 minimal 1×1 PNG placeholders with matching base names
     - Files: aria-bloom, crystal-dream, jay-storm, luna-park, neon-pulse, phoenix-rise, shadow-blade, stellar-nova, thunder-kings
     - _Requirements: 1.1, 1.3_
@@ -45,7 +45,7 @@ Update source code to add two new chart sources (`m_countdown`, `show_music_core
   - [ ] 3.1 Update `"version"` in `package.json` from `"0.2.3"` to `"0.3.0"`
     - _Requirements: 6.1, 6.2_
 
-- [ ] 4. Final checkpoint
+- [x] 4. Final checkpoint
   - Ensure all tests pass, ask the user if questions arise.
 
 ## Notes

@@ -184,8 +184,8 @@ Incremental implementation of a static animated bar chart race visualizing K-pop
 - [x] 7. Checkpoint — Utilities
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 8. Embed Renderer
-  - [ ] 8.1 Implement Embed_Renderer
+- [x] 8. Embed Renderer
+  - [x] 8.1 Implement Embed_Renderer
     - Create `src/embed-renderer.ts`
     - URL pattern detection: YouTube (`youtube.com/watch`, `youtu.be/`), Apple Music (`music.apple.com/`), Instagram (`instagram.com/p/`, `instagram.com/reel/`), TikTok (`tiktok.com/`)
     - Transform to embed templates: YouTube → iframe with `/embed/`, Apple Music → iframe with `embed.music.apple.com/`, Instagram → blockquote + embed script, TikTok → blockquote + embed script
@@ -195,17 +195,17 @@ Incremental implementation of a static animated bar chart race visualizing K-pop
     - Iframes use `sandbox` attribute; external links use `rel="noopener noreferrer" target="_blank"`
     - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5, 8.6_
 
-  - [ ]* 8.2 Write property test — Property 13: Embed URL Transformation
+  - [x]* 8.2 Write property test — Property 13: Embed URL Transformation
     - **Property 13: Embed URL Transformation**
     - Generate random valid URLs for each embed type; verify correct embed template with extracted content ID
     - **Validates: Requirements 8.1, 8.2, 8.3, 8.4**
 
-  - [ ]* 8.3 Write property test — Property 14: Malformed URL Fallback
+  - [x]* 8.3 Write property test — Property 14: Malformed URL Fallback
     - **Property 14: Malformed URL Fallback**
     - Generate random non-matching strings; verify fallback anchor element produced
     - **Validates: Requirements 8.5**
 
-  - [ ]* 8.4 Write property test — Property 15: Permalink Sanitization
+  - [x]* 8.4 Write property test — Property 15: Permalink Sanitization
     - **Property 15: Permalink Sanitization**
     - Generate strings with XSS payloads (script tags, javascript: URLs, event handlers); verify no executable script content in output
     - **Validates: Requirements 8.6**

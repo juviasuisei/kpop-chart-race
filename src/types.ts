@@ -16,7 +16,9 @@ export type ChartSource =
   | "inkigayo"
   | "the_show"
   | "show_champion"
-  | "music_bank";
+  | "music_bank"
+  | "m_countdown"
+  | "show_music_core";
 
 /** Content type labels for embed date entries */
 export type EventType =

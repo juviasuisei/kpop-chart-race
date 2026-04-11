@@ -1,33 +1,21 @@
 {
-  "name": "Aria Bloom",
-  "artistType": "solo_female",
+  "name": "BTS",
+  "korean_name": "",
+  "artistType": "boy_group",
   "generation": 3,
-  "logo": "assets/logos/aria-bloom.png",
+  "logo": "assets/logos/bts.png",
   "releases": [
     {
-      "title": "Petal Storm",
+      "title": "SWIM",
       "dailyValues": {
-        "2024-05-01": { "value": 600, "source": "music_bank", "episode": 477 },
-        "2024-05-05": { "value": 680, "source": "inkigayo", "episode": 1251 },
-        "2024-05-08": { "value": 720, "source": "music_bank", "episode": 478 },
-        "2024-05-12": { "value": 680, "source": "show_champion", "episode": 509 },
-        "2024-05-15": { "value": 620, "source": "music_bank", "episode": 480 },
-        "2024-05-19": { "value": 560, "source": "inkigayo", "episode": 1254 },
-        "2024-05-22": { "value": 500, "source": "music_bank", "episode": 482 },
-        "2024-05-26": { "value": 440, "source": "show_champion", "episode": 512 },
-        "2024-05-29": { "value": 380, "source": "music_bank", "episode": 483 },
-        "2024-06-02": { "value": 320, "source": "inkigayo", "episode": 1256 },
-        "2024-06-05": { "value": 280, "source": "music_bank", "episode": 485 },
-        "2024-06-08": { "value": 250, "source": "show_champion", "episode": 514 },
-        "2024-06-12": { "value": 220, "source": "music_bank", "episode": 486 },
-        "2024-06-15": { "value": 200, "source": "inkigayo", "episode": 1258 }
+        "2026-04-11": { "value": 8532, "source": "show_music_core", "episode": 940 }
       },
       "embeds": {
-        "2024-05-01": [
+        "2026-03-20": [
           {
             "eventType": "release_date",
             "links": [
-              { "url": "https://music.apple.com/us/album/petal-storm/EXAMPLE_AB01", "description": "Petal Storm on Apple Music" }
+              { "url": "https://music.apple.com/us/album/arirang/1868481904", "description": "ARIRANG" }
             ]
           }
         ],

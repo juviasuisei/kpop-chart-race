@@ -31,6 +31,8 @@ const KNOWN_CHART_SOURCES: ReadonlySet<string> = new Set([
   "the_show",
   "show_champion",
   "music_bank",
+  "m_countdown",
+  "show_music_core",
 ]);
 
 /**

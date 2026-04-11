@@ -12,10 +12,12 @@ import { toRomanNumeral } from "./utils.ts";
 
 /** Known chart sources that have logo assets */
 const SOURCE_LOGO_MAP: Record<string, string> = {
-  inkigayo: "assets/sources/inkigayo.svg",
-  the_show: "assets/sources/the_show.svg",
-  show_champion: "assets/sources/show_champion.svg",
-  music_bank: "assets/sources/music_bank.svg",
+  inkigayo: "assets/sources/inkigayo.png",
+  the_show: "assets/sources/the_show.png",
+  show_champion: "assets/sources/show_champion.png",
+  music_bank: "assets/sources/music_bank.png",
+  m_countdown: "assets/sources/m_countdown.png",
+  show_music_core: "assets/sources/show_music_core.png",
 };
 
 /** Crown level visual configuration */

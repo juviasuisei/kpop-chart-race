@@ -350,3 +350,279 @@ body {
   white-space: nowrap;
   border: 0;
 }
+
+
+/* ===== App Layout ===== */
+
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+#app .chart-race {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* ===== Loading Screen ===== */
+
+.loading-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100vh;
+  background: #1a1a2e;
+  color: #ffffff;
+}
+
+.loading-screen__title {
+  font-size: 2rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.loading-screen__progress-text {
+  font-size: 1rem;
+  text-align: center;
+  margin-bottom: 1rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.progress-bar {
+  width: 60%;
+  max-width: 400px;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: #0072B2;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.artist-credits {
+  width: 60%;
+  max-width: 400px;
+  height: 120px;
+  overflow: hidden;
+  text-align: center;
+}
+
+.artist-credits__name {
+  display: block;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+  padding: 0.15rem 0;
+  animation: fadeInName 0.4s ease forwards;
+  opacity: 0;
+}
+
+@keyframes fadeInName {
+  to {
+    opacity: 1;
+  }
+}
+
+.loading-screen__error {
+  font-size: 1rem;
+  color: #ff6b6b;
+  text-align: center;
+  padding: 1rem;
+}
+
+.loading-screen--complete {
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+/* ===== Playback Controls ===== */
+
+.playback-controls {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 1rem;
+  border-top: 1px solid #e0e0e0;
+  background: #ffffff;
+  flex-shrink: 0;
+}
+
+.playback-controls__play-btn {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: #0072B2;
+  color: #ffffff;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+
+.playback-controls__play-btn:hover,
+.playback-controls__play-btn:focus-visible {
+  background: #005a8c;
+  outline: 2px solid #0072B2;
+  outline-offset: 2px;
+}
+
+.playback-controls__scrubber {
+  flex: 1 1 auto;
+  min-width: 0;
+  cursor: pointer;
+}
+
+.playback-controls__date-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #213547;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ===== Zoom Selector ===== */
+
+.zoom-selector {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+.zoom-selector__option {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+  color: #213547;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  transition: background 0.15s;
+}
+
+.zoom-selector__option:hover {
+  background: #f0f0f0;
+}
+
+/* ===== Crown Icon Styles ===== */
+
+.timeline-entry__crown--gold {
+  color: #d4a017;
+}
+
+/* ===== Embed Caption ===== */
+
+.embed-caption {
+  font-size: 0.75rem;
+  color: #666;
+  margin-top: 0.25rem;
+  line-height: 1.4;
+}
+
+/* ===== Mobile Responsive (< 768px) ===== */
+
+@media (max-width: 767px) {
+  .bar__name {
+    font-size: 0.65rem;
+  }
+
+  .bar__gen {
+    font-size: 0.55rem;
+  }
+
+  .bar__value {
+    font-size: 0.65rem;
+  }
+
+  .bar__release {
+    font-size: 0.6rem;
+    max-width: 100px;
+  }
+
+  .bar__logo {
+    width: 20px;
+    height: 20px;
+  }
+
+  .chart-race__date {
+    font-size: 1.25rem;
+    padding: 0.25rem 0.5rem;
+  }
+
+  .playback-controls {
+    gap: 0.5rem;
+    padding: 0.4rem 0.5rem;
+  }
+
+  .playback-controls__play-btn {
+    width: 30px;
+    height: 30px;
+    font-size: 0.85rem;
+  }
+
+  .playback-controls__date-label {
+    font-size: 0.7rem;
+  }
+
+  .zoom-selector {
+    gap: 0.25rem;
+  }
+
+  .zoom-selector__option {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.35rem;
+  }
+
+  .chart-race__legend {
+    gap: 0.5rem;
+    padding: 0.5rem;
+    font-size: 0.65rem;
+  }
+}
+
+/* ===== Desktop Responsive (>= 768px) ===== */
+
+@media (min-width: 768px) {
+  .bar__name {
+    font-size: 0.9rem;
+  }
+
+  .bar__gen {
+    font-size: 0.7rem;
+  }
+
+  .bar__value {
+    font-size: 0.9rem;
+  }
+
+  .bar__release {
+    max-width: 300px;
+  }
+
+  .bar__logo {
+    width: 32px;
+    height: 32px;
+  }
+
+  .playback-controls {
+    padding: 0.75rem 1.5rem;
+  }
+}

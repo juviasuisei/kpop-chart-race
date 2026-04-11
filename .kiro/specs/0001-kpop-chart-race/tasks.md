@@ -328,8 +328,8 @@ Incremental implementation of a static animated bar chart race visualizing K-pop
 - [x] 15. Checkpoint — Detail panel and accessibility
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 16. Responsive design and styling
-  - [ ] 16.1 Implement responsive CSS and layout
+- [x] 16. Responsive design and styling
+  - [x] 16.1 Implement responsive CSS and layout
     - Create `src/styles.css` (or modular CSS files)
     - Mobile layout (<768px): appropriately sized bars, controls, full-screen Detail_Panel overlay
     - Desktop layout (≥768px): optimized bar sizes, sidebar Detail_Panel
@@ -341,7 +341,7 @@ Incremental implementation of a static animated bar chart race visualizing K-pop
     - Crown icon styles for levels 1–5
     - _Requirements: 9.1, 9.2, 9.3, 9.4, 9.5, 11.6, 11.7, 11.8, 11.9_
 
-  - [ ]* 16.2 Write unit tests for responsive design
+  - [x]* 16.2 Write unit tests for responsive design
     - Test mobile/desktop breakpoints (9.1–9.5)
     - _Requirements: 9.1–9.5_
 

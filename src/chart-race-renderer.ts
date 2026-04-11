@@ -6,6 +6,7 @@
 import type { ChartSnapshot, RankedEntry } from "./models.ts";
 import type { ArtistType, ZoomLevel } from "./types.ts";
 import { filterByZoom, computeBarWidth, toRomanNumeral, tween } from "./utils.ts";
+import { EventBus } from "./event-bus.ts";
 
 /** Wong colorblind-friendly palette mapping ArtistType → hex color */
 const ARTIST_TYPE_COLORS: Record<ArtistType, string> = {
@@ -56,6 +57,7 @@ interface BarElement {
   releaseSpan: HTMLSpanElement;
   currentDisplayValue: number;
   animationFrameId: number | null;
+  clickHandler: (() => void) | null;
 }
 
 export class ChartRaceRenderer {
@@ -64,6 +66,8 @@ export class ChartRaceRenderer {
   private barsContainer: HTMLDivElement | null = null;
   private bars: Map<string, BarElement> = new Map();
   private pendingFrames: Set<number> = new Set();
+
+  constructor(private eventBus: EventBus) {}
 
   /**
    * Mount the chart race into the given container.
@@ -156,6 +160,9 @@ export class ChartRaceRenderer {
     for (const [, barEl] of this.bars) {
       if (barEl.animationFrameId !== null) {
         cancelAnimationFrame(barEl.animationFrameId);
+      }
+      if (barEl.clickHandler) {
+        barEl.wrapper.removeEventListener('click', barEl.clickHandler);
       }
     }
     this.bars.clear();
@@ -253,6 +260,9 @@ export class ChartRaceRenderer {
     wrapper.appendChild(valueSpan);
     wrapper.appendChild(releaseSpan);
 
+    const clickHandler = () => this.eventBus.emit('bar:click', entry.artistId);
+    wrapper.addEventListener('click', clickHandler);
+
     return {
       wrapper,
       bar,
@@ -264,6 +274,7 @@ export class ChartRaceRenderer {
       releaseSpan,
       currentDisplayValue: entry.previousCumulativeValue,
       animationFrameId: null,
+      clickHandler,
     };
   }
 

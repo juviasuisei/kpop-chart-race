@@ -1,0 +1,22 @@
+# Tasks
+
+- [x] 1. Modify `ChartRaceRenderer` to accept and store an `EventBus`
+  - [x] 1.1 Import `EventBus` from `./event-bus.ts` in `src/chart-race-renderer.ts`
+  - [x] 1.2 Add a `private eventBus: EventBus` constructor parameter and store it
+  - [x] 1.3 Add an optional `clickHandler` field to the `BarElement` interface to track the bound listener
+- [x] 2. Attach click event listeners to bar wrappers
+  - [x] 2.1 In `createBarElement()`, create a click handler that calls `this.eventBus.emit('bar:click', entry.artistId)`
+  - [x] 2.2 Attach the click handler to the bar `wrapper` element via `addEventListener`
+  - [x] 2.3 Store the click handler reference on the `BarElement` for later cleanup
+- [x] 3. Clean up click listeners in `destroy()`
+  - [x] 3.1 In `destroy()`, iterate over `this.bars` and call `removeEventListener('click', barEl.clickHandler)` for each bar before clearing
+- [x] 4. Update `main.ts` to pass `EventBus` to `ChartRaceRenderer`
+  - [x] 4.1 Change `new ChartRaceRenderer()` to `new ChartRaceRenderer(eventBus)` in `src/main.ts`
+- [x] 5. Update existing tests to use new constructor signature
+  - [x] 5.1 In `tests/unit/chart-race-renderer.test.ts`, import `EventBus` and update all `new ChartRaceRenderer()` calls to pass an `EventBus` instance
+  - [x] 5.2 In `tests/unit/integration.test.ts`, update `new ChartRaceRenderer()` to `new ChartRaceRenderer(eventBus)` (EventBus already imported)
+  - [x] 5.3 In `tests/unit/responsive.test.ts`, update `new ChartRaceRenderer()` to `new ChartRaceRenderer(new EventBus())` (EventBus already imported)
+- [x] 6. Add new tests for click → `bar:click` event emission
+  - [x] 6.1 Add test: clicking a bar wrapper emits `bar:click` with the correct `artistId`
+  - [x] 6.2 Add test: clicking different bars emits the correct `artistId` for each respective bar
+  - [x] 6.3 Add test: no `bar:click` events are emitted after `destroy()` is called

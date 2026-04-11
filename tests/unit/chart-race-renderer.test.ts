@@ -1,4 +1,5 @@
 import { ChartRaceRenderer } from '../../src/chart-race-renderer.ts';
+import { EventBus } from '../../src/event-bus.ts';
 import type { ChartSnapshot, RankedEntry } from '../../src/models.ts';
 import type { ArtistType } from '../../src/types.ts';
 
@@ -35,11 +36,13 @@ function makeSnapshot(entries: RankedEntry[], date = '2024-06-01'): ChartSnapsho
 describe('ChartRaceRenderer', () => {
   let container: HTMLElement;
   let renderer: ChartRaceRenderer;
+  let eventBus: EventBus;
 
   beforeEach(() => {
     container = document.createElement('div');
     document.body.appendChild(container);
-    renderer = new ChartRaceRenderer();
+    eventBus = new EventBus();
+    renderer = new ChartRaceRenderer(eventBus);
   });
 
   afterEach(() => {
@@ -234,5 +237,60 @@ describe('ChartRaceRenderer', () => {
 
     const barsContainer = container.querySelector('.chart-race__bars') as HTMLElement;
     expect(barsContainer.style.overflowY).toBe('auto');
+  });
+
+  // 16. Clicking a bar wrapper emits bar:click with correct artistId
+  it('clicking a bar wrapper emits bar:click with the correct artistId', () => {
+    renderer.mount(container);
+    const snapshot = makeSnapshot([
+      makeEntry({ artistId: 'artist-luna', artistName: 'Luna Park', rank: 1 }),
+    ]);
+    renderer.update(snapshot, 10);
+
+    const emitted: string[] = [];
+    eventBus.on('bar:click', (artistId: string) => emitted.push(artistId));
+
+    const wrapper = container.querySelector('.chart-race__bar-wrapper') as HTMLElement;
+    wrapper.click();
+
+    expect(emitted).toEqual(['artist-luna']);
+  });
+
+  // 17. Clicking different bars emits the correct artistId for each
+  it('clicking different bars emits the correct artistId for each', () => {
+    renderer.mount(container);
+    const snapshot = makeSnapshot([
+      makeEntry({ artistId: 'artist-a', artistName: 'Artist A', rank: 1, cumulativeValue: 600 }),
+      makeEntry({ artistId: 'artist-b', artistName: 'Artist B', rank: 2, cumulativeValue: 400 }),
+    ]);
+    renderer.update(snapshot, 10);
+
+    const emitted: string[] = [];
+    eventBus.on('bar:click', (artistId: string) => emitted.push(artistId));
+
+    const wrappers = container.querySelectorAll('.chart-race__bar-wrapper');
+    (wrappers[0] as HTMLElement).click();
+    (wrappers[1] as HTMLElement).click();
+
+    expect(emitted).toEqual(['artist-a', 'artist-b']);
+  });
+
+  // 18. No bar:click events emitted after destroy()
+  it('no bar:click events are emitted after destroy()', () => {
+    renderer.mount(container);
+    const snapshot = makeSnapshot([
+      makeEntry({ artistId: 'artist-x', artistName: 'Artist X', rank: 1 }),
+    ]);
+    renderer.update(snapshot, 10);
+
+    const wrapper = container.querySelector('.chart-race__bar-wrapper') as HTMLElement;
+
+    const emitted: string[] = [];
+    eventBus.on('bar:click', (artistId: string) => emitted.push(artistId));
+
+    renderer.destroy();
+    wrapper.click();
+
+    expect(emitted).toEqual([]);
   });
 });

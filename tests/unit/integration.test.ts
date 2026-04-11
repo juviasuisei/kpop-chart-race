@@ -155,7 +155,7 @@ describe('Integration: EventBus wiring between components', () => {
 
   // 2. EventBus zoom:change updates the renderer (verify update is called)
   it('zoom:change updates the renderer', () => {
-    const renderer = new ChartRaceRenderer();
+    const renderer = new ChartRaceRenderer(eventBus);
     renderer.mount(container);
     const updateSpy = vi.spyOn(renderer, 'update');
 

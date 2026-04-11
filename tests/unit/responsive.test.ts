@@ -17,7 +17,7 @@ describe('Responsive Design', () => {
 
   // 1. Verify .chart-race element can be created and mounted
   it('creates a .chart-race element when ChartRaceRenderer is mounted', () => {
-    const renderer = new ChartRaceRenderer();
+    const renderer = new ChartRaceRenderer(new EventBus());
     renderer.mount(container);
 
     const chartRace = container.querySelector('.chart-race');

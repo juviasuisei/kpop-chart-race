@@ -297,7 +297,6 @@ export class ChartRaceRenderer {
     releaseSpan.className = "bar__release";
     releaseSpan.textContent = "";
 
-    bar.appendChild(rankSpan);
     bar.appendChild(logo);
     bar.appendChild(nameSpan);
     bar.appendChild(genSpan);
@@ -312,6 +311,7 @@ export class ChartRaceRenderer {
     winsSpan.className = "bar__wins";
     winsSpan.textContent = "";
 
+    wrapper.appendChild(rankSpan);
     wrapper.appendChild(bar);
     wrapper.appendChild(valueSpan);
     wrapper.appendChild(winsSpan);
@@ -353,6 +353,7 @@ export class ChartRaceRenderer {
   ): void {
     // Update text content
     barEl.rankSpan.textContent = `#${entry.rank}`;
+    barEl.rankSpan.style.backgroundColor = ARTIST_TYPE_COLORS[entry.artistType];
     barEl.nameSpan.textContent = entry.artistName;
     barEl.genSpan.textContent = toRomanNumeral(entry.generation);
     barEl.typeIndicator.textContent = ARTIST_TYPE_INDICATORS[entry.artistType];

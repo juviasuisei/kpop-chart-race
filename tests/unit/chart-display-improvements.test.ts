@@ -166,12 +166,12 @@ describe('Rank badge', () => {
     };
     renderer.update(snapshot, 10, emptyDataStore);
 
-    const bar = container.querySelector('.chart-race__bar')!;
-    const children = Array.from(bar.children);
+    const wrapper = container.querySelector('.chart-race__bar-wrapper')!;
+    const children = Array.from(wrapper.children);
     const rankIndex = children.findIndex((el) => el.classList.contains('bar__rank'));
-    const logoIndex = children.findIndex((el) => el.classList.contains('bar__logo'));
+    const barIndex = children.findIndex((el) => el.classList.contains('chart-race__bar'));
 
-    expect(rankIndex).toBeLessThan(logoIndex);
+    expect(rankIndex).toBeLessThan(barIndex);
 
     renderer.destroy();
     container.remove();

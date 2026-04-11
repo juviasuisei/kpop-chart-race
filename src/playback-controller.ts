@@ -27,6 +27,10 @@ export class PlaybackController {
     this.wrapper = document.createElement("div");
     this.wrapper.className = "playback-controls";
 
+    // Start at the last date so the user sees current rankings on load
+    this.currentIndex = this.dates.length - 1;
+    const initialDate = this.dates[this.currentIndex] ?? "";
+
     // Play/Pause button
     this.playBtn = document.createElement("button");
     this.playBtn.className = "playback-controls__play-btn";
@@ -40,15 +44,15 @@ export class PlaybackController {
     this.scrubber.className = "playback-controls__scrubber";
     this.scrubber.min = "0";
     this.scrubber.max = String(this.dates.length - 1);
-    this.scrubber.value = "0";
+    this.scrubber.value = String(this.currentIndex);
     this.scrubber.setAttribute("aria-label", "Timeline scrubber");
-    this.scrubber.setAttribute("aria-valuenow", this.dates[0] ?? "");
+    this.scrubber.setAttribute("aria-valuenow", initialDate);
     this.scrubber.addEventListener("input", this.handleScrubberInput);
 
     // Date label
     this.dateLabel = document.createElement("span");
     this.dateLabel.className = "playback-controls__date-label";
-    this.dateLabel.textContent = this.dates[0] ?? "";
+    this.dateLabel.textContent = initialDate;
 
     this.wrapper.appendChild(this.playBtn);
     this.wrapper.appendChild(this.scrubber);
@@ -58,6 +62,13 @@ export class PlaybackController {
 
   play(): void {
     if (this.intervalId !== null) return;
+
+    // If at the last date, reset to the beginning before starting playback
+    if (this.currentIndex >= this.dates.length - 1) {
+      this.currentIndex = 0;
+      this.updateScrubberAndLabel();
+      this.eventBus.emit("date:change", this.dates[0]);
+    }
 
     this.updateButtonToPause();
     this.eventBus.emit("play");

@@ -157,7 +157,7 @@ async function main(): Promise<void> {
   // Without this, clientHeight is 0 and bars render with zero height.
   if (dataStore.dates.length > 0) {
     requestAnimationFrame(() => {
-      eventBus.emit("date:change", dataStore.dates[0]);
+      eventBus.emit("date:change", dataStore.dates[dataStore.dates.length - 1]);
     });
   }
 }

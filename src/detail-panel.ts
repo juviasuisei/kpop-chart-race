@@ -35,13 +35,21 @@ interface CrownConfig {
  */
 function getCrownLabel(level: number): string {
   if (level === 1) return "Win";
+  const ordinal = getOrdinal(level);
   const tripleCrownCount = Math.floor(level / 3);
   const isTripleCrown = level % 3 === 0;
   if (isTripleCrown) {
-    if (tripleCrownCount === 1) return `${level}x Win (Triple Crown)`;
-    return `${level}x Win (${tripleCrownCount}x Triple Crown)`;
+    if (tripleCrownCount === 1) return `${ordinal} Win (Triple Crown)`;
+    return `${ordinal} Win (${tripleCrownCount}x Triple Crown)`;
   }
-  return `${level}x Win`;
+  return `${ordinal} Win`;
+}
+
+/** Get ordinal suffix for a number (1st, 2nd, 3rd, 4th, etc.) */
+function getOrdinal(n: number): string {
+  const s = ["th", "st", "nd", "rd"];
+  const v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
 }
 
 /**

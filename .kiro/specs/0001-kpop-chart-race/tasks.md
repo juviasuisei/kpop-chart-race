@@ -281,8 +281,8 @@ Incremental implementation of a static animated bar chart race visualizing K-pop
 - [x] 12. Checkpoint — UI components
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 13. Detail Panel
-  - [ ] 13.1 Implement Detail_Panel
+- [x] 13. Detail Panel
+  - [x] 13.1 Implement Detail_Panel
     - Create `src/detail-panel.ts`
     - `open(artistId, dataStore)`: render vertical timeline with alternating left/right entries
     - Each entry: date heading, Chart_Source logo (for known sources), episode number ("Ep N"), performance value, Event_Type label, inline embeds via Embed_Renderer
@@ -300,7 +300,7 @@ Incremental implementation of a static animated bar chart race visualizing K-pop
     - `destroy()`: cleanup
     - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5, 7.6, 7.7, 7.8, 7.9, 7.10, 7.11, 9.5, 12.8_
 
-  - [ ]* 13.2 Write unit tests for Detail_Panel
+  - [x]* 13.2 Write unit tests for Detail_Panel
     - Test open/close (7.1–7.3, 7.8), timeline layout (7.4), content display with source logo + episode (7.5), multiple embed groups per date (7.5), embed descriptions (7.5), scroll (7.6), Chart_Win crown icons by level (7.11), freeze-then-resolve (7.9), tap target padding (7.10), lazy-load embeds (12.8), focus trap (11.4), mobile overlay vs desktop sidebar (9.5)
     - _Requirements: 7.1–7.11, 9.5, 11.4, 12.8_
 

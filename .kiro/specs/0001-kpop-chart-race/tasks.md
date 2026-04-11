@@ -6,7 +6,7 @@ Incremental implementation of a static animated bar chart race visualizing K-pop
 
 ## Tasks
 
-- [-] 0. Git and GitHub setup
+- [x] 0. Git and GitHub setup
   - [x] 0.1 Initialize git repository with personal account
     - Run `git init` in the workspace root
     - Configure repo-level git identity (NOT global) so work git is unaffected:
@@ -21,15 +21,15 @@ Incremental implementation of a static animated bar chart race visualizing K-pop
     - If using HTTPS with personal account while work uses SSH, configure a repo-level credential helper or use a GitHub personal access token for this repo only
     - _Prerequisites: 0.1_
 
-  - [-] 0.3 Create .gitignore and initial commit
+  - [x] 0.3 Create .gitignore and initial commit
     - Create `.gitignore` with standard Node/Vite entries: `node_modules/`, `dist/`, `.DS_Store`, `*.local`
     - Stage all spec files and .gitignore
     - Create initial commit: `git commit -m "chore: initial commit with spec documents"`
     - Push to remote: `git push -u origin main`
     - _Prerequisites: 0.2_
 
-- [ ] 1. Project scaffolding and configuration
-  - [ ] 1.1 Initialize Vite + TypeScript project
+- [x] 1. Project scaffolding and configuration
+  - [x] 1.1 Initialize Vite + TypeScript project
     - Run `npm create vite@latest` with vanilla-ts template
     - Configure `tsconfig.json` with strict mode
     - Install dev dependencies: `vitest`, `fast-check`, `@fast-check/vitest`, `jsdom`
@@ -38,21 +38,21 @@ Incremental implementation of a static animated bar chart race visualizing K-pop
     - Create `src/main.ts` entry point (empty shell)
     - _Requirements: 10.1, 10.2, 10.5_
 
-  - [ ] 1.2 Define core TypeScript interfaces and types
+  - [x] 1.2 Define core TypeScript interfaces and types
     - Create `src/types.ts` with all data model interfaces: `ArtistEntry`, `ReleaseEntry`, `DailyValueEntry`, `EmbedDateEntry`, `EmbedLink`, `ArtistType`, `ChartSource`, `EventType`, `ZoomLevel`
     - Create `src/models.ts` with runtime models: `ParsedArtist`, `ParsedRelease`, `ParsedEmbedDateEntry`, `ParsedEmbedLink`, `ChartSnapshot`, `RankedEntry`, `FeaturedReleaseInfo`, `DataStore`
     - _Requirements: 1.2, 1.5, 1.6_
 
-  - [ ] 1.3 Implement EventBus
+  - [x] 1.3 Implement EventBus
     - Create `src/event-bus.ts` with `on`, `off`, `emit` methods
     - Typed event map for all events: `data:loaded`, `date:change`, `state:updated`, `play`, `pause`, `zoom:change`, `bar:click`, `panel:close`, `loading:progress`, `loading:complete`, `loading:error`
     - _Requirements: 1.1 (component communication)_
 
-  - [ ]* 1.4 Write unit tests for EventBus
+  - [x]* 1.4 Write unit tests for EventBus
     - Test subscribe, emit, unsubscribe, multiple handlers, emit with no listeners
     - _Requirements: 1.1_
 
-  - [ ] 1.5 Generate sample JSON data files
+  - [x] 1.5 Generate sample JSON data files
     - Create `data/` folder with ~8-10 dummy artist JSON files exercising all data model features:
       - Mix of all 5 Artist_Types (boy_group, girl_group, solo_male, solo_female, mixed_group)
       - Multiple generations (2, 3, 4, 5)

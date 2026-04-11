@@ -1,0 +1,49 @@
+{
+  "name": "Shadow Blade",
+  "artistType": "boy_group",
+  "generation": 4,
+  "logo": "assets/logos/shadow-blade.svg",
+  "releases": [
+    {
+      "title": "Dark Edge",
+      "dailyValues": {
+        "2024-05-12": { "value": 550, "source": "the_show", "episode": 309 },
+        "2024-05-15": { "value": 680, "source": "the_show", "episode": 310 },
+        "2024-05-19": { "value": 750, "source": "the_show", "episode": 311 },
+        "2024-05-22": { "value": 820, "source": "the_show", "episode": 312 },
+        "2024-05-26": { "value": 780, "source": "music_bank", "episode": 483 },
+        "2024-05-29": { "value": 700, "source": "the_show", "episode": 313 },
+        "2024-06-02": { "value": 620, "source": "the_show", "episode": 314 },
+        "2024-06-05": { "value": 540, "source": "music_bank", "episode": 485 },
+        "2024-06-08": { "value": 460, "source": "the_show", "episode": 315 },
+        "2024-06-12": { "value": 380, "source": "the_show", "episode": 316 }
+      },
+      "embeds": {
+        "2024-05-12": [
+          {
+            "eventType": "mv",
+            "links": [
+              { "url": "https://www.youtube.com/watch?v=SB_DARKEDGE_MV01", "description": "Dark Edge Official MV" }
+            ]
+          }
+        ],
+        "2024-05-22": [
+          {
+            "eventType": "chart_performance",
+            "links": [
+              { "url": "https://www.youtube.com/watch?v=SB_WIN01", "description": "The Show first win!" }
+            ]
+          }
+        ],
+        "2024-05-29": [
+          {
+            "eventType": "behind_the_scenes",
+            "links": [
+              { "url": "https://www.youtube.com/watch?v=SB_BTS01" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

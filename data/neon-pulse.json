@@ -1,0 +1,47 @@
+{
+  "name": "Neon Pulse",
+  "artistType": "boy_group",
+  "generation": 5,
+  "logo": "assets/logos/neon-pulse.svg",
+  "releases": [
+    {
+      "title": "Electric Dreams",
+      "dailyValues": {
+        "2024-05-19": { "value": 320, "source": "music_core", "episode": 900 },
+        "2024-05-22": { "value": 400, "source": "music_core", "episode": 901 },
+        "2024-05-26": { "value": 480, "source": "music_bank", "episode": 483 },
+        "2024-05-29": { "value": 520, "source": "music_core", "episode": 902 },
+        "2024-06-02": { "value": 560, "source": "the_show", "episode": 314 },
+        "2024-06-05": { "value": 500, "source": "music_core", "episode": 903 },
+        "2024-06-08": { "value": 440, "source": "music_bank", "episode": 486 },
+        "2024-06-12": { "value": 380, "source": "music_core", "episode": 904 }
+      },
+      "embeds": {
+        "2024-05-19": [
+          {
+            "eventType": "mv",
+            "links": [
+              { "url": "https://www.youtube.com/watch?v=NP_ELECTRIC_MV01", "description": "Electric Dreams Official MV" }
+            ]
+          }
+        ],
+        "2024-05-26": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://www.youtube.com/watch?v=NP_ELECTRIC_LIVE01" }
+            ]
+          }
+        ],
+        "2024-06-02": [
+          {
+            "eventType": "fan_event",
+            "links": [
+              { "url": "https://www.tiktok.com/@neonpulse/video/EXAMPLE_TIKTOK03", "description": "Fan sign event highlights" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

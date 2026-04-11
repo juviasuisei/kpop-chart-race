@@ -1,0 +1,22 @@
+{
+  "name": "kpop-chart-race",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "@fast-check/vitest": "^0.4.0",
+    "@types/jsdom": "^28.0.1",
+    "fast-check": "^4.6.0",
+    "jsdom": "^29.0.2",
+    "typescript": "~5.6.2",
+    "vite": "^5.4.10",
+    "vitest": "^4.1.4"
+  }
+}

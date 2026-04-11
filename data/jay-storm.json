@@ -1,0 +1,85 @@
+{
+  "name": "Jay Storm",
+  "artistType": "solo_male",
+  "generation": 4,
+  "logo": "assets/logos/jay-storm.svg",
+  "releases": [
+    {
+      "title": "Hurricane",
+      "dailyValues": {
+        "2024-05-05": { "value": 480, "source": "inkigayo", "episode": 1251 },
+        "2024-05-08": { "value": 550, "source": "music_bank", "episode": 478 },
+        "2024-05-12": { "value": 620, "source": "inkigayo", "episode": 1253 },
+        "2024-05-15": { "value": 700, "source": "music_bank", "episode": 480 },
+        "2024-05-19": { "value": 650, "source": "inkigayo", "episode": 1254 },
+        "2024-05-22": { "value": 580, "source": "music_bank", "episode": 482 },
+        "2024-05-26": { "value": 500, "source": "inkigayo", "episode": 1255 },
+        "2024-05-29": { "value": 420, "source": "music_bank", "episode": 483 },
+        "2024-06-02": { "value": 350, "source": "inkigayo", "episode": 1256 },
+        "2024-06-05": { "value": 280, "source": "music_bank", "episode": 485 },
+        "2024-06-08": { "value": 230, "source": "inkigayo", "episode": 1257 },
+        "2024-06-12": { "value": 200, "source": "music_bank", "episode": 486 }
+      },
+      "embeds": {
+        "2024-05-05": [
+          {
+            "eventType": "mv",
+            "links": [
+              { "url": "https://www.youtube.com/watch?v=JS_HURRICANE_MV01", "description": "Hurricane Official MV" }
+            ]
+          }
+        ],
+        "2024-05-12": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://www.youtube.com/watch?v=JS_HURRICANE_LIVE01" }
+            ]
+          },
+          {
+            "eventType": "promotion",
+            "links": [
+              { "url": "https://www.instagram.com/p/JAYSTORM_PROMO01/", "description": "Inkigayo backstage selfie" }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "title": "Typhoon",
+      "dailyValues": {
+        "2024-06-02": { "value": 400, "source": "the_show", "episode": 314 },
+        "2024-06-05": { "value": 580, "source": "inkigayo", "episode": 1256 },
+        "2024-06-08": { "value": 700, "source": "the_show", "episode": 315 },
+        "2024-06-12": { "value": 780, "source": "inkigayo", "episode": 1258 },
+        "2024-06-15": { "value": 850, "source": "the_show", "episode": 316 }
+      },
+      "embeds": {
+        "2024-06-02": [
+          {
+            "eventType": "trailer",
+            "links": [
+              { "url": "https://www.youtube.com/watch?v=JS_TYPHOON_TEASER01", "description": "Typhoon concept film" }
+            ]
+          }
+        ],
+        "2024-06-08": [
+          {
+            "eventType": "dance_practice",
+            "links": [
+              { "url": "https://www.youtube.com/watch?v=JS_TYPHOON_DANCE01" }
+            ]
+          }
+        ],
+        "2024-06-15": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://www.youtube.com/watch?v=JS_TYPHOON_LIVE01", "description": "The Show comeback stage" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,90 @@
+{
+  "name": "Crystal Dream",
+  "artistType": "girl_group",
+  "generation": 3,
+  "logo": "assets/logos/crystal-dream.svg",
+  "releases": [
+    {
+      "title": "Diamond Heart",
+      "dailyValues": {
+        "2024-05-01": { "value": 850, "source": "show_champion", "episode": 506 },
+        "2024-05-05": { "value": 800, "source": "inkigayo", "episode": 1251 },
+        "2024-05-08": { "value": 750, "source": "show_champion", "episode": 508 },
+        "2024-05-12": { "value": 700, "source": "music_bank", "episode": 479 },
+        "2024-05-15": { "value": 650, "source": "show_champion", "episode": 510 },
+        "2024-05-19": { "value": 600, "source": "inkigayo", "episode": 1254 },
+        "2024-05-22": { "value": 550, "source": "show_champion", "episode": 511 },
+        "2024-05-26": { "value": 500, "source": "music_bank", "episode": 483 },
+        "2024-05-29": { "value": 450, "source": "show_champion", "episode": 512 },
+        "2024-06-02": { "value": 400, "source": "inkigayo", "episode": 1256 },
+        "2024-06-05": { "value": 350, "source": "show_champion", "episode": 513 },
+        "2024-06-08": { "value": 300, "source": "music_bank", "episode": 486 },
+        "2024-06-12": { "value": 280, "source": "show_champion", "episode": 514 },
+        "2024-06-15": { "value": 250, "source": "inkigayo", "episode": 1258 }
+      },
+      "embeds": {
+        "2024-05-01": [
+          {
+            "eventType": "mv",
+            "links": [
+              { "url": "https://www.youtube.com/watch?v=CD_DIAMOND_MV01", "description": "Diamond Heart Official MV" }
+            ]
+          },
+          {
+            "eventType": "release_date",
+            "links": [
+              { "url": "https://music.apple.com/us/album/diamond-heart/EXAMPLE_CD01" }
+            ]
+          }
+        ],
+        "2024-05-08": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://www.youtube.com/watch?v=CD_DIAMOND_LIVE01" }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "title": "Prism Light",
+      "dailyValues": {
+        "2024-05-26": { "value": 350, "source": "show_champion", "episode": 512 },
+        "2024-05-29": { "value": 600, "source": "inkigayo", "episode": 1255 },
+        "2024-06-02": { "value": 780, "source": "show_champion", "episode": 511 },
+        "2024-06-05": { "value": 850, "source": "inkigayo", "episode": 1256 },
+        "2024-06-08": { "value": 920, "source": "show_champion", "episode": 514 },
+        "2024-06-12": { "value": 870, "source": "inkigayo", "episode": 1257 },
+        "2024-06-15": { "value": 800, "source": "show_champion", "episode": 515 }
+      },
+      "embeds": {
+        "2024-05-29": [
+          {
+            "eventType": "trailer",
+            "links": [
+              { "url": "https://www.youtube.com/watch?v=CD_PRISM_TEASER01", "description": "Prism Light concept trailer" }
+            ]
+          }
+        ],
+        "2024-06-02": [
+          {
+            "eventType": "mv",
+            "links": [
+              { "url": "https://www.youtube.com/watch?v=CD_PRISM_MV01" }
+            ]
+          }
+        ],
+        "2024-06-08": [
+          {
+            "eventType": "promotion",
+            "links": [
+              { "url": "https://www.instagram.com/p/CRYSTALDREAM_PROMO01/", "description": "Prism Light photo card event" },
+              { "url": "https://www.tiktok.com/@crystaldream/video/EXAMPLE_TIKTOK02" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

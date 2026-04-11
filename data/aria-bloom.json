@@ -1,0 +1,89 @@
+{
+  "name": "Aria Bloom",
+  "artistType": "solo_female",
+  "generation": 3,
+  "logo": "assets/logos/aria-bloom.svg",
+  "releases": [
+    {
+      "title": "Petal Storm",
+      "dailyValues": {
+        "2024-05-01": { "value": 600, "source": "music_bank", "episode": 477 },
+        "2024-05-05": { "value": 680, "source": "inkigayo", "episode": 1251 },
+        "2024-05-08": { "value": 720, "source": "music_bank", "episode": 478 },
+        "2024-05-12": { "value": 680, "source": "show_champion", "episode": 509 },
+        "2024-05-15": { "value": 620, "source": "music_bank", "episode": 480 },
+        "2024-05-19": { "value": 560, "source": "inkigayo", "episode": 1254 },
+        "2024-05-22": { "value": 500, "source": "music_bank", "episode": 482 },
+        "2024-05-26": { "value": 440, "source": "show_champion", "episode": 512 },
+        "2024-05-29": { "value": 380, "source": "music_bank", "episode": 483 },
+        "2024-06-02": { "value": 320, "source": "inkigayo", "episode": 1256 },
+        "2024-06-05": { "value": 280, "source": "music_bank", "episode": 485 },
+        "2024-06-08": { "value": 250, "source": "show_champion", "episode": 514 },
+        "2024-06-12": { "value": 220, "source": "music_bank", "episode": 486 },
+        "2024-06-15": { "value": 200, "source": "inkigayo", "episode": 1258 }
+      },
+      "embeds": {
+        "2024-05-01": [
+          {
+            "eventType": "release_date",
+            "links": [
+              { "url": "https://music.apple.com/us/album/petal-storm/EXAMPLE_AB01", "description": "Petal Storm on Apple Music" }
+            ]
+          }
+        ],
+        "2024-05-08": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://www.youtube.com/watch?v=AB_PETAL_LIVE01", "description": "Music Bank comeback stage" }
+            ]
+          }
+        ],
+        "2024-05-19": [
+          {
+            "eventType": "variety_show",
+            "links": [
+              { "url": "https://www.youtube.com/watch?v=AB_VARIETY01" }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "title": "Blossom Rain",
+      "dailyValues": {
+        "2024-05-29": { "value": 350, "source": "show_champion", "episode": 512 },
+        "2024-06-02": { "value": 520, "source": "music_bank", "episode": 484 },
+        "2024-06-05": { "value": 650, "source": "inkigayo", "episode": 1256 },
+        "2024-06-08": { "value": 720, "source": "show_champion", "episode": 514 },
+        "2024-06-12": { "value": 680, "source": "music_bank", "episode": 486 },
+        "2024-06-15": { "value": 620, "source": "inkigayo", "episode": 1258 }
+      },
+      "embeds": {
+        "2024-05-29": [
+          {
+            "eventType": "trailer",
+            "links": [
+              { "url": "https://www.youtube.com/watch?v=AB_BLOSSOM_TEASER01" }
+            ]
+          }
+        ],
+        "2024-06-05": [
+          {
+            "eventType": "mv",
+            "links": [
+              { "url": "https://www.youtube.com/watch?v=AB_BLOSSOM_MV01", "description": "Blossom Rain Official MV" }
+            ]
+          },
+          {
+            "eventType": "promotion",
+            "links": [
+              { "url": "https://www.instagram.com/reel/ARIABLOOM_REEL01/", "description": "MV behind the scenes reel" },
+              { "url": "https://www.tiktok.com/@ariabloom/video/EXAMPLE_TIKTOK04" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

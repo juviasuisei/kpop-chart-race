@@ -1,0 +1,55 @@
+{
+  "name": "Luna Park",
+  "artistType": "solo_female",
+  "generation": 4,
+  "logo": "assets/logos/luna-park.svg",
+  "releases": [
+    {
+      "title": "Moonlit Garden",
+      "dailyValues": {
+        "2024-05-08": { "value": 620, "source": "show_champion", "episode": 508 },
+        "2024-05-12": { "value": 700, "source": "show_champion", "episode": 509 },
+        "2024-05-15": { "value": 780, "source": "show_champion", "episode": 510 },
+        "2024-05-19": { "value": 720, "source": "inkigayo", "episode": 1254 },
+        "2024-05-22": { "value": 650, "source": "show_champion", "episode": 511 },
+        "2024-05-26": { "value": 580, "source": "music_bank", "episode": 483 },
+        "2024-05-29": { "value": 500, "source": "show_champion", "episode": 512 },
+        "2024-06-02": { "value": 430, "source": "inkigayo", "episode": 1256 },
+        "2024-06-05": { "value": 370, "source": "show_champion", "episode": 513 },
+        "2024-06-08": { "value": 310, "source": "music_bank", "episode": 486 }
+      },
+      "embeds": {
+        "2024-05-08": [
+          {
+            "eventType": "mv",
+            "links": [
+              { "url": "https://www.youtube.com/watch?v=LP_MOONLIT_MV01", "description": "Moonlit Garden Official MV" }
+            ]
+          },
+          {
+            "eventType": "release_date",
+            "links": [
+              { "url": "https://music.apple.com/us/album/moonlit-garden/EXAMPLE_LP01", "description": "Stream on Apple Music" }
+            ]
+          }
+        ],
+        "2024-05-15": [
+          {
+            "eventType": "chart_performance",
+            "links": [
+              { "url": "https://www.youtube.com/watch?v=LP_WIN01", "description": "Show Champion first win speech" }
+            ]
+          }
+        ],
+        "2024-05-22": [
+          {
+            "eventType": "variety_show",
+            "links": [
+              { "url": "https://www.youtube.com/watch?v=LP_VARIETY01" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

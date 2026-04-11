@@ -138,6 +138,11 @@ body {
   font-size: 0.65rem;
 }
 
+.bar__type-indicator--outside {
+  color: #888;
+  font-size: 0.7rem;
+}
+
 /* ===== Chart Race Legend ===== */
 
 .chart-race__legend {

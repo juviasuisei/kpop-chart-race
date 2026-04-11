@@ -366,22 +366,26 @@ export class ChartRaceRenderer {
     this.tweenValue(barEl, entry.previousCumulativeValue, entry.cumulativeValue);
   }
 
-  /** Move release, name, and gen back inside the bar */
+  /** Move release, name, gen, and type indicator back inside the bar */
   private resetBarOverflow(barEl: BarElement): void {
     // Ensure release is inside bar
     if (barEl.releaseSpan.parentElement !== barEl.bar) {
       barEl.bar.appendChild(barEl.releaseSpan);
     }
     barEl.releaseSpan.classList.remove("bar__release--outside");
-    // Ensure name and gen are inside bar (name before gen, both before type indicator)
+    // Ensure name, gen, and type indicator are inside bar (in order, before release)
     if (barEl.nameSpan.parentElement !== barEl.bar) {
-      barEl.bar.insertBefore(barEl.nameSpan, barEl.typeIndicator);
+      barEl.bar.insertBefore(barEl.nameSpan, barEl.releaseSpan);
     }
     if (barEl.genSpan.parentElement !== barEl.bar) {
-      barEl.bar.insertBefore(barEl.genSpan, barEl.typeIndicator);
+      barEl.bar.insertBefore(barEl.genSpan, barEl.releaseSpan);
+    }
+    if (barEl.typeIndicator.parentElement !== barEl.bar) {
+      barEl.bar.insertBefore(barEl.typeIndicator, barEl.releaseSpan);
     }
     barEl.nameSpan.classList.remove("bar__name--outside");
     barEl.genSpan.classList.remove("bar__gen--outside");
+    barEl.typeIndicator.classList.remove("bar__type-indicator--outside");
   }
 
   /** Check if bar content overflows and move elements outside as needed */
@@ -397,16 +401,18 @@ export class ChartRaceRenderer {
       barEl.wrapper.insertBefore(barEl.releaseSpan, barEl.valueSpan.nextSibling);
       barEl.releaseSpan.classList.add("bar__release--outside");
 
-      // Check if name is truncated or bar still overflows — move name + gen outside together
+      // Check if name is truncated or bar still overflows — move name + gen + type outside together
       const nameIsTruncated = barEl.nameSpan.scrollWidth > barEl.nameSpan.offsetWidth;
       const stillOverflowing = barEl.bar.scrollWidth > barEl.bar.clientWidth;
 
       if (nameIsTruncated || stillOverflowing) {
-        // Insert name then gen before the value span (keeps them together)
+        // Insert name, gen, type indicator before the value span (keeps them together)
         barEl.wrapper.insertBefore(barEl.nameSpan, barEl.valueSpan);
         barEl.wrapper.insertBefore(barEl.genSpan, barEl.valueSpan);
+        barEl.wrapper.insertBefore(barEl.typeIndicator, barEl.valueSpan);
         barEl.nameSpan.classList.add("bar__name--outside");
         barEl.genSpan.classList.add("bar__gen--outside");
+        barEl.typeIndicator.classList.add("bar__type-indicator--outside");
       }
     }
   }

@@ -1,21 +1,21 @@
 {
-  "name": "BTS",
-  "korean_name": "방탄소년단",
-  "artistType": "boy_group",
+  "name": "WONPIL (Day6)",
+  "korean_name": "김원필",
+  "artistType": "solo_male",
   "generation": 3,
-  "debut": "2013-06-13",
+  "debut": "2022-02-07",
   "releases": [
     {
-      "title": "SWIM",
+      "title": "love ward",
       "dailyValues": {
-        "2026-04-11": { "value": 8532, "source": "show_music_core", "episode": 940 }
+        "2026-04-11": { "value": 3912, "source": "show_music_core", "episode": 940 }
       },
       "embeds": {
-        "2026-03-20": [
+        "2026-03-30": [
           {
             "eventType": "release_date",
             "links": [
-              { "url": "https://music.apple.com/us/album/arirang/1868481904", "description": "ARIRANG" }
+              { "url": "https://music.apple.com/us/album/unpiltered/1884783988", "description": "Unpiltered" }
             ]
           },
           {

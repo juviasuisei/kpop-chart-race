@@ -232,7 +232,7 @@ describe('DetailPanel', () => {
     expect(crown3Img!.src).toContain('crown-3.svg');
     const crown3Label = crown3.querySelector('.crown__label');
     expect(crown3Label).not.toBeNull();
-    expect(crown3Label!.textContent).toBe('3rd Win (Triple Crown)');
+    expect(crown3Label!.textContent).toBe('Triple Crown');
     expect(crown3.getAttribute('title')).toBe('Triple Crown');
 
     // 2024-05-13 (crown level 1) comes second

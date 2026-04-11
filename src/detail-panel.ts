@@ -39,8 +39,8 @@ function getCrownLabel(level: number): string {
   const tripleCrownCount = Math.floor(level / 3);
   const isTripleCrown = level % 3 === 0;
   if (isTripleCrown) {
-    if (tripleCrownCount === 1) return `${ordinal} Win (Triple Crown)`;
-    return `${ordinal} Win (${tripleCrownCount}x Triple Crown)`;
+    if (tripleCrownCount === 1) return "Triple Crown";
+    return `${getOrdinal(tripleCrownCount)} Triple Crown`;
   }
   return `${ordinal} Win`;
 }

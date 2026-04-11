@@ -1,0 +1,31 @@
+{
+  "name": "BLACKPINK",
+  "korean_name": "키키",
+  "artistType": "girl_group",
+  "generation": 3,
+  "debut": "2025-02-24",
+  "releases": [
+    {
+      "title": "GO",
+      "dailyValues": {
+        "2026-03-26": { "value": 10167, "source": "m_countdown", "episode": 921 }
+      },
+      "embeds": {
+        "2026-01-26": [
+          {
+            "eventType": "release_date",
+            "links": [
+              { "url": "https://music.apple.com/us/album/delulu-pack-ep/1866860579" }
+            ]
+          },
+          {
+            "eventType": "mv",
+            "links": [
+              { "url": "https://youtu.be/zhHB4dZTChw?si=-5g1JiKoK_kwJkRe" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

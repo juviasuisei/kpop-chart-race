@@ -1,0 +1,31 @@
+{
+  "name": "Moon Byul [MAMAMOO]",
+  "korean_name": "문별이",
+  "artistType": "solo_female",
+  "generation": 3,
+  "debut": "2018-05-23",
+  "releases": [
+    {
+      "title": "Hertz",
+      "dailyValues": {
+        "2026-04-01": { "value": 2235, "source": "show_champion", "episode": 591 }
+      },
+      "embeds": {
+        "2026-03-25": [
+          {
+            "eventType": "release_date",
+            "links": [
+              { "url": "https://music.apple.com/us/album/rev-single/1886384531" }
+            ]
+          },
+          {
+            "eventType": "mv",
+            "links": [
+              { "url": "https://youtu.be/pLKOEfMc09E?si=vHQoaHByVw5T6z2B" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

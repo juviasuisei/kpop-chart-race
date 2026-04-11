@@ -144,9 +144,14 @@ export function computeSnapshot(
     });
   }
 
+  // Filter out entries with zero cumulative value — only artists who have
+  // earned points should appear in the snapshot. The previousMap still
+  // tracks all artists so transitions from 0→non-zero are handled correctly.
+  const nonZero = unsorted.filter(e => e.cumulativeValue > 0);
+
   // Sort descending by cumulative value, with stable sort for ties
   // (preserve previous order from previousSnapshot)
-  unsorted.sort((a, b) => {
+  nonZero.sort((a, b) => {
     if (b.cumulativeValue !== a.cumulativeValue) {
       return b.cumulativeValue - a.cumulativeValue;
     }
@@ -163,14 +168,14 @@ export function computeSnapshot(
     return 0;
   });
 
-  // Assign ranks (1-based)
-  for (let i = 0; i < unsorted.length; i++) {
-    unsorted[i].rank = i + 1;
+  // Assign ranks (1-based) on filtered array only
+  for (let i = 0; i < nonZero.length; i++) {
+    nonZero[i].rank = i + 1;
   }
 
   return {
     date,
-    entries: unsorted,
+    entries: nonZero,
   };
 }
 

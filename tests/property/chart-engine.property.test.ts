@@ -458,3 +458,45 @@ describe('Property 18: Chart Win Determination and Crown Level', () => {
     );
   });
 });
+
+
+// ============================================================
+// Feature: 0010-display-behavior-enhancements
+// Property 1: Zero-value exclusion invariant
+// **Validates: Requirements 1.1, 1.2, 1.3, 1.5**
+// ============================================================
+
+describe('Property 1: Zero-value exclusion invariant', () => {
+  it('snapshot entries all have cumulativeValue > 0 and ranks form [1..N]', () => {
+    fc.assert(
+      fc.property(
+        arbSortedDates(1, 5).chain((dates) =>
+          fc.tuple(
+            fc.constant(dates),
+            fc
+              .array(arbParsedArtist(dates), { minLength: 2, maxLength: 8 })
+              .map((artists) =>
+                artists.map((a, i) => ({ ...a, id: `artist-${i}` })),
+              ),
+            fc.integer({ min: 0, max: dates.length - 1 }).map((i) => dates[i]),
+          ),
+        ),
+        ([dates, artists, targetDate]) => {
+          const dataStore = buildDataStore(artists, dates);
+          const snapshot = computeSnapshot(targetDate, dataStore);
+
+          // Every entry must have cumulativeValue > 0
+          for (const entry of snapshot.entries) {
+            expect(entry.cumulativeValue).toBeGreaterThan(0);
+          }
+
+          // Ranks must form contiguous [1..N]
+          const expectedRanks = snapshot.entries.map((_, i) => i + 1);
+          const actualRanks = snapshot.entries.map((e) => e.rank);
+          expect(actualRanks).toEqual(expectedRanks);
+        },
+      ),
+      { numRuns: 100 },
+    );
+  });
+});

@@ -70,8 +70,8 @@ Incremental implementation of a static animated bar chart race visualizing K-pop
     - This data will be used for visual preview and testing throughout development; swap for real data later
     - _Prerequisites: 1.2 (types must be defined first)_
 
-- [ ] 2. Data layer — loading, validation, serialization
-  - [ ] 2.1 Implement Data_Loader with validation
+- [x] 2. Data layer — loading, validation, serialization
+  - [x] 2.1 Implement Data_Loader with validation
     - Create `src/data-loader.ts`
     - `loadAll(basePath)`: fetch JSON files, parse each as `ArtistEntry`, validate required fields, validate `artistType` enum, validate `generation` as positive integer
     - Skip invalid entries with console warnings; log errors for unparseable files; log warnings for unknown `ChartSource` values
@@ -80,22 +80,22 @@ Incremental implementation of a static animated bar chart race visualizing K-pop
     - Convert parsed data into `DataStore` with `artists` Map, sorted `dates` array, `startDate`, `endDate`
     - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.7, 1.8, 1.9_
 
-  - [ ] 2.2 Implement serialize/deserialize round-trip
+  - [x] 2.2 Implement serialize/deserialize round-trip
     - Add `serialize(artist: ArtistEntry): string` — pretty-print JSON
     - Add `deserialize(json: string): ArtistEntry` — parse JSON back
     - _Requirements: 1.10, 1.11_
 
-  - [ ]* 2.3 Write property test — Property 1: Serialization Round Trip
+  - [x]* 2.3 Write property test — Property 1: Serialization Round Trip
     - **Property 1: Serialization Round Trip**
     - Generate random valid `ArtistEntry` objects with fast-check; verify `deserialize(serialize(entry))` ≡ `entry`
     - **Validates: Requirements 1.10, 1.11**
 
-  - [ ]* 2.4 Write property test — Property 2: Validation Rejects Invalid Entries
+  - [x]* 2.4 Write property test — Property 2: Validation Rejects Invalid Entries
     - **Property 2: Validation Rejects Invalid Entries**
     - Generate `ArtistEntry` objects with randomly invalidated fields (missing name, bad artistType, non-positive generation, no releases); verify rejection
     - **Validates: Requirements 1.4, 1.7, 1.8**
 
-  - [ ]* 2.5 Write unit tests for Data_Loader
+  - [x]* 2.5 Write unit tests for Data_Loader
     - Test invalid JSON handling (1.3), empty dataset, single file, missing required fields (1.4), invalid artistType (1.7), invalid generation (1.8), unknown ChartSource warning (1.9)
     - _Requirements: 1.3, 1.4, 1.7, 1.8, 1.9_
 

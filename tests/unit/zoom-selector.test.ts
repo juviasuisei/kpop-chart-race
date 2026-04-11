@@ -24,11 +24,10 @@ describe('ZoomSelector', () => {
     container.remove();
   });
 
-  it('creates a .zoom-toggle button on mount', () => {
+  it('creates a .zoom-toggle element on mount', () => {
     selector.mount(container);
-    const btn = container.querySelector('.zoom-toggle');
-    expect(btn).not.toBeNull();
-    expect(btn!.tagName).toBe('BUTTON');
+    const toggle = container.querySelector('.zoom-toggle');
+    expect(toggle).not.toBeNull();
   });
 
   it('defaults to zoom level 10', () => {
@@ -36,35 +35,54 @@ describe('ZoomSelector', () => {
     expect(selector.getLevel()).toBe(10);
   });
 
-  it('shows "Zoom Out" label when at top 10', () => {
+  it('shows Top 10 label as active by default', () => {
     selector.mount(container);
-    const btn = container.querySelector('.zoom-toggle') as HTMLButtonElement;
-    expect(btn.textContent).toContain('Zoom Out');
+    const labels = container.querySelectorAll('.zoom-toggle__label');
+    expect(labels[0].classList.contains('zoom-toggle__label--active')).toBe(true);
+    expect(labels[1].classList.contains('zoom-toggle__label--active')).toBe(false);
   });
 
-  it('toggles to "all" and shows "Zoom In" on click', () => {
+  it('toggles to "all" on click and slides thumb', () => {
     selector.mount(container);
-    const btn = container.querySelector('.zoom-toggle') as HTMLButtonElement;
+    const toggle = container.querySelector('.zoom-toggle') as HTMLElement;
 
     let emittedLevel: unknown;
     eventBus.on('zoom:change', (level) => { emittedLevel = level; });
 
-    btn.click();
+    toggle.click();
 
     expect(selector.getLevel()).toBe('all');
-    expect(btn.textContent).toContain('Zoom In');
     expect(emittedLevel).toBe('all');
+
+    const track = container.querySelector('.zoom-toggle__track');
+    expect(track!.classList.contains('zoom-toggle__track--on')).toBe(true);
+
+    const labels = container.querySelectorAll('.zoom-toggle__label');
+    expect(labels[0].classList.contains('zoom-toggle__label--active')).toBe(false);
+    expect(labels[1].classList.contains('zoom-toggle__label--active')).toBe(true);
   });
 
   it('toggles back to 10 on second click', () => {
     selector.mount(container);
-    const btn = container.querySelector('.zoom-toggle') as HTMLButtonElement;
+    const toggle = container.querySelector('.zoom-toggle') as HTMLElement;
 
-    btn.click(); // → all
-    btn.click(); // → 10
+    toggle.click(); // → all
+    toggle.click(); // → 10
 
     expect(selector.getLevel()).toBe(10);
-    expect(btn.textContent).toContain('Zoom Out');
+
+    const track = container.querySelector('.zoom-toggle__track');
+    expect(track!.classList.contains('zoom-toggle__track--on')).toBe(false);
+  });
+
+  it('has role="switch" for accessibility', () => {
+    selector.mount(container);
+    const toggle = container.querySelector('.zoom-toggle') as HTMLElement;
+    expect(toggle.getAttribute('role')).toBe('switch');
+    expect(toggle.getAttribute('aria-checked')).toBe('false');
+
+    toggle.click();
+    expect(toggle.getAttribute('aria-checked')).toBe('true');
   });
 
   it('inserts before the play button in playback controls', () => {

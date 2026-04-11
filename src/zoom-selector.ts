@@ -1,6 +1,6 @@
 /**
- * Zoom_Selector — toggle button for visible entry count (Top 10 / All).
- * Renders a single toggle button and emits `zoom:change` via EventBus.
+ * Zoom_Selector — sliding toggle for visible entry count (Top 10 / All).
+ * Renders a pill-style toggle that slides between two states.
  * Positioned to the left of the play button in the playback controls.
  */
 
@@ -9,7 +9,7 @@ import type { ZoomLevel } from "./types.ts";
 
 export class ZoomSelector {
   private eventBus: EventBus;
-  private button: HTMLButtonElement | null = null;
+  private wrapper: HTMLDivElement | null = null;
   private currentLevel: ZoomLevel = 10;
 
   constructor(eventBus: EventBus) {
@@ -18,18 +18,41 @@ export class ZoomSelector {
 
   /** Mount the zoom toggle into the given container */
   mount(container: HTMLElement): void {
-    this.button = document.createElement("button");
-    this.button.className = "zoom-toggle";
-    this.button.setAttribute("aria-label", "Toggle zoom level");
-    this.updateButtonLabel();
-    this.button.addEventListener("click", this.handleClick);
+    this.wrapper = document.createElement("div");
+    this.wrapper.className = "zoom-toggle";
+    this.wrapper.setAttribute("role", "switch");
+    this.wrapper.setAttribute("aria-checked", "false");
+    this.wrapper.setAttribute("aria-label", "Toggle between Top 10 and All artists");
+    this.wrapper.tabIndex = 0;
+
+    const labelLeft = document.createElement("span");
+    labelLeft.className = "zoom-toggle__label zoom-toggle__label--active";
+    labelLeft.textContent = "Top 10";
+
+    const track = document.createElement("span");
+    track.className = "zoom-toggle__track";
+
+    const thumb = document.createElement("span");
+    thumb.className = "zoom-toggle__thumb";
+    track.appendChild(thumb);
+
+    const labelRight = document.createElement("span");
+    labelRight.className = "zoom-toggle__label";
+    labelRight.textContent = "All";
+
+    this.wrapper.appendChild(labelLeft);
+    this.wrapper.appendChild(track);
+    this.wrapper.appendChild(labelRight);
+
+    this.wrapper.addEventListener("click", this.handleClick);
+    this.wrapper.addEventListener("keydown", this.handleKeydown);
 
     // Insert before the play button (first child of playback controls)
     const playbackControls = container.querySelector(".playback-controls");
     if (playbackControls && playbackControls.firstChild) {
-      playbackControls.insertBefore(this.button, playbackControls.firstChild);
+      playbackControls.insertBefore(this.wrapper, playbackControls.firstChild);
     } else {
-      container.appendChild(this.button);
+      container.appendChild(this.wrapper);
     }
   }
 
@@ -40,27 +63,45 @@ export class ZoomSelector {
 
   /** Remove DOM elements and clean up */
   destroy(): void {
-    if (this.button) {
-      this.button.removeEventListener("click", this.handleClick);
-      this.button.remove();
-      this.button = null;
+    if (this.wrapper) {
+      this.wrapper.removeEventListener("click", this.handleClick);
+      this.wrapper.removeEventListener("keydown", this.handleKeydown);
+      this.wrapper.remove();
+      this.wrapper = null;
     }
   }
 
   private handleClick = (): void => {
-    this.currentLevel = this.currentLevel === 10 ? "all" : 10;
-    this.updateButtonLabel();
-    this.eventBus.emit("zoom:change", this.currentLevel);
+    this.toggle();
   };
 
-  private updateButtonLabel(): void {
-    if (!this.button) return;
-    if (this.currentLevel === 10) {
-      this.button.textContent = "🔍 Zoom Out";
-      this.button.setAttribute("aria-label", "Zoom out to show all artists");
-    } else {
-      this.button.textContent = "🔍 Zoom In";
-      this.button.setAttribute("aria-label", "Zoom in to show top 10");
+  private handleKeydown = (e: KeyboardEvent): void => {
+    if (e.key === " " || e.key === "Enter") {
+      e.preventDefault();
+      this.toggle();
+    }
+  };
+
+  private toggle(): void {
+    this.currentLevel = this.currentLevel === 10 ? "all" : 10;
+    this.updateVisual();
+    this.eventBus.emit("zoom:change", this.currentLevel);
+  }
+
+  private updateVisual(): void {
+    if (!this.wrapper) return;
+    const isAll = this.currentLevel === "all";
+    this.wrapper.setAttribute("aria-checked", String(isAll));
+
+    const labels = this.wrapper.querySelectorAll(".zoom-toggle__label");
+    if (labels.length === 2) {
+      labels[0].classList.toggle("zoom-toggle__label--active", !isAll);
+      labels[1].classList.toggle("zoom-toggle__label--active", isAll);
+    }
+
+    const track = this.wrapper.querySelector(".zoom-toggle__track");
+    if (track) {
+      track.classList.toggle("zoom-toggle__track--on", isAll);
     }
   }
 }

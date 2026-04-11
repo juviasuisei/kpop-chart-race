@@ -526,26 +526,59 @@ body {
 /* ===== Zoom Toggle ===== */
 
 .zoom-toggle {
-  border: 1px solid #d0d0d0;
-  border-radius: 6px;
-  background: #f8f8f8;
-  color: #213547;
-  font-size: 0.75rem;
-  font-weight: 600;
-  padding: 0.3rem 0.6rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
   cursor: pointer;
-  white-space: nowrap;
+  user-select: none;
   flex-shrink: 0;
-  transition: background 0.15s;
-}
-
-.zoom-toggle:hover {
-  background: #e8e8e8;
 }
 
 .zoom-toggle:focus-visible {
   outline: 2px solid #0072B2;
   outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.zoom-toggle__label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #aaa;
+  transition: color 0.2s;
+}
+
+.zoom-toggle__label--active {
+  color: #213547;
+}
+
+.zoom-toggle__track {
+  position: relative;
+  width: 32px;
+  height: 18px;
+  background: #d0d0d0;
+  border-radius: 9px;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.zoom-toggle__track--on {
+  background: #0072B2;
+}
+
+.zoom-toggle__thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.2s;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.zoom-toggle__track--on .zoom-toggle__thumb {
+  transform: translateX(14px);
 }
 
 /* Crown icon img sizing — SVGs provide visual distinction */
@@ -644,9 +677,22 @@ body {
     font-size: 0.7rem;
   }
 
-  .zoom-toggle {
-    font-size: 0.65rem;
-    padding: 0.2rem 0.4rem;
+  .zoom-toggle__label {
+    font-size: 0.6rem;
+  }
+
+  .zoom-toggle__track {
+    width: 28px;
+    height: 16px;
+  }
+
+  .zoom-toggle__thumb {
+    width: 12px;
+    height: 12px;
+  }
+
+  .zoom-toggle__track--on .zoom-toggle__thumb {
+    transform: translateX(12px);
   }
 
   .chart-race__legend {

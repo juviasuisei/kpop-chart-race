@@ -70,7 +70,7 @@ describe('Responsive Design', () => {
   });
 
   // 5. Verify zoom toggle renders correctly
-  it('renders zoom toggle button', () => {
+  it('renders zoom toggle with sliding track', () => {
     const eventBus = new EventBus();
     const selector = new ZoomSelector(eventBus);
 
@@ -84,6 +84,9 @@ describe('Responsive Design', () => {
 
     const toggle = container.querySelector('.zoom-toggle');
     expect(toggle).not.toBeNull();
+
+    const track = container.querySelector('.zoom-toggle__track');
+    expect(track).not.toBeNull();
 
     selector.destroy();
   });

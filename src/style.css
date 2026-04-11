@@ -523,31 +523,29 @@ body {
   flex-shrink: 0;
 }
 
-/* ===== Zoom Selector ===== */
+/* ===== Zoom Toggle ===== */
 
-.zoom-selector {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  border: none;
-  padding: 0;
-  margin: 0;
-}
-
-.zoom-selector__option {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  font-size: 0.8rem;
+.zoom-toggle {
+  border: 1px solid #d0d0d0;
+  border-radius: 6px;
+  background: #f8f8f8;
   color: #213547;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.3rem 0.6rem;
   cursor: pointer;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
   transition: background 0.15s;
 }
 
-.zoom-selector__option:hover {
-  background: #f0f0f0;
+.zoom-toggle:hover {
+  background: #e8e8e8;
+}
+
+.zoom-toggle:focus-visible {
+  outline: 2px solid #0072B2;
+  outline-offset: 2px;
 }
 
 /* Crown icon img sizing — SVGs provide visual distinction */
@@ -646,13 +644,9 @@ body {
     font-size: 0.7rem;
   }
 
-  .zoom-selector {
-    gap: 0.25rem;
-  }
-
-  .zoom-selector__option {
-    font-size: 0.7rem;
-    padding: 0.2rem 0.35rem;
+  .zoom-toggle {
+    font-size: 0.65rem;
+    padding: 0.2rem 0.4rem;
   }
 
   .chart-race__legend {

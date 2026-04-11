@@ -8,6 +8,12 @@ describe('ZoomSelector', () => {
 
   beforeEach(() => {
     container = document.createElement('div');
+    // Create a mock playback-controls container for the toggle to insert into
+    const playbackControls = document.createElement('div');
+    playbackControls.className = 'playback-controls';
+    const playBtn = document.createElement('button');
+    playbackControls.appendChild(playBtn);
+    container.appendChild(playbackControls);
     document.body.appendChild(container);
     eventBus = new EventBus();
     selector = new ZoomSelector(eventBus);
@@ -18,73 +24,59 @@ describe('ZoomSelector', () => {
     container.remove();
   });
 
-  // 1. Mount creates .zoom-selector fieldset
-  it('creates a .zoom-selector fieldset on mount', () => {
+  it('creates a .zoom-toggle button on mount', () => {
     selector.mount(container);
-    const fieldset = container.querySelector('fieldset.zoom-selector');
-    expect(fieldset).not.toBeNull();
-    expect(fieldset!.tagName).toBe('FIELDSET');
+    const btn = container.querySelector('.zoom-toggle');
+    expect(btn).not.toBeNull();
+    expect(btn!.tagName).toBe('BUTTON');
   });
 
-  // 2. Default selection is Top 10 — Req 5.5
-  it('defaults to Top 10 selected', () => {
-    selector.mount(container);
-    const checked = container.querySelector<HTMLInputElement>('input[name="zoom-level"]:checked');
-    expect(checked).not.toBeNull();
-    expect(checked!.value).toBe('10');
-  });
-
-  // 3. getLevel returns 10 by default
-  it('returns 10 from getLevel by default', () => {
+  it('defaults to zoom level 10', () => {
     selector.mount(container);
     expect(selector.getLevel()).toBe(10);
   });
 
-  // 4. All options rendered (Top 10 and All) — Req 5.1
-  it('renders both Top 10 and All radio options', () => {
+  it('shows "Zoom Out" label when at top 10', () => {
     selector.mount(container);
-    const radios = container.querySelectorAll<HTMLInputElement>('input[name="zoom-level"]');
-    expect(radios.length).toBe(2);
-
-    const values = Array.from(radios).map((r) => r.value);
-    expect(values).toContain('10');
-    expect(values).toContain('all');
+    const btn = container.querySelector('.zoom-toggle') as HTMLButtonElement;
+    expect(btn.textContent).toContain('Zoom Out');
   });
 
-  // 5. Selecting "All" emits zoom:change with "all"
-  it('emits zoom:change with "all" when All is selected', () => {
+  it('toggles to "all" and shows "Zoom In" on click', () => {
     selector.mount(container);
+    const btn = container.querySelector('.zoom-toggle') as HTMLButtonElement;
+
     let emittedLevel: unknown;
     eventBus.on('zoom:change', (level) => { emittedLevel = level; });
 
-    const allRadio = container.querySelector<HTMLInputElement>('input[value="all"]')!;
-    allRadio.checked = true;
-    allRadio.dispatchEvent(new Event('change', { bubbles: true }));
+    btn.click();
 
+    expect(selector.getLevel()).toBe('all');
+    expect(btn.textContent).toContain('Zoom In');
     expect(emittedLevel).toBe('all');
   });
 
-  // 6. Keyboard navigation — radio buttons have correct attributes — Req 11.3
-  it('renders radio buttons with correct type and name for keyboard navigation', () => {
+  it('toggles back to 10 on second click', () => {
     selector.mount(container);
-    const radios = container.querySelectorAll<HTMLInputElement>('input[name="zoom-level"]');
+    const btn = container.querySelector('.zoom-toggle') as HTMLButtonElement;
 
-    for (const radio of radios) {
-      expect(radio.type).toBe('radio');
-      expect(radio.name).toBe('zoom-level');
-    }
+    btn.click(); // → all
+    btn.click(); // → 10
 
-    // Verify they are grouped in a fieldset with a legend for accessibility
-    const legend = container.querySelector('fieldset.zoom-selector legend');
-    expect(legend).not.toBeNull();
+    expect(selector.getLevel()).toBe(10);
+    expect(btn.textContent).toContain('Zoom Out');
   });
 
-  // 7. Destroy removes DOM
+  it('inserts before the play button in playback controls', () => {
+    selector.mount(container);
+    const playbackControls = container.querySelector('.playback-controls')!;
+    expect(playbackControls.firstChild).toBe(container.querySelector('.zoom-toggle'));
+  });
+
   it('removes DOM elements on destroy', () => {
     selector.mount(container);
-    expect(container.querySelector('.zoom-selector')).not.toBeNull();
-
+    expect(container.querySelector('.zoom-toggle')).not.toBeNull();
     selector.destroy();
-    expect(container.querySelector('.zoom-selector')).toBeNull();
+    expect(container.querySelector('.zoom-toggle')).toBeNull();
   });
 });

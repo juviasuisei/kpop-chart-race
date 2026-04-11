@@ -1,6 +1,7 @@
 /**
- * Zoom_Selector — toggle control for visible entry count (Top 10 / All).
- * Renders a fieldset with radio buttons and emits `zoom:change` via EventBus.
+ * Zoom_Selector — toggle button for visible entry count (Top 10 / All).
+ * Renders a single toggle button and emits `zoom:change` via EventBus.
+ * Positioned to the left of the play button in the playback controls.
  */
 
 import { EventBus } from "./event-bus.ts";
@@ -8,68 +9,58 @@ import type { ZoomLevel } from "./types.ts";
 
 export class ZoomSelector {
   private eventBus: EventBus;
-  private fieldset: HTMLFieldSetElement | null = null;
+  private button: HTMLButtonElement | null = null;
+  private currentLevel: ZoomLevel = 10;
 
   constructor(eventBus: EventBus) {
     this.eventBus = eventBus;
   }
 
-  /** Mount the zoom selector into the given container */
+  /** Mount the zoom toggle into the given container */
   mount(container: HTMLElement): void {
-    this.fieldset = document.createElement("fieldset");
-    this.fieldset.className = "zoom-selector";
+    this.button = document.createElement("button");
+    this.button.className = "zoom-toggle";
+    this.button.setAttribute("aria-label", "Toggle zoom level");
+    this.updateButtonLabel();
+    this.button.addEventListener("click", this.handleClick);
 
-    const legend = document.createElement("legend");
-    legend.textContent = "Zoom Level";
-    legend.className = "visually-hidden";
-    this.fieldset.appendChild(legend);
-
-    const options: { label: string; value: string }[] = [
-      { label: "Top 10", value: "10" },
-      { label: "All", value: "all" },
-    ];
-
-    for (const opt of options) {
-      const label = document.createElement("label");
-      label.className = "zoom-selector__option";
-
-      const radio = document.createElement("input");
-      radio.type = "radio";
-      radio.name = "zoom-level";
-      radio.value = opt.value;
-      if (opt.value === "10") {
-        radio.checked = true;
-      }
-
-      label.appendChild(radio);
-      label.appendChild(document.createTextNode(` ${opt.label}`));
-      this.fieldset.appendChild(label);
+    // Insert before the play button (first child of playback controls)
+    const playbackControls = container.querySelector(".playback-controls");
+    if (playbackControls && playbackControls.firstChild) {
+      playbackControls.insertBefore(this.button, playbackControls.firstChild);
+    } else {
+      container.appendChild(this.button);
     }
-
-    this.fieldset.addEventListener("change", this.handleChange);
-    container.appendChild(this.fieldset);
   }
 
   /** Return the currently selected ZoomLevel */
   getLevel(): ZoomLevel {
-    if (!this.fieldset) return 10;
-    const checked = this.fieldset.querySelector<HTMLInputElement>(
-      'input[name="zoom-level"]:checked'
-    );
-    if (!checked) return 10;
-    return checked.value === "all" ? "all" : 10;
+    return this.currentLevel;
   }
 
   /** Remove DOM elements and clean up */
   destroy(): void {
-    if (this.fieldset) {
-      this.fieldset.removeEventListener("change", this.handleChange);
-      this.fieldset.remove();
-      this.fieldset = null;
+    if (this.button) {
+      this.button.removeEventListener("click", this.handleClick);
+      this.button.remove();
+      this.button = null;
     }
   }
 
-  private handleChange = (): void => {
-    this.eventBus.emit("zoom:change", this.getLevel());
+  private handleClick = (): void => {
+    this.currentLevel = this.currentLevel === 10 ? "all" : 10;
+    this.updateButtonLabel();
+    this.eventBus.emit("zoom:change", this.currentLevel);
   };
+
+  private updateButtonLabel(): void {
+    if (!this.button) return;
+    if (this.currentLevel === 10) {
+      this.button.textContent = "🔍 Zoom Out";
+      this.button.setAttribute("aria-label", "Zoom out to show all artists");
+    } else {
+      this.button.textContent = "🔍 Zoom In";
+      this.button.setAttribute("aria-label", "Zoom in to show top 10");
+    }
+  }
 }

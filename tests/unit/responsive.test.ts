@@ -69,17 +69,21 @@ describe('Responsive Design', () => {
     controller.destroy();
   });
 
-  // 5. Verify zoom selector renders correctly
-  it('renders zoom selector with radio options', () => {
+  // 5. Verify zoom toggle renders correctly
+  it('renders zoom toggle button', () => {
     const eventBus = new EventBus();
     const selector = new ZoomSelector(eventBus);
+
+    // Create mock playback-controls for the toggle to insert into
+    const playbackControls = document.createElement('div');
+    playbackControls.className = 'playback-controls';
+    playbackControls.appendChild(document.createElement('button'));
+    container.appendChild(playbackControls);
+
     selector.mount(container);
 
-    const fieldset = container.querySelector('.zoom-selector');
-    expect(fieldset).not.toBeNull();
-
-    const options = container.querySelectorAll('input[name="zoom-level"]');
-    expect(options.length).toBe(2);
+    const toggle = container.querySelector('.zoom-toggle');
+    expect(toggle).not.toBeNull();
 
     selector.destroy();
   });

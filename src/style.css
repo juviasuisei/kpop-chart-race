@@ -54,6 +54,7 @@ body {
   align-items: center;
   gap: 0;
   padding: 2px 0;
+  overflow: hidden;
   transition: transform 0.95s ease-in-out, opacity 0.95s ease-in-out;
 }
 
@@ -129,6 +130,8 @@ body {
   flex-shrink: 0;
   cursor: pointer;
   margin-left: 0.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .bar__release {

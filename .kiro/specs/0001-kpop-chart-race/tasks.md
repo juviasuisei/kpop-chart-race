@@ -250,8 +250,8 @@ Incremental implementation of a static animated bar chart race visualizing K-pop
     - Test zoom level bar height scaling (5.4), vertical scroll when overflow (5.3)
     - _Requirements: 3.1, 3.2, 4.1–4.9, 5.3, 5.4_
 
-- [ ] 11. Playback Controller and Zoom Selector
-  - [ ] 11.1 Implement Playback_Controller
+- [x] 11. Playback Controller and Zoom Selector
+  - [x] 11.1 Implement Playback_Controller
     - Create `src/playback-controller.ts`
     - `mount(container)`: render play/pause button with aria-labels, timeline scrubber (`<input type="range">`) with aria-label and aria-valuenow
     - `play()`: start interval advancing one date per ~1s, emit `play` and `date:change` events
@@ -262,7 +262,7 @@ Incremental implementation of a static animated bar chart race visualizing K-pop
     - Screen-reader-paced mode: detect via `prefers-reduced-motion`, await live region announcement Promise before advancing
     - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 6.7, 6.8, 11.1, 11.2, 11.10_
 
-  - [ ] 11.2 Implement Zoom_Selector
+  - [x] 11.2 Implement Zoom_Selector
     - Create `src/zoom-selector.ts`
     - Render radio button group for Top 10 / All
     - Default to Top 10
@@ -270,15 +270,15 @@ Incremental implementation of a static animated bar chart race visualizing K-pop
     - Emit `zoom:change` on selection
     - _Requirements: 5.1, 5.2, 5.5, 11.3_
 
-  - [ ]* 11.3 Write unit tests for Playback_Controller
+  - [x]* 11.3 Write unit tests for Playback_Controller
     - Test play/pause toggle (6.1–6.3), scrubber range (6.4), auto-pause at end (6.6), continuous update during drag (6.7), aria-labels (11.1, 11.2)
     - _Requirements: 6.1–6.8, 11.1, 11.2_
 
-  - [ ]* 11.4 Write unit tests for Zoom_Selector
+  - [x]* 11.4 Write unit tests for Zoom_Selector
     - Test default Top 10 (5.5), all options rendered (5.1), keyboard navigation (11.3)
     - _Requirements: 5.1, 5.5, 11.3_
 
-- [ ] 12. Checkpoint — UI components
+- [x] 12. Checkpoint — UI components
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 13. Detail Panel

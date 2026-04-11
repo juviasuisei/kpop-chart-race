@@ -218,34 +218,29 @@ describe('DetailPanel', () => {
   });
 
   // 10. Crown icons displayed for chart wins — Req 7.11
-  it('displays visually distinct crown icons for chart wins', () => {
+  it('displays SVG-based crown icons for chart wins', () => {
     panel.open('test-artist', dataStore);
     const crownEls = document.body.querySelectorAll('.timeline-entry__crown');
     expect(crownEls.length).toBe(2); // wins on 2024-05-13 and 2024-05-14
 
-    // Crown level 1 should have crown--1 class and "Win" label
-    const crown1 = Array.from(crownEls).find((el) => el.classList.contains('crown--1'));
-    expect(crown1).not.toBeUndefined();
-    const crown1Label = crown1!.querySelector('.crown__label');
+    // Crown level 1 should have an img pointing to crown-1.svg and "Win" label
+    const crown1 = crownEls[0];
+    const crown1Img = crown1.querySelector('.crown__icon img') as HTMLImageElement;
+    expect(crown1Img).not.toBeNull();
+    expect(crown1Img!.src).toContain('crown-1.svg');
+    const crown1Label = crown1.querySelector('.crown__label');
     expect(crown1Label).not.toBeNull();
     expect(crown1Label!.textContent).toBe('Win');
 
-    // Crown level 3 should have crown--3 class and "Triple Crown ✨" label
-    const crown3 = Array.from(crownEls).find((el) => el.classList.contains('crown--3'));
-    expect(crown3).not.toBeUndefined();
-    const crown3Label = crown3!.querySelector('.crown__label');
+    // Crown level 3 should have an img pointing to crown-3.svg and "3x Win (Triple Crown)" label
+    const crown3 = crownEls[1];
+    const crown3Img = crown3.querySelector('.crown__icon img') as HTMLImageElement;
+    expect(crown3Img).not.toBeNull();
+    expect(crown3Img!.src).toContain('crown-3.svg');
+    const crown3Label = crown3.querySelector('.crown__label');
     expect(crown3Label).not.toBeNull();
-    expect(crown3Label!.textContent).toBe('Triple Crown ✨');
-    expect(crown3!.getAttribute('title')).toBe('Triple Crown');
-
-    // Each crown should have an icon span
-    const crown1Icon = crown1!.querySelector('.crown__icon');
-    expect(crown1Icon).not.toBeNull();
-    expect(crown1Icon!.textContent).toBe('👑');
-
-    const crown3Icon = crown3!.querySelector('.crown__icon');
-    expect(crown3Icon).not.toBeNull();
-    expect(crown3Icon!.textContent).toBe('👑✨');
+    expect(crown3Label!.textContent).toBe('3x Win (Triple Crown)');
+    expect(crown3.getAttribute('title')).toBe('Triple Crown');
   });
 
   // 11. Embed placeholders created for lazy loading — Req 12.8

@@ -367,7 +367,7 @@ describe('Property 4: Featured Release Selection', () => {
 // ============================================================
 
 describe('Property 18: Chart Win Determination and Crown Level', () => {
-  it('winners are highest-value artists per (date, source) and crown levels track wins capped at 5', () => {
+  it('winners are highest-value artists per (date, source) and crown levels track wins with no cap', () => {
     fc.assert(
       fc.property(
         arbSortedDates(2, 5).chain((dates) =>
@@ -432,12 +432,11 @@ describe('Property 18: Chart Win Determination and Crown Level', () => {
                     [...expectedWinnerIds].sort(),
                   );
 
-                  // Verify crown levels are capped at 5
+                  // Verify crown levels are unbounded (no cap)
                   for (const [artistId, crownLevel] of sourceResult.crownLevels) {
                     expect(crownLevel).toBeGreaterThanOrEqual(1);
-                    expect(crownLevel).toBeLessThanOrEqual(5);
 
-                    // Verify crown level matches expected count (capped at 5)
+                    // Verify crown level matches expected count (no cap)
                     // Find the max win count for this artist across their winning releases on this source
                     const relevantWinners = expectedWinners.filter(
                       (w) => w.artistId === artistId,
@@ -446,7 +445,7 @@ describe('Property 18: Chart Win Determination and Crown Level', () => {
                     for (const w of relevantWinners) {
                       const key = `${w.artistId}|${w.releaseId}|${source}`;
                       const count = expectedWinCounts.get(key) ?? 0;
-                      maxCrown = Math.max(maxCrown, Math.min(count, 5));
+                      maxCrown = Math.max(maxCrown, count);
                     }
                     expect(crownLevel).toBe(maxCrown);
                   }

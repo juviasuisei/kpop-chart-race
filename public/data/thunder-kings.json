@@ -16,7 +16,17 @@
         "2024-05-22": { "value": 880, "source": "the_show", "episode": 312 },
         "2024-05-26": { "value": 820, "source": "music_bank", "episode": 483 },
         "2024-05-29": { "value": 750, "source": "the_show", "episode": 313 },
-        "2024-06-02": { "value": 680, "source": "music_bank", "episode": 484 }
+        "2024-06-02": { "value": 680, "source": "music_bank", "episode": 484 },
+        "2024-06-16": { "value": 950, "source": "music_bank", "episode": 488 },
+        "2024-06-19": { "value": 940, "source": "music_bank", "episode": 489 },
+        "2024-06-23": { "value": 930, "source": "music_bank", "episode": 490 },
+        "2024-06-26": { "value": 920, "source": "music_bank", "episode": 491 },
+        "2024-06-30": { "value": 910, "source": "music_bank", "episode": 492 },
+        "2024-07-03": { "value": 900, "source": "music_bank", "episode": 493 },
+        "2024-07-07": { "value": 890, "source": "music_bank", "episode": 494 },
+        "2024-07-10": { "value": 880, "source": "music_bank", "episode": 495 },
+        "2024-07-14": { "value": 870, "source": "music_bank", "episode": 496 },
+        "2024-07-15": { "value": 860, "source": "music_bank", "episode": 497 }
       },
       "embeds": {
         "2024-05-01": [

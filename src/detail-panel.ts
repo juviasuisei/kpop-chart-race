@@ -20,18 +20,39 @@ const SOURCE_LOGO_MAP: Record<string, string> = {
 
 /** Crown level visual configuration */
 interface CrownConfig {
-  icon: string;
+  svgPath: string;
   label: string;
   cssClass: string;
 }
 
-const CROWN_LEVELS: Record<number, CrownConfig> = {
-  1: { icon: "👑", label: "Win", cssClass: "crown--1" },
-  2: { icon: "👑", label: "Double Win", cssClass: "crown--2" },
-  3: { icon: "👑✨", label: "Triple Crown ✨", cssClass: "crown--3" },
-  4: { icon: "👑💎", label: "Quad Crown", cssClass: "crown--4" },
-  5: { icon: "👑💎✨", label: "Grand Crown", cssClass: "crown--5" },
-};
+/**
+ * Get the crown label for a given level.
+ * Levels that are multiples of 3 get a "Triple Crown" suffix.
+ */
+function getCrownLabel(level: number): string {
+  if (level === 1) return "Win";
+  const tripleCrownCount = Math.floor(level / 3);
+  const isTripleCrown = level % 3 === 0;
+  if (isTripleCrown) {
+    if (tripleCrownCount === 1) return `${level}x Win (Triple Crown)`;
+    return `${level}x Win (${tripleCrownCount}x Triple Crown)`;
+  }
+  return `${level}x Win`;
+}
+
+/**
+ * Get the CrownConfig for a given crown level.
+ * Levels 1-12 map to crown-1.svg through crown-12.svg.
+ * Levels 13+ use crown-12.svg (rendered multiple times by the caller).
+ */
+function getCrownConfig(level: number): CrownConfig {
+  const svgIndex = Math.min(level, 12);
+  return {
+    svgPath: `assets/crowns/crown-${svgIndex}.svg`,
+    label: getCrownLabel(level),
+    cssClass: "timeline-entry__crown",
+  };
+}
 
 /** Human-readable labels for event types */
 const EVENT_TYPE_LABELS: Record<string, string> = {
@@ -316,14 +337,32 @@ export class DetailPanel {
 
       // Crown icon if applicable
       if (item.crownLevel > 0) {
-        const level = Math.min(item.crownLevel, 5) as 1 | 2 | 3 | 4 | 5;
-        const config = CROWN_LEVELS[level];
+        const config = getCrownConfig(item.crownLevel);
         const crownEl = document.createElement("div");
-        crownEl.className = `timeline-entry__crown ${config.cssClass}`;
+        crownEl.className = `timeline-entry__crown`;
 
         const iconSpan = document.createElement("span");
         iconSpan.className = "crown__icon";
-        iconSpan.textContent = config.icon;
+
+        // For levels 1-12: single img. For 13+: multiple crown-12 imgs.
+        if (item.crownLevel <= 12) {
+          const img = document.createElement("img");
+          img.src = config.svgPath;
+          img.alt = config.label;
+          img.width = 24;
+          img.height = 24;
+          iconSpan.appendChild(img);
+        } else {
+          const iconCount = item.crownLevel - 11;
+          for (let i = 0; i < iconCount; i++) {
+            const img = document.createElement("img");
+            img.src = config.svgPath;
+            img.alt = config.label;
+            img.width = 24;
+            img.height = 24;
+            iconSpan.appendChild(img);
+          }
+        }
         crownEl.appendChild(iconSpan);
 
         const labelSpan = document.createElement("span");

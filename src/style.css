@@ -548,20 +548,11 @@ body {
   background: #f0f0f0;
 }
 
-/* Level 1: Basic Win — small, muted */
-.crown--1 { font-size: 0.85rem; color: #a0a0a0; }
-
-/* Level 2: Double Win — medium, gold */
-.crown--2 { font-size: 0.95rem; color: #d4a017; }
-
-/* Level 3: Triple Crown — larger, gold, bold */
-.crown--3 { font-size: 1.1rem; color: #d4a017; font-weight: 700; }
-
-/* Level 4: Quad Crown — larger, gold, bold */
-.crown--4 { font-size: 1.2rem; color: #d4a017; font-weight: 700; }
-
-/* Level 5: Grand Crown — largest, dark gold, bold */
-.crown--5 { font-size: 1.35rem; color: #b8860b; font-weight: 700; }
+/* Crown icon img sizing — SVGs provide visual distinction */
+.crown__icon img {
+  height: 24px;
+  width: auto;
+}
 
 /* ===== Embed Caption ===== */
 

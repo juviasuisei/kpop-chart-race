@@ -182,7 +182,7 @@ export function computeSnapshot(
  * value are the winners. Ties result in all tied artists being winners.
  *
  * Crown levels track the total number of wins per (artistId, releaseId, source)
- * tuple, capped at 5. The crown level for a given date entry is the running
+ * tuple with no upper bound. The crown level for a given date entry is the running
  * total up to and including that date.
  *
  * @returns Map<date, Map<source, { artistIds, crownLevels }>>
@@ -261,7 +261,7 @@ export function computeChartWins(
         winnerArtistIds.add(winner.artistId);
         const key = `${winner.artistId}|${winner.releaseId}|${source}`;
         const totalWins = winCounts.get(key) ?? 0;
-        const crownLevel = Math.min(totalWins, 5);
+        const crownLevel = totalWins;
         const existing = crownLevels.get(winner.artistId) ?? 0;
         if (crownLevel > existing) {
           crownLevels.set(winner.artistId, crownLevel);

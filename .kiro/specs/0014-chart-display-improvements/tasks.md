@@ -1,0 +1,32 @@
+# Tasks
+
+- [x] 1 Fix chart win dedup in chart-engine.ts
+  - [x] 1.1 Add `deduplicateByArtist` helper function in `computeChartWins` that keeps only the highest-value release per artist for each source's entries
+  - [x] 1.2 Call `deduplicateByArtist` on each source's entries before finding the max value and determining winners
+  - [x] 1.3 Ensure crown level increments use only the selected (deduplicated) release per winning artist
+- [x] 2 Add 365-day activity filter
+  - [x] 2.1 Add `dateMinus365(date: string): string` utility in `utils.ts` that returns the YYYY-MM-DD string 365 days before the input date
+  - [x] 2.2 Add `hasRecentActivity(artistId, cutoffDate, snapshotDate, dataStore): boolean` in `utils.ts` that scans the artist's releases for any dailyValues key within the date range
+  - [x] 2.3 Add `filterByActivity(entries, snapshotDate, dataStore, zoomLevel): RankedEntry[]` in `utils.ts` that wraps `filterByZoom` and applies the 365-day activity check for zoom 10 (rank 1 always included)
+  - [x] 2.4 Update `chart-race-renderer.ts` `update()` to call `filterByActivity` instead of `filterByZoom`, passing snapshotDate and dataStore
+  - [x] 2.5 Update `ChartRaceRenderer` constructor or `update()` signature to accept dataStore reference
+- [x] 3 Add rank badge to bars
+  - [x] 3.1 Add `rankSpan: HTMLSpanElement` to the `BarElement` interface in `chart-race-renderer.ts`
+  - [x] 3.2 In `createBarElement`, create a `<span class="bar__rank">` with text `#${entry.rank}` and insert it before the logo in the bar
+  - [x] 3.3 In `updateBarElement`, update `barEl.rankSpan.textContent` to `#${entry.rank}`
+- [-] 4 Toggle logo visibility by zoom level
+  - [ ] 4.1 In `update()`, after processing visible entries, toggle `bar__logo--hidden` class on each bar's logo based on whether zoomLevel is `"all"`
+- [ ] 5 CSS for rank badge and hidden logo
+  - [ ] 5.1 Add `.bar__rank` styles (font-size, font-weight, color, flex-shrink: 0, min-width) in `style.css`
+  - [ ] 5.2 Add `.bar__logo--hidden { display: none; }` in `style.css`
+  - [ ] 5.3 Add mobile responsive override for `.bar__rank` font-size in the `< 768px` media query
+- [ ] 6 Version bump to 0.9.0
+  - [ ] 6.1 Update `version` field in `package.json` from `0.8.0` to `0.9.0`
+- [ ] 7 Tests and checkpoint
+  - [ ] 7.1 [PBT] Property 1: Chart win dedup — for any artists with multiple releases on the same (date, source), computeChartWins represents each artist by at most one release and increments crown only for the selected release
+  - [ ] 7.2 [PBT] Property 2: Activity filter at zoom 10 — for any entries and snapshot date, filterByActivity includes rank 1 always and ranks 2+ only if artist has recent activity
+  - [ ] 7.3 [PBT] Property 3: Activity filter at zoom all — for any entries, filterByActivity with zoom "all" returns input unchanged
+  - [ ] 7.4 [PBT] Property 4: Rank badge reflects entry rank — for any RankedEntry with rank N, bar's rank badge text is `#N`
+  - [ ] 7.5 [PBT] Property 5: Logo visibility matches zoom level — for any bars at a zoom level, logo hidden class present iff zoom is "all"
+  - [ ] 7.6 Add unit tests for dedup tie-breaking (first release wins), dateMinus365 leap year, rank badge class name, logo toggle uses CSS class
+  - [ ] 7.7 Run full test suite and verify all tests pass

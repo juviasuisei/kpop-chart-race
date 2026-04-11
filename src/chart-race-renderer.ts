@@ -3,9 +3,9 @@
  * Renders bars, animates transitions, manages the legend and date display.
  */
 
-import type { ChartSnapshot, RankedEntry } from "./models.ts";
+import type { ChartSnapshot, DataStore, RankedEntry } from "./models.ts";
 import type { ArtistType, ZoomLevel } from "./types.ts";
-import { filterByZoom, computeBarWidth, toRomanNumeral, tween } from "./utils.ts";
+import { filterByActivity, computeBarWidth, toRomanNumeral, tween } from "./utils.ts";
 import { EventBus } from "./event-bus.ts";
 import { ARTIST_TYPE_COLORS } from "./colors.ts";
 import pkg from "../package.json";
@@ -42,6 +42,7 @@ const TWEEN_DURATION = 950;
 interface BarElement {
   wrapper: HTMLDivElement;
   bar: HTMLDivElement;
+  rankSpan: HTMLSpanElement;
   logo: HTMLImageElement;
   nameSpan: HTMLSpanElement;
   genSpan: HTMLSpanElement;
@@ -115,13 +116,13 @@ export class ChartRaceRenderer {
    * Update the chart with a new snapshot at the given zoom level.
    * Creates or reuses bar elements keyed by artistId, animates positions and widths.
    */
-  update(snapshot: ChartSnapshot, zoomLevel: ZoomLevel): void {
+  update(snapshot: ChartSnapshot, zoomLevel: ZoomLevel, dataStore: DataStore): void {
     if (!this.barsContainer || !this.dateDisplay) return;
 
     // Update date display
     this.dateDisplay.textContent = snapshot.date;
 
-    const visibleEntries = filterByZoom(snapshot.entries, zoomLevel);
+    const visibleEntries = filterByActivity(snapshot.entries, snapshot.date, dataStore, zoomLevel);
     const containerHeight = this.barsContainer.clientHeight || this.barsContainer.offsetHeight;
     // Bar height at zoom 10 is always containerHeight / 10 (not divided by
     // visibleEntries.length), so bars maintain consistent size even when fewer
@@ -173,6 +174,13 @@ export class ChartRaceRenderer {
         }
         barEl.wrapper.remove();
         this.bars.delete(artistId);
+      }
+    }
+
+    // Toggle logo visibility based on zoom level
+    for (const [artistId, barEl] of this.bars) {
+      if (visibleIds.has(artistId)) {
+        barEl.logo.classList.toggle("bar__logo--hidden", zoomLevel === "all");
       }
     }
   }
@@ -266,6 +274,10 @@ export class ChartRaceRenderer {
       logo.src = PLACEHOLDER_SVG;
     };
 
+    const rankSpan = document.createElement("span");
+    rankSpan.className = "bar__rank";
+    rankSpan.textContent = `#${entry.rank}`;
+
     const nameSpan = document.createElement("span");
     nameSpan.className = "bar__name";
     nameSpan.textContent = entry.artistName;
@@ -282,6 +294,7 @@ export class ChartRaceRenderer {
     releaseSpan.className = "bar__release";
     releaseSpan.textContent = "";
 
+    bar.appendChild(rankSpan);
     bar.appendChild(logo);
     bar.appendChild(nameSpan);
     bar.appendChild(genSpan);
@@ -306,6 +319,7 @@ export class ChartRaceRenderer {
     return {
       wrapper,
       bar,
+      rankSpan,
       logo,
       nameSpan,
       genSpan,
@@ -326,6 +340,7 @@ export class ChartRaceRenderer {
     maxCumulative: number,
   ): void {
     // Update text content
+    barEl.rankSpan.textContent = `#${entry.rank}`;
     barEl.nameSpan.textContent = entry.artistName;
     barEl.genSpan.textContent = toRomanNumeral(entry.generation);
     barEl.typeIndicator.textContent = ARTIST_TYPE_INDICATORS[entry.artistType];

@@ -92,7 +92,7 @@ async function main(): Promise<void> {
 
   // state:updated → update renderer + announce for screen readers
   eventBus.on("state:updated", (snapshot: ChartSnapshot) => {
-    renderer.update(snapshot, currentZoom);
+    renderer.update(snapshot, currentZoom, dataStore);
 
     // Screen reader announcement
     if (pacedMode.isActive()) {
@@ -112,7 +112,7 @@ async function main(): Promise<void> {
   eventBus.on("zoom:change", (level: ZoomLevel) => {
     currentZoom = level;
     if (currentSnapshot) {
-      renderer.update(currentSnapshot, currentZoom);
+      renderer.update(currentSnapshot, currentZoom, dataStore);
     }
   });
 

@@ -171,26 +171,26 @@ describe('Integration: EventBus wiring between components', () => {
     });
 
     eventBus.on('state:updated', (snapshot: ChartSnapshot) => {
-      renderer.update(snapshot, currentZoom);
+      renderer.update(snapshot, currentZoom, dataStore);
     });
 
     // Wire zoom:change → re-render
     eventBus.on('zoom:change', (level: ZoomLevel) => {
       currentZoom = level;
       if (currentSnapshot) {
-        renderer.update(currentSnapshot, currentZoom);
+        renderer.update(currentSnapshot, currentZoom, dataStore);
       }
     });
 
     // First render
     eventBus.emit('date:change', '2024-06-01');
     expect(updateSpy).toHaveBeenCalledTimes(1);
-    expect(updateSpy).toHaveBeenCalledWith(expect.objectContaining({ date: '2024-06-01' }), 10);
+    expect(updateSpy).toHaveBeenCalledWith(expect.objectContaining({ date: '2024-06-01' }), 10, dataStore);
 
     // Change zoom
     eventBus.emit('zoom:change', 'all' as ZoomLevel);
     expect(updateSpy).toHaveBeenCalledTimes(2);
-    expect(updateSpy).toHaveBeenLastCalledWith(expect.objectContaining({ date: '2024-06-01' }), 'all');
+    expect(updateSpy).toHaveBeenLastCalledWith(expect.objectContaining({ date: '2024-06-01' }), 'all', dataStore);
 
     renderer.destroy();
   });

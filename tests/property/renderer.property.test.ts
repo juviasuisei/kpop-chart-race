@@ -271,7 +271,32 @@ describe('Property 12: Scrubber Position to Date Mapping', () => {
 
 import { ChartRaceRenderer } from '../../src/chart-race-renderer.ts';
 import { EventBus } from '../../src/event-bus.ts';
-import type { ChartSnapshot } from '../../src/models.ts';
+import type { ChartSnapshot, DataStore, ParsedArtist } from '../../src/models.ts';
+import type { DailyValueEntry } from '../../src/types.ts';
+
+/** Build a DataStore where every artist in the snapshot has recent activity */
+function makeDataStoreForSnapshot(snapshot: ChartSnapshot): DataStore {
+  const artists = new Map<string, ParsedArtist>();
+  for (const entry of snapshot.entries) {
+    const dv: DailyValueEntry = { value: entry.dailyValue || 100, source: 'inkigayo', episode: 1 };
+    artists.set(entry.artistId, {
+      id: entry.artistId,
+      name: entry.artistName,
+      artistType: entry.artistType,
+      generation: entry.generation,
+      logoUrl: entry.logoUrl,
+      releases: [{
+        id: 'release-1',
+        title: 'Song',
+        dailyValues: new Map([[snapshot.date, dv]]),
+        embeds: new Map(),
+      }],
+    });
+  }
+  return { artists, dates: [snapshot.date], startDate: snapshot.date, endDate: snapshot.date, chartWins: new Map() };
+}
+
+const emptyDataStore: DataStore = { artists: new Map(), dates: [], startDate: '', endDate: '', chartWins: new Map() };
 
 /** Arbitrary for ArtistType values */
 const arbArtistType = fc.constantFrom(
@@ -340,7 +365,7 @@ describe('Bugfix 0006: Bug Condition — Initial Render Bar Sizing', () => {
         renderer.mount(container);
 
         // Call update synchronously — this is the bug condition (clientHeight === 0 in jsdom)
-        renderer.update(snapshot, 10);
+        renderer.update(snapshot, 10, makeDataStoreForSnapshot(snapshot));
 
         const wrappers = container.querySelectorAll('.chart-race__bar-wrapper');
         expect(wrappers.length).toBe(snapshot.entries.length);
@@ -391,7 +416,7 @@ describe('Bugfix 0006: Bug Condition — Initial Render Bar Sizing', () => {
             ],
           };
 
-          renderer.update(snapshot, 10);
+          renderer.update(snapshot, 10, makeDataStoreForSnapshot(snapshot));
 
           const bars = container.querySelectorAll('.chart-race__bar');
           expect(bars.length).toBe(2);
@@ -472,7 +497,7 @@ describe('Bugfix 0006: Preservation — Post-Layout Update Behavior', () => {
           configurable: true,
         });
 
-        renderer.update(snapshot, 10);
+        renderer.update(snapshot, 10, makeDataStoreForSnapshot(snapshot));
 
         const visibleEntries = filterByZoom(snapshot.entries, 10);
         const maxCumulative = visibleEntries.reduce(
@@ -513,7 +538,7 @@ describe('Bugfix 0006: Preservation — Post-Layout Update Behavior', () => {
           configurable: true,
         });
 
-        renderer.update(snapshot, 10);
+        renderer.update(snapshot, 10, makeDataStoreForSnapshot(snapshot));
 
         const barHeight = MOCKED_CLIENT_HEIGHT / 10;
         const visibleEntries = filterByZoom(snapshot.entries, 10);
@@ -550,7 +575,7 @@ describe('Bugfix 0006: Preservation — Post-Layout Update Behavior', () => {
           configurable: true,
         });
 
-        renderer.update(snapshot, 'all');
+        renderer.update(snapshot, 'all', emptyDataStore);
 
         expect(barsContainer.style.overflowY).toBe('auto');
 
@@ -616,7 +641,7 @@ describe('Property 2: Bar height independence from entry count at zoom 10', () =
 
           const snapshot: ChartSnapshot = { date: '2024-06-01', entries };
 
-          renderer.update(snapshot, 10);
+          renderer.update(snapshot, 10, makeDataStoreForSnapshot(snapshot));
 
           const expectedHeight = containerHeight / 10;
           const wrappers = container.querySelectorAll('.chart-race__bar-wrapper');
@@ -625,6 +650,222 @@ describe('Property 2: Bar height independence from entry count at zoom 10', () =
           for (const wrapper of wrappers) {
             const height = parseFloat((wrapper as HTMLElement).style.height);
             expect(height).toBeCloseTo(expectedHeight, 5);
+          }
+
+          renderer.destroy();
+          container.remove();
+        },
+      ),
+      { numRuns: 100 },
+    );
+  });
+});
+
+
+// ============================================================
+// Feature: 0014-chart-display-improvements
+// Property 4: Rank Badge Reflects Entry Rank
+// **Validates: Requirements 3.1, 3.2**
+// ============================================================
+
+describe('Feature 0014, Property 4: Rank Badge Reflects Entry Rank', () => {
+  it('bar rank badge text is #N for any entry with rank N', () => {
+    fc.assert(
+      fc.property(
+        fc.integer({ min: 1, max: 20 }),
+        fc.integer({ min: 100, max: 10000 }),
+        (rank, cumulativeValue) => {
+          const container = document.createElement('div');
+          document.body.appendChild(container);
+
+          const eventBus = new EventBus();
+          const renderer = new ChartRaceRenderer(eventBus);
+          renderer.mount(container);
+
+          const entry: RankedEntry = {
+            artistId: `artist-rank-${rank}`,
+            artistName: `Artist ${rank}`,
+            artistType: 'boy_group',
+            generation: 4,
+            logoUrl: `assets/logos/artist-${rank}.svg`,
+            cumulativeValue,
+            previousCumulativeValue: Math.max(0, cumulativeValue - 100),
+            dailyValue: 100,
+            rank,
+            previousRank: rank,
+            featuredRelease: { title: 'Song', releaseId: 'song' },
+          };
+
+          const snapshot: ChartSnapshot = { date: '2024-06-01', entries: [entry] };
+          renderer.update(snapshot, 'all', emptyDataStore);
+
+          const rankBadge = container.querySelector('.bar__rank');
+          expect(rankBadge).not.toBeNull();
+          expect(rankBadge!.textContent).toBe(`#${rank}`);
+
+          renderer.destroy();
+          container.remove();
+        },
+      ),
+      { numRuns: 100 },
+    );
+  });
+
+  it('rank badge updates when rank changes on subsequent snapshots', () => {
+    fc.assert(
+      fc.property(
+        fc.integer({ min: 1, max: 10 }),
+        fc.integer({ min: 1, max: 10 }),
+        (rank1, rank2) => {
+          const container = document.createElement('div');
+          document.body.appendChild(container);
+
+          const eventBus = new EventBus();
+          const renderer = new ChartRaceRenderer(eventBus);
+          renderer.mount(container);
+
+          const makeEntryWithRank = (rank: number): RankedEntry => ({
+            artistId: 'artist-update-rank',
+            artistName: 'Update Rank Artist',
+            artistType: 'girl_group',
+            generation: 4,
+            logoUrl: 'assets/logos/update.svg',
+            cumulativeValue: 1000,
+            previousCumulativeValue: 900,
+            dailyValue: 100,
+            rank,
+            previousRank: rank,
+            featuredRelease: { title: 'Song', releaseId: 'song' },
+          });
+
+          // First update
+          const snapshot1: ChartSnapshot = { date: '2024-06-01', entries: [makeEntryWithRank(rank1)] };
+          renderer.update(snapshot1, 'all', emptyDataStore);
+
+          let rankBadge = container.querySelector('.bar__rank');
+          expect(rankBadge!.textContent).toBe(`#${rank1}`);
+
+          // Second update with different rank
+          const snapshot2: ChartSnapshot = { date: '2024-06-02', entries: [makeEntryWithRank(rank2)] };
+          renderer.update(snapshot2, 'all', emptyDataStore);
+
+          rankBadge = container.querySelector('.bar__rank');
+          expect(rankBadge!.textContent).toBe(`#${rank2}`);
+
+          renderer.destroy();
+          container.remove();
+        },
+      ),
+      { numRuns: 100 },
+    );
+  });
+});
+
+
+// ============================================================
+// Feature: 0014-chart-display-improvements
+// Property 5: Logo Visibility Matches Zoom Level
+// **Validates: Requirements 4.1, 4.2, 4.3, 4.4, 4.5**
+// ============================================================
+
+describe('Feature 0014, Property 5: Logo Visibility Matches Zoom Level', () => {
+  it('logo has bar__logo--hidden class iff zoom is "all"', () => {
+    fc.assert(
+      fc.property(
+        fc.constantFrom(10 as const, 'all' as const),
+        fc.integer({ min: 1, max: 5 }),
+        (zoomLevel, entryCount) => {
+          const container = document.createElement('div');
+          document.body.appendChild(container);
+
+          const eventBus = new EventBus();
+          const renderer = new ChartRaceRenderer(eventBus);
+          renderer.mount(container);
+
+          const entries: RankedEntry[] = Array.from({ length: entryCount }, (_, i) => ({
+            artistId: `artist-logo-${i}`,
+            artistName: `Artist ${i}`,
+            artistType: 'boy_group' as const,
+            generation: 4,
+            logoUrl: `assets/logos/artist-${i}.svg`,
+            cumulativeValue: 1000 - i * 50,
+            previousCumulativeValue: 900 - i * 50,
+            dailyValue: 100,
+            rank: i + 1,
+            previousRank: i + 1,
+            featuredRelease: { title: 'Song', releaseId: 'song' },
+          }));
+
+          const snapshot: ChartSnapshot = { date: '2024-06-01', entries };
+          renderer.update(snapshot, zoomLevel, makeDataStoreForSnapshot(snapshot));
+
+          const logos = container.querySelectorAll('.bar__logo');
+          expect(logos.length).toBe(entryCount);
+
+          for (const logo of logos) {
+            if (zoomLevel === 'all') {
+              expect(logo.classList.contains('bar__logo--hidden')).toBe(true);
+            } else {
+              expect(logo.classList.contains('bar__logo--hidden')).toBe(false);
+            }
+          }
+
+          renderer.destroy();
+          container.remove();
+        },
+      ),
+      { numRuns: 100 },
+    );
+  });
+
+  it('logo visibility toggles correctly when zoom changes', () => {
+    fc.assert(
+      fc.property(
+        fc.integer({ min: 1, max: 5 }),
+        (entryCount) => {
+          const container = document.createElement('div');
+          document.body.appendChild(container);
+
+          const eventBus = new EventBus();
+          const renderer = new ChartRaceRenderer(eventBus);
+          renderer.mount(container);
+
+          const entries: RankedEntry[] = Array.from({ length: entryCount }, (_, i) => ({
+            artistId: `artist-toggle-${i}`,
+            artistName: `Artist ${i}`,
+            artistType: 'girl_group' as const,
+            generation: 4,
+            logoUrl: `assets/logos/artist-${i}.svg`,
+            cumulativeValue: 1000 - i * 50,
+            previousCumulativeValue: 900 - i * 50,
+            dailyValue: 100,
+            rank: i + 1,
+            previousRank: i + 1,
+            featuredRelease: { title: 'Song', releaseId: 'song' },
+          }));
+
+          const snapshot: ChartSnapshot = { date: '2024-06-01', entries };
+          const ds = makeDataStoreForSnapshot(snapshot);
+
+          // Start at zoom 10 — logos visible
+          renderer.update(snapshot, 10, ds);
+          let logos = container.querySelectorAll('.bar__logo');
+          for (const logo of logos) {
+            expect(logo.classList.contains('bar__logo--hidden')).toBe(false);
+          }
+
+          // Switch to "all" — logos hidden
+          renderer.update(snapshot, 'all', ds);
+          logos = container.querySelectorAll('.bar__logo');
+          for (const logo of logos) {
+            expect(logo.classList.contains('bar__logo--hidden')).toBe(true);
+          }
+
+          // Switch back to 10 — logos visible again
+          renderer.update(snapshot, 10, ds);
+          logos = container.querySelectorAll('.bar__logo');
+          for (const logo of logos) {
+            expect(logo.classList.contains('bar__logo--hidden')).toBe(false);
           }
 
           renderer.destroy();

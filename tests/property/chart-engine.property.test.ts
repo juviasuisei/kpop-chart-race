@@ -366,6 +366,20 @@ describe('Property 4: Featured Release Selection', () => {
 // **Validates: Requirements 7.11**
 // ============================================================
 
+/** Reference dedup: keep only the highest-value release per artist (first wins ties) */
+function refDeduplicateByArtist(
+  entries: { artistId: string; releaseId: string; value: number }[],
+): { artistId: string; releaseId: string; value: number }[] {
+  const best = new Map<string, { artistId: string; releaseId: string; value: number }>();
+  for (const e of entries) {
+    const existing = best.get(e.artistId);
+    if (!existing || e.value > existing.value) {
+      best.set(e.artistId, e);
+    }
+  }
+  return Array.from(best.values());
+}
+
 describe('Property 18: Chart Win Determination and Crown Level', () => {
   it('winners are highest-value artists per (date, source) and crown levels track wins with no cap', () => {
     fc.assert(
@@ -412,7 +426,10 @@ describe('Property 18: Chart Win Determination and Crown Level', () => {
 
             const dateResult = chartWins.get(date);
 
-            for (const [source, entries] of entriesBySource) {
+            for (const [source, rawEntries] of entriesBySource) {
+              // Apply dedup before determining winners (matches implementation)
+              const entries = refDeduplicateByArtist(rawEntries);
+
               const maxValue = Math.max(...entries.map((e) => e.value));
               const expectedWinners = entries.filter((e) => e.value === maxValue);
               const expectedWinnerIds = [...new Set(expectedWinners.map((w) => w.artistId))];
@@ -437,7 +454,6 @@ describe('Property 18: Chart Win Determination and Crown Level', () => {
                     expect(crownLevel).toBeGreaterThanOrEqual(1);
 
                     // Verify crown level matches expected count (no cap)
-                    // Find the max win count for this artist across their winning releases on this source
                     const relevantWinners = expectedWinners.filter(
                       (w) => w.artistId === artistId,
                     );
@@ -494,6 +510,338 @@ describe('Property 1: Zero-value exclusion invariant', () => {
           const expectedRanks = snapshot.entries.map((_, i) => i + 1);
           const actualRanks = snapshot.entries.map((e) => e.rank);
           expect(actualRanks).toEqual(expectedRanks);
+        },
+      ),
+      { numRuns: 100 },
+    );
+  });
+});
+
+
+// ============================================================
+// Feature: 0014-chart-display-improvements
+// Property 1: Chart Win Deduplication and Crown Correctness
+// **Validates: Requirements 1.1, 1.2, 1.3, 1.5, 1.6**
+// ============================================================
+
+import { dateMinus365, hasRecentActivity, filterByActivity } from '../../src/utils.ts';
+import type { RankedEntry } from '../../src/models.ts';
+
+describe('Feature 0014, Property 1: Chart Win Deduplication and Crown Correctness', () => {
+  /**
+   * Build artists where at least one artist has multiple releases on the same (date, source).
+   * This ensures the dedup logic is exercised.
+   */
+  const arbMultiReleaseArtists = arbSortedDates(1, 3).chain((dates) =>
+    fc.tuple(
+      fc.constant(dates),
+      fc.constantFrom(...CHART_SOURCES).chain((source) =>
+        fc.tuple(
+          fc.constant(source),
+          // Artist with 2 releases that share the same (date, source)
+          fc.integer({ min: 100, max: 5000 }).chain((val1) =>
+            fc.integer({ min: 100, max: 5000 }).map((val2) => ({
+              val1,
+              val2,
+            })),
+          ),
+        ),
+      ),
+    ),
+  );
+
+  it('each artist is represented by at most one release per (date, source) in chart wins', () => {
+    fc.assert(
+      fc.property(
+        arbSortedDates(1, 3).chain((dates) =>
+          fc.tuple(
+            fc.constant(dates),
+            fc.constantFrom(...CHART_SOURCES),
+            fc.integer({ min: 100, max: 5000 }),
+            fc.integer({ min: 100, max: 5000 }),
+          ),
+        ),
+        ([dates, source, val1, val2]) => {
+          // Create an artist with two releases on the same (date, source)
+          const date = dates[0];
+          const artist: ParsedArtist = {
+            id: 'multi-release-artist',
+            name: 'Multi Release',
+            artistType: 'boy_group',
+            generation: 4,
+            logoUrl: 'assets/logos/multi.svg',
+            releases: [
+              {
+                id: 'release-a',
+                title: 'Song A',
+                dailyValues: new Map([[date, { value: val1, source, episode: 1 }]]),
+                embeds: new Map(),
+              },
+              {
+                id: 'release-b',
+                title: 'Song B',
+                dailyValues: new Map([[date, { value: val2, source, episode: 1 }]]),
+                embeds: new Map(),
+              },
+            ],
+          };
+
+          // Create a second artist with one release
+          const otherArtist: ParsedArtist = {
+            id: 'single-release-artist',
+            name: 'Single Release',
+            artistType: 'girl_group',
+            generation: 4,
+            logoUrl: 'assets/logos/single.svg',
+            releases: [
+              {
+                id: 'release-c',
+                title: 'Song C',
+                dailyValues: new Map([[date, { value: 1, source, episode: 1 }]]),
+                embeds: new Map(),
+              },
+            ],
+          };
+
+          const dataStore = buildDataStore([artist, otherArtist], dates);
+          const chartWins = computeChartWins(dataStore);
+
+          const dateResult = chartWins.get(date);
+          if (dateResult) {
+            const sourceResult = dateResult.get(source);
+            if (sourceResult) {
+              // The multi-release artist should appear at most once in artistIds
+              const multiCount = sourceResult.artistIds.filter(
+                (id) => id === 'multi-release-artist',
+              ).length;
+              expect(multiCount).toBeLessThanOrEqual(1);
+
+              // Crown level for the multi-release artist should be based on
+              // only the highest-value release
+              if (sourceResult.crownLevels.has('multi-release-artist')) {
+                const crownLevel = sourceResult.crownLevels.get('multi-release-artist')!;
+                expect(crownLevel).toBeGreaterThanOrEqual(1);
+              }
+            }
+          }
+        },
+      ),
+      { numRuns: 100 },
+    );
+  });
+
+  it('crown level increments only for the selected (highest-value) release', () => {
+    fc.assert(
+      fc.property(
+        fc.constantFrom(...CHART_SOURCES),
+        fc.integer({ min: 100, max: 5000 }),
+        (source, highVal) => {
+          const lowVal = Math.max(1, highVal - 50);
+          const dates = ['2024-01-01', '2024-01-02'];
+
+          // Artist with two releases: release-a has highVal, release-b has lowVal
+          const artist: ParsedArtist = {
+            id: 'dedup-artist',
+            name: 'Dedup Artist',
+            artistType: 'boy_group',
+            generation: 4,
+            logoUrl: 'assets/logos/dedup.svg',
+            releases: [
+              {
+                id: 'release-high',
+                title: 'High Song',
+                dailyValues: new Map([
+                  [dates[0], { value: highVal, source, episode: 1 }],
+                  [dates[1], { value: highVal, source, episode: 2 }],
+                ]),
+                embeds: new Map(),
+              },
+              {
+                id: 'release-low',
+                title: 'Low Song',
+                dailyValues: new Map([
+                  [dates[0], { value: lowVal, source, episode: 1 }],
+                  [dates[1], { value: lowVal, source, episode: 2 }],
+                ]),
+                embeds: new Map(),
+              },
+            ],
+          };
+
+          const dataStore = buildDataStore([artist], dates);
+          const chartWins = computeChartWins(dataStore);
+
+          // On both dates, the artist should win with the high-value release
+          for (const date of dates) {
+            const dateResult = chartWins.get(date);
+            if (dateResult) {
+              const sourceResult = dateResult.get(source);
+              if (sourceResult) {
+                expect(sourceResult.artistIds).toContain('dedup-artist');
+                // Crown level should increment by 1 per date (not 2 for both releases)
+                const crownLevel = sourceResult.crownLevels.get('dedup-artist')!;
+                expect(crownLevel).toBeGreaterThanOrEqual(1);
+              }
+            }
+          }
+
+          // After both dates, the crown level should be exactly 2 (one per date)
+          const lastDateResult = chartWins.get(dates[1]);
+          if (lastDateResult) {
+            const sourceResult = lastDateResult.get(source);
+            if (sourceResult && sourceResult.crownLevels.has('dedup-artist')) {
+              expect(sourceResult.crownLevels.get('dedup-artist')).toBe(2);
+            }
+          }
+        },
+      ),
+      { numRuns: 100 },
+    );
+  });
+});
+
+
+// ============================================================
+// Feature: 0014-chart-display-improvements
+// Property 2: Activity Filter Correctness at Zoom 10
+// **Validates: Requirements 2.1, 2.2, 2.3, 2.5, 2.6**
+// ============================================================
+
+describe('Feature 0014, Property 2: Activity Filter Correctness at Zoom 10', () => {
+  /** Build a RankedEntry for testing */
+  function makeRankedEntryForFilter(rank: number, artistId: string): RankedEntry {
+    return {
+      artistId,
+      artistName: `Artist ${artistId}`,
+      artistType: 'boy_group',
+      generation: 4,
+      logoUrl: `assets/logos/${artistId}.svg`,
+      cumulativeValue: 1000 - rank * 10,
+      previousCumulativeValue: 900 - rank * 10,
+      dailyValue: 100,
+      rank,
+      previousRank: rank,
+      featuredRelease: { title: 'Song', releaseId: 'song' },
+    };
+  }
+
+  it('rank 1 is always included and ranks 2+ only if artist has recent activity', () => {
+    fc.assert(
+      fc.property(
+        fc.integer({ min: 2, max: 10 }),
+        fc.integer({ min: 0, max: 9 }), // how many of ranks 2+ have activity
+        (entryCount, activeCount) => {
+          const clampedActive = Math.min(activeCount, entryCount - 1);
+          const snapshotDate = '2024-06-15';
+          const recentDate = '2024-03-01'; // within 365 days
+          const oldDate = '2022-01-01'; // outside 365 days
+
+          const entries: RankedEntry[] = [];
+          const artists = new Map<string, ParsedArtist>();
+
+          for (let i = 0; i < entryCount; i++) {
+            const artistId = `artist-filter-${i}`;
+            entries.push(makeRankedEntryForFilter(i + 1, artistId));
+
+            // Rank 1 (i=0) always has activity; ranks 2+ get activity based on clampedActive
+            const hasActivity = i === 0 || i <= clampedActive;
+            const dateForValues = hasActivity ? recentDate : oldDate;
+
+            artists.set(artistId, {
+              id: artistId,
+              name: `Artist ${artistId}`,
+              artistType: 'boy_group',
+              generation: 4,
+              logoUrl: `assets/logos/${artistId}.svg`,
+              releases: [{
+                id: 'release-1',
+                title: 'Song',
+                dailyValues: new Map([[dateForValues, { value: 100, source: 'inkigayo', episode: 1 }]]),
+                embeds: new Map(),
+              }],
+            });
+          }
+
+          const dataStore: DataStore = {
+            artists,
+            dates: [oldDate, recentDate, snapshotDate],
+            startDate: oldDate,
+            endDate: snapshotDate,
+            chartWins: new Map(),
+          };
+
+          const result = filterByActivity(entries, snapshotDate, dataStore, 10);
+
+          // Rank 1 always included
+          expect(result.length).toBeGreaterThanOrEqual(1);
+          expect(result[0].rank).toBe(1);
+
+          // Only artists with recent activity should be included
+          for (const entry of result) {
+            if (entry.rank === 1) continue;
+            const cutoff = dateMinus365(snapshotDate);
+            expect(hasRecentActivity(entry.artistId, cutoff, snapshotDate, dataStore)).toBe(true);
+          }
+
+          // Artists without recent activity should NOT be included
+          const resultIds = new Set(result.map((e) => e.artistId));
+          for (const entry of entries) {
+            if (entry.rank === 1) continue;
+            const cutoff = dateMinus365(snapshotDate);
+            if (!hasRecentActivity(entry.artistId, cutoff, snapshotDate, dataStore)) {
+              expect(resultIds.has(entry.artistId)).toBe(false);
+            }
+          }
+        },
+      ),
+      { numRuns: 100 },
+    );
+  });
+});
+
+
+// ============================================================
+// Feature: 0014-chart-display-improvements
+// Property 3: Activity Filter Is Identity at Zoom "all"
+// **Validates: Requirements 2.4**
+// ============================================================
+
+describe('Feature 0014, Property 3: Activity Filter Is Identity at Zoom "all"', () => {
+  function makeRankedEntryForIdentity(rank: number): RankedEntry {
+    return {
+      artistId: `artist-identity-${rank}`,
+      artistName: `Artist ${rank}`,
+      artistType: 'boy_group',
+      generation: 4,
+      logoUrl: `assets/logos/artist-${rank}.svg`,
+      cumulativeValue: 1000 - rank * 10,
+      previousCumulativeValue: 900 - rank * 10,
+      dailyValue: 100,
+      rank,
+      previousRank: rank,
+      featuredRelease: { title: 'Song', releaseId: 'song' },
+    };
+  }
+
+  it('returns input unchanged when zoom is "all"', () => {
+    fc.assert(
+      fc.property(
+        fc.integer({ min: 0, max: 30 }),
+        (size) => {
+          const entries = Array.from({ length: size }, (_, i) =>
+            makeRankedEntryForIdentity(i + 1),
+          );
+          const snapshotDate = '2024-06-15';
+          const emptyStore: DataStore = {
+            artists: new Map(),
+            dates: [],
+            startDate: '',
+            endDate: '',
+            chartWins: new Map(),
+          };
+
+          const result = filterByActivity(entries, snapshotDate, emptyStore, 'all');
+          expect(result).toEqual(entries);
         },
       ),
       { numRuns: 100 },

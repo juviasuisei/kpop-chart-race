@@ -1,7 +1,7 @@
 import { ChartRaceRenderer } from '../../src/chart-race-renderer.ts';
 import { EventBus } from '../../src/event-bus.ts';
-import type { ChartSnapshot, RankedEntry } from '../../src/models.ts';
-import type { ArtistType } from '../../src/types.ts';
+import type { ChartSnapshot, DataStore, RankedEntry, ParsedArtist } from '../../src/models.ts';
+import type { ArtistType, DailyValueEntry } from '../../src/types.ts';
 
 /** Expected colors per ArtistType (rgb format as returned by jsdom) */
 const EXPECTED_COLORS: Record<ArtistType, string> = {
@@ -32,6 +32,30 @@ function makeEntry(overrides: Partial<RankedEntry> = {}): RankedEntry {
 function makeSnapshot(entries: RankedEntry[], date = '2024-06-01'): ChartSnapshot {
   return { date, entries };
 }
+
+/** Build a DataStore where every artist in the entries has recent activity on the snapshot date */
+function makeDataStoreForEntries(entries: RankedEntry[], date = '2024-06-01'): DataStore {
+  const artists = new Map<string, ParsedArtist>();
+  for (const entry of entries) {
+    const dv: DailyValueEntry = { value: entry.dailyValue || 100, source: 'inkigayo', episode: 1 };
+    artists.set(entry.artistId, {
+      id: entry.artistId,
+      name: entry.artistName,
+      artistType: entry.artistType,
+      generation: entry.generation,
+      logoUrl: entry.logoUrl,
+      releases: [{
+        id: 'release-1',
+        title: 'Song',
+        dailyValues: new Map([[date, dv]]),
+        embeds: new Map(),
+      }],
+    });
+  }
+  return { artists, dates: [date], startDate: date, endDate: date, chartWins: new Map() };
+}
+
+const emptyDataStore: DataStore = { artists: new Map(), dates: [], startDate: '', endDate: '', chartWins: new Map() };
 
 describe('ChartRaceRenderer', () => {
   let container: HTMLElement;
@@ -84,7 +108,7 @@ describe('ChartRaceRenderer', () => {
       makeEntry({ artistId: 'a1', artistName: 'Luna Park', rank: 1 }),
       makeEntry({ artistId: 'a2', artistName: 'Jay Storm', rank: 2 }),
     ]);
-    renderer.update(snapshot, 10);
+    renderer.update(snapshot, 10, makeDataStoreForEntries(snapshot.entries));
 
     const names = container.querySelectorAll('.bar__name');
     expect(names.length).toBe(2);
@@ -98,7 +122,7 @@ describe('ChartRaceRenderer', () => {
     const snapshot = makeSnapshot([
       makeEntry({ logoUrl: 'assets/logos/luna-park.svg' }),
     ]);
-    renderer.update(snapshot, 10);
+    renderer.update(snapshot, 10, emptyDataStore);
 
     const logo = container.querySelector('.bar__logo') as HTMLImageElement;
     expect(logo).not.toBeNull();
@@ -111,7 +135,7 @@ describe('ChartRaceRenderer', () => {
     const snapshot = makeSnapshot([
       makeEntry({ cumulativeValue: 1234, previousCumulativeValue: 1234 }),
     ]);
-    renderer.update(snapshot, 10);
+    renderer.update(snapshot, 10, emptyDataStore);
 
     const value = container.querySelector('.bar__value');
     expect(value).not.toBeNull();
@@ -125,7 +149,7 @@ describe('ChartRaceRenderer', () => {
     const snapshot = makeSnapshot([
       makeEntry({ logoUrl: 'assets/logos/nonexistent.svg' }),
     ]);
-    renderer.update(snapshot, 10);
+    renderer.update(snapshot, 10, emptyDataStore);
 
     const logo = container.querySelector('.bar__logo') as HTMLImageElement;
     expect(logo).not.toBeNull();
@@ -150,7 +174,7 @@ describe('ChartRaceRenderer', () => {
       }),
     );
     const snapshot = makeSnapshot(entries);
-    renderer.update(snapshot, 'all');
+    renderer.update(snapshot, 'all', emptyDataStore);
 
     const bars = container.querySelectorAll('.chart-race__bar');
     expect(bars.length).toBe(5);
@@ -181,7 +205,7 @@ describe('ChartRaceRenderer', () => {
     const snapshot = makeSnapshot([
       makeEntry({ featuredRelease: { title: 'Supernova', releaseId: 'supernova' } }),
     ]);
-    renderer.update(snapshot, 10);
+    renderer.update(snapshot, 10, emptyDataStore);
 
     const release = container.querySelector('.bar__release');
     expect(release).not.toBeNull();
@@ -192,7 +216,7 @@ describe('ChartRaceRenderer', () => {
   it('logo element has bar__logo class for CSS drop-shadow styling', () => {
     renderer.mount(container);
     const snapshot = makeSnapshot([makeEntry()]);
-    renderer.update(snapshot, 10);
+    renderer.update(snapshot, 10, emptyDataStore);
 
     const logo = container.querySelector('.bar__logo');
     expect(logo).not.toBeNull();
@@ -206,7 +230,7 @@ describe('ChartRaceRenderer', () => {
     const snapshot = makeSnapshot([
       makeEntry({ generation: 4 }),
     ]);
-    renderer.update(snapshot, 10);
+    renderer.update(snapshot, 10, emptyDataStore);
 
     const gen = container.querySelector('.bar__gen');
     expect(gen).not.toBeNull();
@@ -233,7 +257,7 @@ describe('ChartRaceRenderer', () => {
       }),
     );
     const snapshot = makeSnapshot(entries);
-    renderer.update(snapshot, 'all');
+    renderer.update(snapshot, 'all', emptyDataStore);
 
     const barsContainer = container.querySelector('.chart-race__bars') as HTMLElement;
     expect(barsContainer.style.overflowY).toBe('auto');
@@ -245,7 +269,7 @@ describe('ChartRaceRenderer', () => {
     const snapshot = makeSnapshot([
       makeEntry({ artistId: 'artist-luna', artistName: 'Luna Park', rank: 1 }),
     ]);
-    renderer.update(snapshot, 10);
+    renderer.update(snapshot, 10, emptyDataStore);
 
     const emitted: string[] = [];
     eventBus.on('bar:click', (artistId: string) => emitted.push(artistId));
@@ -263,7 +287,7 @@ describe('ChartRaceRenderer', () => {
       makeEntry({ artistId: 'artist-a', artistName: 'Artist A', rank: 1, cumulativeValue: 600 }),
       makeEntry({ artistId: 'artist-b', artistName: 'Artist B', rank: 2, cumulativeValue: 400 }),
     ]);
-    renderer.update(snapshot, 10);
+    renderer.update(snapshot, 10, makeDataStoreForEntries(snapshot.entries));
 
     const emitted: string[] = [];
     eventBus.on('bar:click', (artistId: string) => emitted.push(artistId));
@@ -281,7 +305,7 @@ describe('ChartRaceRenderer', () => {
     const snapshot = makeSnapshot([
       makeEntry({ artistId: 'artist-x', artistName: 'Artist X', rank: 1 }),
     ]);
-    renderer.update(snapshot, 10);
+    renderer.update(snapshot, 10, emptyDataStore);
 
     const wrapper = container.querySelector('.chart-race__bar-wrapper') as HTMLElement;
 
@@ -352,7 +376,6 @@ describe('ChartRaceRenderer', () => {
 // ============================================================
 
 import { DetailPanel } from '../../src/detail-panel.ts';
-import type { DataStore, ParsedArtist } from '../../src/models.ts';
 
 /** Create a minimal mock DataStore with one artist for testing */
 function createMockDataStore(artistId: string): DataStore {
@@ -412,7 +435,7 @@ describe('Bugfix 0007: Bug Condition — Click Outside Does Not Close Panel', ()
     const snapshot = makeSnapshot([
       makeEntry({ artistId: 'artist-luna', artistName: 'Luna Park', rank: 1 }),
     ]);
-    renderer.update(snapshot, 10);
+    renderer.update(snapshot, 10, dataStore);
 
     // Wire up the click-outside listener on .chart-race (same pattern as main.ts)
     const chartRace = container.querySelector('.chart-race') as HTMLElement;

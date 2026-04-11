@@ -79,6 +79,19 @@ body {
   flex-shrink: 0;
 }
 
+.bar__rank {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+  flex-shrink: 0;
+  min-width: 1.5em;
+  text-align: center;
+}
+
+.bar__logo--hidden {
+  display: none;
+}
+
 .bar__name {
   font-size: 0.95rem;
   font-weight: 600;
@@ -736,6 +749,10 @@ body {
 /* ===== Mobile Responsive (< 768px) ===== */
 
 @media (max-width: 767px) {
+  .bar__rank {
+    font-size: 0.6rem;
+  }
+
   .bar__name {
     font-size: 0.65rem;
   }

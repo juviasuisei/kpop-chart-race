@@ -99,46 +99,46 @@ Incremental implementation of a static animated bar chart race visualizing K-pop
     - Test invalid JSON handling (1.3), empty dataset, single file, missing required fields (1.4), invalid artistType (1.7), invalid generation (1.8), unknown ChartSource warning (1.9)
     - _Requirements: 1.3, 1.4, 1.7, 1.8, 1.9_
 
-- [ ] 3. Checkpoint — Data layer
+- [x] 3. Checkpoint — Data layer
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 4. Core engine — cumulative values, ranking, featured releases
-  - [ ] 4.1 Implement ChartEngine.computeSnapshot
+- [x] 4. Core engine — cumulative values, ranking, featured releases
+  - [x] 4.1 Implement ChartEngine.computeSnapshot
     - Create `src/chart-engine.ts`
     - `computeSnapshot(date, previousSnapshot?)`: compute daily values per artist (sum of all release `.value` fields), compute cumulative values from startDate through date, rank artists descending by cumulative value with stable sort for ties, identify featured release per artist
     - _Requirements: 1.5, 1.6, 1.12, 2.1, 2.2, 2.3, 2.4_
 
-  - [ ] 4.2 Implement ChartEngine.computeChartWins
+  - [x] 4.2 Implement ChartEngine.computeChartWins
     - `computeChartWins(dataStore)`: iterate all dates and sources, determine winner(s) per (date, source) pair, track crown levels per (artistId, releaseId, source) tuple, cap at 5
     - Return `Map<string, Map<string, { artistIds, crownLevels }>>` (date → source → winners)
     - _Requirements: 7.11_
 
-  - [ ]* 4.3 Write property test — Property 3: Daily Performance Sum Invariant
+  - [x]* 4.3 Write property test — Property 3: Daily Performance Sum Invariant
     - **Property 3: Daily Performance Sum Invariant**
     - Generate artists with multiple releases and random dates; verify daily value = sum of all release `.value` fields
     - **Validates: Requirements 1.5, 1.12**
 
-  - [ ]* 4.4 Write property test — Property 5: Cumulative Value Invariant
+  - [x]* 4.4 Write property test — Property 5: Cumulative Value Invariant
     - **Property 5: Cumulative Value Invariant**
     - Generate artist data across random date ranges; verify cumulative = sum of daily values from start through current date
     - **Validates: Requirements 2.1, 2.4**
 
-  - [ ]* 4.5 Write property test — Property 6: Ranking Descending Order
+  - [x]* 4.5 Write property test — Property 6: Ranking Descending Order
     - **Property 6: Ranking Descending Order**
     - Generate random cumulative value arrays; verify entries sorted descending
     - **Validates: Requirements 2.2**
 
-  - [ ]* 4.6 Write property test — Property 7: Stable Sort for Ties
+  - [x]* 4.6 Write property test — Property 7: Stable Sort for Ties
     - **Property 7: Stable Sort for Ties**
     - Generate arrays with intentional duplicate cumulative values; verify tied artists maintain previous relative order
     - **Validates: Requirements 2.3**
 
-  - [ ]* 4.7 Write property test — Property 4: Featured Release Selection
+  - [x]* 4.7 Write property test — Property 4: Featured Release Selection
     - **Property 4: Featured Release Selection**
     - Generate artists with multiple releases and varying daily values; verify highest-value release selected, or most recent non-zero when all zero
     - **Validates: Requirements 1.6**
 
-  - [ ]* 4.8 Write property test — Property 18: Chart Win Determination and Crown Level
+  - [x]* 4.8 Write property test — Property 18: Chart Win Determination and Crown Level
     - **Property 18: Chart Win Determination and Crown Level**
     - Generate multiple artists with random daily values across dates and sources; verify winners are highest-value artists per (date, source), crown levels track total wins per (artistId, releaseId, source) capped at 5
     - **Validates: Requirements 7.11**

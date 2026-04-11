@@ -304,8 +304,8 @@ Incremental implementation of a static animated bar chart race visualizing K-pop
     - Test open/close (7.1–7.3, 7.8), timeline layout (7.4), content display with source logo + episode (7.5), multiple embed groups per date (7.5), embed descriptions (7.5), scroll (7.6), Chart_Win crown icons by level (7.11), freeze-then-resolve (7.9), tap target padding (7.10), lazy-load embeds (12.8), focus trap (11.4), mobile overlay vs desktop sidebar (9.5)
     - _Requirements: 7.1–7.11, 9.5, 11.4, 12.8_
 
-- [ ] 14. Accessibility layer
-  - [ ] 14.1 Implement LiveRegionAnnouncer and ScreenReaderPacedMode
+- [x] 14. Accessibility layer
+  - [x] 14.1 Implement LiveRegionAnnouncer and ScreenReaderPacedMode
     - Create `src/live-region.ts`
     - `mount(container)`: render visually hidden `<div role="log" aria-live="polite">`
     - `announce(message)`: return Promise resolving after estimated read time delay
@@ -316,16 +316,16 @@ Incremental implementation of a static animated bar chart race visualizing K-pop
     - Wire into Playback_Controller: await announcement before advancing in paced mode
     - _Requirements: 11.5, 11.10, 11.11, 11.12_
 
-  - [ ]* 14.2 Write property test — Property 16: Announcement Formatting
+  - [x]* 14.2 Write property test — Property 16: Announcement Formatting
     - **Property 16: Announcement Formatting**
     - Generate random snapshots + announcement counts (1, 3, 5, 10); verify formatted string contains date and exactly min(N, total) artist names with cumulative values
     - **Validates: Requirements 11.5, 11.11**
 
-  - [ ]* 14.3 Write unit tests for accessibility
+  - [x]* 14.3 Write unit tests for accessibility
     - Test ARIA labels (11.1, 11.2), keyboard navigation (11.3), focus trap (11.4), colorblind palette verification (11.6–11.8), contrast ratio calculation (11.9), paced mode activation (11.10), default announcement count (11.12)
     - _Requirements: 11.1–11.12_
 
-- [ ] 15. Checkpoint — Detail panel and accessibility
+- [x] 15. Checkpoint — Detail panel and accessibility
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 16. Responsive design and styling

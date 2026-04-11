@@ -10,7 +10,7 @@ import type { DailyValueEntry } from "./types.ts";
 import { render as renderEmbed } from "./embed-renderer.ts";
 import { toRomanNumeral } from "./utils.ts";
 import { ARTIST_TYPE_COLORS } from "./colors.ts";
-import { computeCumulativeValue } from "./chart-engine.ts";
+import { computeCumulativeValue, computeTotalWins } from "./chart-engine.ts";
 
 /** Known chart sources that have logo assets */
 const SOURCE_LOGO_MAP: Record<string, string> = {
@@ -179,12 +179,14 @@ export class DetailPanel {
     nameEl.innerHTML = nameHtml;
     header.appendChild(nameEl);
 
-    // Generation (+ debut) — no group type designation
+    // Generation (+ debut) — use "solo debut" for solo artists
     const metaEl = document.createElement("span");
     metaEl.className = "detail-panel__artist-meta";
     const genLabel = toRomanNumeral(artist.generation);
+    const isSolo = artist.artistType.startsWith("solo_");
+    const debutPrefix = isSolo ? "solo debut" : "debut";
     const debutHtml = artist.debut
-      ? ` <span class="detail-panel__debut">(debut: ${this.escapeHtml(artist.debut)})</span>`
+      ? ` <span class="detail-panel__debut">(${debutPrefix}: ${this.escapeHtml(artist.debut)})</span>`
       : "";
     metaEl.innerHTML = `${genLabel}${debutHtml}`;
     header.appendChild(metaEl);
@@ -195,6 +197,17 @@ export class DetailPanel {
       cumulEl.className = "detail-panel__cumulative";
       cumulEl.textContent = `${cumulativeValue.toLocaleString()} pts`;
       header.appendChild(cumulEl);
+    }
+
+    // Total wins count
+    if (currentDate) {
+      const totalWins = computeTotalWins(artistId, currentDate, dataStore);
+      if (totalWins > 0) {
+        const winsEl = document.createElement("div");
+        winsEl.className = "detail-panel__total-wins";
+        winsEl.textContent = `${totalWins} ${totalWins === 1 ? "win" : "wins"}`;
+        header.appendChild(winsEl);
+      }
     }
 
     panel.appendChild(header);

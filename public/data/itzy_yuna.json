@@ -1,0 +1,48 @@
+{
+  "name": "YUNA [ITZY]",
+  "korean_name": "申有娜",
+  "artistType": "solo_female",
+  "generation": 4,
+  "debut": "2026-03-23",
+  "releases": [
+    {
+      "title": "Ice Cream",
+      "dailyValues": {
+        "2026-04-03": { "value": 5803, "source": "music_bank", "episode": 1287 },
+        "2026-04-02": { "value": 2188, "source": "m_countdown", "episode": 922 }
+      },
+      "embeds": {
+        "2026-04-03": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://youtu.be/WBa9KHXKhZ0?si=Fla_tDtNE2KCE6LP" }
+            ]
+          }
+        ],
+        "2026-04-02": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://youtu.be/dZ1RUf4NYlY?si=VrOdo3l9NrEn5d-O" }
+            ]
+          }
+        ],
+        "2026-03-23": [
+          {
+            "eventType": "release_date",
+            "links": [
+              { "url": "https://music.apple.com/us/album/ice-cream-ep/1880407965" }
+            ]
+          },
+          {
+            "eventType": "mv",
+            "links": [
+              { "url": "https://youtu.be/x0FwbTiD3iA?si=PH1IBP8pWbkiwdu7" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

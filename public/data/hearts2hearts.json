@@ -8,7 +8,8 @@
     {
       "title": "RUDE!",
       "dailyValues": {
-        "2026-04-11": { "value": 6214, "source": "show_music_core", "episode": 940 }
+        "2026-04-11": { "value": 6214, "source": "show_music_core", "episode": 940 },
+        "2026-04-04": { "value": 5125, "source": "show_music_core", "episode": 939 }
       },
       "embeds": {
         "2026-02-20": [

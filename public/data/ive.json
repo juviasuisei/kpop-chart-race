@@ -1,0 +1,32 @@
+{
+  "name": "IVE",
+  "korean_name": "아이브",
+  "artistType": "girl_group",
+  "generation": 4,
+  "debut": "2022-10-19",
+  "releases": [
+    {
+      "title": "BANG BANG",
+      "dailyValues": {
+        "2026-04-05": { "value": 4047, "source": "inkigayo", "episode": 1305 },
+        "2026-04-04": { "value": 4423, "source": "show_music_core", "episode": 939 }
+      },
+      "embeds": {
+        "2026-02-09": [
+          {
+            "eventType": "release_date",
+            "links": [
+              { "url": "https://music.apple.com/us/album/bang-bang-single/1872627662" }
+            ]
+          },
+          {
+            "eventType": "mv",
+            "links": [
+              { "url": "https://youtu.be/9qkpcLK422o?si=ywAmpK2pRFzT_hAB" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

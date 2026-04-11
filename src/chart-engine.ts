@@ -40,6 +40,46 @@ export function computeCumulativeValue(
 }
 
 /**
+ * Count total chart wins for an artist up to and including the given date.
+ */
+export function computeTotalWins(
+  artistId: string,
+  date: string,
+  dataStore: DataStore,
+): number {
+  let total = 0;
+  for (const [d, sourceMap] of dataStore.chartWins) {
+    if (d > date) continue;
+    for (const [, winData] of sourceMap) {
+      if (winData.artistIds.includes(artistId)) {
+        total++;
+      }
+    }
+  }
+  return total;
+}
+
+/**
+ * Compute the cumulative value for a specific release up to the given date.
+ */
+export function computeReleaseCumulativeValue(
+  artist: ParsedArtist,
+  releaseId: string,
+  date: string,
+  dates: string[],
+): number {
+  const release = artist.releases.find(r => r.id === releaseId);
+  if (!release) return 0;
+  let cumulative = 0;
+  for (const d of dates) {
+    if (d > date) break;
+    const entry = release.dailyValues.get(d);
+    if (entry) cumulative += entry.value;
+  }
+  return cumulative;
+}
+
+/**
  * Identify the featured release for an artist on a given date.
  *
  * - If one or more releases have a non-zero daily value on the current date,

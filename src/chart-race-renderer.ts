@@ -8,6 +8,7 @@ import type { ArtistType, ZoomLevel } from "./types.ts";
 import { filterByActivity, computeBarWidth, toRomanNumeral, tween } from "./utils.ts";
 import { EventBus } from "./event-bus.ts";
 import { ARTIST_TYPE_COLORS } from "./colors.ts";
+import { computeTotalWins, computeReleaseCumulativeValue } from "./chart-engine.ts";
 import pkg from "../package.json";
 
 /** Secondary indicator icons per ArtistType */
@@ -49,6 +50,7 @@ interface BarElement {
   typeIndicator: HTMLSpanElement;
   valueSpan: HTMLSpanElement;
   releaseSpan: HTMLSpanElement;
+  winsSpan: HTMLSpanElement;
   currentDisplayValue: number;
   animationFrameId: number | null;
   clickHandler: ((e: Event) => void) | null;
@@ -162,7 +164,7 @@ export class ChartRaceRenderer {
         barEl.wrapper.offsetHeight;
       }
 
-      this.updateBarElement(barEl, entry, barHeight, maxCumulative);
+      this.updateBarElement(barEl, entry, barHeight, maxCumulative, snapshot.date, dataStore);
     }
 
     // Remove bars no longer visible
@@ -305,8 +307,13 @@ export class ChartRaceRenderer {
     valueSpan.className = "bar__value";
     valueSpan.textContent = "0";
 
+    const winsSpan = document.createElement("span");
+    winsSpan.className = "bar__wins";
+    winsSpan.textContent = "";
+
     wrapper.appendChild(bar);
     wrapper.appendChild(valueSpan);
+    wrapper.appendChild(winsSpan);
 
     const clickHandler = (e: Event) => {
       const target = e.target as HTMLElement;
@@ -326,6 +333,7 @@ export class ChartRaceRenderer {
       typeIndicator,
       valueSpan,
       releaseSpan,
+      winsSpan,
       currentDisplayValue: entry.previousCumulativeValue,
       animationFrameId: null,
       clickHandler,
@@ -338,6 +346,8 @@ export class ChartRaceRenderer {
     entry: RankedEntry,
     barHeight: number,
     maxCumulative: number,
+    snapshotDate: string,
+    dataStore: DataStore,
   ): void {
     // Update text content
     barEl.rankSpan.textContent = `#${entry.rank}`;
@@ -351,10 +361,30 @@ export class ChartRaceRenderer {
       barEl.logo.src = entry.logoUrl;
     }
 
-    // Featured release
-    barEl.releaseSpan.textContent = entry.featuredRelease.title
-      ? `♪ ${entry.featuredRelease.title}`
-      : "";
+    // Featured release with per-song count if artist has multiple releases
+    const artist = dataStore.artists.get(entry.artistId);
+    const hasMultipleReleases = artist ? artist.releases.filter(r => {
+      for (const d of dataStore.dates) {
+        if (d > snapshotDate) break;
+        if (r.dailyValues.has(d)) return true;
+      }
+      return false;
+    }).length > 1 : false;
+
+    if (entry.featuredRelease.title) {
+      if (hasMultipleReleases && artist) {
+        const songPts = computeReleaseCumulativeValue(artist, entry.featuredRelease.releaseId, snapshotDate, dataStore.dates);
+        barEl.releaseSpan.textContent = `♪ ${entry.featuredRelease.title} (${songPts.toLocaleString()})`;
+      } else {
+        barEl.releaseSpan.textContent = `♪ ${entry.featuredRelease.title}`;
+      }
+    } else {
+      barEl.releaseSpan.textContent = "";
+    }
+
+    // Total wins count
+    const totalWins = computeTotalWins(entry.artistId, snapshotDate, dataStore);
+    barEl.winsSpan.textContent = totalWins > 0 ? `${totalWins}W` : "";
 
     // Bar width as percentage
     const widthPercent = computeBarWidth(entry.cumulativeValue, maxCumulative);
@@ -418,10 +448,11 @@ export class ChartRaceRenderer {
       const stillOverflowing = barEl.bar.scrollWidth > barEl.bar.clientWidth;
 
       if (nameIsTruncated || stillOverflowing) {
-        // Insert name, gen, type indicator before the value span (keeps them together)
+        // Insert name, gen, type indicator, wins before the value span (keeps them together)
         barEl.wrapper.insertBefore(barEl.nameSpan, barEl.valueSpan);
         barEl.wrapper.insertBefore(barEl.genSpan, barEl.valueSpan);
         barEl.wrapper.insertBefore(barEl.typeIndicator, barEl.valueSpan);
+        barEl.wrapper.insertBefore(barEl.winsSpan, barEl.valueSpan);
         barEl.nameSpan.classList.add("bar__name--outside");
         barEl.genSpan.classList.add("bar__gen--outside");
         barEl.typeIndicator.classList.add("bar__type-indicator--outside");

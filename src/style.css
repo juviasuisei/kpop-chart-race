@@ -156,6 +156,15 @@ body {
   font-size: 0.7rem;
 }
 
+.bar__wins {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #213547;
+  white-space: nowrap;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
 /* ===== Chart Race Legend ===== */
 
 .chart-race__legend {
@@ -296,6 +305,13 @@ body {
   font-weight: 700;
   color: #213547;
   margin-top: 0.35rem;
+}
+
+.detail-panel__total-wins {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #666;
+  margin-top: 0.15rem;
 }
 
 /* ===== Timeline ===== */

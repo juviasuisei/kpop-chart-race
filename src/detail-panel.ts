@@ -400,12 +400,6 @@ export class DetailPanel {
       entry.appendChild(dateEl);
     }
 
-    // Release title
-    const releaseEl = document.createElement("div");
-    releaseEl.className = "timeline-entry__release";
-    releaseEl.textContent = `♪ ${item.releaseTitle}`;
-    entry.appendChild(releaseEl);
-
     // Chart source + episode + value
     if (item.dailyValue) {
       const sourceEl = document.createElement("div");
@@ -432,7 +426,7 @@ export class DetailPanel {
       sourceEl.appendChild(episodeEl);
       entry.appendChild(sourceEl);
 
-      // Crown icon above points value (if applicable)
+      // Crown icon with label next to it (if applicable)
       if (item.crownLevel > 0) {
         const config = getCrownConfig(item.crownLevel);
         const crownEl = document.createElement("div");
@@ -472,11 +466,23 @@ export class DetailPanel {
         entry.appendChild(crownEl);
       }
 
-      // Performance value with "pts" suffix
+      // Release title right above points
+      const releaseEl = document.createElement("div");
+      releaseEl.className = "timeline-entry__release";
+      releaseEl.textContent = `♪ ${item.releaseTitle}`;
+      entry.appendChild(releaseEl);
+
+      // Performance value with commas and "pts" suffix
       const valueEl = document.createElement("div");
       valueEl.className = "timeline-entry__value";
-      valueEl.textContent = `${item.dailyValue.value} pts`;
+      valueEl.textContent = `${item.dailyValue.value.toLocaleString()} pts`;
       entry.appendChild(valueEl);
+    } else {
+      // Embed-only entry — still show release title at top
+      const releaseEl = document.createElement("div");
+      releaseEl.className = "timeline-entry__release";
+      releaseEl.textContent = `♪ ${item.releaseTitle}`;
+      entry.appendChild(releaseEl);
     }
 
     // Embed groups

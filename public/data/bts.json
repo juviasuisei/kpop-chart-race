@@ -30,6 +30,12 @@
           }
         ]
       }
+    },
+    {
+      "title": "Body to Body",
+      "dailyValues": {
+        "2026-04-05": { "value": 4250, "source": "inkigayo", "episode": 1305 }
+      }
     }
   ]
 }

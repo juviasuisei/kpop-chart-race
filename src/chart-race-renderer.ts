@@ -366,27 +366,29 @@ export class ChartRaceRenderer {
     this.tweenValue(barEl, entry.previousCumulativeValue, entry.cumulativeValue);
   }
 
-  /** Move release and name back inside the bar */
+  /** Move release, name, and gen back inside the bar */
   private resetBarOverflow(barEl: BarElement): void {
-    // Ensure release is inside bar (before value span)
+    // Ensure release is inside bar
     if (barEl.releaseSpan.parentElement !== barEl.bar) {
       barEl.bar.appendChild(barEl.releaseSpan);
     }
     barEl.releaseSpan.classList.remove("bar__release--outside");
-    // Ensure name is inside bar
+    // Ensure name and gen are inside bar (name before gen, both before type indicator)
     if (barEl.nameSpan.parentElement !== barEl.bar) {
-      // Re-insert after logo
-      barEl.bar.insertBefore(barEl.nameSpan, barEl.genSpan);
+      barEl.bar.insertBefore(barEl.nameSpan, barEl.typeIndicator);
+    }
+    if (barEl.genSpan.parentElement !== barEl.bar) {
+      barEl.bar.insertBefore(barEl.genSpan, barEl.typeIndicator);
     }
     barEl.nameSpan.classList.remove("bar__name--outside");
+    barEl.genSpan.classList.remove("bar__gen--outside");
   }
 
   /** Check if bar content overflows and move elements outside as needed */
   private checkBarOverflow(barEl: BarElement): void {
     if (!barEl.bar.parentElement) return; // destroyed
 
-    // Check if the release text is being truncated (scrollWidth > offsetWidth)
-    // or if the bar itself is overflowing
+    // Check if the release text is being truncated or bar is overflowing
     const releaseIsTruncated = barEl.releaseSpan.scrollWidth > barEl.releaseSpan.offsetWidth;
     const barIsOverflowing = barEl.bar.scrollWidth > barEl.bar.clientWidth;
 
@@ -395,10 +397,16 @@ export class ChartRaceRenderer {
       barEl.wrapper.insertBefore(barEl.releaseSpan, barEl.valueSpan.nextSibling);
       barEl.releaseSpan.classList.add("bar__release--outside");
 
-      // Check again — if bar still overflows, move name outside too
-      if (barEl.bar.scrollWidth > barEl.bar.clientWidth) {
+      // Check if name is truncated or bar still overflows — move name + gen outside together
+      const nameIsTruncated = barEl.nameSpan.scrollWidth > barEl.nameSpan.offsetWidth;
+      const stillOverflowing = barEl.bar.scrollWidth > barEl.bar.clientWidth;
+
+      if (nameIsTruncated || stillOverflowing) {
+        // Insert name then gen before the value span (keeps them together)
         barEl.wrapper.insertBefore(barEl.nameSpan, barEl.valueSpan);
+        barEl.wrapper.insertBefore(barEl.genSpan, barEl.valueSpan);
         barEl.nameSpan.classList.add("bar__name--outside");
+        barEl.genSpan.classList.add("bar__gen--outside");
       }
     }
   }

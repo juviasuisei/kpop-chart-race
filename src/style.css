@@ -133,6 +133,11 @@ body {
   font-size: 0.8rem;
 }
 
+.bar__gen--outside {
+  color: #888;
+  font-size: 0.65rem;
+}
+
 /* ===== Chart Race Legend ===== */
 
 .chart-race__legend {

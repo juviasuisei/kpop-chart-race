@@ -398,38 +398,55 @@ export class ChartRaceRenderer {
     barEl.wrapper.style.transform = `translateY(${yPosition}px)`;
     barEl.wrapper.style.height = `${barHeight}px`;
 
-    // Smart overflow: check immediately and again after transition.
-    // Don't reset blindly — only move things back in if they fit.
-    this.checkBarOverflow(barEl);
+    // Smart overflow: only check after the CSS transition completes,
+    // when the bar has reached its target width.
+    // First, move everything inside so the bar can render at full content.
+    this.moveAllInside(barEl);
+    // Then after transition, check what actually fits.
     setTimeout(() => this.checkBarOverflow(barEl), 960);
 
     // Numeric value tweening
     this.tweenValue(barEl, entry.previousCumulativeValue, entry.cumulativeValue);
   }
 
-  /** Check if bar content overflows and move elements outside/inside as needed */
+  /** Move all overflow elements back inside the bar */
+  private moveAllInside(barEl: BarElement): void {
+    if (barEl.releaseSpan.parentElement !== barEl.bar) {
+      barEl.bar.appendChild(barEl.releaseSpan);
+    }
+    barEl.releaseSpan.classList.remove("bar__release--outside");
+    if (barEl.nameSpan.parentElement !== barEl.bar) {
+      barEl.bar.insertBefore(barEl.nameSpan, barEl.releaseSpan);
+    }
+    if (barEl.genSpan.parentElement !== barEl.bar) {
+      barEl.bar.insertBefore(barEl.genSpan, barEl.releaseSpan);
+    }
+    if (barEl.typeIndicator.parentElement !== barEl.bar) {
+      barEl.bar.insertBefore(barEl.typeIndicator, barEl.releaseSpan);
+    }
+    barEl.nameSpan.classList.remove("bar__name--outside");
+    barEl.genSpan.classList.remove("bar__gen--outside");
+    barEl.typeIndicator.classList.remove("bar__type-indicator--outside");
+  }
+
+  /** Check if bar content overflows and move elements outside as needed */
   private checkBarOverflow(barEl: BarElement): void {
     if (!barEl.bar.parentElement) return; // destroyed
 
-    const releaseIsOutside = barEl.releaseSpan.parentElement !== barEl.bar;
-    const nameIsOutside = barEl.nameSpan.parentElement !== barEl.bar;
+    // Check if the release text is being truncated or bar is overflowing
+    const releaseIsTruncated = barEl.releaseSpan.scrollWidth > barEl.releaseSpan.offsetWidth;
+    const barIsOverflowing = barEl.bar.scrollWidth > barEl.bar.clientWidth;
 
-    // If name is outside, try moving it back in first
-    if (nameIsOutside) {
-      // Temporarily move name block back inside to test fit
-      barEl.bar.insertBefore(barEl.nameSpan, barEl.releaseSpan);
-      barEl.bar.insertBefore(barEl.genSpan, barEl.releaseSpan);
-      barEl.bar.insertBefore(barEl.typeIndicator, barEl.releaseSpan);
+    if (releaseIsTruncated || barIsOverflowing) {
+      // Move release outside bar
+      barEl.wrapper.insertBefore(barEl.releaseSpan, barEl.valueSpan.nextSibling);
+      barEl.releaseSpan.classList.add("bar__release--outside");
 
-      const nameFits = barEl.bar.scrollWidth <= barEl.bar.clientWidth
-        && barEl.nameSpan.scrollWidth <= barEl.nameSpan.offsetWidth;
+      // Check if name is truncated or bar still overflows
+      const nameIsTruncated = barEl.nameSpan.scrollWidth > barEl.nameSpan.offsetWidth;
+      const stillOverflowing = barEl.bar.scrollWidth > barEl.bar.clientWidth;
 
-      if (nameFits) {
-        barEl.nameSpan.classList.remove("bar__name--outside");
-        barEl.genSpan.classList.remove("bar__gen--outside");
-        barEl.typeIndicator.classList.remove("bar__type-indicator--outside");
-      } else {
-        // Doesn't fit — move back outside
+      if (nameIsTruncated || stillOverflowing) {
         barEl.wrapper.insertBefore(barEl.nameSpan, barEl.valueSpan);
         barEl.wrapper.insertBefore(barEl.genSpan, barEl.valueSpan);
         barEl.wrapper.insertBefore(barEl.typeIndicator, barEl.valueSpan);
@@ -437,45 +454,6 @@ export class ChartRaceRenderer {
         barEl.nameSpan.classList.add("bar__name--outside");
         barEl.genSpan.classList.add("bar__gen--outside");
         barEl.typeIndicator.classList.add("bar__type-indicator--outside");
-      }
-    }
-
-    // If release is outside, try moving it back in
-    if (releaseIsOutside) {
-      barEl.bar.appendChild(barEl.releaseSpan);
-
-      const releaseFits = barEl.bar.scrollWidth <= barEl.bar.clientWidth
-        && barEl.releaseSpan.scrollWidth <= barEl.releaseSpan.offsetWidth;
-
-      if (releaseFits) {
-        barEl.releaseSpan.classList.remove("bar__release--outside");
-      } else {
-        barEl.wrapper.insertBefore(barEl.releaseSpan, barEl.valueSpan.nextSibling);
-        barEl.releaseSpan.classList.add("bar__release--outside");
-      }
-    }
-
-    // If everything is inside, check if it still fits
-    if (!releaseIsOutside && !nameIsOutside) {
-      const releaseIsTruncated = barEl.releaseSpan.scrollWidth > barEl.releaseSpan.offsetWidth;
-      const barIsOverflowing = barEl.bar.scrollWidth > barEl.bar.clientWidth;
-
-      if (releaseIsTruncated || barIsOverflowing) {
-        barEl.wrapper.insertBefore(barEl.releaseSpan, barEl.valueSpan.nextSibling);
-        barEl.releaseSpan.classList.add("bar__release--outside");
-
-        const nameIsTruncated = barEl.nameSpan.scrollWidth > barEl.nameSpan.offsetWidth;
-        const stillOverflowing = barEl.bar.scrollWidth > barEl.bar.clientWidth;
-
-        if (nameIsTruncated || stillOverflowing) {
-          barEl.wrapper.insertBefore(barEl.nameSpan, barEl.valueSpan);
-          barEl.wrapper.insertBefore(barEl.genSpan, barEl.valueSpan);
-          barEl.wrapper.insertBefore(barEl.typeIndicator, barEl.valueSpan);
-          barEl.wrapper.insertBefore(barEl.winsSpan, barEl.valueSpan);
-          barEl.nameSpan.classList.add("bar__name--outside");
-          barEl.genSpan.classList.add("bar__gen--outside");
-          barEl.typeIndicator.classList.add("bar__type-indicator--outside");
-        }
       }
     }
   }

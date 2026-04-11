@@ -181,10 +181,32 @@ export function computeSnapshot(
 
 
 /**
+ * Deduplicate entries by artist, keeping only the highest-value release per artist.
+ * If an artist has multiple releases tied at the same highest value, the first
+ * encountered in iteration order is kept.
+ */
+function deduplicateByArtist(
+  entries: { artistId: string; releaseId: string; value: number }[],
+): { artistId: string; releaseId: string; value: number }[] {
+  const bestByArtist = new Map<string, { artistId: string; releaseId: string; value: number }>();
+  for (const entry of entries) {
+    const existing = bestByArtist.get(entry.artistId);
+    if (!existing || entry.value > existing.value) {
+      bestByArtist.set(entry.artistId, entry);
+    }
+  }
+  return Array.from(bestByArtist.values());
+}
+
+/**
  * Compute chart wins across all dates and sources.
  *
  * For each (date, source) pair, the artist(s) with the highest DailyValueEntry
  * value are the winners. Ties result in all tied artists being winners.
+ *
+ * Before determining winners, entries are deduplicated per artist so that each
+ * artist is represented by at most one release (the highest-value one). Crown
+ * level increments apply only to the selected release.
  *
  * Crown levels track the total number of wins per (artistId, releaseId, source)
  * tuple with no upper bound. The crown level for a given date entry is the running
@@ -237,7 +259,10 @@ export function computeChartWins(
       { artistIds: string[]; crownLevels: Map<string, number> }
     >();
 
-    for (const [source, entries] of entriesBySource) {
+    for (const [source, rawEntries] of entriesBySource) {
+      // Deduplicate: keep only the highest-value release per artist
+      const entries = deduplicateByArtist(rawEntries);
+
       // Find the maximum value for this (date, source)
       let maxValue = -Infinity;
       for (const entry of entries) {
@@ -257,8 +282,6 @@ export function computeChartWins(
       }
 
       // Build crown levels for this (date, source) — one entry per winning artistId
-      // If an artist wins with multiple releases on the same source on the same date,
-      // use the highest crown level among their winning releases
       const crownLevels = new Map<string, number>();
       const winnerArtistIds = new Set<string>();
 

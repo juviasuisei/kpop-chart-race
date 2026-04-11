@@ -44,7 +44,7 @@ function buildArtist(overrides: Partial<ParsedArtist> = {}): ParsedArtist {
     name: 'Test Artist',
     artistType: 'girl_group',
     generation: 4,
-    logoUrl: 'assets/logos/test.png',
+    logoUrl: 'assets/logos/test.svg',
     releases: [release],
     ...overrides,
   };

@@ -154,13 +154,13 @@ describe('toParseArtist', () => {
   it('derives logoUrl from filename bts.json', () => {
     const entry = validEntry();
     const parsed = toParseArtist(entry, 'bts.json');
-    expect(parsed.logoUrl).toBe('assets/logos/bts.png');
+    expect(parsed.logoUrl).toBe('assets/logos/bts.svg');
   });
 
   it('derives logoUrl from hyphenated filename aria-bloom.json', () => {
     const entry = validEntry();
     const parsed = toParseArtist(entry, 'aria-bloom.json');
-    expect(parsed.logoUrl).toBe('assets/logos/aria-bloom.png');
+    expect(parsed.logoUrl).toBe('assets/logos/aria-bloom.svg');
   });
 });
 

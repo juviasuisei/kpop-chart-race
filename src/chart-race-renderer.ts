@@ -97,12 +97,17 @@ export class ChartRaceRenderer {
     titleHeader.appendChild(titleText);
     titleHeader.appendChild(versionBadge);
     titleHeader.appendChild(this.dataNote);
-    this.wrapper.appendChild(titleHeader);
 
     this.dateDisplay = document.createElement("div");
     this.dateDisplay.className = "chart-race__date";
     this.dateDisplay.textContent = "";
-    this.wrapper.appendChild(this.dateDisplay);
+
+    // Wrap title and date in a shared top bar row
+    const topBar = document.createElement("div");
+    topBar.className = "chart-race__top-bar";
+    topBar.appendChild(titleHeader);
+    topBar.appendChild(this.dateDisplay);
+    this.wrapper.appendChild(topBar);
 
     this.barsContainer = document.createElement("div");
     this.barsContainer.className = "chart-race__bars";

@@ -160,7 +160,7 @@ export function toParseArtist(entry: ArtistEntry, filename: string): ParsedArtis
     name: entry.name,
     artistType: entry.artistType,
     generation: entry.generation,
-    logoUrl: `assets/logos/${slug}.png`,
+    logoUrl: `assets/logos/${slug}.svg`,
     koreanName: entry.korean_name || undefined,
     debut: entry.debut || undefined,
     releases,

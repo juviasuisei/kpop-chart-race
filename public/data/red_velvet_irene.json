@@ -1,0 +1,39 @@
+{
+  "name": "IRENE [Red Velvet]",
+  "korean_name": "아이린",
+  "artistType": "solo_female",
+  "generation": 3,
+  "debut": "2024-11-26",
+  "releases": [
+    {
+      "title": "Biggest Fan",
+      "dailyValues": {
+        "2026-04-10": { "value": 7062, "source": "music_bank", "episode": 1288 }
+      },
+      "embeds": {
+        "2026-04-10": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://youtu.be/CmCgT113JNg?si=yD5Vm8vBe5mC-MBq" }
+            ]
+          }
+        ],
+        "2026-03-30": [
+          {
+            "eventType": "release_date",
+            "links": [
+              { "url": "https://music.apple.com/us/album/biggest-fan-the-1st-album/1887564140", "description": "Unpiltered" }
+            ]
+          },
+          {
+            "eventType": "mv",
+            "links": [
+              { "url": "https://youtu.be/x7wLlK9MMN4?si=x9djnr8jcn-EIfDe", "description": "MV" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

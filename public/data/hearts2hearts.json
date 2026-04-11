@@ -1,0 +1,31 @@
+{
+  "name": "Hearts2Hearts",
+  "korean_name": "하츠투하츠",
+  "artistType": "girl_group",
+  "generation": 5,
+  "debut": "2025-02-24",
+  "releases": [
+    {
+      "title": "RUDE!",
+      "dailyValues": {
+        "2026-04-11": { "value": 6214, "source": "show_music_core", "episode": 940 }
+      },
+      "embeds": {
+        "2026-02-20": [
+          {
+            "eventType": "release_date",
+            "links": [
+              { "url": "https://music.apple.com/us/album/rude-single/1875146814", "description": "RUDE!" }
+            ]
+          },
+          {
+            "eventType": "mv",
+            "links": [
+              { "url": "https://youtu.be/F7sGJVUrkjQ?si=WHyVws8UltEajlZr", "description": "MV" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

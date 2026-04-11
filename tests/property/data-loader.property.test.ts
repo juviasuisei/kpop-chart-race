@@ -290,12 +290,12 @@ describe('Property 2: Validation accepts optional fields', () => {
 // **Validates: Requirements 5.2, 5.3, 7.1, 7.2**
 
 describe('Property 3: Logo URL derived from filename', () => {
-  it('derives logoUrl as assets/logos/{slug}.png from filename', () => {
+  it('derives logoUrl as assets/logos/{slug}.svg from filename', () => {
     fc.assert(
       fc.property(arbArtistEntry, arbFilename, (entry, filename) => {
         const parsed = toParseArtist(entry, filename);
         const expectedSlug = filename.replace(/\.json$/i, '');
-        expect(parsed.logoUrl).toBe(`assets/logos/${expectedSlug}.png`);
+        expect(parsed.logoUrl).toBe(`assets/logos/${expectedSlug}.svg`);
       }),
     );
   });

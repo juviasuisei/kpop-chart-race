@@ -8,7 +8,8 @@
     {
       "title": "Biggest Fan",
       "dailyValues": {
-        "2026-04-10": { "value": 7062, "source": "music_bank", "episode": 1288 }
+        "2026-04-10": { "value": 7062, "source": "music_bank", "episode": 1288 },
+        "2026-04-08": { "value": 2126, "source": "show_champion", "episode": 592 }
       },
       "embeds": {
         "2026-04-10": [

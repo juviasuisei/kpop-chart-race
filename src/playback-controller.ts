@@ -17,6 +17,7 @@ export class PlaybackController {
   private playBtn: HTMLButtonElement | null = null;
   private scrubber: HTMLInputElement | null = null;
   private dateLabel: HTMLSpanElement | null = null;
+  private wasPlayingBeforeScrub = false;
 
   constructor(eventBus: EventBus, dates: string[]) {
     this.eventBus = eventBus;
@@ -48,6 +49,9 @@ export class PlaybackController {
     this.scrubber.setAttribute("aria-label", "Timeline scrubber");
     this.scrubber.setAttribute("aria-valuenow", initialDate);
     this.scrubber.addEventListener("input", this.handleScrubberInput);
+    this.scrubber.addEventListener("mousedown", this.handleScrubStart);
+    this.scrubber.addEventListener("touchstart", this.handleScrubStart);
+    this.scrubber.addEventListener("change", this.handleScrubEnd);
 
     // Date label
     this.dateLabel = document.createElement("span");
@@ -125,6 +129,9 @@ export class PlaybackController {
 
     if (this.scrubber) {
       this.scrubber.removeEventListener("input", this.handleScrubberInput);
+      this.scrubber.removeEventListener("mousedown", this.handleScrubStart);
+      this.scrubber.removeEventListener("touchstart", this.handleScrubStart);
+      this.scrubber.removeEventListener("change", this.handleScrubEnd);
     }
 
     if (this.wrapper && this.wrapper.parentElement) {
@@ -159,6 +166,20 @@ export class PlaybackController {
       this.scrubber.setAttribute("aria-valuenow", date);
       this.eventBus.emit("date:change", date);
     });
+  };
+
+  private handleScrubStart = (): void => {
+    this.wasPlayingBeforeScrub = this.isPlaying();
+    if (this.wasPlayingBeforeScrub) {
+      this.pause();
+    }
+  };
+
+  private handleScrubEnd = (): void => {
+    if (this.wasPlayingBeforeScrub) {
+      this.wasPlayingBeforeScrub = false;
+      this.play();
+    }
   };
 
   private updateScrubberAndLabel(): void {

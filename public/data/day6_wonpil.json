@@ -8,7 +8,8 @@
     {
       "title": "Highs and Lows",
       "dailyValues": {
-        "2026-04-11": { "value": 3912, "source": "show_music_core", "episode": 940 }
+        "2026-04-11": { "value": 3912, "source": "show_music_core", "episode": 940 },
+        "2026-04-08": { "value": 2544, "source": "show_champion", "episode": 592 }
       },
       "embeds": {
         "2026-03-30": [

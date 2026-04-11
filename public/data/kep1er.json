@@ -8,7 +8,8 @@
     {
       "title": "KILLA",
       "dailyValues": {
-        "2026-04-09": { "value": 2377, "source": "m_countdown", "episode": 923 }
+        "2026-04-09": { "value": 2377, "source": "m_countdown", "episode": 923 },
+        "2026-04-08": { "value": 5481, "source": "show_champion", "episode": 592 }
       },
       "embeds": {
         "2026-04-09": [

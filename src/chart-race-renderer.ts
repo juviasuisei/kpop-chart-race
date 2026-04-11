@@ -384,7 +384,7 @@ export class ChartRaceRenderer {
 
     // Total wins count
     const totalWins = computeTotalWins(entry.artistId, snapshotDate, dataStore);
-    barEl.winsSpan.textContent = totalWins > 0 ? `${totalWins}W` : "";
+    barEl.winsSpan.textContent = totalWins > 0 ? `${totalWins} ${totalWins === 1 ? "win" : "wins"}` : "";
 
     // Bar width as percentage
     const widthPercent = computeBarWidth(entry.cumulativeValue, maxCumulative);

@@ -281,6 +281,15 @@ export class DetailPanel {
     document.body.appendChild(panel);
     this.panelEl = panel;
 
+    // On desktop, squeeze the main app area to make room for the panel
+    if (!isMobile) {
+      const appEl = document.getElementById("app");
+      if (appEl) {
+        appEl.style.marginRight = "500px";
+        appEl.style.transition = "margin-right 0.3s ease";
+      }
+    }
+
     // Set up focus trap
     this.setupFocusTrap(panel);
 
@@ -309,6 +318,12 @@ export class DetailPanel {
     // Remove from DOM
     this.panelEl.remove();
     this.panelEl = null;
+
+    // Restore main app area width
+    const appEl = document.getElementById("app");
+    if (appEl) {
+      appEl.style.marginRight = "";
+    }
 
     // Return focus
     if (this.previouslyFocusedEl && document.contains(this.previouslyFocusedEl)) {

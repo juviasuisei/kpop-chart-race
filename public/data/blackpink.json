@@ -8,7 +8,8 @@
     {
       "title": "GO",
       "dailyValues": {
-        "2026-03-26": { "value": 2025, "source": "m_countdown", "episode": 921 }
+        "2026-03-26": { "value": 2025, "source": "m_countdown", "episode": 921 },
+        "2026-03-25": { "value": 2633, "source": "show_champion", "episode": 590 }
       },
       "embeds": {
         "2026-02-27": [

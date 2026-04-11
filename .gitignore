@@ -24,4 +24,4 @@ dist-ssr
 *.sw?
 
 # Auto-generated data manifest
-data/index.json
+public/data/index.json

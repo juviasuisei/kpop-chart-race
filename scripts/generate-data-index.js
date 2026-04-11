@@ -6,7 +6,7 @@
 import { readdirSync, writeFileSync } from 'fs';
 import { join } from 'path';
 
-const dataDir = join(process.cwd(), 'data');
+const dataDir = join(process.cwd(), 'public', 'data');
 const files = readdirSync(dataDir)
   .filter(f => f.endsWith('.json') && f !== 'index.json')
   .sort();

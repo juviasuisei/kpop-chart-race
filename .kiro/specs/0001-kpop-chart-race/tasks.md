@@ -363,19 +363,19 @@ Incremental implementation of a static animated bar chart race visualizing K-pop
     - Test EventBus wiring between components
     - _Requirements: 1.1, 3.1, 6.1, 7.1_
 
-- [ ] 18. Build and deploy configuration
-  - [ ] 18.1 Configure Vite build and GitHub Actions
+- [x] 18. Build and deploy configuration
+  - [x] 18.1 Configure Vite build and GitHub Actions
     - Configure `vite.config.ts` for static output build (`base` path for GitHub Pages)
     - Verify `npm run build` produces self-contained `dist/` directory
     - Create `.github/workflows/deploy.yml` GitHub Actions workflow: build on push to primary branch, deploy to GitHub Pages
     - _Requirements: 10.1, 10.3, 10.4_
 
-  - [ ]* 18.2 Write build smoke tests
+  - [x]* 18.2 Write build smoke tests
     - Verify build output exists and contains expected files (index.html, JS bundle, CSS)
     - Verify no framework dependencies in package.json
     - _Requirements: 10.1, 10.2, 10.3_
 
-- [ ] 19. Final checkpoint — Full integration
+- [x] 19. Final checkpoint — Full integration
   - Ensure all tests pass, ask the user if questions arise.
 
 ## Notes

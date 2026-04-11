@@ -33,7 +33,7 @@ const ARTIST_TYPE_LABELS: Record<ArtistType, string> = {
   girl_group: "Girl Group",
   solo_male: "Solo Male",
   solo_female: "Solo Female",
-  mixed_group: "Mixed Group",
+  mixed_group: "Non-Gendered Group",
 };
 
 /** Placeholder SVG data URI for missing logos */
@@ -232,10 +232,6 @@ export class ChartRaceRenderer {
       const item = document.createElement("div");
       item.className = "chart-race__legend-item";
 
-      const swatch = document.createElement("span");
-      swatch.className = "legend-item__swatch";
-      swatch.style.backgroundColor = ARTIST_TYPE_COLORS[type];
-
       const indicator = document.createElement("span");
       indicator.className = "legend-item__indicator";
       indicator.textContent = ARTIST_TYPE_INDICATORS[type];
@@ -245,7 +241,6 @@ export class ChartRaceRenderer {
       label.className = "legend-item__label";
       label.textContent = ARTIST_TYPE_LABELS[type];
 
-      item.appendChild(swatch);
       item.appendChild(indicator);
       item.appendChild(label);
       legend.appendChild(item);

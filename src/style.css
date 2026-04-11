@@ -65,7 +65,7 @@ body {
   height: 80%;
   min-width: 0;
   flex: none;
-  border-radius: 4px;
+  border-radius: 0 4px 4px 0;
   padding: 0 0.5rem;
   overflow: hidden;
   transition: width 0.4s ease-in-out;
@@ -73,14 +73,14 @@ body {
 }
 
 .bar__logo {
-  width: 28px;
-  height: 28px;
+  width: 36px;
+  height: 36px;
   object-fit: contain;
   flex-shrink: 0;
 }
 
 .bar__name {
-  font-size: 0.8rem;
+  font-size: 0.95rem;
   font-weight: 600;
   color: #fff;
   white-space: nowrap;
@@ -147,7 +147,7 @@ body {
 }
 
 .legend-item__indicator {
-  font-size: 0.7rem;
+  font-size: 1rem;
   flex-shrink: 0;
 }
 
@@ -690,8 +690,8 @@ body {
   }
 
   .bar__logo {
-    width: 32px;
-    height: 32px;
+    width: 40px;
+    height: 40px;
   }
 
   .playback-controls {

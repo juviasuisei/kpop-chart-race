@@ -172,7 +172,7 @@ describe('ChartRaceRenderer', () => {
     expect(labelTexts).toContain('Girl Group');
     expect(labelTexts).toContain('Solo Male');
     expect(labelTexts).toContain('Solo Female');
-    expect(labelTexts).toContain('Mixed Group');
+    expect(labelTexts).toContain('Non-Gendered Group');
   });
 
   // 11. Update renders featured release with ♪ prefix (.bar__release) — Req 4.8

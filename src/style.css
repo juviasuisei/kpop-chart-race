@@ -161,12 +161,14 @@ body {
   color: #888;
   font-size: 0.65rem;
   cursor: pointer;
+  margin-left: 0.25rem;
 }
 
 .bar__type-indicator--outside {
   color: #888;
   font-size: 0.7rem;
   cursor: pointer;
+  margin-left: 0.25rem;
 }
 
 .bar__wins {

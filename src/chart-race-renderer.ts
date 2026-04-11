@@ -318,7 +318,7 @@ export class ChartRaceRenderer {
 
     const clickHandler = (e: Event) => {
       const target = e.target as HTMLElement;
-      if (target.closest('.chart-race__bar') || target.classList.contains('bar__value') || target.classList.contains('bar__release') || target.classList.contains('bar__name')) {
+      if (target.closest('.chart-race__bar') || target.classList.contains('bar__value') || target.classList.contains('bar__release') || target.classList.contains('bar__name') || target.classList.contains('bar__gen') || target.classList.contains('bar__type-indicator') || target.classList.contains('bar__wins') || target.classList.contains('bar__rank')) {
         this.eventBus.emit('bar:click', entry.artistId);
       }
     };
@@ -388,6 +388,7 @@ export class ChartRaceRenderer {
     // Total wins count
     const totalWins = computeTotalWins(entry.artistId, snapshotDate, dataStore);
     barEl.winsSpan.textContent = totalWins > 0 ? `${totalWins} ${totalWins === 1 ? "win" : "wins"}` : "";
+    barEl.winsSpan.style.display = totalWins > 0 ? "" : "none";
 
     // Bar width as percentage
     const widthPercent = computeBarWidth(entry.cumulativeValue, maxCumulative);

@@ -143,11 +143,11 @@ Incremental implementation of a static animated bar chart race visualizing K-pop
     - Generate multiple artists with random daily values across dates and sources; verify winners are highest-value artists per (date, source), crown levels track total wins per (artistId, releaseId, source) capped at 5
     - **Validates: Requirements 7.11**
 
-- [ ] 5. Checkpoint — Core engine
+- [x] 5. Checkpoint — Core engine
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 6. Utility functions
-  - [ ] 6.1 Implement tween and Roman numeral utilities
+- [x] 6. Utility functions
+  - [x] 6.1 Implement tween and Roman numeral utilities
     - Create `src/utils.ts`
     - `tween(start, end, t)`: linear interpolation returning `start + (end - start) * t`
     - `toRomanNumeral(n)`: convert positive integer to "Gen I", "Gen II", etc.
@@ -156,32 +156,32 @@ Incremental implementation of a static animated bar chart race visualizing K-pop
     - `positionToDate(position, dates)`: map scrubber position to date string
     - _Requirements: 3.3, 3.4, 4.7, 5.2, 6.5_
 
-  - [ ]* 6.2 Write property test — Property 9: Tween Interpolation
+  - [x]* 6.2 Write property test — Property 9: Tween Interpolation
     - **Property 9: Tween Interpolation**
     - Generate random start, end, t ∈ [0,1]; verify `tween(s, e, t) === s + (e - s) * t`, t=0 → start, t=1 → end
     - **Validates: Requirements 3.4**
 
-  - [ ]* 6.3 Write property test — Property 10: Generation to Roman Numeral
+  - [x]* 6.3 Write property test — Property 10: Generation to Roman Numeral
     - **Property 10: Generation to Roman Numeral Conversion**
     - Generate random positive integers; verify correct "Gen " + Roman numeral output
     - **Validates: Requirements 4.7**
 
-  - [ ]* 6.4 Write property test — Property 8: Bar Width Proportionality
+  - [x]* 6.4 Write property test — Property 8: Bar Width Proportionality
     - **Property 8: Bar Width Proportionality**
     - Generate random cumulative values with known max; verify proportional width, 0 when max is 0
     - **Validates: Requirements 3.3**
 
-  - [ ]* 6.5 Write property test — Property 11: Zoom Level Filtering
+  - [x]* 6.5 Write property test — Property 11: Zoom Level Filtering
     - **Property 11: Zoom Level Filtering**
     - Generate snapshots of varying sizes + zoom levels; verify correct count and top-N selection
     - **Validates: Requirements 5.2**
 
-  - [ ]* 6.6 Write property test — Property 12: Scrubber Position to Date Mapping
+  - [x]* 6.6 Write property test — Property 12: Scrubber Position to Date Mapping
     - **Property 12: Scrubber Position to Date Mapping**
     - Generate random sorted date arrays + positions; verify correct date returned, monotonically increasing
     - **Validates: Requirements 6.5**
 
-- [ ] 7. Checkpoint — Utilities
+- [x] 7. Checkpoint — Utilities
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 8. Embed Renderer

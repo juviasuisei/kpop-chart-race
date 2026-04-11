@@ -111,6 +111,10 @@ export class DetailPanel {
     const timeline = document.createElement("div");
     timeline.className = "detail-panel__timeline";
 
+    // Inner wrapper grows with content so the ::before line covers full scroll height
+    const timelineInner = document.createElement("div");
+    timelineInner.className = "detail-panel__timeline-inner";
+
     // Build timeline items
     const items = this.buildTimelineItems(artist, dataStore);
 
@@ -133,13 +137,14 @@ export class DetailPanel {
       { root: timeline, rootMargin: "200px" },
     );
 
-    // Render timeline entries
+    // Render timeline entries into the inner wrapper
     items.forEach((item, index) => {
       const side = index % 2 === 0 ? "left" : "right";
       const entryEl = this.createTimelineEntry(item, side);
-      timeline.appendChild(entryEl);
+      timelineInner.appendChild(entryEl);
     });
 
+    timeline.appendChild(timelineInner);
     panel.appendChild(timeline);
 
     // Add to DOM

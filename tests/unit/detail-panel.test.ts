@@ -268,4 +268,22 @@ describe('DetailPanel', () => {
     expect(document.body.querySelector('.detail-panel')).toBeNull();
     expect(panel.isOpen()).toBe(false);
   });
+
+  // 15. Timeline inner wrapper exists and contains entries — Bug 0003 fix
+  it('creates timeline inner wrapper that contains all timeline entries', () => {
+    panel.open('test-artist', dataStore);
+    const inner = document.body.querySelector('.detail-panel__timeline-inner');
+    expect(inner).not.toBeNull();
+
+    // Inner wrapper should be a child of the timeline container
+    const timeline = document.body.querySelector('.detail-panel__timeline');
+    expect(timeline).not.toBeNull();
+    expect(timeline!.contains(inner)).toBe(true);
+
+    // All timeline entries should be inside the inner wrapper
+    const entriesInInner = inner!.querySelectorAll('.timeline-entry');
+    const entriesTotal = document.body.querySelectorAll('.timeline-entry');
+    expect(entriesInInner.length).toBe(entriesTotal.length);
+    expect(entriesInInner.length).toBeGreaterThan(0);
+  });
 });

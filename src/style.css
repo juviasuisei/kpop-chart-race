@@ -238,7 +238,12 @@ body {
   padding: 1.5rem 1rem;
 }
 
-.detail-panel__timeline::before {
+.detail-panel__timeline-inner {
+  position: relative;
+  min-height: 100%;
+}
+
+.detail-panel__timeline-inner::before {
   content: "";
   position: absolute;
   top: 0;
@@ -259,6 +264,7 @@ body {
   background: #fafafa;
   border-radius: 6px;
   border: 1px solid #e8e8e8;
+  overflow: hidden;
 }
 
 .timeline-entry--left {
@@ -335,6 +341,16 @@ body {
 
 .detail-panel__embed-placeholder iframe {
   max-width: 100%;
+}
+
+.timeline-entry iframe,
+.timeline-entry blockquote {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.timeline-entry iframe {
+  height: auto;
 }
 
 /* ===== Visually Hidden Utility ===== */

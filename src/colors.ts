@@ -5,11 +5,11 @@
 
 import type { ArtistType } from "./types.ts";
 
-/** Colorblind-friendly palette: blue for boy/male, purple for girl/female, green for mixed */
+/** Colorblind-friendly palette: green for boy/male, purple for girl/female, blue for mixed */
 export const ARTIST_TYPE_COLORS: Record<ArtistType, string> = {
-  boy_group: "#1565C0",
+  boy_group: "#2E7D32",
   girl_group: "#7B1FA2",
-  solo_male: "#64B5F6",
+  solo_male: "#81C784",
   solo_female: "#CE93D8",
-  mixed_group: "#009E73",
+  mixed_group: "#1565C0",
 };

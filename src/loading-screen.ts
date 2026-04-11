@@ -69,26 +69,33 @@ export class LoadingScreen {
     }
   }
 
-  /** Trigger fade-out transition, then destroy. */
-  onComplete(): void {
-    if (!this.root) return;
-
-    this.root.classList.add("loading-screen--complete");
-
-    const onEnd = (): void => {
-      this.root?.removeEventListener("transitionend", onEnd);
-      this.destroy();
-    };
-
-    this.root.addEventListener("transitionend", onEnd);
-
-    // Safety fallback in case transitionend never fires
-    setTimeout(() => {
-      if (this.root) {
-        this.root.removeEventListener("transitionend", onEnd);
-        this.destroy();
+  /** Trigger fade-out transition, then destroy. Returns a promise that resolves when removed. */
+  onComplete(): Promise<void> {
+    return new Promise<void>((resolve) => {
+      if (!this.root) {
+        resolve();
+        return;
       }
-    }, 500);
+
+      this.root.classList.add("loading-screen--complete");
+
+      const onEnd = (): void => {
+        this.root?.removeEventListener("transitionend", onEnd);
+        this.destroy();
+        resolve();
+      };
+
+      this.root.addEventListener("transitionend", onEnd);
+
+      // Safety fallback in case transitionend never fires
+      setTimeout(() => {
+        if (this.root) {
+          this.root.removeEventListener("transitionend", onEnd);
+          this.destroy();
+        }
+        resolve();
+      }, 500);
+    });
   }
 
   /** Show error message, hide progress bar and credits. */

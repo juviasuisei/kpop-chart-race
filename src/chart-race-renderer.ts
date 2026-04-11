@@ -104,10 +104,10 @@ export class ChartRaceRenderer {
     this.dateDisplay.textContent = snapshot.date;
 
     const visibleEntries = filterByZoom(snapshot.entries, zoomLevel);
-    const containerHeight = this.barsContainer.clientHeight;
+    const containerHeight = this.barsContainer.clientHeight || this.barsContainer.offsetHeight;
     const barHeight =
       zoomLevel === 10
-        ? containerHeight / 10
+        ? (containerHeight > 0 ? containerHeight / 10 : 50)
         : BAR_HEIGHT_ALL;
 
     // Enable scrolling for "all" zoom

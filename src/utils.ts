@@ -37,6 +37,7 @@ export function toRomanNumeral(n: number): string {
 
 /**
  * Compute proportional bar width as a percentage (0–100).
+ * Caps at 85% so the value label beside the bar always remains visible.
  * Returns 0 when maxCumulativeValue is 0.
  */
 export function computeBarWidth(
@@ -44,7 +45,7 @@ export function computeBarWidth(
   maxCumulativeValue: number,
 ): number {
   if (maxCumulativeValue === 0) return 0;
-  return (cumulativeValue / maxCumulativeValue) * 100;
+  return (cumulativeValue / maxCumulativeValue) * 85;
 }
 
 /**

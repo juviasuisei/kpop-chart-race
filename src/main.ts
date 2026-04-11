@@ -54,7 +54,7 @@ async function main(): Promise<void> {
       dataStore.artists.size,
       Array.from(dataStore.artists.values()).map((a) => a.name),
     );
-    loadingScreen.onComplete();
+    await loadingScreen.onComplete();
   } catch (_err) {
     loadingScreen.onError(
       "Unable to load chart data. Please try refreshing the page.",
@@ -139,9 +139,12 @@ async function main(): Promise<void> {
   });
 
   // --- Initial render ---
-  // Emit the first date:change to render the initial state (app starts paused)
+  // Defer the first date:change so the browser completes layout after mount().
+  // Without this, clientHeight is 0 and bars render with zero height.
   if (dataStore.dates.length > 0) {
-    eventBus.emit("date:change", dataStore.dates[0]);
+    requestAnimationFrame(() => {
+      eventBus.emit("date:change", dataStore.dates[0]);
+    });
   }
 }
 

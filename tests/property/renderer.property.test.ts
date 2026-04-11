@@ -107,14 +107,14 @@ describe('Property 10: Generation to Roman Numeral Conversion', () => {
 // ============================================================
 
 describe('Property 8: Bar Width Proportionality', () => {
-  it('bar width is proportional: (cumulativeValue / maxCumulativeValue) * 100', () => {
+  it('bar width is proportional: (cumulativeValue / maxCumulativeValue) * 85', () => {
     fc.assert(
       fc.property(
         fc.integer({ min: 0, max: 100000 }),
         fc.integer({ min: 1, max: 100000 }),
         (cumulative, max) => {
           const result = computeBarWidth(cumulative, max);
-          const expected = (cumulative / max) * 100;
+          const expected = (cumulative / max) * 85;
           expect(result).toBeCloseTo(expected, 10);
         },
       ),
@@ -259,6 +259,310 @@ describe('Property 12: Scrubber Position to Date Mapping', () => {
           expect(positionToDate(dates.length + overflow, dates)).toBe(dates[dates.length - 1]);
         },
       ),
+    );
+  });
+});
+
+
+// ============================================================
+// Bugfix 0006: Bug Condition — Initial Render Bar Sizing
+// **Validates: Requirements 1.1, 1.2, 1.3 (bugfix.md)**
+// ============================================================
+
+import { ChartRaceRenderer } from '../../src/chart-race-renderer.ts';
+import { EventBus } from '../../src/event-bus.ts';
+import type { ChartSnapshot } from '../../src/models.ts';
+
+/** Arbitrary for ArtistType values */
+const arbArtistType = fc.constantFrom(
+  'boy_group' as const,
+  'girl_group' as const,
+  'solo_male' as const,
+  'solo_female' as const,
+  'mixed_group' as const,
+);
+
+/** Generate a random RankedEntry with the given rank and cumulative value */
+function makeRankedEntryForBugfix(
+  rank: number,
+  cumulativeValue: number,
+  artistName: string,
+  artistType: 'boy_group' | 'girl_group' | 'solo_male' | 'solo_female' | 'mixed_group' = 'boy_group',
+): RankedEntry {
+  return {
+    artistId: `artist-bugfix-${rank}-${artistName}`,
+    artistName,
+    artistType,
+    generation: 4,
+    logoUrl: `assets/logos/artist-${rank}.svg`,
+    cumulativeValue,
+    previousCumulativeValue: Math.max(0, cumulativeValue - 100),
+    dailyValue: 100,
+    rank,
+    previousRank: rank,
+    featuredRelease: { title: 'Song', releaseId: 'song' },
+  };
+}
+
+/** Arbitrary for a ChartSnapshot with 2-10 entries */
+const arbSnapshot: fc.Arbitrary<ChartSnapshot> = fc
+  .integer({ min: 2, max: 10 })
+  .chain((size) =>
+    fc.tuple(
+      fc.array(
+        fc.tuple(
+          fc.string({ minLength: 2, maxLength: 12 }),
+          fc.integer({ min: 100, max: 10000 }),
+          arbArtistType,
+        ),
+        { minLength: size, maxLength: size },
+      ),
+    ).map(([entries]) => {
+      // Sort by cumulative value descending to assign ranks
+      const sorted = [...entries].sort((a, b) => b[1] - a[1]);
+      const rankedEntries = sorted.map(([name, cumVal, type], i) =>
+        makeRankedEntryForBugfix(i + 1, cumVal, name, type),
+      );
+      return { date: '2024-06-01', entries: rankedEntries } as ChartSnapshot;
+    }),
+  );
+
+describe('Bugfix 0006: Bug Condition — Initial Render Bar Sizing', () => {
+  it('bars should have non-zero height and be vertically distributed on initial render (zoom 10)', () => {
+    fc.assert(
+      fc.property(arbSnapshot, (snapshot) => {
+        // Fresh container per iteration to avoid accumulation
+        const container = document.createElement('div');
+        document.body.appendChild(container);
+
+        const eventBus = new EventBus();
+        const renderer = new ChartRaceRenderer(eventBus);
+        renderer.mount(container);
+
+        // Call update synchronously — this is the bug condition (clientHeight === 0 in jsdom)
+        renderer.update(snapshot, 10);
+
+        const wrappers = container.querySelectorAll('.chart-race__bar-wrapper');
+        expect(wrappers.length).toBe(snapshot.entries.length);
+
+        // Each bar wrapper should have a non-zero height
+        for (const wrapper of wrappers) {
+          const height = parseFloat((wrapper as HTMLElement).style.height);
+          expect(height).toBeGreaterThan(0);
+        }
+
+        // Bar wrappers should NOT all have the same translateY (unless only 1 entry)
+        if (snapshot.entries.length > 1) {
+          const transforms = Array.from(wrappers).map(
+            (w) => (w as HTMLElement).style.transform,
+          );
+          const uniqueTransforms = new Set(transforms);
+          expect(uniqueTransforms.size).toBeGreaterThan(1);
+        }
+
+        renderer.destroy();
+        container.remove();
+      }),
+      { numRuns: 50 },
+    );
+  });
+
+  it('tied entries should have the same bar width', () => {
+    fc.assert(
+      fc.property(
+        fc.integer({ min: 100, max: 10000 }),
+        fc.string({ minLength: 2, maxLength: 4 }),
+        fc.string({ minLength: 8, maxLength: 12 }),
+        arbArtistType,
+        (cumulativeValue, shortName, longName, artistType) => {
+          // Fresh container per iteration
+          const container = document.createElement('div');
+          document.body.appendChild(container);
+
+          const eventBus = new EventBus();
+          const renderer = new ChartRaceRenderer(eventBus);
+          renderer.mount(container);
+
+          const snapshot: ChartSnapshot = {
+            date: '2024-06-01',
+            entries: [
+              makeRankedEntryForBugfix(1, cumulativeValue, shortName, artistType),
+              makeRankedEntryForBugfix(2, cumulativeValue, longName, artistType),
+            ],
+          };
+
+          renderer.update(snapshot, 10);
+
+          const bars = container.querySelectorAll('.chart-race__bar');
+          expect(bars.length).toBe(2);
+
+          const width1 = (bars[0] as HTMLElement).style.width;
+          const width2 = (bars[1] as HTMLElement).style.width;
+          expect(width1).toBe(width2);
+
+          renderer.destroy();
+          container.remove();
+        },
+      ),
+      { numRuns: 50 },
+    );
+  });
+});
+
+
+// ============================================================
+// Bugfix 0006: Preservation — Post-Layout Update Behavior
+// **Validates: Requirements 3.1, 3.2, 3.3, 3.4, 3.5 (bugfix.md)**
+// ============================================================
+
+/** Arbitrary for a ChartSnapshot with 1-15 entries for preservation tests */
+const arbPreservationSnapshot: fc.Arbitrary<ChartSnapshot> = fc
+  .integer({ min: 1, max: 15 })
+  .chain((size) =>
+    fc.tuple(
+      fc.array(
+        fc.tuple(
+          fc.string({ minLength: 2, maxLength: 10 }),
+          fc.integer({ min: 100, max: 10000 }),
+          arbArtistType,
+        ),
+        { minLength: size, maxLength: size },
+      ),
+    ).map(([entries]) => {
+      const sorted = [...entries].sort((a, b) => b[1] - a[1]);
+      const rankedEntries = sorted.map(([name, cumVal, type], i) =>
+        makeRankedEntryForBugfix(i + 1, cumVal, name, type),
+      );
+      return { date: '2024-06-15', entries: rankedEntries } as ChartSnapshot;
+    }),
+  );
+
+describe('Bugfix 0006: Preservation — Post-Layout Update Behavior', () => {
+  const MOCKED_CLIENT_HEIGHT = 500;
+
+  it('computeBarWidth is idempotent: equal inputs always produce equal outputs', () => {
+    fc.assert(
+      fc.property(
+        fc.integer({ min: 0, max: 100000 }),
+        fc.integer({ min: 1, max: 100000 }),
+        (cumVal, max) => {
+          const result1 = computeBarWidth(cumVal, max);
+          const result2 = computeBarWidth(cumVal, max);
+          expect(result1).toBe(result2);
+        },
+      ),
+      { numRuns: 100 },
+    );
+  });
+
+  it('bar width style matches computeBarWidth output after post-layout update', () => {
+    fc.assert(
+      fc.property(arbPreservationSnapshot, (snapshot) => {
+        const container = document.createElement('div');
+        document.body.appendChild(container);
+
+        const eventBus = new EventBus();
+        const renderer = new ChartRaceRenderer(eventBus);
+        renderer.mount(container);
+
+        // Mock clientHeight to simulate post-layout state
+        const barsContainer = container.querySelector('.chart-race__bars')!;
+        Object.defineProperty(barsContainer, 'clientHeight', {
+          value: MOCKED_CLIENT_HEIGHT,
+          configurable: true,
+        });
+
+        renderer.update(snapshot, 10);
+
+        const visibleEntries = filterByZoom(snapshot.entries, 10);
+        const maxCumulative = visibleEntries.reduce(
+          (max, e) => Math.max(max, e.cumulativeValue),
+          0,
+        );
+
+        const bars = container.querySelectorAll('.chart-race__bar');
+        expect(bars.length).toBe(visibleEntries.length);
+
+        for (let i = 0; i < visibleEntries.length; i++) {
+          const entry = visibleEntries[i];
+          const expectedWidth = computeBarWidth(entry.cumulativeValue, maxCumulative);
+          const barStyle = (bars[i] as HTMLElement).style.width;
+          expect(barStyle).toBe(`${expectedWidth}%`);
+        }
+
+        renderer.destroy();
+        container.remove();
+      }),
+      { numRuns: 50 },
+    );
+  });
+
+  it('bar position matches rank after post-layout update (zoom 10)', () => {
+    fc.assert(
+      fc.property(arbPreservationSnapshot, (snapshot) => {
+        const container = document.createElement('div');
+        document.body.appendChild(container);
+
+        const eventBus = new EventBus();
+        const renderer = new ChartRaceRenderer(eventBus);
+        renderer.mount(container);
+
+        const barsContainer = container.querySelector('.chart-race__bars')!;
+        Object.defineProperty(barsContainer, 'clientHeight', {
+          value: MOCKED_CLIENT_HEIGHT,
+          configurable: true,
+        });
+
+        renderer.update(snapshot, 10);
+
+        const barHeight = MOCKED_CLIENT_HEIGHT / 10;
+        const visibleEntries = filterByZoom(snapshot.entries, 10);
+        const wrappers = container.querySelectorAll('.chart-race__bar-wrapper');
+
+        for (let i = 0; i < visibleEntries.length; i++) {
+          const entry = visibleEntries[i];
+          const wrapper = wrappers[i] as HTMLElement;
+          const expectedY = (entry.rank - 1) * barHeight;
+          expect(wrapper.style.transform).toBe(`translateY(${expectedY}px)`);
+          expect(wrapper.style.height).toBe(`${barHeight}px`);
+        }
+
+        renderer.destroy();
+        container.remove();
+      }),
+      { numRuns: 50 },
+    );
+  });
+
+  it('zoom "all" uses fixed height 40px and overflowY auto', () => {
+    fc.assert(
+      fc.property(arbPreservationSnapshot, (snapshot) => {
+        const container = document.createElement('div');
+        document.body.appendChild(container);
+
+        const eventBus = new EventBus();
+        const renderer = new ChartRaceRenderer(eventBus);
+        renderer.mount(container);
+
+        const barsContainer = container.querySelector('.chart-race__bars')! as HTMLElement;
+        Object.defineProperty(barsContainer, 'clientHeight', {
+          value: MOCKED_CLIENT_HEIGHT,
+          configurable: true,
+        });
+
+        renderer.update(snapshot, 'all');
+
+        expect(barsContainer.style.overflowY).toBe('auto');
+
+        const wrappers = container.querySelectorAll('.chart-race__bar-wrapper');
+        for (const wrapper of wrappers) {
+          expect((wrapper as HTMLElement).style.height).toBe('40px');
+        }
+
+        renderer.destroy();
+        container.remove();
+      }),
+      { numRuns: 50 },
     );
   });
 });

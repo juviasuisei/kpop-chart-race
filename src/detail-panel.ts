@@ -238,7 +238,7 @@ export class DetailPanel {
     timelineInner.className = "detail-panel__timeline-inner";
 
     // Build date-grouped timeline items
-    const dateGroups = this.buildDateGroups(artist, dataStore);
+    const dateGroups = this.buildDateGroups(artist, dataStore, currentDate);
 
     // Set up IntersectionObserver for lazy-loading embeds
     this.observer = new IntersectionObserver(
@@ -360,7 +360,7 @@ export class DetailPanel {
    * Returns groups sorted in reverse chronological order.
    * Within each group, chart performance items come before embed-only items.
    */
-  private buildDateGroups(artist: ParsedArtist, dataStore: DataStore): DateGroup[] {
+  private buildDateGroups(artist: ParsedArtist, dataStore: DataStore, currentDate?: string): DateGroup[] {
     const items: TimelineItem[] = [];
 
     for (const release of artist.releases) {
@@ -467,10 +467,12 @@ export class DetailPanel {
       });
     }
 
-    // Sort date keys descending (reverse chronological)
-    const sortedDates = Array.from(groupMap.keys()).sort((a, b) => b.localeCompare(a));
+    // Sort date keys descending (reverse chronological), filtered to currentDate
+    const allDates = Array.from(groupMap.keys())
+      .filter(d => !currentDate || d <= currentDate)
+      .sort((a, b) => b.localeCompare(a));
 
-    return sortedDates.map((date) => ({
+    return allDates.map((date) => ({
       date,
       items: groupMap.get(date)!,
     }));

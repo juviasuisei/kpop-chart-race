@@ -1,48 +1,38 @@
 {
-  "name": "BTS",
-  "korean_name": "방탄소년단",
+  "name": "ALL(H)OURS",
+  "korean_name": "올아워즈",
   "artistType": "boy_group",
-  "generation": 3,
-  "debut": "2013-06-13",
+  "generation": 5,
+  "debut": "2024-01-10",
   "releases": [
     {
-      "title": "SWIM",
+      "title": "DEAD MAN WALKING",
       "dailyValues": {
-        "2026-04-11": { "value": 8532, "source": "show_music_core", "episode": 940 },
-        "2026-04-10": { "value": 5601, "source": "music_bank", "episode": 1288 },
-        "2026-04-09": { "value": 10052, "source": "m_countdown", "episode": 923 },
-        "2026-04-08": { "value": 7825, "source": "show_champion", "episode": 592 },
-        "2026-04-05": { "value": 9422, "source": "inkigayo", "episode": 1305 },
-        "2026-04-04": { "value": 9494, "source": "show_music_core", "episode": 939 },
-        "2026-04-03": { "value": 9477, "source": "music_bank", "episode": 1287 },
-        "2026-04-02": { "value": 10150, "source": "m_countdown", "episode": 922 },
-        "2026-04-01": { "value": 7965, "source": "show_champion", "episode": 591 },
-        "2026-03-29": { "value": 7245, "source": "inkigayo", "episode": 1304 },
-        "2026-03-27": { "value": 10703, "source": "music_bank", "episode": 1286 },
-        "2026-03-26": { "value": 10167, "source": "m_countdown", "episode": 921 },
-        "2026-03-25": { "value": 8000, "source": "show_champion", "episode": 590 }
+        "2026-03-25": { "value": 2094, "source": "show_champion", "episode": 590 }
       },
       "embeds": {
-        "2026-03-20": [
+        "2026-03-25": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://youtu.be/SoB0hUW2cXA?si=PFDBDXYBoVi1MJE1" }
+            ]
+          }
+        ],
+        "2026-03-16": [
           {
             "eventType": "release_date",
             "links": [
-              { "url": "https://music.apple.com/us/album/arirang/1868481904" }
+              { "url": "https://music.apple.com/us/album/no-doubt-ep/1884273521" }
             ]
           },
           {
             "eventType": "mv",
             "links": [
-              { "url": "https://youtu.be/b4iVv91Z6lY?si=NTtHoNhMcayxxjXL" }
+              { "url": "https://youtu.be/4-ba6z64nlQ?si=NxT42HwOPzUkRnuL" }
             ]
           }
         ]
-      }
-    },
-    {
-      "title": "Body to Body",
-      "dailyValues": {
-        "2026-04-05": { "value": 4250, "source": "inkigayo", "episode": 1305 }
       }
     }
   ]

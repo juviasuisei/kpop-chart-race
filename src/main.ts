@@ -121,14 +121,15 @@ async function main(): Promise<void> {
     if (playbackController.isPlaying()) {
       playbackController.pause();
     }
-    detailPanel.open(artistId, dataStore, currentSnapshot?.date);
+    const rank = currentSnapshot?.entries.find(e => e.artistId === artistId)?.rank;
+    detailPanel.open(artistId, dataStore, currentSnapshot?.date, rank);
   });
 
   // pause → auto-open detail panel for top-ranked artist
   eventBus.on("pause", () => {
     if (currentSnapshot && currentSnapshot.entries.length > 0) {
       const topArtistId = currentSnapshot.entries[0].artistId;
-      detailPanel.open(topArtistId, dataStore, currentSnapshot.date);
+      detailPanel.open(topArtistId, dataStore, currentSnapshot.date, 1);
     }
   });
 

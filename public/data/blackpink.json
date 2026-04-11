@@ -1,27 +1,27 @@
 {
   "name": "BLACKPINK",
-  "korean_name": "키키",
+  "korean_name": "블랙핑크",
   "artistType": "girl_group",
   "generation": 3,
-  "debut": "2025-02-24",
+  "debut": "2016-08-08",
   "releases": [
     {
       "title": "GO",
       "dailyValues": {
-        "2026-03-26": { "value": 10167, "source": "m_countdown", "episode": 921 }
+        "2026-03-26": { "value": 2025, "source": "m_countdown", "episode": 921 }
       },
       "embeds": {
-        "2026-01-26": [
+        "2026-02-27": [
           {
             "eventType": "release_date",
             "links": [
-              { "url": "https://music.apple.com/us/album/delulu-pack-ep/1866860579" }
+              { "url": "https://music.apple.com/us/album/deadline-ep/1870046940" }
             ]
           },
           {
             "eventType": "mv",
             "links": [
-              { "url": "https://youtu.be/zhHB4dZTChw?si=-5g1JiKoK_kwJkRe" }
+              { "url": "https://youtu.be/2GJfWMYCWY0?si=wRzEfNcb91NKkG0P" }
             ]
           }
         ]

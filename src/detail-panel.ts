@@ -126,7 +126,7 @@ export class DetailPanel {
   /**
    * Open the detail panel for a given artist.
    */
-  open(artistId: string, dataStore: DataStore, currentDate?: string): void {
+  open(artistId: string, dataStore: DataStore, currentDate?: string, currentRank?: number): void {
     // Close any existing panel first
     if (this.panelEl) {
       this.close();
@@ -200,6 +200,14 @@ export class DetailPanel {
       : "";
     metaEl.innerHTML = `${genLabel}${debutHtml}`;
     header.appendChild(metaEl);
+
+    // Current rank
+    if (currentRank !== undefined && currentRank > 0) {
+      const rankEl = document.createElement("div");
+      rankEl.className = "detail-panel__rank";
+      rankEl.textContent = `#${currentRank}`;
+      header.appendChild(rankEl);
+    }
 
     // Cumulative value
     if (cumulativeValue !== undefined) {

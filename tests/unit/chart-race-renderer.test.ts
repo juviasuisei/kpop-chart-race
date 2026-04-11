@@ -6,9 +6,9 @@ import type { ArtistType, DailyValueEntry } from '../../src/types.ts';
 /** Expected colors per ArtistType (rgb format as returned by jsdom) */
 const EXPECTED_COLORS: Record<ArtistType, string> = {
   boy_group: 'rgb(21, 101, 192)',
-  girl_group: 'rgb(198, 40, 40)',
+  girl_group: 'rgb(123, 31, 162)',
   solo_male: 'rgb(100, 181, 246)',
-  solo_female: 'rgb(239, 154, 154)',
+  solo_female: 'rgb(206, 147, 216)',
   mixed_group: 'rgb(0, 158, 115)',
 };
 

@@ -15,7 +15,8 @@
         "2026-04-05": { "value": 9422, "source": "inkigayo", "episode": 1305 },
         "2026-04-04": { "value": 9494, "source": "show_music_core", "episode": 939 },
         "2026-04-03": { "value": 9477, "source": "music_bank", "episode": 1287 },
-        "2026-04-02": { "value": 10150, "source": "m_countdown", "episode": 922 }
+        "2026-04-02": { "value": 10150, "source": "m_countdown", "episode": 922 },
+        "2026-04-01": { "value": 7965, "source": "show_champion", "episode": 591 }
       },
       "embeds": {
         "2026-03-20": [

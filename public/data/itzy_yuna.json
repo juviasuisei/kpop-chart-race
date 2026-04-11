@@ -9,7 +9,8 @@
       "title": "Ice Cream",
       "dailyValues": {
         "2026-04-03": { "value": 5803, "source": "music_bank", "episode": 1287 },
-        "2026-04-02": { "value": 2188, "source": "m_countdown", "episode": 922 }
+        "2026-04-02": { "value": 2188, "source": "m_countdown", "episode": 922 },
+        "2026-04-01": { "value": 1750, "source": "show_champion", "episode": 591 }
       },
       "embeds": {
         "2026-04-03": [

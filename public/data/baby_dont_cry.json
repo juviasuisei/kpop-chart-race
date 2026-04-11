@@ -1,0 +1,31 @@
+{
+  "name": "Baby DONT Cry",
+  "korean_name": "베이비돈크라이",
+  "artistType": "girl_group",
+  "generation": 5,
+  "debut": "2025-06-23",
+  "releases": [
+    {
+      "title": "Bittersweet",
+      "dailyValues": {
+        "2026-04-01": { "value": 2167, "source": "show_champion", "episode": 591 }
+      },
+      "embeds": {
+        "2026-03-24": [
+          {
+            "eventType": "release_date",
+            "links": [
+              { "url": "https://music.apple.com/us/album/the-1st-mini-album-after-cry-ep/1886088507" }
+            ]
+          },
+          {
+            "eventType": "mv",
+            "links": [
+              { "url": "https://youtu.be/P9q7NoOQHIo?si=jRSEur4rrMXykdve" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

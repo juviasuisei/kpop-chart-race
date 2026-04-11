@@ -94,6 +94,8 @@ interface TimelineItem {
   dailyValue?: DailyValueEntry;
   embedGroups: ParsedEmbedDateEntry[];
   crownLevel: number;
+  /** Additional releases on the same (date, source, episode) — merged into one card */
+  subReleases: { title: string; releaseId: string; value: number }[];
 }
 
 /** A date group containing all timeline items for that date */
@@ -364,13 +366,60 @@ export class DetailPanel {
           dailyValue,
           embedGroups,
           crownLevel,
+          subReleases: [],
         });
+      }
+    }
+
+    // Merge items that share the same (date, source, episode) into one card.
+    // The highest-value release becomes the primary; others become subReleases.
+    // Only the primary gets the crown.
+    const mergedItems: TimelineItem[] = [];
+    const mergeMap = new Map<string, TimelineItem>();
+
+    for (const item of items) {
+      if (item.dailyValue) {
+        const key = `${item.date}|${item.dailyValue.source}|${item.dailyValue.episode}`;
+        const existing = mergeMap.get(key);
+        if (existing && existing.dailyValue) {
+          // Merge: add as sub-release
+          if (item.dailyValue.value > existing.dailyValue.value) {
+            // New item is higher — swap: existing becomes sub-release
+            existing.subReleases.push({
+              title: existing.releaseTitle,
+              releaseId: existing.releaseId,
+              value: existing.dailyValue.value,
+            });
+            existing.releaseTitle = item.releaseTitle;
+            existing.releaseId = item.releaseId;
+            existing.dailyValue = item.dailyValue;
+            existing.crownLevel = item.crownLevel;
+            // Merge embeds
+            existing.embedGroups = existing.embedGroups.concat(item.embedGroups);
+          } else {
+            // Existing is higher or equal — add new as sub-release
+            existing.subReleases.push({
+              title: item.releaseTitle,
+              releaseId: item.releaseId,
+              value: item.dailyValue.value,
+            });
+            // Only keep crown on the primary (highest value)
+            // Merge embeds
+            existing.embedGroups = existing.embedGroups.concat(item.embedGroups);
+          }
+        } else {
+          mergeMap.set(key, item);
+          mergedItems.push(item);
+        }
+      } else {
+        // Embed-only items don't merge
+        mergedItems.push(item);
       }
     }
 
     // Group by date
     const groupMap = new Map<string, TimelineItem[]>();
-    for (const item of items) {
+    for (const item of mergedItems) {
       const existing = groupMap.get(item.date);
       if (existing) {
         existing.push(item);
@@ -488,6 +537,14 @@ export class DetailPanel {
       valueEl.className = "timeline-entry__value";
       valueEl.textContent = `${item.dailyValue.value.toLocaleString()} pts`;
       entry.appendChild(valueEl);
+
+      // Sub-releases (other songs on the same show/episode)
+      for (const sub of item.subReleases) {
+        const subEl = document.createElement("div");
+        subEl.className = "timeline-entry__sub-release";
+        subEl.textContent = `♪ ${sub.title} — ${sub.value.toLocaleString()} pts`;
+        entry.appendChild(subEl);
+      }
     } else {
       // Embed-only entry — still show release title at top
       const releaseEl = document.createElement("div");

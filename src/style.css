@@ -413,6 +413,12 @@ body {
   margin-bottom: 0.25rem;
 }
 
+.timeline-entry__sub-release {
+  font-size: 0.75rem;
+  color: #888;
+  margin-bottom: 0.15rem;
+}
+
 .timeline-entry__crown {
   display: flex;
   flex-direction: row;

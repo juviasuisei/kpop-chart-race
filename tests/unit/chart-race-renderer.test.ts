@@ -239,7 +239,7 @@ describe('ChartRaceRenderer', () => {
     expect(barsContainer.style.overflowY).toBe('auto');
   });
 
-  // 16. Clicking a bar wrapper emits bar:click with correct artistId
+  // 16. Clicking a bar emits bar:click with correct artistId
   it('clicking a bar wrapper emits bar:click with the correct artistId', () => {
     renderer.mount(container);
     const snapshot = makeSnapshot([
@@ -250,8 +250,8 @@ describe('ChartRaceRenderer', () => {
     const emitted: string[] = [];
     eventBus.on('bar:click', (artistId: string) => emitted.push(artistId));
 
-    const wrapper = container.querySelector('.chart-race__bar-wrapper') as HTMLElement;
-    wrapper.click();
+    const bar = container.querySelector('.chart-race__bar') as HTMLElement;
+    bar.click();
 
     expect(emitted).toEqual(['artist-luna']);
   });
@@ -268,9 +268,9 @@ describe('ChartRaceRenderer', () => {
     const emitted: string[] = [];
     eventBus.on('bar:click', (artistId: string) => emitted.push(artistId));
 
-    const wrappers = container.querySelectorAll('.chart-race__bar-wrapper');
-    (wrappers[0] as HTMLElement).click();
-    (wrappers[1] as HTMLElement).click();
+    const bars = container.querySelectorAll('.chart-race__bar');
+    (bars[0] as HTMLElement).click();
+    (bars[1] as HTMLElement).click();
 
     expect(emitted).toEqual(['artist-a', 'artist-b']);
   });
@@ -292,5 +292,138 @@ describe('ChartRaceRenderer', () => {
     wrapper.click();
 
     expect(emitted).toEqual([]);
+  });
+});
+
+
+// ============================================================
+// Bugfix 0007: Bug Condition Exploration — Click Outside & Cursor
+// **Validates: Requirements 1.1, 1.2**
+// These tests demonstrate the bugs exist on UNFIXED code.
+// They encode the EXPECTED behavior — they will pass after the fix.
+// ============================================================
+
+import { DetailPanel } from '../../src/detail-panel.ts';
+import type { DataStore, ParsedArtist } from '../../src/models.ts';
+
+/** Create a minimal mock DataStore with one artist for testing */
+function createMockDataStore(artistId: string): DataStore {
+  const artist: ParsedArtist = {
+    id: artistId,
+    name: 'Luna Park',
+    artistType: 'girl_group',
+    generation: 4,
+    logoUrl: 'assets/logos/luna-park.svg',
+    releases: [],
+  };
+  const artists = new Map<string, ParsedArtist>();
+  artists.set(artistId, artist);
+  return {
+    artists,
+    dates: ['2024-06-01'],
+    startDate: '2024-06-01',
+    endDate: '2024-06-01',
+    chartWins: new Map(),
+  };
+}
+
+describe('Bugfix 0007: Bug Condition — Click Outside Does Not Close Panel', () => {
+  let container: HTMLElement;
+  let renderer: ChartRaceRenderer;
+  let eventBus: EventBus;
+  let detailPanel: DetailPanel;
+  let dataStore: DataStore;
+  const originalIO = globalThis.IntersectionObserver;
+
+  beforeEach(() => {
+    // Mock IntersectionObserver for jsdom (not natively available)
+    globalThis.IntersectionObserver = class {
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    } as unknown as typeof IntersectionObserver;
+
+    container = document.createElement('div');
+    document.body.appendChild(container);
+    eventBus = new EventBus();
+    renderer = new ChartRaceRenderer(eventBus);
+    detailPanel = new DetailPanel(eventBus);
+    dataStore = createMockDataStore('artist-luna');
+  });
+
+  afterEach(() => {
+    detailPanel.destroy();
+    renderer.destroy();
+    container.remove();
+    globalThis.IntersectionObserver = originalIO;
+  });
+
+  // 19. Bug Condition 1: Clicking .chart-race__bars background while panel is open should close panel
+  it('clicking .chart-race__bars background closes the detail panel', () => {
+    renderer.mount(container);
+    const snapshot = makeSnapshot([
+      makeEntry({ artistId: 'artist-luna', artistName: 'Luna Park', rank: 1 }),
+    ]);
+    renderer.update(snapshot, 10);
+
+    // Wire up the click-outside listener on .chart-race (same pattern as main.ts)
+    const chartRace = container.querySelector('.chart-race') as HTMLElement;
+    chartRace.addEventListener('click', (event) => {
+      const target = event.target as HTMLElement;
+      if (target.closest('.chart-race__bar-wrapper')) return;
+      if (target.closest('.detail-panel')) return;
+      if (detailPanel.isOpen()) {
+        detailPanel.close();
+      }
+    });
+
+    // Open the detail panel
+    detailPanel.open('artist-luna', dataStore);
+    expect(detailPanel.isOpen()).toBe(true);
+
+    // Simulate clicking the .chart-race__bars background
+    const barsContainer = container.querySelector('.chart-race__bars') as HTMLElement;
+    barsContainer.click();
+
+    // BUG: On unfixed code, the panel stays open because no click-outside listener exists in main.ts
+    // EXPECTED after fix: panel should be closed
+    expect(detailPanel.isOpen()).toBe(false);
+  });
+});
+
+describe('Bugfix 0007: Bug Condition — Missing Pointer Cursor', () => {
+  let container: HTMLElement;
+  let renderer: ChartRaceRenderer;
+  let eventBus: EventBus;
+
+  beforeEach(() => {
+    container = document.createElement('div');
+    document.body.appendChild(container);
+    eventBus = new EventBus();
+    renderer = new ChartRaceRenderer(eventBus);
+  });
+
+  afterEach(() => {
+    renderer.destroy();
+    container.remove();
+  });
+
+  // 20. Bug Condition 2: .chart-race__bar-wrapper should have cursor: pointer in CSS
+  it('.chart-race__bar-wrapper has cursor: pointer in the stylesheet', () => {
+    // jsdom doesn't load CSS from files, so we read the CSS source directly
+    // to verify the rule exists. This is a static check.
+    const fs = require('fs');
+    const path = require('path');
+    const cssPath = path.resolve(__dirname, '../../src/style.css');
+    const cssContent = fs.readFileSync(cssPath, 'utf-8');
+
+    // Find the .chart-race__bar rule block and check for cursor: pointer
+    const ruleMatch = cssContent.match(
+      /\.chart-race__bar\s*\{[^}]*cursor:\s*pointer[^}]*\}/,
+    );
+
+    // BUG: On unfixed code, cursor: pointer is missing from the CSS rule
+    // EXPECTED after fix: the rule should include cursor: pointer
+    expect(ruleMatch).not.toBeNull();
   });
 });

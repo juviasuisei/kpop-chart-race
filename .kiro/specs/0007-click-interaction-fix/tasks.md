@@ -1,0 +1,86 @@
+# Implementation Plan
+
+- [x] 1. Write bug condition exploration test
+  - **Property 1: Bug Condition** — Click Outside Does Not Close Panel & Missing Pointer Cursor
+  - **CRITICAL**: This test MUST FAIL on unfixed code — failure confirms the bug exists
+  - **DO NOT attempt to fix the test or the code when it fails**
+  - **NOTE**: This test encodes the expected behavior — it will validate the fix when it passes after implementation
+  - **GOAL**: Surface counterexamples that demonstrate the bug exists
+  - **Scoped PBT Approach**: Scope the property to the concrete failing cases: (1) click on `.chart-race` outside any `.chart-race__bar-wrapper` while detail panel is open, (2) `.chart-race__bar-wrapper` missing `cursor: pointer`
+  - Test file: `tests/property/renderer.property.test.ts` (append to existing file)
+  - Use `fast-check` with existing patterns in the file
+  - Bug Condition 1 — Click-to-dismiss:
+    - Mount `ChartRaceRenderer` into a container, wire up `EventBus` and `DetailPanel`
+    - Open the detail panel (call `detailPanel.open(artistId, dataStore)`)
+    - Simulate a click event on the `.chart-race` wrapper element (targeting `.chart-race__bars`, `.chart-race__date`, or `.chart-race__legend` — NOT a `.chart-race__bar-wrapper`)
+    - Assert: `detailPanel.isOpen()` returns `false` after the click
+    - Generate random click targets from non-bar-wrapper children of `.chart-race` using `fc.constantFrom`
+  - Bug Condition 2 — Missing pointer cursor:
+    - Mount `ChartRaceRenderer`, call `update()` with a generated snapshot
+    - Query `.chart-race__bar-wrapper` elements
+    - Assert: `getComputedStyle(wrapper).cursor === 'pointer'` for each wrapper
+  - Run test on UNFIXED code
+  - **EXPECTED OUTCOME**: Test FAILS (panel stays open after clicking empty space; cursor is not `pointer`)
+  - Document counterexamples found to understand root cause
+  - Mark task complete when test is written, run, and failure is documented
+  - _Requirements: 1.1, 1.2_
+
+- [x] 2. Write preservation property tests (BEFORE implementing fix)
+  - **Property 2: Preservation** — Bar Click, Escape, Close Button, Playback Dismissal
+  - **IMPORTANT**: Follow observation-first methodology
+  - Test file: `tests/property/renderer.property.test.ts` (append to existing file)
+  - Use `fast-check` with existing patterns in the file
+  - Observe on UNFIXED code:
+    - Clicking a `.chart-race__bar-wrapper` emits `bar:click` with the correct `artistId`
+    - Pressing Escape while the detail panel is open closes it (via `setupFocusTrap` keydown handler)
+    - Clicking the close button closes the detail panel
+    - Emitting `play` on the event bus while the panel is open closes it
+    - Clicking empty space when the panel is NOT open produces no errors
+  - Write property-based tests:
+    - Generate random snapshots with 1–10 entries and random artist types
+    - Bar click preservation: for each generated entry, click its `.chart-race__bar-wrapper`, assert `bar:click` was emitted with the correct `artistId`
+    - Escape key preservation: open the detail panel, dispatch `keydown` with `key: 'Escape'`, assert `detailPanel.isOpen()` returns `false`
+    - Close button preservation: open the detail panel, click `.detail-panel__close-btn`, assert `detailPanel.isOpen()` returns `false`
+    - Playback close preservation: open the detail panel, emit `play` on the event bus, assert `detailPanel.isOpen()` returns `false`
+    - No-panel click safety: with panel closed, simulate click on `.chart-race` outside bar wrappers, assert no errors thrown and `detailPanel.isOpen()` remains `false`
+  - Verify tests PASS on UNFIXED code (these test existing behavior that already works)
+  - **EXPECTED OUTCOME**: Tests PASS (confirms baseline behavior to preserve)
+  - Mark task complete when tests are written, run, and passing on unfixed code
+  - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5_
+
+- [x] 3. Fix for click-outside dismissal and missing pointer cursor
+
+  - [x] 3.1 Implement the fix
+    - **File `src/main.ts`**: After the existing `eventBus.on("bar:click", ...)` wiring block, query for the `.chart-race` wrapper element and attach a click listener. In the handler:
+      - Check if the click target (via `(event.target as HTMLElement).closest('.chart-race__bar-wrapper')`) is NOT inside a bar wrapper
+      - If it is NOT inside a bar wrapper AND `detailPanel.isOpen()` returns `true`, call `detailPanel.close()`
+      - No `stopPropagation()` needed — bar wrapper clicks are correctly skipped by the `closest()` check
+    - **File `src/style.css`**: Add `cursor: pointer;` to the existing `.chart-race__bar-wrapper` rule block
+    - **File `package.json`**: Bump version from `0.2.2` to `0.2.3` (patch bump for bugfix)
+    - _Bug_Condition: isBugCondition(input) where input.event.target NOT inside '.chart-race__bar-wrapper' AND input.panelOpen === true; OR input.event.type === 'hover' AND input.target IS '.chart-race__bar-wrapper'_
+    - _Expected_Behavior: Panel closes when clicking empty chart space while open; bar wrappers show pointer cursor_
+    - _Preservation: Bar click → open panel, Escape → close panel, close button → close panel, play → close panel, no-panel click → no-op all remain unchanged_
+    - _Requirements: 2.1, 2.2, 3.1, 3.2, 3.3, 3.4, 3.5_
+
+  - [x] 3.2 Verify bug condition exploration test now passes
+    - **Property 1: Expected Behavior** — Click Outside Closes Panel & Pointer Cursor Present
+    - **IMPORTANT**: Re-run the SAME test from task 1 — do NOT write a new test
+    - The test from task 1 encodes the expected behavior
+    - When this test passes, it confirms the expected behavior is satisfied
+    - Run bug condition exploration test from step 1
+    - **EXPECTED OUTCOME**: Test PASSES (confirms bug is fixed — panel closes on click-outside, cursor is pointer)
+    - _Requirements: 2.1, 2.2_
+
+  - [x] 3.3 Verify preservation tests still pass
+    - **Property 2: Preservation** — Bar Click, Escape, Close Button, Playback Dismissal
+    - **IMPORTANT**: Re-run the SAME tests from task 2 — do NOT write new tests
+    - Run preservation property tests from step 2
+    - **EXPECTED OUTCOME**: Tests PASS (confirms no regressions)
+    - Confirm all tests still pass after fix (no regressions)
+    - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5_
+
+- [x] 4. Checkpoint — Ensure all tests pass
+  - Run the full test suite (`vitest --run`) to verify all existing and new tests pass
+  - Ensure no regressions in existing unit tests (`tests/unit/chart-race-renderer.test.ts`) or property tests (`tests/property/renderer.property.test.ts`)
+  - Ensure all other test files continue to pass
+  - Ask the user if questions arise

@@ -138,6 +138,20 @@ async function main(): Promise<void> {
     }
   });
 
+  // click-outside → close detail panel when clicking empty chart space
+  const chartRaceEl = app.querySelector(".chart-race");
+  if (chartRaceEl) {
+    chartRaceEl.addEventListener("click", (event) => {
+      const target = event.target as HTMLElement;
+      // Only skip if clicking the colored bar, value text, or release text
+      if (target.closest(".chart-race__bar") || target.classList.contains("bar__value") || target.classList.contains("bar__release")) return;
+      if (target.closest(".detail-panel")) return;
+      if (detailPanel.isOpen()) {
+        detailPanel.close();
+      }
+    });
+  }
+
   // --- Initial render ---
   // Defer the first date:change so the browser completes layout after mount().
   // Without this, clientHeight is 0 and bars render with zero height.

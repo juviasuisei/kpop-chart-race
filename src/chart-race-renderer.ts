@@ -260,7 +260,13 @@ export class ChartRaceRenderer {
     wrapper.appendChild(valueSpan);
     wrapper.appendChild(releaseSpan);
 
-    const clickHandler = () => this.eventBus.emit('bar:click', entry.artistId);
+    const clickHandler = (e: Event) => {
+      const target = e.target as HTMLElement;
+      // Only emit bar:click when clicking the colored bar, value, or release — not empty wrapper space
+      if (target.closest('.chart-race__bar') || target.classList.contains('bar__value') || target.classList.contains('bar__release')) {
+        this.eventBus.emit('bar:click', entry.artistId);
+      }
+    };
     wrapper.addEventListener('click', clickHandler);
 
     return {

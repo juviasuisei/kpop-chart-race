@@ -304,18 +304,11 @@ body {
   color: #666;
 }
 
-.detail-panel__cumulative {
+.detail-panel__stats {
   font-size: 1.1rem;
   font-weight: 700;
   color: #213547;
   margin-top: 0.35rem;
-}
-
-.detail-panel__rank {
-  font-size: 1.5rem;
-  font-weight: 800;
-  color: #213547;
-  margin-top: 0.25rem;
 }
 
 .detail-panel__total-wins {

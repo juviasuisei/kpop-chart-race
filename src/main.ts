@@ -84,7 +84,11 @@ async function main(): Promise<void> {
   // --- EventBus wiring ---
 
   // date:change → compute snapshot → emit state:updated
+  // Close detail panel if open (user is scrubbing or playback advanced)
   eventBus.on("date:change", (date: string) => {
+    if (detailPanel.isOpen()) {
+      detailPanel.close();
+    }
     previousSnapshot = currentSnapshot;
     currentSnapshot = computeSnapshot(date, dataStore, previousSnapshot);
     eventBus.emit("state:updated", currentSnapshot);
@@ -108,9 +112,12 @@ async function main(): Promise<void> {
     }
   });
 
-  // zoom:change → re-render with new zoom level
+  // zoom:change → re-render with new zoom level and close detail panel
   eventBus.on("zoom:change", (level: ZoomLevel) => {
     currentZoom = level;
+    if (detailPanel.isOpen()) {
+      detailPanel.close();
+    }
     if (currentSnapshot) {
       renderer.update(currentSnapshot, currentZoom, dataStore);
     }

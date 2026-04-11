@@ -526,11 +526,11 @@ describe('Feature: 0013-detail-panel-overhaul, Property 10: Cumulative value mat
 
             panel.open('test-artist', store, currentDate);
 
-            const cumulEl = document.body.querySelector('.detail-panel__cumulative');
+            const cumulEl = document.body.querySelector('.detail-panel__stats');
             expect(cumulEl).not.toBeNull();
 
             const expected = computeCumulativeValue(artist, currentDate, sortedDates);
-            expect(cumulEl!.textContent).toBe(`${expected.toLocaleString()} pts`);
+            expect(cumulEl!.textContent).toContain(`${expected.toLocaleString()} pts`);
 
             panel.destroy();
           }),

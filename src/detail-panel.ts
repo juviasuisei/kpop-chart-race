@@ -201,20 +201,19 @@ export class DetailPanel {
     metaEl.innerHTML = `${genLabel}${debutHtml}`;
     header.appendChild(metaEl);
 
-    // Current rank
-    if (currentRank !== undefined && currentRank > 0) {
-      const rankEl = document.createElement("div");
-      rankEl.className = "detail-panel__rank";
-      rankEl.textContent = `#${currentRank}`;
-      header.appendChild(rankEl);
-    }
-
-    // Cumulative value
-    if (cumulativeValue !== undefined) {
-      const cumulEl = document.createElement("div");
-      cumulEl.className = "detail-panel__cumulative";
-      cumulEl.textContent = `${cumulativeValue.toLocaleString()} pts`;
-      header.appendChild(cumulEl);
+    // Rank and cumulative value on one line
+    if (currentRank !== undefined || cumulativeValue !== undefined) {
+      const statsEl = document.createElement("div");
+      statsEl.className = "detail-panel__stats";
+      const parts: string[] = [];
+      if (currentRank !== undefined && currentRank > 0) {
+        parts.push(`#${currentRank}`);
+      }
+      if (cumulativeValue !== undefined) {
+        parts.push(`${cumulativeValue.toLocaleString()} pts`);
+      }
+      statsEl.textContent = parts.join(" · ");
+      header.appendChild(statsEl);
     }
 
     // Total wins count

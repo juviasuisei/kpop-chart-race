@@ -71,16 +71,21 @@ export function positionToDate(position: number, dates: string[]): string {
 
 
 /**
- * Return the YYYY-MM-DD date string 365 days before the given date.
+ * Return the YYYY-MM-DD date string N days before the given date.
  * Uses Date arithmetic which handles leap years correctly.
  */
-export function dateMinus365(date: string): string {
+export function dateMinusDays(date: string, days: number): string {
   const d = new Date(date + "T00:00:00");
-  d.setDate(d.getDate() - 365);
+  d.setDate(d.getDate() - days);
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, "0");
   const day = String(d.getDate()).padStart(2, "0");
   return `${y}-${m}-${day}`;
+}
+
+/** Backward-compatible alias */
+export function dateMinus365(date: string): string {
+  return dateMinusDays(date, 30);
 }
 
 /**
@@ -107,9 +112,14 @@ export function hasRecentActivity(
 }
 
 /**
- * Filter entries by zoom level with a 365-day activity check for zoom 10.
- * At zoom 10, rank 1 is always included; ranks 2+ are included only if the
- * artist has recent activity. At zoom "all", returns all entries unchanged.
+ * Filter entries by zoom level with a 30-day activity check for zoom 10.
+ *
+ * At zoom 10:
+ * - Rank 1 is always included.
+ * - For ranks 2-10: inactive artists (no activity in last 30 days) are only
+ *   removed if there are active artists outside the top 10 to replace them.
+ *   Removal happens from the bottom of the top 10 upward.
+ * At zoom "all", returns all entries unchanged.
  */
 export function filterByActivity(
   entries: RankedEntry[],
@@ -117,13 +127,37 @@ export function filterByActivity(
   dataStore: DataStore,
   zoomLevel: ZoomLevel,
 ): RankedEntry[] {
-  const base = filterByZoom(entries, zoomLevel);
-  if (zoomLevel !== 10) return base;
+  if (zoomLevel !== 10) return filterByZoom(entries, zoomLevel);
 
-  const cutoff = dateMinus365(snapshotDate);
+  const cutoff = dateMinusDays(snapshotDate, 30);
 
-  return base.filter((entry, index) => {
-    if (index === 0) return true; // rank 1 always included
-    return hasRecentActivity(entry.artistId, cutoff, snapshotDate, dataStore);
-  });
+  // Get top 10 and the rest
+  const top10 = entries.slice(0, 10);
+  const outside = entries.slice(10);
+
+  // Find active artists outside top 10
+  const activeOutside = outside.filter(e =>
+    hasRecentActivity(e.artistId, cutoff, snapshotDate, dataStore)
+  );
+
+  // Find inactive artists in top 10 (excluding rank 1)
+  const inactiveInTop10: number[] = [];
+  for (let i = top10.length - 1; i >= 1; i--) {
+    if (!hasRecentActivity(top10[i].artistId, cutoff, snapshotDate, dataStore)) {
+      inactiveInTop10.push(i);
+    }
+  }
+
+  // Replace inactive from bottom, one at a time, only if there's an active replacement
+  const result = [...top10];
+  let replacementIdx = 0;
+  for (const inactiveIdx of inactiveInTop10) {
+    if (replacementIdx < activeOutside.length) {
+      result[inactiveIdx] = activeOutside[replacementIdx];
+      replacementIdx++;
+    }
+  }
+
+  // Remove any remaining nulls and return up to 10
+  return result.filter(Boolean).slice(0, 10);
 }

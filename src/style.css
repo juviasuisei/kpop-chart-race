@@ -145,7 +145,7 @@ body {
 
 .bar__release--outside {
   color: #666;
-  margin-left: 0;
+  margin-left: 0.5rem;
   max-width: 200px;
   cursor: pointer;
 }
@@ -154,6 +154,7 @@ body {
   color: #213547;
   font-size: 0.8rem;
   cursor: pointer;
+  margin-left: 0.5rem;
 }
 
 .bar__gen--outside {
@@ -175,6 +176,7 @@ body {
   white-space: nowrap;
   flex-shrink: 0;
   cursor: pointer;
+  margin-left: 0.5rem;
 }
 
 /* ===== Chart Race Legend ===== */

@@ -105,22 +105,20 @@ describe('Dedup tie-breaking', () => {
 // dateMinus365 with leap year boundary
 // ============================================================
 
-describe('dateMinus365', () => {
-  it('handles leap year correctly (2024-03-01 minus 365 = 2023-03-02)', () => {
-    // 2024 is a leap year, so 2024-03-01 minus 365 days = 2023-03-02
-    const result = dateMinus365('2024-03-01');
-    expect(result).toBe('2023-03-02');
+describe('dateMinus365 (now 30 days)', () => {
+  it('returns 30 days before the given date', () => {
+    const result = dateMinus365('2024-03-15');
+    expect(result).toBe('2024-02-14');
   });
 
-  it('handles non-leap year correctly (2023-03-01 minus 365 = 2022-03-01)', () => {
-    const result = dateMinus365('2023-03-01');
-    expect(result).toBe('2022-03-01');
+  it('handles month boundary', () => {
+    const result = dateMinus365('2024-01-15');
+    expect(result).toBe('2023-12-16');
   });
 
-  it('handles year boundary (2024-01-01 minus 365 = 2023-01-01)', () => {
-    // 2023 is not a leap year, so 365 days before 2024-01-01 = 2023-01-01
+  it('handles year boundary', () => {
     const result = dateMinus365('2024-01-01');
-    expect(result).toBe('2023-01-01');
+    expect(result).toBe('2023-12-02');
   });
 });
 

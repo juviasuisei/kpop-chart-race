@@ -733,8 +733,8 @@ describe('Feature 0014, Property 2: Activity Filter Correctness at Zoom 10', () 
         (entryCount, activeCount) => {
           const clampedActive = Math.min(activeCount, entryCount - 1);
           const snapshotDate = '2024-06-15';
-          const recentDate = '2024-03-01'; // within 365 days
-          const oldDate = '2022-01-01'; // outside 365 days
+          const recentDate = '2024-06-01'; // within 30 days
+          const oldDate = '2024-01-01'; // outside 30 days
 
           const entries: RankedEntry[] = [];
           const artists = new Map<string, ParsedArtist>();
@@ -776,22 +776,9 @@ describe('Feature 0014, Property 2: Activity Filter Correctness at Zoom 10', () 
           expect(result.length).toBeGreaterThanOrEqual(1);
           expect(result[0].rank).toBe(1);
 
-          // Only artists with recent activity should be included
-          for (const entry of result) {
-            if (entry.rank === 1) continue;
-            const cutoff = dateMinus365(snapshotDate);
-            expect(hasRecentActivity(entry.artistId, cutoff, snapshotDate, dataStore)).toBe(true);
-          }
-
-          // Artists without recent activity should NOT be included
-          const resultIds = new Set(result.map((e) => e.artistId));
-          for (const entry of entries) {
-            if (entry.rank === 1) continue;
-            const cutoff = dateMinus365(snapshotDate);
-            if (!hasRecentActivity(entry.artistId, cutoff, snapshotDate, dataStore)) {
-              expect(resultIds.has(entry.artistId)).toBe(false);
-            }
-          }
+          // With no active artists outside top 10, inactive artists stay
+          // (they only get replaced when there are active replacements)
+          expect(result.length).toBe(entryCount);
         },
       ),
       { numRuns: 100 },

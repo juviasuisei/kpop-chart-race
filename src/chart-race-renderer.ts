@@ -53,6 +53,7 @@ interface BarElement {
   winsSpan: HTMLSpanElement;
   currentDisplayValue: number;
   animationFrameId: number | null;
+  overflowTimeoutId: ReturnType<typeof setTimeout> | null;
   clickHandler: ((e: Event) => void) | null;
 }
 
@@ -336,6 +337,7 @@ export class ChartRaceRenderer {
       winsSpan,
       currentDisplayValue: entry.previousCumulativeValue,
       animationFrameId: null,
+      overflowTimeoutId: null,
       clickHandler,
     };
   }
@@ -405,8 +407,17 @@ export class ChartRaceRenderer {
     if (parseFloat(newWidth) > parseFloat(oldWidth || "0")) {
       this.moveAllInside(barEl);
     }
-    // Check what fits after the CSS transition completes.
-    setTimeout(() => this.checkBarOverflow(barEl), 960);
+    // Cancel any pending overflow check from the previous update
+    if (barEl.overflowTimeoutId !== null) {
+      clearTimeout(barEl.overflowTimeoutId);
+    }
+    // After transition completes, reset inside and re-check what fits.
+    barEl.overflowTimeoutId = setTimeout(() => {
+      barEl.overflowTimeoutId = null;
+      this.moveAllInside(barEl);
+      barEl.bar.offsetHeight; // force layout
+      this.checkBarOverflow(barEl);
+    }, 960);
 
     // Numeric value tweening
     this.tweenValue(barEl, entry.previousCumulativeValue, entry.cumulativeValue);
@@ -436,18 +447,24 @@ export class ChartRaceRenderer {
   private checkBarOverflow(barEl: BarElement): void {
     if (!barEl.bar.parentElement) return; // destroyed
 
-    // Check if the release text is being truncated or bar is overflowing
+    // Temporarily remove overflow:hidden to get true content measurements
+    barEl.bar.style.overflow = "visible";
+
     const releaseIsTruncated = barEl.releaseSpan.scrollWidth > barEl.releaseSpan.offsetWidth;
     const barIsOverflowing = barEl.bar.scrollWidth > barEl.bar.clientWidth;
 
+    // Restore overflow
+    barEl.bar.style.overflow = "";
+
     if (releaseIsTruncated || barIsOverflowing) {
-      // Move release outside bar
       barEl.wrapper.insertBefore(barEl.releaseSpan, barEl.valueSpan.nextSibling);
       barEl.releaseSpan.classList.add("bar__release--outside");
 
-      // Check if name is truncated or bar still overflows
+      // Re-measure with release removed
+      barEl.bar.style.overflow = "visible";
       const nameIsTruncated = barEl.nameSpan.scrollWidth > barEl.nameSpan.offsetWidth;
       const stillOverflowing = barEl.bar.scrollWidth > barEl.bar.clientWidth;
+      barEl.bar.style.overflow = "";
 
       if (nameIsTruncated || stillOverflowing) {
         barEl.wrapper.insertBefore(barEl.nameSpan, barEl.valueSpan);

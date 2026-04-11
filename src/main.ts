@@ -65,6 +65,7 @@ async function main(): Promise<void> {
   // --- Mount UI components ---
   const renderer = new ChartRaceRenderer(eventBus);
   renderer.mount(app);
+  renderer.setDataNote(dataStore.startDate);
 
   const playbackController = new PlaybackController(eventBus, dataStore.dates);
   playbackController.mount(app);

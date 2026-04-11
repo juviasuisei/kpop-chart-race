@@ -293,6 +293,54 @@ describe('ChartRaceRenderer', () => {
 
     expect(emitted).toEqual([]);
   });
+
+  // 19. Mount creates .chart-race__title-header
+  it('mount creates a .chart-race__title-header element', () => {
+    renderer.mount(container);
+    expect(container.querySelector('.chart-race__title-header')).not.toBeNull();
+  });
+
+  // 20. Title text is "K-Pop Chart Race"
+  it('title text is "K-Pop Chart Race"', () => {
+    renderer.mount(container);
+    const titleText = container.querySelector('.chart-race__title-text');
+    expect(titleText).not.toBeNull();
+    expect(titleText!.textContent).toBe('K-Pop Chart Race');
+  });
+
+  // 21. Version badge starts with "v"
+  it('version badge starts with "v"', () => {
+    renderer.mount(container);
+    const badge = container.querySelector('.chart-race__version-badge');
+    expect(badge).not.toBeNull();
+    expect(badge!.textContent!.startsWith('v')).toBe(true);
+  });
+
+  // 22. setDataNote sets correct text
+  it('setDataNote("2024-01-15") sets correct text', () => {
+    renderer.mount(container);
+    renderer.setDataNote('2024-01-15');
+    const note = container.querySelector('.chart-race__data-note');
+    expect(note).not.toBeNull();
+    expect(note!.textContent).toBe('Includes points earned from 2024-01-15 forward');
+  });
+
+  // 23. setDataNote("") leaves note empty
+  it('setDataNote("") leaves note empty', () => {
+    renderer.mount(container);
+    renderer.setDataNote('');
+    const note = container.querySelector('.chart-race__data-note');
+    expect(note).not.toBeNull();
+    expect(note!.textContent).toBe('');
+  });
+
+  // 24. destroy removes title header
+  it('destroy removes the title header along with everything else', () => {
+    renderer.mount(container);
+    expect(container.querySelector('.chart-race__title-header')).not.toBeNull();
+    renderer.destroy();
+    expect(container.querySelector('.chart-race__title-header')).toBeNull();
+  });
 });
 
 

@@ -567,6 +567,35 @@ body {
   line-height: 1.4;
 }
 
+/* ===== Title Header ===== */
+
+.chart-race__title-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem 0;
+}
+
+.chart-race__title-text {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #213547;
+}
+
+.chart-race__version-badge {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: #999;
+}
+
+.chart-race__data-note {
+  width: 100%;
+  font-size: 0.7rem;
+  color: #888;
+  margin-top: -0.25rem;
+}
+
 /* ===== Mobile Responsive (< 768px) ===== */
 
 @media (max-width: 767px) {
@@ -625,6 +654,14 @@ body {
     gap: 0.5rem;
     padding: 0.5rem;
     font-size: 0.65rem;
+  }
+
+  .chart-race__title-text {
+    font-size: 1rem;
+  }
+
+  .chart-race__data-note {
+    font-size: 0.6rem;
   }
 }
 

@@ -7,6 +7,7 @@ import type { ChartSnapshot, RankedEntry } from "./models.ts";
 import type { ArtistType, ZoomLevel } from "./types.ts";
 import { filterByZoom, computeBarWidth, toRomanNumeral, tween } from "./utils.ts";
 import { EventBus } from "./event-bus.ts";
+import pkg from "../package.json";
 
 /** Wong colorblind-friendly palette mapping ArtistType → hex color */
 const ARTIST_TYPE_COLORS: Record<ArtistType, string> = {
@@ -64,6 +65,7 @@ export class ChartRaceRenderer {
   private wrapper: HTMLDivElement | null = null;
   private dateDisplay: HTMLDivElement | null = null;
   private barsContainer: HTMLDivElement | null = null;
+  private dataNote: HTMLDivElement | null = null;
   private bars: Map<string, BarElement> = new Map();
   private pendingFrames: Set<number> = new Set();
 
@@ -77,6 +79,25 @@ export class ChartRaceRenderer {
 
     this.wrapper = document.createElement("div");
     this.wrapper.className = "chart-race";
+
+    const titleHeader = document.createElement("div");
+    titleHeader.className = "chart-race__title-header";
+
+    const titleText = document.createElement("span");
+    titleText.className = "chart-race__title-text";
+    titleText.textContent = "K-Pop Chart Race";
+
+    const versionBadge = document.createElement("span");
+    versionBadge.className = "chart-race__version-badge";
+    versionBadge.textContent = `v${pkg.version}`;
+
+    this.dataNote = document.createElement("div");
+    this.dataNote.className = "chart-race__data-note";
+
+    titleHeader.appendChild(titleText);
+    titleHeader.appendChild(versionBadge);
+    titleHeader.appendChild(this.dataNote);
+    this.wrapper.appendChild(titleHeader);
 
     this.dateDisplay = document.createElement("div");
     this.dateDisplay.className = "chart-race__date";
@@ -152,6 +173,16 @@ export class ChartRaceRenderer {
   }
 
   /**
+   * Set the data note text showing the earliest data date.
+   */
+  setDataNote(startDate: string): void {
+    if (!this.dataNote) return;
+    this.dataNote.textContent = startDate
+      ? `Includes points earned from ${startDate} forward`
+      : "";
+  }
+
+  /**
    * Remove the chart from the DOM and cancel pending animation frames.
    */
   destroy(): void {
@@ -176,6 +207,7 @@ export class ChartRaceRenderer {
     this.wrapper = null;
     this.dateDisplay = null;
     this.barsContainer = null;
+    this.dataNote = null;
   }
 
   /** Create the legend element showing all 5 ArtistType colors with indicators */

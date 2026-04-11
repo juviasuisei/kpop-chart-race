@@ -121,8 +121,9 @@ export function validateArtistEntry(
  * Convert a validated ArtistEntry into a ParsedArtist with slugified ids
  * and Map-based lookups.
  */
-function toParseArtist(entry: ArtistEntry): ParsedArtist {
+export function toParseArtist(entry: ArtistEntry, filename: string): ParsedArtist {
   const artistId = slugify(entry.name);
+  const slug = filename.replace(/\.json$/i, "");
 
   const releases: ParsedRelease[] = entry.releases.map((rel: ReleaseEntry) => {
     const dailyValues = new Map<string, DailyValueEntry>();
@@ -159,7 +160,9 @@ function toParseArtist(entry: ArtistEntry): ParsedArtist {
     name: entry.name,
     artistType: entry.artistType,
     generation: entry.generation,
-    logoUrl: entry.logo ?? "",
+    logoUrl: `assets/logos/${slug}.png`,
+    koreanName: entry.korean_name || undefined,
+    debut: entry.debut || undefined,
     releases,
   };
 }
@@ -227,7 +230,7 @@ export async function loadAll(basePath: string): Promise<DataStore> {
         continue;
       }
 
-      const parsed = toParseArtist(entry);
+      const parsed = toParseArtist(entry, filename);
       artists.set(parsed.id, parsed);
     } catch (err) {
       console.error(`[Data_Loader] Error loading "${filename}":`, err);

@@ -36,6 +36,8 @@ export interface ParsedArtist {
   artistType: ArtistType;
   generation: number;
   logoUrl: string;
+  koreanName?: string;
+  debut?: string;
   releases: ParsedRelease[];
 }
 

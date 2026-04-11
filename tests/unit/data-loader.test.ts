@@ -1,4 +1,4 @@
-import { validateArtistEntry, slugify, serialize, deserialize } from '../../src/data-loader.ts';
+import { validateArtistEntry, slugify, serialize, deserialize, toParseArtist } from '../../src/data-loader.ts';
 import type { ArtistEntry } from '../../src/types.ts';
 
 /** A minimal valid ArtistEntry for reuse across tests */
@@ -7,7 +7,6 @@ function validEntry(overrides: Partial<ArtistEntry> = {}): ArtistEntry {
     name: 'Stellar Nova',
     artistType: 'girl_group',
     generation: 4,
-    logo: 'assets/logos/stellar-nova.svg',
     releases: [
       {
         title: 'Supernova',
@@ -109,6 +108,60 @@ describe('validateArtistEntry', () => {
       expect.stringContaining('Unknown ChartSource "unknown_show"'),
     );
   });
+
+  it('accepts entries with korean_name and debut', () => {
+    const entry = validEntry({ korean_name: '방탄소년단', debut: '2013-06-13' });
+    expect(validateArtistEntry(entry, 'bts.json')).toBe(true);
+  });
+
+  it('accepts entries without korean_name and debut', () => {
+    const entry = validEntry();
+    expect(validateArtistEntry(entry, 'test.json')).toBe(true);
+  });
+});
+
+describe('toParseArtist', () => {
+  it('preserves korean_name as koreanName', () => {
+    const entry = validEntry({ korean_name: '방탄소년단' });
+    const parsed = toParseArtist(entry, 'bts.json');
+    expect(parsed.koreanName).toBe('방탄소년단');
+  });
+
+  it('sets koreanName to undefined when korean_name is missing', () => {
+    const entry = validEntry();
+    const parsed = toParseArtist(entry, 'stellar-nova.json');
+    expect(parsed.koreanName).toBeUndefined();
+  });
+
+  it('sets koreanName to undefined when korean_name is empty string', () => {
+    const entry = validEntry({ korean_name: '' });
+    const parsed = toParseArtist(entry, 'stellar-nova.json');
+    expect(parsed.koreanName).toBeUndefined();
+  });
+
+  it('preserves debut field', () => {
+    const entry = validEntry({ debut: '2013-06-13' });
+    const parsed = toParseArtist(entry, 'bts.json');
+    expect(parsed.debut).toBe('2013-06-13');
+  });
+
+  it('sets debut to undefined when missing', () => {
+    const entry = validEntry();
+    const parsed = toParseArtist(entry, 'test.json');
+    expect(parsed.debut).toBeUndefined();
+  });
+
+  it('derives logoUrl from filename bts.json', () => {
+    const entry = validEntry();
+    const parsed = toParseArtist(entry, 'bts.json');
+    expect(parsed.logoUrl).toBe('assets/logos/bts.png');
+  });
+
+  it('derives logoUrl from hyphenated filename aria-bloom.json', () => {
+    const entry = validEntry();
+    const parsed = toParseArtist(entry, 'aria-bloom.json');
+    expect(parsed.logoUrl).toBe('assets/logos/aria-bloom.png');
+  });
 });
 
 describe('serialize', () => {
@@ -116,10 +169,8 @@ describe('serialize', () => {
     const entry = validEntry();
     const json = serialize(entry);
 
-    // Pretty-printed JSON has newlines and indentation
     expect(json).toContain('\n');
     expect(json).toContain('  ');
-    // Parses back correctly
     expect(JSON.parse(json)).toEqual(entry);
   });
 });

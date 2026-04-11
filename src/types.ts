@@ -67,7 +67,8 @@ export interface ArtistEntry {
   name: string;
   artistType: ArtistType;
   generation: number;
-  logo: string;
+  korean_name?: string;
+  debut?: string;
   releases: ReleaseEntry[];
 }
 

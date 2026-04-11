@@ -1,0 +1,39 @@
+{
+  "name": "YENA [IZONE]",
+  "korean_name": "최예나",
+  "artistType": "solo_female",
+  "generation": 4,
+  "debut": "2022-01-17",
+  "releases": [
+    {
+      "title": "Catch Catch",
+      "dailyValues": {
+        "2026-03-25": { "value": 2178, "source": "show_champion", "episode": 590 }
+      },
+      "embeds": {
+        "2026-03-25": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://youtu.be/SoDdfe1JCIg?si=Y3AnD-s-TX-MVi5b" }
+            ]
+          }
+        ],
+        "2026-03-11": [
+          {
+            "eventType": "release_date",
+            "links": [
+              { "url": "https://music.apple.com/us/album/love-catcher-ep/1882581635" }
+            ]
+          },
+          {
+            "eventType": "mv",
+            "links": [
+              { "url": "https://youtu.be/NOiyDlWl534?si=RSJQj3ilv6pDA1iZ" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

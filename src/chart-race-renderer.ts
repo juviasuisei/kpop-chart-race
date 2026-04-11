@@ -280,27 +280,27 @@ export class ChartRaceRenderer {
     typeIndicator.className = "bar__type-indicator";
     typeIndicator.textContent = ARTIST_TYPE_INDICATORS[entry.artistType];
 
+    const releaseSpan = document.createElement("span");
+    releaseSpan.className = "bar__release";
+    releaseSpan.textContent = "";
+
     bar.appendChild(logo);
     bar.appendChild(nameSpan);
     bar.appendChild(genSpan);
     bar.appendChild(typeIndicator);
+    bar.appendChild(releaseSpan);
 
     const valueSpan = document.createElement("span");
     valueSpan.className = "bar__value";
     valueSpan.textContent = "0";
 
-    const releaseSpan = document.createElement("span");
-    releaseSpan.className = "bar__release";
-    releaseSpan.textContent = "";
-
     wrapper.appendChild(bar);
     wrapper.appendChild(valueSpan);
-    wrapper.appendChild(releaseSpan);
 
     const clickHandler = (e: Event) => {
       const target = e.target as HTMLElement;
       // Only emit bar:click when clicking the colored bar, value, or release — not empty wrapper space
-      if (target.closest('.chart-race__bar') || target.classList.contains('bar__value') || target.classList.contains('bar__release')) {
+      if (target.closest('.chart-race__bar') || target.classList.contains('bar__value') || target.classList.contains('bar__release') || target.classList.contains('bar__name')) {
         this.eventBus.emit('bar:click', entry.artistId);
       }
     };
@@ -356,8 +356,47 @@ export class ChartRaceRenderer {
     barEl.wrapper.style.transform = `translateY(${yPosition}px)`;
     barEl.wrapper.style.height = `${barHeight}px`;
 
+    // Smart overflow: move release and name outside bar if they don't fit.
+    // Reset to inside first, then check after transition settles.
+    this.resetBarOverflow(barEl);
+    // Check overflow after the CSS transition completes
+    setTimeout(() => this.checkBarOverflow(barEl), 960);
+
     // Numeric value tweening
     this.tweenValue(barEl, entry.previousCumulativeValue, entry.cumulativeValue);
+  }
+
+  /** Move release and name back inside the bar */
+  private resetBarOverflow(barEl: BarElement): void {
+    // Ensure release is inside bar (before value span)
+    if (barEl.releaseSpan.parentElement !== barEl.bar) {
+      barEl.bar.appendChild(barEl.releaseSpan);
+    }
+    barEl.releaseSpan.classList.remove("bar__release--outside");
+    // Ensure name is inside bar
+    if (barEl.nameSpan.parentElement !== barEl.bar) {
+      // Re-insert after logo
+      barEl.bar.insertBefore(barEl.nameSpan, barEl.genSpan);
+    }
+    barEl.nameSpan.classList.remove("bar__name--outside");
+  }
+
+  /** Check if bar content overflows and move elements outside as needed */
+  private checkBarOverflow(barEl: BarElement): void {
+    if (!barEl.bar.parentElement) return; // destroyed
+
+    // Check if bar is overflowing
+    if (barEl.bar.scrollWidth > barEl.bar.clientWidth) {
+      // Move release outside bar (insert after value span in wrapper)
+      barEl.wrapper.insertBefore(barEl.releaseSpan, barEl.valueSpan.nextSibling);
+      barEl.releaseSpan.classList.add("bar__release--outside");
+
+      // Check again — if still overflowing, move name outside too
+      if (barEl.bar.scrollWidth > barEl.bar.clientWidth) {
+        barEl.wrapper.insertBefore(barEl.nameSpan, barEl.valueSpan);
+        barEl.nameSpan.classList.add("bar__name--outside");
+      }
+    }
   }
 
   /** Animate numeric value from start to end using requestAnimationFrame */

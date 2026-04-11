@@ -112,12 +112,25 @@ body {
 
 .bar__release {
   font-size: 0.7rem;
-  color: #666;
+  color: rgba(255, 255, 255, 0.85);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 200px;
+  margin-left: auto;
+  flex-shrink: 1;
+  min-width: 0;
   cursor: pointer;
+}
+
+.bar__release--outside {
+  color: #666;
+  margin-left: 0;
+  max-width: 200px;
+}
+
+.bar__name--outside {
+  color: #213547;
+  font-size: 0.8rem;
 }
 
 /* ===== Chart Race Legend ===== */

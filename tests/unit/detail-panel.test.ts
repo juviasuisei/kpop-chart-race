@@ -171,22 +171,22 @@ describe('DetailPanel', () => {
     expect(panel.isOpen()).toBe(false);
   });
 
-  // 6. Timeline entries alternate left/right — Req 7.4
-  it('alternates timeline entries left and right', () => {
+  // 6. Timeline entries use single-column layout (no left/right alternation) — Req 2.1, 2.2
+  it('renders timeline entries without left/right alternation', () => {
     panel.open('test-artist', dataStore);
     const entries = document.body.querySelectorAll('.timeline-entry');
     expect(entries.length).toBeGreaterThan(1);
 
-    entries.forEach((entry, index) => {
-      const side = index % 2 === 0 ? 'left' : 'right';
-      expect(entry.classList.contains(`timeline-entry--${side}`)).toBe(true);
+    entries.forEach((entry) => {
+      expect(entry.classList.contains('timeline-entry--left')).toBe(false);
+      expect(entry.classList.contains('timeline-entry--right')).toBe(false);
     });
   });
 
-  // 7. Timeline entries show date headings — Req 7.5
-  it('shows date headings in timeline entries', () => {
+  // 7. Timeline shows date headings — Req 7.5
+  it('shows date headings in timeline', () => {
     panel.open('test-artist', dataStore);
-    const dateEls = document.body.querySelectorAll('.timeline-entry__date');
+    const dateEls = document.body.querySelectorAll('.timeline-date-header');
     expect(dateEls.length).toBeGreaterThan(0);
 
     const dateTexts = Array.from(dateEls).map((el) => el.textContent);
@@ -198,25 +198,25 @@ describe('DetailPanel', () => {
   // 8. Timeline entries show chart source info — Req 7.5
   it('shows chart source info with episode number', () => {
     panel.open('test-artist', dataStore);
-    const sourceEls = document.body.querySelectorAll('.timeline-entry__source');
-    expect(sourceEls.length).toBeGreaterThan(0);
+    // Episode numbers are now in separate .timeline-entry__episode elements
+    const episodeEls = document.body.querySelectorAll('.timeline-entry__episode');
+    expect(episodeEls.length).toBeGreaterThan(0);
 
-    // Check that at least one source element contains an episode reference
-    const allSourceText = Array.from(sourceEls).map((el) => el.textContent).join(' ');
-    expect(allSourceText).toContain('Ep 1254');
-    expect(allSourceText).toContain('Ep 480');
+    const allEpisodeText = Array.from(episodeEls).map((el) => el.textContent).join(' ');
+    expect(allEpisodeText).toContain('Ep 1254');
+    expect(allEpisodeText).toContain('Ep 480');
   });
 
-  // 9. Timeline entries show performance values — Req 7.5
-  it('shows performance values in timeline entries', () => {
+  // 9. Timeline entries show performance values with pts suffix — Req 7.5
+  it('shows performance values with pts suffix in timeline entries', () => {
     panel.open('test-artist', dataStore);
     const valueEls = document.body.querySelectorAll('.timeline-entry__value');
     expect(valueEls.length).toBeGreaterThan(0);
 
     const values = Array.from(valueEls).map((el) => el.textContent);
-    expect(values).toContain('850');
-    expect(values).toContain('920');
-    expect(values).toContain('780');
+    expect(values).toContain('850 pts');
+    expect(values).toContain('920 pts');
+    expect(values).toContain('780 pts');
   });
 
   // 10. Crown icons displayed for chart wins — Req 7.11
@@ -225,17 +225,8 @@ describe('DetailPanel', () => {
     const crownEls = document.body.querySelectorAll('.timeline-entry__crown');
     expect(crownEls.length).toBe(2); // wins on 2024-05-13 and 2024-05-14
 
-    // Crown level 1 should have an img pointing to crown-1.svg and "Win" label
-    const crown1 = crownEls[0];
-    const crown1Img = crown1.querySelector('.crown__icon img') as HTMLImageElement;
-    expect(crown1Img).not.toBeNull();
-    expect(crown1Img!.src).toContain('crown-1.svg');
-    const crown1Label = crown1.querySelector('.crown__label');
-    expect(crown1Label).not.toBeNull();
-    expect(crown1Label!.textContent).toBe('Win');
-
-    // Crown level 3 should have an img pointing to crown-3.svg and "3x Win (Triple Crown)" label
-    const crown3 = crownEls[1];
+    // Reverse chronological: 2024-05-14 (crown level 3) comes first
+    const crown3 = crownEls[0];
     const crown3Img = crown3.querySelector('.crown__icon img') as HTMLImageElement;
     expect(crown3Img).not.toBeNull();
     expect(crown3Img!.src).toContain('crown-3.svg');
@@ -243,6 +234,15 @@ describe('DetailPanel', () => {
     expect(crown3Label).not.toBeNull();
     expect(crown3Label!.textContent).toBe('3x Win (Triple Crown)');
     expect(crown3.getAttribute('title')).toBe('Triple Crown');
+
+    // 2024-05-13 (crown level 1) comes second
+    const crown1 = crownEls[1];
+    const crown1Img = crown1.querySelector('.crown__icon img') as HTMLImageElement;
+    expect(crown1Img).not.toBeNull();
+    expect(crown1Img!.src).toContain('crown-1.svg');
+    const crown1Label = crown1.querySelector('.crown__label');
+    expect(crown1Label).not.toBeNull();
+    expect(crown1Label!.textContent).toBe('Win');
   });
 
   // 11. Embed placeholders created for lazy loading — Req 12.8

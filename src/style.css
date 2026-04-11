@@ -184,7 +184,7 @@ body {
 }
 
 .detail-panel--desktop {
-  width: 400px;
+  width: 500px;
 }
 
 .detail-panel__close-btn {
@@ -219,6 +219,30 @@ body {
   flex-shrink: 0;
 }
 
+.detail-panel__header--sticky {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: #ffffff;
+  text-align: center;
+}
+
+.detail-panel__logo-bg {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100px;
+  height: 100px;
+  border-radius: 12px;
+  margin: 0 auto 0.5rem;
+}
+
+.detail-panel__logo-img {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+}
+
 .detail-panel__artist-name {
   font-size: 1.25rem;
   font-weight: 700;
@@ -229,6 +253,13 @@ body {
 .detail-panel__artist-meta {
   font-size: 0.85rem;
   color: #666;
+}
+
+.detail-panel__cumulative {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #213547;
+  margin-top: 0.35rem;
 }
 
 /* ===== Timeline ===== */
@@ -258,25 +289,33 @@ body {
 
 /* ===== Timeline Entry ===== */
 
+.timeline-date-header {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #0072B2;
+  text-align: center;
+  margin-bottom: 0.5rem;
+  margin-top: 1rem;
+}
+
+.timeline-date-header:first-child {
+  margin-top: 0;
+}
+
+.timeline-date-group {
+  margin-bottom: 1rem;
+}
+
 .timeline-entry {
   position: relative;
-  width: 45%;
+  max-width: 100%;
   padding: 0.75rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
   background: #fafafa;
   border-radius: 6px;
   border: 1px solid #e8e8e8;
   overflow: hidden;
-}
-
-.timeline-entry--left {
-  margin-right: auto;
-  margin-left: 0;
-}
-
-.timeline-entry--right {
-  margin-left: auto;
-  margin-right: 0;
+  text-align: center;
 }
 
 .timeline-entry__date {
@@ -294,6 +333,7 @@ body {
 
 .timeline-entry__source {
   display: flex;
+  flex-direction: column;
   align-items: center;
   gap: 0.25rem;
   font-size: 0.75rem;
@@ -302,9 +342,15 @@ body {
 }
 
 .timeline-entry__source-logo {
-  width: 20px;
-  height: 20px;
+  width: 80px;
+  height: 80px;
   object-fit: contain;
+}
+
+.timeline-entry__episode {
+  font-size: 0.75rem;
+  color: #555;
+  text-align: center;
 }
 
 .timeline-entry__value {
@@ -584,6 +630,22 @@ body {
 /* Crown icon img sizing — SVGs provide visual distinction */
 .crown__icon img {
   height: 24px;
+  width: auto;
+}
+
+/* Crown tier sizing */
+.crown__icon--tier-1 img {
+  height: 24px;
+  width: auto;
+}
+
+.crown__icon--tier-2 img {
+  height: 48px;
+  width: auto;
+}
+
+.crown__icon--tier-3 img {
+  height: 72px;
   width: auto;
 }
 

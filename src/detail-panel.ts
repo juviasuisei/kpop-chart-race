@@ -1,7 +1,7 @@
 /**
  * Detail_Panel — modal/sidebar showing artist timeline with embedded media.
  * Full-screen overlay on mobile (<768px), sidebar on desktop (≥768px).
- * Vertical timeline with alternating left/right entries, lazy-loaded embeds.
+ * Single-column centered timeline, date-grouped entries, sticky header.
  */
 
 import { EventBus } from "./event-bus.ts";
@@ -9,6 +9,8 @@ import type { DataStore, ParsedArtist, ParsedEmbedDateEntry } from "./models.ts"
 import type { DailyValueEntry } from "./types.ts";
 import { render as renderEmbed } from "./embed-renderer.ts";
 import { toRomanNumeral } from "./utils.ts";
+import { ARTIST_TYPE_COLORS } from "./colors.ts";
+import { computeCumulativeValue } from "./chart-engine.ts";
 
 /** Known chart sources that have logo assets */
 const SOURCE_LOGO_MAP: Record<string, string> = {
@@ -56,6 +58,17 @@ function getCrownConfig(level: number): CrownConfig {
   };
 }
 
+/**
+ * Returns the crown icon height in pixels based on tier.
+ * Levels 1–6 → 24px, 7–9 → 48px, 10+ → 72px.
+ * Exported for testability.
+ */
+export function getCrownHeight(level: number): number {
+  if (level >= 10) return 72;
+  if (level >= 7) return 48;
+  return 24;
+}
+
 /** Human-readable labels for event types */
 const EVENT_TYPE_LABELS: Record<string, string> = {
   trailer: "Trailer",
@@ -83,6 +96,12 @@ interface TimelineItem {
   crownLevel: number;
 }
 
+/** A date group containing all timeline items for that date */
+interface DateGroup {
+  date: string;
+  items: TimelineItem[];
+}
+
 export class DetailPanel {
   private eventBus: EventBus;
   private panelEl: HTMLElement | null = null;
@@ -97,7 +116,7 @@ export class DetailPanel {
   /**
    * Open the detail panel for a given artist.
    */
-  open(artistId: string, dataStore: DataStore): void {
+  open(artistId: string, dataStore: DataStore, currentDate?: string): void {
     // Close any existing panel first
     if (this.panelEl) {
       this.close();
@@ -108,6 +127,12 @@ export class DetailPanel {
 
     // Store the currently focused element for focus return
     this.previouslyFocusedEl = document.activeElement as HTMLElement | null;
+
+    // Compute cumulative value if currentDate provided
+    let cumulativeValue: number | undefined;
+    if (currentDate) {
+      cumulativeValue = computeCumulativeValue(artist, currentDate, dataStore.dates);
+    }
 
     // Determine mobile vs desktop
     const isMobile = window.innerWidth < 768;
@@ -127,23 +152,51 @@ export class DetailPanel {
     closeBtn.addEventListener("click", () => this.close());
     panel.appendChild(closeBtn);
 
-    // Header
+    // Sticky Header
     const header = document.createElement("div");
-    header.className = "detail-panel__header";
+    header.className = "detail-panel__header detail-panel__header--sticky";
 
+    // Logo with colored background
+    const logoBg = document.createElement("div");
+    logoBg.className = "detail-panel__logo-bg";
+    logoBg.style.backgroundColor = ARTIST_TYPE_COLORS[artist.artistType];
+
+    const logoImg = document.createElement("img");
+    logoImg.className = "detail-panel__logo-img";
+    logoImg.src = artist.logoUrl;
+    logoImg.alt = `${artist.name} logo`;
+    logoImg.width = 80;
+    logoImg.height = 80;
+    logoBg.appendChild(logoImg);
+    header.appendChild(logoBg);
+
+    // Artist name (+ Korean name)
+    const nameEl = document.createElement("h2");
+    nameEl.className = "detail-panel__artist-name";
     const nameHtml = artist.koreanName
       ? `${this.escapeHtml(artist.name)} (${this.escapeHtml(artist.koreanName)})`
       : this.escapeHtml(artist.name);
+    nameEl.innerHTML = nameHtml;
+    header.appendChild(nameEl);
 
+    // Type · Generation (+ debut)
+    const metaEl = document.createElement("span");
+    metaEl.className = "detail-panel__artist-meta";
     const genLabel = `${this.escapeHtml(this.formatArtistType(artist.artistType))} · ${toRomanNumeral(artist.generation)}`;
     const debutHtml = artist.debut
       ? ` <span class="detail-panel__debut">(debut: ${this.escapeHtml(artist.debut)})</span>`
       : "";
+    metaEl.innerHTML = `${genLabel}${debutHtml}`;
+    header.appendChild(metaEl);
 
-    header.innerHTML = `
-      <h2 class="detail-panel__artist-name">${nameHtml}</h2>
-      <span class="detail-panel__artist-meta">${genLabel}${debutHtml}</span>
-    `;
+    // Cumulative value
+    if (cumulativeValue !== undefined) {
+      const cumulEl = document.createElement("div");
+      cumulEl.className = "detail-panel__cumulative";
+      cumulEl.textContent = `${cumulativeValue.toLocaleString()} pts`;
+      header.appendChild(cumulEl);
+    }
+
     panel.appendChild(header);
 
     // Timeline container
@@ -154,8 +207,8 @@ export class DetailPanel {
     const timelineInner = document.createElement("div");
     timelineInner.className = "detail-panel__timeline-inner";
 
-    // Build timeline items
-    const items = this.buildTimelineItems(artist, dataStore);
+    // Build date-grouped timeline items
+    const dateGroups = this.buildDateGroups(artist, dataStore);
 
     // Set up IntersectionObserver for lazy-loading embeds
     this.observer = new IntersectionObserver(
@@ -176,12 +229,26 @@ export class DetailPanel {
       { root: timeline, rootMargin: "200px" },
     );
 
-    // Render timeline entries into the inner wrapper
-    items.forEach((item, index) => {
-      const side = index % 2 === 0 ? "left" : "right";
-      const entryEl = this.createTimelineEntry(item, side);
-      timelineInner.appendChild(entryEl);
-    });
+    // Render date groups into the inner wrapper
+    for (const group of dateGroups) {
+      // Date header
+      const dateHeader = document.createElement("div");
+      dateHeader.className = "timeline-date-header";
+      dateHeader.textContent = group.date;
+      timelineInner.appendChild(dateHeader);
+
+      // Date group container
+      const groupContainer = document.createElement("div");
+      groupContainer.className = "timeline-date-group";
+      groupContainer.dataset.date = group.date;
+
+      for (const item of group.items) {
+        const entryEl = this.createTimelineEntry(item);
+        groupContainer.appendChild(entryEl);
+      }
+
+      timelineInner.appendChild(groupContainer);
+    }
 
     timeline.appendChild(timelineInner);
     panel.appendChild(timeline);
@@ -250,9 +317,11 @@ export class DetailPanel {
   }
 
   /**
-   * Build a sorted list of timeline items from the artist's data.
+   * Build date-grouped timeline items from the artist's data.
+   * Returns groups sorted in reverse chronological order.
+   * Within each group, chart performance items come before embed-only items.
    */
-  private buildTimelineItems(artist: ParsedArtist, dataStore: DataStore): TimelineItem[] {
+  private buildDateGroups(artist: ParsedArtist, dataStore: DataStore): DateGroup[] {
     const items: TimelineItem[] = [];
 
     for (const release of artist.releases) {
@@ -292,23 +361,42 @@ export class DetailPanel {
       }
     }
 
-    // Sort by date ascending
-    items.sort((a, b) => a.date.localeCompare(b.date));
-    return items;
+    // Group by date
+    const groupMap = new Map<string, TimelineItem[]>();
+    for (const item of items) {
+      const existing = groupMap.get(item.date);
+      if (existing) {
+        existing.push(item);
+      } else {
+        groupMap.set(item.date, [item]);
+      }
+    }
+
+    // Sort each group: chart performance items before embed-only items
+    for (const [, groupItems] of groupMap) {
+      groupItems.sort((a, b) => {
+        const aHasChart = a.dailyValue ? 0 : 1;
+        const bHasChart = b.dailyValue ? 0 : 1;
+        return aHasChart - bHasChart;
+      });
+    }
+
+    // Sort date keys descending (reverse chronological)
+    const sortedDates = Array.from(groupMap.keys()).sort((a, b) => b.localeCompare(a));
+
+    return sortedDates.map((date) => ({
+      date,
+      items: groupMap.get(date)!,
+    }));
   }
 
   /**
    * Create a single timeline entry DOM element.
+   * Single-column layout — no left/right alternation.
    */
-  private createTimelineEntry(item: TimelineItem, side: "left" | "right"): HTMLElement {
+  private createTimelineEntry(item: TimelineItem): HTMLElement {
     const entry = document.createElement("div");
-    entry.className = `timeline-entry timeline-entry--${side}`;
-
-    // Date heading
-    const dateEl = document.createElement("div");
-    dateEl.className = "timeline-entry__date";
-    dateEl.textContent = item.date;
-    entry.appendChild(dateEl);
+    entry.className = "timeline-entry";
 
     // Release title
     const releaseEl = document.createElement("div");
@@ -327,8 +415,8 @@ export class DetailPanel {
         logo.src = SOURCE_LOGO_MAP[sourceName];
         logo.alt = sourceName;
         logo.className = "timeline-entry__source-logo";
-        logo.width = 20;
-        logo.height = 20;
+        logo.width = 80;
+        logo.height = 80;
         sourceEl.appendChild(logo);
       } else {
         const sourceText = document.createElement("span");
@@ -336,33 +424,31 @@ export class DetailPanel {
         sourceEl.appendChild(sourceText);
       }
 
-      const episodeSpan = document.createElement("span");
-      episodeSpan.textContent = ` Ep ${item.dailyValue.episode}`;
-      sourceEl.appendChild(episodeSpan);
+      // Episode number as separate block element below logo
+      const episodeEl = document.createElement("div");
+      episodeEl.className = "timeline-entry__episode";
+      episodeEl.textContent = `Ep ${item.dailyValue.episode}`;
+      sourceEl.appendChild(episodeEl);
       entry.appendChild(sourceEl);
 
-      // Performance value
-      const valueEl = document.createElement("div");
-      valueEl.className = "timeline-entry__value";
-      valueEl.textContent = String(item.dailyValue.value);
-      entry.appendChild(valueEl);
-
-      // Crown icon if applicable
+      // Crown icon above points value (if applicable)
       if (item.crownLevel > 0) {
         const config = getCrownConfig(item.crownLevel);
         const crownEl = document.createElement("div");
-        crownEl.className = `timeline-entry__crown`;
+        crownEl.className = "timeline-entry__crown";
 
         const iconSpan = document.createElement("span");
         iconSpan.className = "crown__icon";
+
+        const crownHeight = getCrownHeight(item.crownLevel);
 
         // For levels 1-12: single img. For 13+: multiple crown-12 imgs.
         if (item.crownLevel <= 12) {
           const img = document.createElement("img");
           img.src = config.svgPath;
           img.alt = config.label;
-          img.width = 24;
-          img.height = 24;
+          img.width = crownHeight;
+          img.height = crownHeight;
           iconSpan.appendChild(img);
         } else {
           const iconCount = item.crownLevel - 11;
@@ -370,8 +456,8 @@ export class DetailPanel {
             const img = document.createElement("img");
             img.src = config.svgPath;
             img.alt = config.label;
-            img.width = 24;
-            img.height = 24;
+            img.width = crownHeight;
+            img.height = crownHeight;
             iconSpan.appendChild(img);
           }
         }
@@ -387,6 +473,12 @@ export class DetailPanel {
         }
         entry.appendChild(crownEl);
       }
+
+      // Performance value with "pts" suffix
+      const valueEl = document.createElement("div");
+      valueEl.className = "timeline-entry__value";
+      valueEl.textContent = `${item.dailyValue.value} pts`;
+      entry.appendChild(valueEl);
     }
 
     // Embed groups

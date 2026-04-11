@@ -121,14 +121,14 @@ async function main(): Promise<void> {
     if (playbackController.isPlaying()) {
       playbackController.pause();
     }
-    detailPanel.open(artistId, dataStore);
+    detailPanel.open(artistId, dataStore, currentSnapshot?.date);
   });
 
   // pause → auto-open detail panel for top-ranked artist
   eventBus.on("pause", () => {
     if (currentSnapshot && currentSnapshot.entries.length > 0) {
       const topArtistId = currentSnapshot.entries[0].artistId;
-      detailPanel.open(topArtistId, dataStore);
+      detailPanel.open(topArtistId, dataStore, currentSnapshot.date);
     }
   });
 

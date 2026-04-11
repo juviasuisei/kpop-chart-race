@@ -7,16 +7,8 @@ import type { ChartSnapshot, RankedEntry } from "./models.ts";
 import type { ArtistType, ZoomLevel } from "./types.ts";
 import { filterByZoom, computeBarWidth, toRomanNumeral, tween } from "./utils.ts";
 import { EventBus } from "./event-bus.ts";
+import { ARTIST_TYPE_COLORS } from "./colors.ts";
 import pkg from "../package.json";
-
-/** Colorblind-friendly palette: blue for boy/male, red-pink for girl/female, green for mixed */
-const ARTIST_TYPE_COLORS: Record<ArtistType, string> = {
-  boy_group: "#1565C0",
-  girl_group: "#C62828",
-  solo_male: "#64B5F6",
-  solo_female: "#EF9A9A",
-  mixed_group: "#009E73",
-};
 
 /** Secondary indicator icons per ArtistType */
 const ARTIST_TYPE_INDICATORS: Record<ArtistType, string> = {

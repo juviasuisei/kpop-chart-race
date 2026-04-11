@@ -44,8 +44,8 @@ const PLACEHOLDER_SVG = `data:image/svg+xml,${encodeURIComponent(
 /** Fixed bar height in pixels when zoom is "all" */
 const BAR_HEIGHT_ALL = 40;
 
-/** Duration for tween animation in ms */
-const TWEEN_DURATION = 400;
+/** Duration for tween animation in ms — matches the 1s playback interval */
+const TWEEN_DURATION = 950;
 
 interface BarElement {
   wrapper: HTMLDivElement;

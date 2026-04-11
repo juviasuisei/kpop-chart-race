@@ -10,7 +10,8 @@
       "dailyValues": {
         "2026-04-11": { "value": 8532, "source": "show_music_core", "episode": 940 },
         "2026-04-10": { "value": 5601, "source": "music_bank", "episode": 1288 },
-        "2026-04-09": { "value": 10052, "source": "m_countdown", "episode": 923 }
+        "2026-04-09": { "value": 10052, "source": "m_countdown", "episode": 923 },
+        "2026-04-08": { "value": 7825, "source": "show_champion", "episode": 592 }
       },
       "embeds": {
         "2026-03-20": [

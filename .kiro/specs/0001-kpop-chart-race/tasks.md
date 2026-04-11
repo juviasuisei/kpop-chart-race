@@ -345,8 +345,8 @@ Incremental implementation of a static animated bar chart race visualizing K-pop
     - Test mobile/desktop breakpoints (9.1–9.5)
     - _Requirements: 9.1–9.5_
 
-- [ ] 17. Application wiring and integration
-  - [ ] 17.1 Wire all components together in main.ts
+- [x] 17. Application wiring and integration
+  - [x] 17.1 Wire all components together in main.ts
     - Create EventBus instance
     - Initialize Data_Loader → show LoadingScreen → on complete, mount Chart_Race, Playback_Controller, Zoom_Selector
     - Connect EventBus events: `date:change` → ChartEngine → `state:updated` → Chart_Race Renderer
@@ -358,7 +358,7 @@ Incremental implementation of a static animated bar chart race visualizing K-pop
     - Create sample JSON data file(s) in `data/` for development/testing
     - _Requirements: 1.1, 3.1, 6.1, 7.1, 7.2, 7.3, 7.9, 12.1, 12.5_
 
-  - [ ]* 17.2 Write integration tests
+  - [x]* 17.2 Write integration tests
     - Test end-to-end flow: data load → loading screen → chart race → playback → detail panel
     - Test EventBus wiring between components
     - _Requirements: 1.1, 3.1, 6.1, 7.1_

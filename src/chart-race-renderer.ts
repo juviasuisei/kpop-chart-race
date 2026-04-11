@@ -105,6 +105,9 @@ export class ChartRaceRenderer {
 
     const visibleEntries = filterByZoom(snapshot.entries, zoomLevel);
     const containerHeight = this.barsContainer.clientHeight || this.barsContainer.offsetHeight;
+    // Bar height at zoom 10 is always containerHeight / 10 (not divided by
+    // visibleEntries.length), so bars maintain consistent size even when fewer
+    // than 10 entries are visible. Satisfies Requirement 3 (display-behavior-enhancements).
     const barHeight =
       zoomLevel === 10
         ? (containerHeight > 0 ? containerHeight / 10 : 50)

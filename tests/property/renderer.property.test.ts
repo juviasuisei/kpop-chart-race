@@ -566,3 +566,72 @@ describe('Bugfix 0006: Preservation — Post-Layout Update Behavior', () => {
     );
   });
 });
+
+
+// ============================================================
+// Feature: 0010-display-behavior-enhancements
+// Property 2: Bar height independence from entry count at zoom 10
+// **Validates: Requirements 3.1, 3.2, 3.4**
+// ============================================================
+
+describe('Property 2: Bar height independence from entry count at zoom 10', () => {
+  it('all bar wrappers have height equal to containerHeight / 10 regardless of entry count', () => {
+    fc.assert(
+      fc.property(
+        fc.integer({ min: 1, max: 10 }).chain((size) =>
+          fc.tuple(
+            fc.constant(size),
+            fc.integer({ min: 100, max: 1000 }),
+          ),
+        ),
+        ([entryCount, containerHeight]) => {
+          const container = document.createElement('div');
+          document.body.appendChild(container);
+
+          const eventBus = new EventBus();
+          const renderer = new ChartRaceRenderer(eventBus);
+          renderer.mount(container);
+
+          // Mock clientHeight to the random positive value
+          const barsContainer = container.querySelector('.chart-race__bars')!;
+          Object.defineProperty(barsContainer, 'clientHeight', {
+            value: containerHeight,
+            configurable: true,
+          });
+
+          // Build a snapshot with the given number of entries
+          const entries: RankedEntry[] = Array.from({ length: entryCount }, (_, i) => ({
+            artistId: `artist-prop2-${i}`,
+            artistName: `Artist ${i}`,
+            artistType: 'boy_group' as const,
+            generation: 4,
+            logoUrl: `assets/logos/artist-${i}.svg`,
+            cumulativeValue: 1000 - i * 50,
+            previousCumulativeValue: 900 - i * 50,
+            dailyValue: 100,
+            rank: i + 1,
+            previousRank: i + 1,
+            featuredRelease: { title: 'Song', releaseId: 'song' },
+          }));
+
+          const snapshot: ChartSnapshot = { date: '2024-06-01', entries };
+
+          renderer.update(snapshot, 10);
+
+          const expectedHeight = containerHeight / 10;
+          const wrappers = container.querySelectorAll('.chart-race__bar-wrapper');
+          expect(wrappers.length).toBe(entryCount);
+
+          for (const wrapper of wrappers) {
+            const height = parseFloat((wrapper as HTMLElement).style.height);
+            expect(height).toBeCloseTo(expectedHeight, 5);
+          }
+
+          renderer.destroy();
+          container.remove();
+        },
+      ),
+      { numRuns: 100 },
+    );
+  });
+});

@@ -385,13 +385,17 @@ export class ChartRaceRenderer {
   private checkBarOverflow(barEl: BarElement): void {
     if (!barEl.bar.parentElement) return; // destroyed
 
-    // Check if bar is overflowing
-    if (barEl.bar.scrollWidth > barEl.bar.clientWidth) {
+    // Check if the release text is being truncated (scrollWidth > offsetWidth)
+    // or if the bar itself is overflowing
+    const releaseIsTruncated = barEl.releaseSpan.scrollWidth > barEl.releaseSpan.offsetWidth;
+    const barIsOverflowing = barEl.bar.scrollWidth > barEl.bar.clientWidth;
+
+    if (releaseIsTruncated || barIsOverflowing) {
       // Move release outside bar (insert after value span in wrapper)
       barEl.wrapper.insertBefore(barEl.releaseSpan, barEl.valueSpan.nextSibling);
       barEl.releaseSpan.classList.add("bar__release--outside");
 
-      // Check again — if still overflowing, move name outside too
+      // Check again — if bar still overflows, move name outside too
       if (barEl.bar.scrollWidth > barEl.bar.clientWidth) {
         barEl.wrapper.insertBefore(barEl.nameSpan, barEl.valueSpan);
         barEl.nameSpan.classList.add("bar__name--outside");

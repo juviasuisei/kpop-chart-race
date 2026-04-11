@@ -3,13 +3,13 @@ import { EventBus } from '../../src/event-bus.ts';
 import type { ChartSnapshot, RankedEntry } from '../../src/models.ts';
 import type { ArtistType } from '../../src/types.ts';
 
-/** Wong palette expected colors per ArtistType (rgb format as returned by jsdom) */
+/** Expected colors per ArtistType (rgb format as returned by jsdom) */
 const EXPECTED_COLORS: Record<ArtistType, string> = {
-  boy_group: 'rgb(0, 114, 178)',
-  girl_group: 'rgb(213, 94, 0)',
-  solo_male: 'rgb(0, 158, 115)',
-  solo_female: 'rgb(204, 121, 167)',
-  mixed_group: 'rgb(240, 228, 66)',
+  boy_group: 'rgb(21, 101, 192)',
+  girl_group: 'rgb(198, 40, 40)',
+  solo_male: 'rgb(100, 181, 246)',
+  solo_female: 'rgb(239, 154, 154)',
+  mixed_group: 'rgb(0, 158, 115)',
 };
 
 function makeEntry(overrides: Partial<RankedEntry> = {}): RankedEntry {

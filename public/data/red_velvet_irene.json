@@ -23,13 +23,13 @@
           {
             "eventType": "release_date",
             "links": [
-              { "url": "https://music.apple.com/us/album/biggest-fan-the-1st-album/1887564140", "description": "Unpiltered" }
+              { "url": "https://music.apple.com/us/album/biggest-fan-the-1st-album/1887564140" }
             ]
           },
           {
             "eventType": "mv",
             "links": [
-              { "url": "https://youtu.be/x7wLlK9MMN4?si=x9djnr8jcn-EIfDe", "description": "MV" }
+              { "url": "https://youtu.be/x7wLlK9MMN4?si=x9djnr8jcn-EIfDe" }
             ]
           }
         ]

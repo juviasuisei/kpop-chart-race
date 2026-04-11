@@ -17,13 +17,13 @@
           {
             "eventType": "release_date",
             "links": [
-              { "url": "https://music.apple.com/us/album/arirang/1868481904", "description": "ARIRANG" }
+              { "url": "https://music.apple.com/us/album/arirang/1868481904" }
             ]
           },
           {
             "eventType": "mv",
             "links": [
-              { "url": "https://youtu.be/b4iVv91Z6lY?si=NTtHoNhMcayxxjXL", "description": "MV" }
+              { "url": "https://youtu.be/b4iVv91Z6lY?si=NTtHoNhMcayxxjXL" }
             ]
           }
         ]

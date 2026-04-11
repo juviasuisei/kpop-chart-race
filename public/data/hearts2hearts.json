@@ -15,13 +15,13 @@
           {
             "eventType": "release_date",
             "links": [
-              { "url": "https://music.apple.com/us/album/rude-single/1875146814", "description": "RUDE!" }
+              { "url": "https://music.apple.com/us/album/rude-single/1875146814" }
             ]
           },
           {
             "eventType": "mv",
             "links": [
-              { "url": "https://youtu.be/F7sGJVUrkjQ?si=WHyVws8UltEajlZr", "description": "MV" }
+              { "url": "https://youtu.be/F7sGJVUrkjQ?si=WHyVws8UltEajlZr" }
             ]
           }
         ]

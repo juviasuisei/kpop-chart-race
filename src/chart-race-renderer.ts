@@ -9,13 +9,13 @@ import { filterByZoom, computeBarWidth, toRomanNumeral, tween } from "./utils.ts
 import { EventBus } from "./event-bus.ts";
 import pkg from "../package.json";
 
-/** Wong colorblind-friendly palette mapping ArtistType → hex color */
+/** Colorblind-friendly palette: blue for boy/male, red-pink for girl/female, green for mixed */
 const ARTIST_TYPE_COLORS: Record<ArtistType, string> = {
-  boy_group: "#0072B2",
-  girl_group: "#D55E00",
-  solo_male: "#009E73",
-  solo_female: "#CC79A7",
-  mixed_group: "#F0E442",
+  boy_group: "#1565C0",
+  girl_group: "#C62828",
+  solo_male: "#64B5F6",
+  solo_female: "#EF9A9A",
+  mixed_group: "#009E73",
 };
 
 /** Secondary indicator icons per ArtistType */

@@ -388,6 +388,7 @@ export class ChartRaceRenderer {
 
     // Bar width as percentage
     const widthPercent = computeBarWidth(entry.cumulativeValue, maxCumulative);
+    const oldWidth = barEl.bar.style.width;
     barEl.bar.style.width = `${widthPercent}%`;
 
     // Ensure opacity is 1 (transitions from 0 for new bars)
@@ -398,11 +399,13 @@ export class ChartRaceRenderer {
     barEl.wrapper.style.transform = `translateY(${yPosition}px)`;
     barEl.wrapper.style.height = `${barHeight}px`;
 
-    // Smart overflow: only check after the CSS transition completes,
-    // when the bar has reached its target width.
-    // First, move everything inside so the bar can render at full content.
-    this.moveAllInside(barEl);
-    // Then after transition, check what actually fits.
+    // Smart overflow: only reset inside when the bar is growing (more room available).
+    // Otherwise leave the current overflow state to avoid flicker.
+    const newWidth = `${widthPercent}%`;
+    if (parseFloat(newWidth) > parseFloat(oldWidth || "0")) {
+      this.moveAllInside(barEl);
+    }
+    // Check what fits after the CSS transition completes.
     setTimeout(() => this.checkBarOverflow(barEl), 960);
 
     // Numeric value tweening

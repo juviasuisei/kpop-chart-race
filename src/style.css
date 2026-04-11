@@ -84,7 +84,7 @@ body {
   font-weight: 700;
   color: rgba(255, 255, 255, 0.9);
   flex-shrink: 0;
-  min-width: 1.5em;
+  min-width: 2.5em;
   text-align: center;
 }
 

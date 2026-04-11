@@ -210,8 +210,8 @@ Incremental implementation of a static animated bar chart race visualizing K-pop
     - Generate strings with XSS payloads (script tags, javascript: URLs, event handlers); verify no executable script content in output
     - **Validates: Requirements 8.6**
 
-- [ ] 9. Loading Screen
-  - [ ] 9.1 Implement LoadingScreen component
+- [x] 9. Loading Screen
+  - [x] 9.1 Implement LoadingScreen component
     - Create `src/loading-screen.ts`
     - `mount(container)`: render loading UI replacing main visualization area
     - `onFileProgress(loaded, total, artistNames)`: update progress text ("Loading... N/M files"), progress bar percentage, scroll artist names in credits-roll animation
@@ -220,12 +220,12 @@ Incremental implementation of a static animated bar chart race visualizing K-pop
     - Listen to EventBus events: `loading:progress`, `loading:complete`, `loading:error`
     - _Requirements: 12.1, 12.2, 12.3, 12.4, 12.5, 12.6, 12.7_
 
-  - [ ]* 9.2 Write property test — Property 17: Loading Progress Display
+  - [x]* 9.2 Write property test — Property 17: Loading Progress Display
     - **Property 17: Loading Progress Display**
     - Generate random (loaded, total) pairs where 0 ≤ loaded ≤ total, total > 0; verify progress text contains both counts and progress bar value = loaded/total
     - **Validates: Requirements 12.2, 12.4**
 
-  - [ ]* 9.3 Write unit tests for LoadingScreen
+  - [x]* 9.3 Write unit tests for LoadingScreen
     - Test loading screen replaces visualization area (12.1), file progress indicator (12.2), artist name scrolling (12.3), progress bar (12.4), transition to Chart_Race (12.5), error on total failure (12.6), empty dataset message (12.7)
     - _Requirements: 12.1, 12.2, 12.3, 12.4, 12.5, 12.6, 12.7_
 

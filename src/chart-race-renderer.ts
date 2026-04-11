@@ -146,11 +146,21 @@ export class ChartRaceRenderer {
     for (const entry of visibleEntries) {
       visibleIds.add(entry.artistId);
       let barEl = this.bars.get(entry.artistId);
+      let isNew = false;
 
       if (!barEl) {
         barEl = this.createBarElement(entry);
         this.bars.set(entry.artistId, barEl);
         this.barsContainer.appendChild(barEl.wrapper);
+        isNew = true;
+
+        // Start new bars at the bottom with zero width for entrance animation
+        const bottomY = containerHeight > 0 ? containerHeight : 500;
+        barEl.wrapper.style.transform = `translateY(${bottomY}px)`;
+        barEl.wrapper.style.opacity = "0";
+        barEl.bar.style.width = "0%";
+        // Force reflow so the initial position is applied before transition
+        barEl.wrapper.offsetHeight;
       }
 
       this.updateBarElement(barEl, entry, barHeight, maxCumulative);
@@ -337,6 +347,9 @@ export class ChartRaceRenderer {
     // Bar width as percentage
     const widthPercent = computeBarWidth(entry.cumulativeValue, maxCumulative);
     barEl.bar.style.width = `${widthPercent}%`;
+
+    // Ensure opacity is 1 (transitions from 0 for new bars)
+    barEl.wrapper.style.opacity = "1";
 
     // Bar position via translateY (rank is 1-based, so rank-1 for 0-based index)
     const yPosition = (entry.rank - 1) * barHeight;

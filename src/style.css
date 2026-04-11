@@ -18,3 +18,143 @@
 body {
   min-height: 100vh;
 }
+
+/* ===== Chart Race ===== */
+
+.chart-race {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.chart-race__date {
+  font-size: 2rem;
+  font-weight: 700;
+  text-align: right;
+  padding: 0.5rem 1rem;
+  color: #213547;
+  opacity: 0.7;
+  user-select: none;
+}
+
+.chart-race__bars {
+  position: relative;
+  flex: 1 1 auto;
+  overflow: hidden;
+}
+
+.chart-race__bar-wrapper {
+  position: absolute;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 2px 0;
+  transition: transform 0.4s ease-in-out;
+}
+
+.chart-race__bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  height: 80%;
+  min-width: 2rem;
+  border-radius: 4px;
+  padding: 0 0.5rem;
+  overflow: hidden;
+  transition: width 0.4s ease-in-out;
+}
+
+.bar__logo {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.8))
+    drop-shadow(0 0 6px rgba(255, 255, 255, 0.5));
+}
+
+.bar__name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bar__gen {
+  font-size: 0.65rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.85);
+  white-space: nowrap;
+}
+
+.bar__type-indicator {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.9);
+  flex-shrink: 0;
+}
+
+.bar__value {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #213547;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.bar__release {
+  font-size: 0.7rem;
+  color: #666;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+/* ===== Chart Race Legend ===== */
+
+.chart-race__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border-top: 1px solid #e0e0e0;
+  justify-content: center;
+}
+
+.chart-race__legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+}
+
+.legend-item__swatch {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.legend-item__indicator {
+  font-size: 0.7rem;
+  flex-shrink: 0;
+}
+
+.legend-item__label {
+  color: #555;
+}
+
+/* ===== Placeholder SVG styling ===== */
+
+.bar__logo[src*="data:image/svg"] {
+  opacity: 0.6;
+}

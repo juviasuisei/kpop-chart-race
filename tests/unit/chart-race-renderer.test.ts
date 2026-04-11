@@ -1,0 +1,238 @@
+import { ChartRaceRenderer } from '../../src/chart-race-renderer.ts';
+import type { ChartSnapshot, RankedEntry } from '../../src/models.ts';
+import type { ArtistType } from '../../src/types.ts';
+
+/** Wong palette expected colors per ArtistType (rgb format as returned by jsdom) */
+const EXPECTED_COLORS: Record<ArtistType, string> = {
+  boy_group: 'rgb(0, 114, 178)',
+  girl_group: 'rgb(213, 94, 0)',
+  solo_male: 'rgb(0, 158, 115)',
+  solo_female: 'rgb(204, 121, 167)',
+  mixed_group: 'rgb(240, 228, 66)',
+};
+
+function makeEntry(overrides: Partial<RankedEntry> = {}): RankedEntry {
+  return {
+    artistId: 'artist-1',
+    artistName: 'Luna Park',
+    artistType: 'girl_group',
+    generation: 4,
+    logoUrl: 'assets/logos/luna-park.svg',
+    cumulativeValue: 500,
+    previousCumulativeValue: 400,
+    dailyValue: 100,
+    rank: 1,
+    previousRank: 1,
+    featuredRelease: { title: 'Starlight', releaseId: 'starlight' },
+    ...overrides,
+  };
+}
+
+function makeSnapshot(entries: RankedEntry[], date = '2024-06-01'): ChartSnapshot {
+  return { date, entries };
+}
+
+describe('ChartRaceRenderer', () => {
+  let container: HTMLElement;
+  let renderer: ChartRaceRenderer;
+
+  beforeEach(() => {
+    container = document.createElement('div');
+    document.body.appendChild(container);
+    renderer = new ChartRaceRenderer();
+  });
+
+  afterEach(() => {
+    renderer.destroy();
+    container.remove();
+  });
+
+  // 1. Mount creates .chart-race element in container
+  it('mount creates a .chart-race element in the container', () => {
+    renderer.mount(container);
+    expect(container.querySelector('.chart-race')).not.toBeNull();
+  });
+
+  // 2. Mount creates date display (.chart-race__date)
+  it('mount creates a .chart-race__date element', () => {
+    renderer.mount(container);
+    expect(container.querySelector('.chart-race__date')).not.toBeNull();
+  });
+
+  // 3. Mount creates bars container (.chart-race__bars)
+  it('mount creates a .chart-race__bars element', () => {
+    renderer.mount(container);
+    expect(container.querySelector('.chart-race__bars')).not.toBeNull();
+  });
+
+  // 4. Mount creates legend with 5 items (.chart-race__legend)
+  it('mount creates a legend with 5 items', () => {
+    renderer.mount(container);
+    const legend = container.querySelector('.chart-race__legend');
+    expect(legend).not.toBeNull();
+    const items = legend!.querySelectorAll('.chart-race__legend-item');
+    expect(items.length).toBe(5);
+  });
+
+  // 5. Update renders bars with artist names (.bar__name) — Req 4.1
+  it('update renders bars with artist names', () => {
+    renderer.mount(container);
+    const snapshot = makeSnapshot([
+      makeEntry({ artistId: 'a1', artistName: 'Luna Park', rank: 1 }),
+      makeEntry({ artistId: 'a2', artistName: 'Jay Storm', rank: 2 }),
+    ]);
+    renderer.update(snapshot, 10);
+
+    const names = container.querySelectorAll('.bar__name');
+    expect(names.length).toBe(2);
+    expect(names[0].textContent).toBe('Luna Park');
+    expect(names[1].textContent).toBe('Jay Storm');
+  });
+
+  // 6. Update renders logo images (.bar__logo) — Req 4.2
+  it('update renders logo images with correct src', () => {
+    renderer.mount(container);
+    const snapshot = makeSnapshot([
+      makeEntry({ logoUrl: 'assets/logos/luna-park.svg' }),
+    ]);
+    renderer.update(snapshot, 10);
+
+    const logo = container.querySelector('.bar__logo') as HTMLImageElement;
+    expect(logo).not.toBeNull();
+    expect(logo.src).toContain('luna-park.svg');
+  });
+
+  // 7. Update renders cumulative value (.bar__value) — Req 4.3
+  it('update renders cumulative value text', () => {
+    renderer.mount(container);
+    const snapshot = makeSnapshot([
+      makeEntry({ cumulativeValue: 1234, previousCumulativeValue: 1234 }),
+    ]);
+    renderer.update(snapshot, 10);
+
+    const value = container.querySelector('.bar__value');
+    expect(value).not.toBeNull();
+    // Value should display the cumulative value (may be formatted with locale)
+    expect(value!.textContent).toContain('1,234');
+  });
+
+  // 8. Logo onerror sets placeholder SVG — Req 4.4
+  it('logo onerror sets placeholder SVG data URI', () => {
+    renderer.mount(container);
+    const snapshot = makeSnapshot([
+      makeEntry({ logoUrl: 'assets/logos/nonexistent.svg' }),
+    ]);
+    renderer.update(snapshot, 10);
+
+    const logo = container.querySelector('.bar__logo') as HTMLImageElement;
+    expect(logo).not.toBeNull();
+
+    // Trigger onerror handler
+    logo.onerror!(new Event('error'));
+
+    expect(logo.src).toContain('data:image/svg+xml');
+  });
+
+  // 9. Bar background color matches ArtistType (Wong palette) — Req 4.5
+  it('bar background color matches ArtistType Wong palette', () => {
+    renderer.mount(container);
+    const types: ArtistType[] = ['boy_group', 'girl_group', 'solo_male', 'solo_female', 'mixed_group'];
+
+    const entries = types.map((type, i) =>
+      makeEntry({
+        artistId: `artist-${i}`,
+        artistType: type,
+        rank: i + 1,
+        cumulativeValue: 500 - i * 50,
+      }),
+    );
+    const snapshot = makeSnapshot(entries);
+    renderer.update(snapshot, 'all');
+
+    const bars = container.querySelectorAll('.chart-race__bar');
+    expect(bars.length).toBe(5);
+
+    bars.forEach((bar, i) => {
+      const htmlBar = bar as HTMLElement;
+      expect(htmlBar.style.backgroundColor).toBe(EXPECTED_COLORS[types[i]]);
+    });
+  });
+
+  // 10. Legend shows all 5 ArtistType entries — Req 4.6
+  it('legend shows all 5 ArtistType labels', () => {
+    renderer.mount(container);
+    const labels = container.querySelectorAll('.legend-item__label');
+    expect(labels.length).toBe(5);
+
+    const labelTexts = Array.from(labels).map((l) => l.textContent);
+    expect(labelTexts).toContain('Boy Group');
+    expect(labelTexts).toContain('Girl Group');
+    expect(labelTexts).toContain('Solo Male');
+    expect(labelTexts).toContain('Solo Female');
+    expect(labelTexts).toContain('Mixed Group');
+  });
+
+  // 11. Update renders featured release with ♪ prefix (.bar__release) — Req 4.8
+  it('update renders featured release with ♪ prefix', () => {
+    renderer.mount(container);
+    const snapshot = makeSnapshot([
+      makeEntry({ featuredRelease: { title: 'Supernova', releaseId: 'supernova' } }),
+    ]);
+    renderer.update(snapshot, 10);
+
+    const release = container.querySelector('.bar__release');
+    expect(release).not.toBeNull();
+    expect(release!.textContent).toBe('♪ Supernova');
+  });
+
+  // 12. Logo has drop-shadow filter (.bar__logo CSS) — Req 4.9
+  it('logo element has bar__logo class for CSS drop-shadow styling', () => {
+    renderer.mount(container);
+    const snapshot = makeSnapshot([makeEntry()]);
+    renderer.update(snapshot, 10);
+
+    const logo = container.querySelector('.bar__logo');
+    expect(logo).not.toBeNull();
+    expect(logo!.tagName).toBe('IMG');
+    expect(logo!.classList.contains('bar__logo')).toBe(true);
+  });
+
+  // 13. Update renders generation Roman numeral (.bar__gen) — Req 4.7
+  it('update renders generation as Roman numeral', () => {
+    renderer.mount(container);
+    const snapshot = makeSnapshot([
+      makeEntry({ generation: 4 }),
+    ]);
+    renderer.update(snapshot, 10);
+
+    const gen = container.querySelector('.bar__gen');
+    expect(gen).not.toBeNull();
+    expect(gen!.textContent).toBe('Gen IV');
+  });
+
+  // 14. Destroy removes chart from DOM
+  it('destroy removes the chart-race element from DOM', () => {
+    renderer.mount(container);
+    expect(container.querySelector('.chart-race')).not.toBeNull();
+
+    renderer.destroy();
+    expect(container.querySelector('.chart-race')).toBeNull();
+  });
+
+  // 15. Update with zoom "all" enables overflow scroll on bars container — Req 5.3
+  it('update with zoom "all" sets overflowY auto on bars container', () => {
+    renderer.mount(container);
+    const entries = Array.from({ length: 15 }, (_, i) =>
+      makeEntry({
+        artistId: `artist-${i}`,
+        rank: i + 1,
+        cumulativeValue: 1000 - i * 50,
+      }),
+    );
+    const snapshot = makeSnapshot(entries);
+    renderer.update(snapshot, 'all');
+
+    const barsContainer = container.querySelector('.chart-race__bars') as HTMLElement;
+    expect(barsContainer.style.overflowY).toBe('auto');
+  });
+});

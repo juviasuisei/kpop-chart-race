@@ -229,8 +229,8 @@ Incremental implementation of a static animated bar chart race visualizing K-pop
     - Test loading screen replaces visualization area (12.1), file progress indicator (12.2), artist name scrolling (12.3), progress bar (12.4), transition to Chart_Race (12.5), error on total failure (12.6), empty dataset message (12.7)
     - _Requirements: 12.1, 12.2, 12.3, 12.4, 12.5, 12.6, 12.7_
 
-- [ ] 10. Chart Race Renderer
-  - [ ] 10.1 Implement Chart_Race Renderer
+- [x] 10. Chart Race Renderer
+  - [x] 10.1 Implement Chart_Race Renderer
     - Create `src/chart-race-renderer.ts`
     - `mount(container)`: create chart container, legend element
     - `update(snapshot, zoomLevel)`: render/update bars with CSS transitions on `transform` (translateY) and `width`
@@ -245,7 +245,7 @@ Incremental implementation of a static animated bar chart race visualizing K-pop
     - `destroy()`: cleanup DOM and animation frames
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.8, 4.9, 5.2, 5.3, 5.4_
 
-  - [ ]* 10.2 Write unit tests for Chart_Race Renderer
+  - [x]* 10.2 Write unit tests for Chart_Race Renderer
     - Test bar rendering (artist name 4.1, logo 4.2, value display 4.3, placeholder on error 4.4, color mapping 4.5, legend 4.6, featured release 4.8, logo halo 4.9)
     - Test zoom level bar height scaling (5.4), vertical scroll when overflow (5.3)
     - _Requirements: 3.1, 3.2, 4.1–4.9, 5.3, 5.4_

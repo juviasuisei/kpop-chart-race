@@ -4,11 +4,12 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
+    "dev": "node scripts/generate-data-index.js && vite",
+    "build": "node scripts/generate-data-index.js && tsc && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "data:index": "node scripts/generate-data-index.js"
   },
   "devDependencies": {
     "@fast-check/vitest": "^0.4.0",

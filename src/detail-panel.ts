@@ -130,9 +130,19 @@ export class DetailPanel {
     // Header
     const header = document.createElement("div");
     header.className = "detail-panel__header";
+
+    const nameHtml = artist.koreanName
+      ? `${this.escapeHtml(artist.name)} (${this.escapeHtml(artist.koreanName)})`
+      : this.escapeHtml(artist.name);
+
+    const genLabel = `${this.escapeHtml(this.formatArtistType(artist.artistType))} · ${toRomanNumeral(artist.generation)}`;
+    const debutHtml = artist.debut
+      ? ` <span class="detail-panel__debut">(debut: ${this.escapeHtml(artist.debut)})</span>`
+      : "";
+
     header.innerHTML = `
-      <h2 class="detail-panel__artist-name">${this.escapeHtml(artist.name)}</h2>
-      <span class="detail-panel__artist-meta">${this.escapeHtml(this.formatArtistType(artist.artistType))} · ${toRomanNumeral(artist.generation)}</span>
+      <h2 class="detail-panel__artist-name">${nameHtml}</h2>
+      <span class="detail-panel__artist-meta">${genLabel}${debutHtml}</span>
     `;
     panel.appendChild(header);
 

@@ -67,6 +67,8 @@ function createTestDataStore(): DataStore {
     artistType: 'girl_group',
     generation: 4,
     logoUrl: 'assets/logos/test.svg',
+    koreanName: '테스트 아티스트',
+    debut: '2020-03-15',
     releases: [release1],
   };
 
@@ -134,11 +136,11 @@ describe('DetailPanel', () => {
   });
 
   // 2. Open shows artist name in header — Req 7.1
-  it('shows artist name in the panel header', () => {
+  it('shows artist name with Korean name in the panel header', () => {
     panel.open('test-artist', dataStore);
     const nameEl = document.body.querySelector('.detail-panel__artist-name');
     expect(nameEl).not.toBeNull();
-    expect(nameEl!.textContent).toBe('Test Artist');
+    expect(nameEl!.textContent).toBe('Test Artist (테스트 아티스트)');
   });
 
   // 3. Close removes panel from DOM — Req 7.8
@@ -298,5 +300,51 @@ describe('DetailPanel', () => {
     const entriesTotal = document.body.querySelectorAll('.timeline-entry');
     expect(entriesInInner.length).toBe(entriesTotal.length);
     expect(entriesInInner.length).toBeGreaterThan(0);
+  });
+
+  // 16. Header shows Korean name in parentheses when koreanName is defined — Req 2.1
+  it('shows Korean name in parentheses when koreanName is defined', () => {
+    panel.open('test-artist', dataStore);
+    const nameEl = document.body.querySelector('.detail-panel__artist-name');
+    expect(nameEl).not.toBeNull();
+    expect(nameEl!.textContent).toContain('(테스트 아티스트)');
+  });
+
+  // 17. Header shows only English name when koreanName is undefined — Req 2.2
+  it('shows only English name when koreanName is undefined', () => {
+    const artist = dataStore.artists.get('test-artist')!;
+    const noKorean: ParsedArtist = { ...artist, koreanName: undefined };
+    const store: DataStore = {
+      ...dataStore,
+      artists: new Map([['test-artist', noKorean]]),
+    };
+    panel.open('test-artist', store);
+    const nameEl = document.body.querySelector('.detail-panel__artist-name');
+    expect(nameEl).not.toBeNull();
+    expect(nameEl!.textContent).toBe('Test Artist');
+    expect(nameEl!.textContent).not.toContain('(');
+  });
+
+  // 18. Meta shows debut when debut is defined — Req 4.1
+  it('shows debut date in meta when debut is defined', () => {
+    panel.open('test-artist', dataStore);
+    const metaEl = document.body.querySelector('.detail-panel__artist-meta');
+    expect(metaEl).not.toBeNull();
+    expect(metaEl!.textContent).toContain('(debut: 2020-03-15)');
+  });
+
+  // 19. Meta shows only type and generation when debut is undefined — Req 4.2
+  it('shows only type and generation when debut is undefined', () => {
+    const artist = dataStore.artists.get('test-artist')!;
+    const noDebut: ParsedArtist = { ...artist, debut: undefined };
+    const store: DataStore = {
+      ...dataStore,
+      artists: new Map([['test-artist', noDebut]]),
+    };
+    panel.open('test-artist', store);
+    const metaEl = document.body.querySelector('.detail-panel__artist-meta');
+    expect(metaEl).not.toBeNull();
+    expect(metaEl!.textContent).not.toContain('debut');
+    expect(metaEl!.textContent).toContain('Girl Group');
   });
 });

@@ -313,8 +313,18 @@ body {
 }
 
 .timeline-entry__crown {
-  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
   margin-bottom: 0.25rem;
+}
+
+.crown__icon {
+  display: inline-block;
+}
+
+.crown__label {
+  font-weight: 600;
 }
 
 .timeline-entry__embed-group {
@@ -538,11 +548,20 @@ body {
   background: #f0f0f0;
 }
 
-/* ===== Crown Icon Styles ===== */
+/* Level 1: Basic Win — small, muted */
+.crown--1 { font-size: 0.85rem; color: #a0a0a0; }
 
-.timeline-entry__crown--gold {
-  color: #d4a017;
-}
+/* Level 2: Double Win — medium, gold */
+.crown--2 { font-size: 0.95rem; color: #d4a017; }
+
+/* Level 3: Triple Crown — larger, gold, bold */
+.crown--3 { font-size: 1.1rem; color: #d4a017; font-weight: 700; }
+
+/* Level 4: Quad Crown — larger, gold, bold */
+.crown--4 { font-size: 1.2rem; color: #d4a017; font-weight: 700; }
+
+/* Level 5: Grand Crown — largest, dark gold, bold */
+.crown--5 { font-size: 1.35rem; color: #b8860b; font-weight: 700; }
 
 /* ===== Embed Caption ===== */
 

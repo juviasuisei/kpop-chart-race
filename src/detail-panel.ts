@@ -18,13 +18,19 @@ const SOURCE_LOGO_MAP: Record<string, string> = {
   music_bank: "assets/sources/music_bank.svg",
 };
 
-/** Crown level emoji representations */
-const CROWN_ICONS: Record<number, string> = {
-  1: "👑",
-  2: "👑👑",
-  3: "👑👑👑",
-  4: "👑👑👑👑",
-  5: "👑👑👑👑👑",
+/** Crown level visual configuration */
+interface CrownConfig {
+  icon: string;
+  label: string;
+  cssClass: string;
+}
+
+const CROWN_LEVELS: Record<number, CrownConfig> = {
+  1: { icon: "👑", label: "Win", cssClass: "crown--1" },
+  2: { icon: "👑", label: "Double Win", cssClass: "crown--2" },
+  3: { icon: "👑✨", label: "Triple Crown ✨", cssClass: "crown--3" },
+  4: { icon: "👑💎", label: "Quad Crown", cssClass: "crown--4" },
+  5: { icon: "👑💎✨", label: "Grand Crown", cssClass: "crown--5" },
 };
 
 /** Human-readable labels for event types */
@@ -310,10 +316,21 @@ export class DetailPanel {
 
       // Crown icon if applicable
       if (item.crownLevel > 0) {
-        const crownEl = document.createElement("div");
-        crownEl.className = "timeline-entry__crown";
         const level = Math.min(item.crownLevel, 5) as 1 | 2 | 3 | 4 | 5;
-        crownEl.textContent = CROWN_ICONS[level];
+        const config = CROWN_LEVELS[level];
+        const crownEl = document.createElement("div");
+        crownEl.className = `timeline-entry__crown ${config.cssClass}`;
+
+        const iconSpan = document.createElement("span");
+        iconSpan.className = "crown__icon";
+        iconSpan.textContent = config.icon;
+        crownEl.appendChild(iconSpan);
+
+        const labelSpan = document.createElement("span");
+        labelSpan.className = "crown__label";
+        labelSpan.textContent = config.label;
+        crownEl.appendChild(labelSpan);
+
         if (item.crownLevel === 3) {
           crownEl.title = "Triple Crown";
         }

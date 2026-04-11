@@ -183,10 +183,10 @@ describe('DetailPanel', () => {
     });
   });
 
-  // 7. Timeline shows date headings — Req 7.5
-  it('shows date headings in timeline', () => {
+  // 7. Timeline shows date headings inside cards — Req 7.5
+  it('shows date headings in timeline entries', () => {
     panel.open('test-artist', dataStore);
-    const dateEls = document.body.querySelectorAll('.timeline-date-header');
+    const dateEls = document.body.querySelectorAll('.timeline-entry__date');
     expect(dateEls.length).toBeGreaterThan(0);
 
     const dateTexts = Array.from(dateEls).map((el) => el.textContent);
@@ -345,6 +345,6 @@ describe('DetailPanel', () => {
     const metaEl = document.body.querySelector('.detail-panel__artist-meta');
     expect(metaEl).not.toBeNull();
     expect(metaEl!.textContent).not.toContain('debut');
-    expect(metaEl!.textContent).toContain('Girl Group');
+    expect(metaEl!.textContent).toContain('Gen');
   });
 });

@@ -319,10 +319,10 @@ body {
 }
 
 .timeline-entry__date {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   font-weight: 700;
-  color: #0072B2;
-  margin-bottom: 0.35rem;
+  color: #213547;
+  margin-bottom: 0.5rem;
 }
 
 .timeline-entry__release {
@@ -343,7 +343,7 @@ body {
 
 .timeline-entry__source-logo {
   width: 80px;
-  height: 80px;
+  height: auto;
   object-fit: contain;
 }
 
@@ -362,6 +362,7 @@ body {
 
 .timeline-entry__crown {
   display: flex;
+  flex-direction: column;
   align-items: center;
   gap: 0.25rem;
   margin-bottom: 0.25rem;
@@ -409,6 +410,19 @@ body {
 
 .timeline-entry iframe {
   height: auto;
+}
+
+/* YouTube embeds — wider to use panel width */
+.timeline-entry iframe[src*="youtube.com/embed"] {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  height: auto;
+}
+
+/* Apple Music embeds — nearly full width, 2.5x taller */
+.timeline-entry iframe[src*="embed.music.apple.com"] {
+  width: 100%;
+  height: 450px;
 }
 
 /* ===== Visually Hidden Utility ===== */

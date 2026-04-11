@@ -8,21 +8,20 @@
     {
       "title": "Highs and Lows",
       "dailyValues": {
-        "2026-04-11": { "value": 3912, "source": "show_music_core", "episode": 940 },
-        "2026-04-08": { "value": 2544, "source": "show_champion", "episode": 592 }
+        "2026-04-11": { "value": 3912, "source": "show_music_core", "episode": 940 }
       },
       "embeds": {
         "2026-03-30": [
           {
             "eventType": "release_date",
             "links": [
-              { "url": "https://music.apple.com/us/album/biggest-fan-the-1st-album/1887564140" }
+              { "url": "https://music.apple.com/us/album/unpiltered/1884783988" }
             ]
           },
           {
             "eventType": "mv",
             "links": [
-              { "url": "https://youtu.be/x7wLlK9MMN4?si=9Ii0O_8FKmyIk6mL" }
+              { "url": "https://youtu.be/yiPTOpGWaeM?si=VEnq4AOgxiw18g5e" }
             ]
           }
         ]

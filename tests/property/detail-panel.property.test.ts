@@ -207,10 +207,10 @@ describe('Feature: 0013-detail-panel-overhaul, Property 2: One date header per u
               for (const date of release.embeds.keys()) uniqueDates.add(date);
             }
 
-            const dateHeaders = document.body.querySelectorAll('.timeline-date-header');
-            expect(dateHeaders.length).toBe(uniqueDates.size);
+            // Date headers are now inside cards (.timeline-entry__date), one per date group
+            const dateEls = document.body.querySelectorAll('.timeline-entry__date');
+            expect(dateEls.length).toBe(uniqueDates.size);
 
-            // All entries for a given date should be in the same date group container
             const dateGroups = document.body.querySelectorAll('.timeline-date-group');
             expect(dateGroups.length).toBe(uniqueDates.size);
 
@@ -245,8 +245,8 @@ describe('Feature: 0013-detail-panel-overhaul, Property 3: Reverse chronological
 
             panel.open('test-artist', store);
 
-            const dateHeaders = document.body.querySelectorAll('.timeline-date-header');
-            const headerDates = Array.from(dateHeaders).map((el) => el.textContent!);
+            const dateEls = document.body.querySelectorAll('.timeline-entry__date');
+            const headerDates = Array.from(dateEls).map((el) => el.textContent!);
 
             for (let i = 1; i < headerDates.length; i++) {
               expect(headerDates[i - 1].localeCompare(headerDates[i])).toBeGreaterThan(0);
@@ -319,7 +319,7 @@ describe('Feature: 0013-detail-panel-overhaul, Property 5: Source logos at 80px'
     document.querySelectorAll('.detail-panel').forEach((el) => el.remove());
   });
 
-  it('all source logo images have width=80 and height=80', () => {
+  it('all source logo images have width=80', () => {
     fc.assert(
       fc.property(arbDates, (dates) =>
         fc.assert(
@@ -333,7 +333,6 @@ describe('Feature: 0013-detail-panel-overhaul, Property 5: Source logos at 80px'
             const logos = document.body.querySelectorAll('.timeline-entry__source-logo') as NodeListOf<HTMLImageElement>;
             logos.forEach((logo) => {
               expect(logo.width).toBe(80);
-              expect(logo.height).toBe(80);
             });
 
             panel.destroy();

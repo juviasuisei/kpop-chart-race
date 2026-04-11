@@ -179,10 +179,10 @@ export class DetailPanel {
     nameEl.innerHTML = nameHtml;
     header.appendChild(nameEl);
 
-    // Type · Generation (+ debut)
+    // Generation (+ debut) — no group type designation
     const metaEl = document.createElement("span");
     metaEl.className = "detail-panel__artist-meta";
-    const genLabel = `${this.escapeHtml(this.formatArtistType(artist.artistType))} · ${toRomanNumeral(artist.generation)}`;
+    const genLabel = toRomanNumeral(artist.generation);
     const debutHtml = artist.debut
       ? ` <span class="detail-panel__debut">(debut: ${this.escapeHtml(artist.debut)})</span>`
       : "";
@@ -231,19 +231,13 @@ export class DetailPanel {
 
     // Render date groups into the inner wrapper
     for (const group of dateGroups) {
-      // Date header
-      const dateHeader = document.createElement("div");
-      dateHeader.className = "timeline-date-header";
-      dateHeader.textContent = group.date;
-      timelineInner.appendChild(dateHeader);
-
       // Date group container
       const groupContainer = document.createElement("div");
       groupContainer.className = "timeline-date-group";
       groupContainer.dataset.date = group.date;
 
-      for (const item of group.items) {
-        const entryEl = this.createTimelineEntry(item);
+      for (let i = 0; i < group.items.length; i++) {
+        const entryEl = this.createTimelineEntry(group.items[i], i === 0 ? group.date : undefined);
         groupContainer.appendChild(entryEl);
       }
 
@@ -394,9 +388,17 @@ export class DetailPanel {
    * Create a single timeline entry DOM element.
    * Single-column layout — no left/right alternation.
    */
-  private createTimelineEntry(item: TimelineItem): HTMLElement {
+  private createTimelineEntry(item: TimelineItem, showDate?: string): HTMLElement {
     const entry = document.createElement("div");
     entry.className = "timeline-entry";
+
+    // Date inside the card (only for first item in a date group)
+    if (showDate) {
+      const dateEl = document.createElement("div");
+      dateEl.className = "timeline-entry__date";
+      dateEl.textContent = showDate;
+      entry.appendChild(dateEl);
+    }
 
     // Release title
     const releaseEl = document.createElement("div");
@@ -416,7 +418,6 @@ export class DetailPanel {
         logo.alt = sourceName;
         logo.className = "timeline-entry__source-logo";
         logo.width = 80;
-        logo.height = 80;
         sourceEl.appendChild(logo);
       } else {
         const sourceText = document.createElement("span");
@@ -438,7 +439,8 @@ export class DetailPanel {
         crownEl.className = "timeline-entry__crown";
 
         const iconSpan = document.createElement("span");
-        iconSpan.className = "crown__icon";
+        const tier = item.crownLevel >= 10 ? 3 : item.crownLevel >= 7 ? 2 : 1;
+        iconSpan.className = `crown__icon crown__icon--tier-${tier}`;
 
         const crownHeight = getCrownHeight(item.crownLevel);
 
@@ -447,8 +449,6 @@ export class DetailPanel {
           const img = document.createElement("img");
           img.src = config.svgPath;
           img.alt = config.label;
-          img.width = crownHeight;
-          img.height = crownHeight;
           iconSpan.appendChild(img);
         } else {
           const iconCount = item.crownLevel - 11;
@@ -456,8 +456,6 @@ export class DetailPanel {
             const img = document.createElement("img");
             img.src = config.svgPath;
             img.alt = config.label;
-            img.width = crownHeight;
-            img.height = crownHeight;
             iconSpan.appendChild(img);
           }
         }

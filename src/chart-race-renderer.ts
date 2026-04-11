@@ -50,7 +50,7 @@ interface BarElement {
   releaseSpan: HTMLSpanElement;
   currentDisplayValue: number;
   animationFrameId: number | null;
-  clickHandler: (() => void) | null;
+  clickHandler: ((e: Event) => void) | null;
 }
 
 export class ChartRaceRenderer {
@@ -146,13 +146,11 @@ export class ChartRaceRenderer {
     for (const entry of visibleEntries) {
       visibleIds.add(entry.artistId);
       let barEl = this.bars.get(entry.artistId);
-      let isNew = false;
 
       if (!barEl) {
         barEl = this.createBarElement(entry);
         this.bars.set(entry.artistId, barEl);
         this.barsContainer.appendChild(barEl.wrapper);
-        isNew = true;
 
         // Start new bars at the bottom with zero width for entrance animation
         const bottomY = containerHeight > 0 ? containerHeight : 500;
@@ -299,7 +297,6 @@ export class ChartRaceRenderer {
 
     const clickHandler = (e: Event) => {
       const target = e.target as HTMLElement;
-      // Only emit bar:click when clicking the colored bar, value, or release — not empty wrapper space
       if (target.closest('.chart-race__bar') || target.classList.contains('bar__value') || target.classList.contains('bar__release') || target.classList.contains('bar__name')) {
         this.eventBus.emit('bar:click', entry.artistId);
       }

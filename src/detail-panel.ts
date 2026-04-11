@@ -436,8 +436,6 @@ export class DetailPanel {
         const tier = item.crownLevel >= 10 ? 3 : item.crownLevel >= 7 ? 2 : 1;
         iconSpan.className = `crown__icon crown__icon--tier-${tier}`;
 
-        const crownHeight = getCrownHeight(item.crownLevel);
-
         // For levels 1-12: single img. For 13+: multiple crown-12 imgs.
         if (item.crownLevel <= 12) {
           const img = document.createElement("img");
@@ -551,16 +549,6 @@ export class DetailPanel {
     };
 
     document.addEventListener("keydown", this.boundKeyHandler);
-  }
-
-  /**
-   * Format an artist type string for display.
-   */
-  private formatArtistType(type: string): string {
-    return type
-      .split("_")
-      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-      .join(" ");
   }
 
   /**

@@ -8,7 +8,8 @@
     {
       "title": "UNIQUE",
       "dailyValues": {
-        "2026-03-20": { "value": 10034, "source": "music_bank", "episode": 1285 }
+        "2026-03-20": { "value": 10034, "source": "music_bank", "episode": 1285 },
+        "2026-03-18": { "value": 6553, "source": "show_champion", "episode": 589 }
       },
       "embeds": {
         "2026-03-20": [
@@ -16,6 +17,14 @@
             "eventType": "live_performance",
             "links": [
               { "url": "https://youtu.be/VTnnR8YGXhc?si=oRAN3sw3mS8rG7dQ" }
+            ]
+          }
+        ],
+        "2026-03-18": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://youtu.be/Bkb8p_XOgCg?si=JV1vp0HMrDBxeC00" }
             ]
           }
         ],

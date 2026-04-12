@@ -585,8 +585,23 @@ export class DetailPanel {
       entry.appendChild(releaseEl);
     }
 
-    // Embed groups
-    for (const group of item.embedGroups) {
+    // Embed groups — sorted so live performances come first (closest to chart data)
+    const sortedEmbeds = [...item.embedGroups].sort((a, b) => {
+      const order: Record<string, number> = {
+        live_performance: 0,
+        chart_performance: 1,
+        mv: 2,
+        release_date: 3,
+        trailer: 4,
+        dance_practice: 5,
+        promotion: 6,
+        behind_the_scenes: 7,
+        variety_show: 8,
+        fan_event: 9,
+      };
+      return (order[a.eventType] ?? 10) - (order[b.eventType] ?? 10);
+    });
+    for (const group of sortedEmbeds) {
       const groupEl = document.createElement("div");
       groupEl.className = "timeline-entry__embed-group";
 

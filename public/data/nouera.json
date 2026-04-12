@@ -1,0 +1,48 @@
+{
+  "name": "NouerA",
+  "korean_name": "누에라",
+  "artistType": "boy_group",
+  "generation": 5,
+  "debut": "2025-02-26",
+  "releases": [
+    {
+      "title": "Pop It Like",
+      "dailyValues": {
+        "2026-03-20": { "value": 7140, "source": "music_bank", "episode": 1285 },
+        "2026-03-18": { "value": 5100, "source": "show_champion", "episode": 589 }
+      },
+      "embeds": {
+        "2026-03-20": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://youtu.be/G2aofQho8Oc?si=bWJItkdB1IY0kBq0" }
+            ]
+          }
+        ],
+        "2026-03-18": [
+          {
+            "eventType": "release_date",
+            "links": [
+              { "url": "https://music.apple.com/us/album/pop-it-like-ep/1886270616" }
+            ]
+          },
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://youtu.be/KAEW-tEnTco?si=cPXHN2mpWpbBkDkd" }
+            ]
+          }
+        ],
+        "2026-03-09": [
+          {
+            "eventType": "mv",
+            "links": [
+              { "url": "https://youtu.be/FeU8m9YEVSY?si=LrBimmHQxbIb77Px" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -199,6 +199,20 @@ export class ChartRaceRenderer {
   }
 
   /**
+   * Re-check overflow on all bars (e.g., after panel open/close resizes the viewport).
+   */
+  recheckOverflow(): void {
+    // Delay to let the CSS transition (margin change) complete
+    setTimeout(() => {
+      for (const [, barEl] of this.bars) {
+        this.moveAllInside(barEl);
+        barEl.bar.offsetHeight;
+        this.checkBarOverflow(barEl);
+      }
+    }, 350);
+  }
+
+  /**
    * Remove the chart from the DOM and cancel pending animation frames.
    */
   destroy(): void {
@@ -454,14 +468,21 @@ export class ChartRaceRenderer {
   private checkBarOverflow(barEl: BarElement): void {
     if (!barEl.bar.parentElement) return; // destroyed
 
-    // Temporarily remove overflow:hidden to get true content measurements
+    // Temporarily remove overflow:hidden and flex-shrink to measure true content size
     barEl.bar.style.overflow = "visible";
+    barEl.releaseSpan.style.flexShrink = "0";
+    barEl.nameSpan.style.flexShrink = "0";
+
+    // Force layout to get accurate measurements
+    barEl.bar.offsetHeight;
 
     const releaseIsTruncated = barEl.releaseSpan.scrollWidth > barEl.releaseSpan.offsetWidth;
     const barIsOverflowing = barEl.bar.scrollWidth > barEl.bar.clientWidth;
 
-    // Restore overflow
+    // Restore
     barEl.bar.style.overflow = "";
+    barEl.releaseSpan.style.flexShrink = "";
+    barEl.nameSpan.style.flexShrink = "";
 
     if (releaseIsTruncated || barIsOverflowing) {
       barEl.wrapper.insertBefore(barEl.releaseSpan, barEl.winsSpan.nextSibling);
@@ -469,9 +490,12 @@ export class ChartRaceRenderer {
 
       // Re-measure with release removed
       barEl.bar.style.overflow = "visible";
+      barEl.nameSpan.style.flexShrink = "0";
+      barEl.bar.offsetHeight;
       const nameIsTruncated = barEl.nameSpan.scrollWidth > barEl.nameSpan.offsetWidth;
       const stillOverflowing = barEl.bar.scrollWidth > barEl.bar.clientWidth;
       barEl.bar.style.overflow = "";
+      barEl.nameSpan.style.flexShrink = "";
 
       if (nameIsTruncated || stillOverflowing) {
         barEl.wrapper.insertBefore(barEl.nameSpan, barEl.valueSpan);

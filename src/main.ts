@@ -130,6 +130,7 @@ async function main(): Promise<void> {
     }
     const rank = currentSnapshot?.entries.find(e => e.artistId === artistId)?.rank;
     detailPanel.open(artistId, dataStore, currentSnapshot?.date, rank);
+    renderer.recheckOverflow();
   });
 
   // pause → auto-open detail panel for top-ranked artist
@@ -137,6 +138,7 @@ async function main(): Promise<void> {
     if (currentSnapshot && currentSnapshot.entries.length > 0) {
       const topArtistId = currentSnapshot.entries[0].artistId;
       detailPanel.open(topArtistId, dataStore, currentSnapshot.date, 1);
+      renderer.recheckOverflow();
     }
   });
 
@@ -145,6 +147,11 @@ async function main(): Promise<void> {
     if (detailPanel.isOpen()) {
       detailPanel.close();
     }
+  });
+
+  // panel:close → recheck overflow since main area width changes
+  eventBus.on("panel:close", () => {
+    renderer.recheckOverflow();
   });
 
   // click-outside → close detail panel when clicking empty chart space

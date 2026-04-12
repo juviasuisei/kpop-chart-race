@@ -1,0 +1,31 @@
+{
+  "name": "ONEW [SHINee]",
+  "korean_name": "이진기",
+  "artistType": "solo_male",
+  "generation": 2,
+  "debut": "2018-12-05",
+  "releases": [
+    {
+      "title": "TOUGH LOVE",
+      "dailyValues": {
+        "2026-03-18": { "value": 2958, "source": "show_champion", "episode": 589 }
+      },
+      "embeds": {
+        "2026-03-09": [
+          {
+            "eventType": "release_date",
+            "links": [
+              { "url": "https://music.apple.com/us/album/tough-love-ep/1879738920" }
+            ]
+          },
+          {
+            "eventType": "mv",
+            "links": [
+              { "url": "https://youtu.be/geONm_InNZA?si=uuLzlsP41OKBRlkM" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

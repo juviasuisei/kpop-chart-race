@@ -115,10 +115,13 @@ export function hasRecentActivity(
  * Filter entries by zoom level with a 30-day activity check for zoom 10.
  *
  * At zoom 10:
- * - Rank 1 is always included.
- * - For ranks 2-10: inactive artists (no activity in last 30 days) are only
- *   removed if there are active artists outside the top 10 to replace them.
- *   Removal happens from the bottom of the top 10 upward.
+ * - Rank 1 is always shown (the ultimate goalpost).
+ * - Active artists (activity in last 30 days) fill slots.
+ * - One "goalpost" inactive artist is shown: the one ranked just above the
+ *   highest-ranked active artist, giving them a visible target to chase.
+ * - Inactive artists from the bottom of the top 10 are replaced by active
+ *   artists from outside the top 10 when available.
+ * - If fewer than 10 qualify, show what we have.
  * At zoom "all", returns all entries unchanged.
  */
 export function filterByActivity(
@@ -128,36 +131,47 @@ export function filterByActivity(
   zoomLevel: ZoomLevel,
 ): RankedEntry[] {
   if (zoomLevel !== 10) return filterByZoom(entries, zoomLevel);
+  if (entries.length === 0) return [];
 
   const cutoff = dateMinusDays(snapshotDate, 30);
 
-  // Get top 10 and the rest
-  const top10 = entries.slice(0, 10);
-  const outside = entries.slice(10);
+  // Classify all entries by activity
+  const isActive = (e: RankedEntry) =>
+    hasRecentActivity(e.artistId, cutoff, snapshotDate, dataStore);
 
-  // Find active artists outside top 10
-  const activeOutside = outside.filter(e =>
-    hasRecentActivity(e.artistId, cutoff, snapshotDate, dataStore)
-  );
+  // Always include rank 1
+  const result: RankedEntry[] = [entries[0]];
 
-  // Find inactive artists in top 10 (excluding rank 1)
-  const inactiveInTop10: number[] = [];
-  for (let i = top10.length - 1; i >= 1; i--) {
-    if (!hasRecentActivity(top10[i].artistId, cutoff, snapshotDate, dataStore)) {
-      inactiveInTop10.push(i);
+  // Find all active entries (excluding rank 1 which is already included)
+  const activeEntries = entries.filter((e, i) => i > 0 && isActive(e));
+
+  // Find the "goalpost" — the inactive artist ranked just above the highest active one.
+  // This gives the top active artist a visible target to chase toward #1.
+  if (activeEntries.length > 0) {
+    const highestActiveRank = activeEntries[0].rank;
+
+    // Look for the inactive entry between rank 1 and the highest active rank
+    // Walk down from rank 2 to find the last inactive before the highest active
+    let goalpost: RankedEntry | null = null;
+    for (let i = 1; i < entries.length; i++) {
+      if (entries[i].rank >= highestActiveRank) break;
+      if (!isActive(entries[i])) {
+        goalpost = entries[i]; // keep updating — we want the one closest to the active
+      }
+    }
+
+    if (goalpost && goalpost.artistId !== entries[0].artistId) {
+      result.push(goalpost);
     }
   }
 
-  // Replace inactive from bottom, one at a time, only if there's an active replacement
-  const result = [...top10];
-  let replacementIdx = 0;
-  for (const inactiveIdx of inactiveInTop10) {
-    if (replacementIdx < activeOutside.length) {
-      result[inactiveIdx] = activeOutside[replacementIdx];
-      replacementIdx++;
+  // Add active entries (up to 10 total)
+  for (const entry of activeEntries) {
+    if (result.length >= 10) break;
+    if (!result.some(r => r.artistId === entry.artistId)) {
+      result.push(entry);
     }
   }
 
-  // Remove any remaining nulls and return up to 10
-  return result.filter(Boolean).slice(0, 10);
+  return result.slice(0, 10);
 }

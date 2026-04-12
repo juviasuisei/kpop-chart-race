@@ -48,24 +48,17 @@ export class LoadingScreen {
     container.appendChild(wrapper);
   }
 
-  /** Update progress text, bar width, and append artist names. */
+  /** Update progress for a single artist being loaded. */
   onFileProgress(loaded: number, total: number, artistNames: string[]): void {
-    if (this.progressText) {
-      this.progressText.textContent = `Loading ${loaded} of ${total} artists...`;
+    if (this.progressText && artistNames.length > 0) {
+      this.progressText.textContent = `Loading ${artistNames[artistNames.length - 1]}`;
+    } else if (this.progressText) {
+      this.progressText.textContent = `Loading artists...`;
     }
 
     if (this.progressBarFill && total > 0) {
       const pct = (loaded / total) * 100;
       this.progressBarFill.style.width = `${pct}%`;
-    }
-
-    if (this.artistCredits) {
-      for (const name of artistNames) {
-        const span = document.createElement("span");
-        span.className = "artist-credits__name";
-        span.textContent = name;
-        this.artistCredits.appendChild(span);
-      }
     }
   }
 

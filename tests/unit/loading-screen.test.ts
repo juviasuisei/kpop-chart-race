@@ -24,27 +24,23 @@ describe('LoadingScreen', () => {
   });
 
   // 12.2 — File progress indicator display
-  it('updates progress text to "Loading X of X artists..."', () => {
+  it('updates progress text to show artist name', () => {
     screen.mount(container);
     screen.onFileProgress(3, 12, ['Artist A']);
 
     const text = container.querySelector('.loading-screen__progress-text');
     expect(text).not.toBeNull();
-    expect(text!.textContent).toBe('Loading 3 of 12 artists...');
+    expect(text!.textContent).toBe('Loading Artist A');
   });
 
   // 12.3 — Artist name scrolling on file parse
-  it('appends artist name spans to .artist-credits', () => {
+  it('shows the last artist name in progress text', () => {
     screen.mount(container);
-    screen.onFileProgress(1, 5, ['Luna Park', 'Jay Storm']);
+    screen.onFileProgress(2, 5, ['Jay Storm']);
 
-    const credits = container.querySelector('.artist-credits');
-    expect(credits).not.toBeNull();
-
-    const spans = credits!.querySelectorAll('.artist-credits__name');
-    expect(spans.length).toBe(2);
-    expect(spans[0].textContent).toBe('Luna Park');
-    expect(spans[1].textContent).toBe('Jay Storm');
+    const text = container.querySelector('.loading-screen__progress-text');
+    expect(text).not.toBeNull();
+    expect(text!.textContent).toBe('Loading Jay Storm');
   });
 
   // 12.4 — Progress bar display

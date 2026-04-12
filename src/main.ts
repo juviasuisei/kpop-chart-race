@@ -39,7 +39,9 @@ async function main(): Promise<void> {
 
   let dataStore: DataStore;
   try {
-    dataStore = await loadAll("data");
+    dataStore = await loadAll("data", (loaded, total, name) => {
+      loadingScreen.onFileProgress(loaded, total, [name]);
+    });
 
     if (dataStore.artists.size === 0) {
       loadingScreen.onError("No chart data available.");
@@ -49,11 +51,6 @@ async function main(): Promise<void> {
     // Compute chart wins and attach to dataStore
     dataStore.chartWins = computeChartWins(dataStore);
 
-    loadingScreen.onFileProgress(
-      dataStore.artists.size,
-      dataStore.artists.size,
-      Array.from(dataStore.artists.values()).map((a) => a.name),
-    );
     await loadingScreen.onComplete();
   } catch (_err) {
     loadingScreen.onError(

@@ -188,7 +188,10 @@ function collectSortedDates(artists: Map<string, ParsedArtist>): string[] {
  * @param basePath - The base URL path to the data folder (e.g. "data" or "/data")
  * @returns A fully populated DataStore
  */
-export async function loadAll(basePath: string): Promise<DataStore> {
+export async function loadAll(
+  basePath: string,
+  onProgress?: (loaded: number, total: number, artistName: string) => void,
+): Promise<DataStore> {
   // Fetch the manifest listing all JSON filenames
   let filenames: string[];
   try {
@@ -232,6 +235,10 @@ export async function loadAll(basePath: string): Promise<DataStore> {
 
       const parsed = toParseArtist(entry, filename);
       artists.set(parsed.id, parsed);
+
+      if (onProgress) {
+        onProgress(artists.size, filenames.length, parsed.name);
+      }
     } catch (err) {
       console.error(`[Data_Loader] Error loading "${filename}":`, err);
       continue;

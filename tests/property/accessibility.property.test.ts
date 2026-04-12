@@ -40,8 +40,8 @@ describe('Property 17: Loading Progress Display', () => {
           expect(progressText).not.toBeNull();
 
           const text = progressText!.textContent ?? '';
-          // Text must contain both loaded and total counts (e.g., "3/12 files")
-          expect(text).toContain(`${loaded}/${total}`);
+          // Text must contain both loaded and total counts (e.g., "Loading 3 of 12 artists...")
+          expect(text).toContain(`${loaded} of ${total}`);
 
           const barFill = container.querySelector('.progress-bar-fill') as HTMLElement;
           expect(barFill).not.toBeNull();

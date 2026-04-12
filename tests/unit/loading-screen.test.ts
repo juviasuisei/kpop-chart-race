@@ -24,13 +24,13 @@ describe('LoadingScreen', () => {
   });
 
   // 12.2 — File progress indicator display
-  it('updates progress text to "Loading... N/M files"', () => {
+  it('updates progress text to "Loading X of X artists..."', () => {
     screen.mount(container);
     screen.onFileProgress(3, 12, ['Artist A']);
 
     const text = container.querySelector('.loading-screen__progress-text');
     expect(text).not.toBeNull();
-    expect(text!.textContent).toBe('Loading... 3/12 files');
+    expect(text!.textContent).toBe('Loading 3 of 12 artists...');
   });
 
   // 12.3 — Artist name scrolling on file parse

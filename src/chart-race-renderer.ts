@@ -443,6 +443,11 @@ export class ChartRaceRenderer {
     barEl.nameSpan.classList.remove("bar__name--outside");
     barEl.genSpan.classList.remove("bar__gen--outside");
     barEl.typeIndicator.classList.remove("bar__type-indicator--outside");
+
+    // Ensure wins stays right after value in the wrapper
+    if (barEl.winsSpan.previousElementSibling !== barEl.valueSpan) {
+      barEl.wrapper.insertBefore(barEl.winsSpan, barEl.valueSpan.nextSibling);
+    }
   }
 
   /** Check if bar content overflows and move elements outside as needed */
@@ -459,7 +464,7 @@ export class ChartRaceRenderer {
     barEl.bar.style.overflow = "";
 
     if (releaseIsTruncated || barIsOverflowing) {
-      barEl.wrapper.insertBefore(barEl.releaseSpan, barEl.valueSpan.nextSibling);
+      barEl.wrapper.insertBefore(barEl.releaseSpan, barEl.winsSpan.nextSibling);
       barEl.releaseSpan.classList.add("bar__release--outside");
 
       // Re-measure with release removed
@@ -472,7 +477,6 @@ export class ChartRaceRenderer {
         barEl.wrapper.insertBefore(barEl.nameSpan, barEl.valueSpan);
         barEl.wrapper.insertBefore(barEl.genSpan, barEl.valueSpan);
         barEl.wrapper.insertBefore(barEl.typeIndicator, barEl.valueSpan);
-        barEl.wrapper.insertBefore(barEl.winsSpan, barEl.valueSpan);
         barEl.nameSpan.classList.add("bar__name--outside");
         barEl.genSpan.classList.add("bar__gen--outside");
         barEl.typeIndicator.classList.add("bar__type-indicator--outside");

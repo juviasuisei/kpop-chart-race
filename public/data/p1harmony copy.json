@@ -1,0 +1,39 @@
+{
+  "name": "NouerA",
+  "korean_name": "누에라",
+  "artistType": "boy_group",
+  "generation": 5,
+  "debut": "2025-02-26",
+  "releases": [
+    {
+      "title": "UNIQUE",
+      "dailyValues": {
+        "2026-03-20": { "value": 10034, "source": "music_bank", "episode": 1285 }
+      },
+      "embeds": {
+        "2026-03-20": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://youtu.be/VTnnR8YGXhc?si=oRAN3sw3mS8rG7dQ" }
+            ]
+          }
+        ],
+        "2026-03-12": [
+          {
+            "eventType": "release_date",
+            "links": [
+              { "url": "https://music.apple.com/us/album/unique-ep/1878335259" }
+            ]
+          },
+          {
+            "eventType": "mv",
+            "links": [
+              { "url": "https://youtu.be/m18dRRu9-V4?si=CYt7UhaoWT6R-Og3" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

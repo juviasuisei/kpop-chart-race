@@ -12,7 +12,8 @@
         "2026-04-04": { "value": 4423, "source": "show_music_core", "episode": 939 },
         "2026-03-29": { "value": 4218, "source": "inkigayo", "episode": 1304 },
         "2026-03-27": { "value": 3042, "source": "music_bank", "episode": 1286 },
-        "2026-03-22": { "value": 5365, "source": "inkigayo", "episode": 1304 }
+        "2026-03-22": { "value": 5365, "source": "inkigayo", "episode": 1304 },
+        "2026-03-21": { "value": 5976, "source": "show_music_core", "episode": 938 }
       },
       "embeds": {
         "2026-02-09": [

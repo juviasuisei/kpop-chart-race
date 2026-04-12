@@ -173,5 +173,16 @@ export function filterByActivity(
     }
   }
 
+  // Backfill remaining slots with inactive artists by rank (2, 3, 4, etc.)
+  // if there aren't enough active artists to fill 10 slots
+  if (result.length < 10) {
+    for (const entry of entries) {
+      if (result.length >= 10) break;
+      if (!result.some(r => r.artistId === entry.artistId)) {
+        result.push(entry);
+      }
+    }
+  }
+
   return result.slice(0, 10);
 }

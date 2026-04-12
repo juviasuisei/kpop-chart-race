@@ -1,0 +1,39 @@
+{
+  "name": "H1-KEY",
+  "korean_name": "하이키",
+  "artistType": "girl_group",
+  "generation": 4,
+  "debut": "2022-01-05",
+  "releases": [
+    {
+      "title": "To. My First Love",
+      "dailyValues": {
+        "2026-03-11": { "value": 2303, "source": "show_champion", "episode": 588 }
+      },
+      "embeds": {
+        "2026-03-11": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://youtu.be/AkEMneW9xrs?si=mLipWiY41WB0g_C-" }
+            ]
+          }
+        ],
+        "2026-02-23": [
+          {
+            "eventType": "release_date",
+            "links": [
+              { "url": "https://music.apple.com/us/album/lovechapter/1882194752" }
+            ]
+          },
+          {
+            "eventType": "mv",
+            "links": [
+              { "url": "https://youtu.be/sBx08M4cDME?si=L_5loe8KC8c8nPs3" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

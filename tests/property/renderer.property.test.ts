@@ -60,41 +60,34 @@ describe('Property 9: Tween Interpolation', () => {
 // **Validates: Requirements 4.7**
 // ============================================================
 
-/** Reference implementation for Roman numeral conversion */
-function referenceRoman(n: number): string {
-  const values = [1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1];
-  const numerals = ['M', 'CM', 'D', 'CD', 'C', 'XC', 'L', 'XL', 'X', 'IX', 'V', 'IV', 'I'];
-  let remaining = n;
-  let result = '';
-  for (let i = 0; i < values.length; i++) {
-    while (remaining >= values[i]) {
-      result += numerals[i];
-      remaining -= values[i];
-    }
-  }
-  return `Gen ${result}`;
+/** Reference implementation for ordinal generation string */
+function referenceOrdinalGen(n: number): string {
+  const s = ['th', 'st', 'nd', 'rd'];
+  const v = n % 100;
+  const suffix = s[(v - 20) % 10] || s[v] || s[0];
+  return `${n}${suffix} Gen`;
 }
 
-describe('Property 10: Generation to Roman Numeral Conversion', () => {
-  it('produces correct "Gen " + Roman numeral for any positive integer 1-100', () => {
+describe('Property 10: Generation to Ordinal Conversion', () => {
+  it('produces correct ordinal gen string for any positive integer 1-100', () => {
     fc.assert(
       fc.property(
         fc.integer({ min: 1, max: 100 }),
         (n) => {
           const result = toRomanNumeral(n);
-          const expected = referenceRoman(n);
+          const expected = referenceOrdinalGen(n);
           expect(result).toBe(expected);
         },
       ),
     );
   });
 
-  it('result always starts with "Gen "', () => {
+  it('result always ends with " Gen"', () => {
     fc.assert(
       fc.property(
         fc.integer({ min: 1, max: 100 }),
         (n) => {
-          expect(toRomanNumeral(n)).toMatch(/^Gen [IVXLCDM]+$/);
+          expect(toRomanNumeral(n)).toMatch(/^\d+(st|nd|rd|th) Gen$/);
         },
       ),
     );

@@ -1,0 +1,31 @@
+{
+  "name": "NCT JNJM",
+  "korean_name": "엔시티 제노재민",
+  "artistType": "boy_group",
+  "generation": 3,
+  "debut": "2026-02-23",
+  "releases": [
+    {
+      "title": "BOTH SIDES",
+      "dailyValues": {
+        "2026-03-13": { "value": 4138, "source": "music_bank", "episode": 1284 }
+      },
+      "embeds": {
+        "2026-02-23": [
+          {
+            "eventType": "release_date",
+            "links": [
+              { "url": "https://music.apple.com/us/album/both-sides-the-1st-mini-album-ep/1875871527" }
+            ]
+          },
+          {
+            "eventType": "mv",
+            "links": [
+              { "url": "https://youtu.be/QWFIz75ad6I?si=SP1DpEIEPysNFHj8" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

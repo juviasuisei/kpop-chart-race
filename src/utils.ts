@@ -15,24 +15,14 @@ export function tween(start: number, end: number, t: number): number {
 }
 
 /**
- * Convert a positive integer to a "Gen N" Roman numeral string.
- * Uses the standard subtractive Roman numeral algorithm.
+ * Convert a positive integer to an ordinal generation string.
+ * E.g., 1 → "1st Gen", 2 → "2nd Gen", 3 → "3rd Gen", 4 → "4th Gen".
  */
 export function toRomanNumeral(n: number): string {
-  const values = [1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1];
-  const numerals = [
-    "M", "CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I",
-  ];
-
-  let remaining = n;
-  let result = "";
-  for (let i = 0; i < values.length; i++) {
-    while (remaining >= values[i]) {
-      result += numerals[i];
-      remaining -= values[i];
-    }
-  }
-  return `Gen ${result}`;
+  const s = ["th", "st", "nd", "rd"];
+  const v = n % 100;
+  const suffix = s[(v - 20) % 10] || s[v] || s[0];
+  return `${n}${suffix} Gen`;
 }
 
 /**

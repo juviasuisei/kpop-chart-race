@@ -12,7 +12,9 @@
         "2026-03-25": { "value": 2633, "source": "show_champion", "episode": 590 },
         "2026-03-22": { "value": 4250, "source": "inkigayo", "episode": 1304 },
         "2026-03-19": { "value": 4953, "source": "m_countdown", "episode": 920 },
-        "2026-03-15": { "value": 5935, "source": "inkigayo", "episode": 1303 }
+        "2026-03-15": { "value": 5935, "source": "inkigayo", "episode": 1303 },
+        "2026-03-12": { "value": 8294, "source": "m_countdown", "episode": 919 },
+        "2026-03-11": { "value": 6907, "source": "show_champion", "episode": 588 }
       },
       "embeds": {
         "2026-02-27": [

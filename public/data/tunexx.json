@@ -1,0 +1,31 @@
+{
+  "name": "TUNEXX",
+  "korean_name": "튜넥스",
+  "artistType": "boy_group",
+  "generation": 5,
+  "debut": "2026-03-03",
+  "releases": [
+    {
+      "title": "I'm Alive",
+      "dailyValues": {
+        "2026-03-11": { "value": 3007, "source": "show_champion", "episode": 588 }
+      },
+      "embeds": {
+        "2026-03-03": [
+          {
+            "eventType": "release_date",
+            "links": [
+              { "url": "https://music.apple.com/us/album/set-by-us-only-ep/1879739715" }
+            ]
+          },
+          {
+            "eventType": "mv",
+            "links": [
+              { "url": "https://youtu.be/cQESe4Jc0rE?si=2kM-OCCm7GVQ-A6J" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

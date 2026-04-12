@@ -234,7 +234,7 @@ describe('ChartRaceRenderer', () => {
 
     const gen = container.querySelector('.bar__gen');
     expect(gen).not.toBeNull();
-    expect(gen!.textContent).toBe('Gen IV');
+    expect(gen!.textContent).toBe('4th Gen');
   });
 
   // 14. Destroy removes chart from DOM

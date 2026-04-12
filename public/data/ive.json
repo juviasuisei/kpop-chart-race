@@ -38,7 +38,8 @@
     {
       "title": "BLACKHOLE",
       "dailyValues": {
-        "2026-03-18": { "value": 2887, "source": "show_champion", "episode": 589 }
+        "2026-03-18": { "value": 2887, "source": "show_champion", "episode": 589 },
+        "2026-03-11": { "value": 3643, "source": "show_champion", "episode": 588 }
       },
       "embeds": {
         "2026-02-23": [

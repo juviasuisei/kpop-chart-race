@@ -23,7 +23,7 @@ export class LoadingScreen {
 
     this.progressText = document.createElement("p");
     this.progressText.className = "loading-screen__progress-text";
-    this.progressText.textContent = "Loading... 0/0 files";
+    this.progressText.textContent = "Loading artists...";
     wrapper.appendChild(this.progressText);
 
     this.progressBarContainer = document.createElement("div");
@@ -51,7 +51,7 @@ export class LoadingScreen {
   /** Update progress text, bar width, and append artist names. */
   onFileProgress(loaded: number, total: number, artistNames: string[]): void {
     if (this.progressText) {
-      this.progressText.textContent = `Loading... ${loaded}/${total} files`;
+      this.progressText.textContent = `Loading ${loaded} of ${total} artists...`;
     }
 
     if (this.progressBarFill && total > 0) {

@@ -791,11 +791,12 @@ body {
 
 @media (max-width: 767px) {
   .chart-race__bar {
-    max-width: 65%;
+    max-width: 55%;
   }
 
   .bar__rank {
     font-size: 0.6rem;
+    min-width: 2em;
   }
 
   .bar__name {
@@ -808,6 +809,9 @@ body {
 
   .bar__value {
     font-size: 0.65rem;
+    flex-shrink: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .bar__release {

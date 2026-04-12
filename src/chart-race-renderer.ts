@@ -417,20 +417,16 @@ export class ChartRaceRenderer {
     barEl.wrapper.style.transform = `translateY(${yPosition}px)`;
     barEl.wrapper.style.height = `${barHeight}px`;
 
-    // Smart overflow: only reset inside when the bar is growing (more room available).
-    // Otherwise leave the current overflow state to avoid flicker.
+    // Smart overflow: never reset inside during the update to avoid flicker.
+    // Only check after the transition completes.
     const newWidthNum = widthPercent;
     const oldWidthNum = parseFloat(oldWidth || "0");
-    const barGrew = newWidthNum > oldWidthNum;
-    if (barGrew) {
-      this.moveAllInside(barEl);
-    }
+    const barGrew = newWidthNum > oldWidthNum + 1; // significant growth only
     // Cancel any pending overflow check from the previous update
     if (barEl.overflowTimeoutId !== null) {
       clearTimeout(barEl.overflowTimeoutId);
     }
     // After transition completes, check what fits.
-    // Only reset inside if bar grew — otherwise just check current state.
     barEl.overflowTimeoutId = setTimeout(() => {
       barEl.overflowTimeoutId = null;
       if (barGrew) {

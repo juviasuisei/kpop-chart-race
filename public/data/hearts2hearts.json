@@ -8,6 +8,7 @@
     {
       "title": "RUDE!",
       "dailyValues": {
+        "2026-04-12": { "value": 4228, "source": "inkigayo", "episode": 1306 },
         "2026-04-11": { "value": 6214, "source": "show_music_core", "episode": 940 },
         "2026-04-04": { "value": 5125, "source": "show_music_core", "episode": 939 },
         "2026-03-22": { "value": 5769, "source": "inkigayo", "episode": 1304 },
@@ -17,7 +18,11 @@
         "2026-03-15": { "value": 5413, "source": "inkigayo", "episode": 1303 },
         "2026-03-14": { "value": 7514, "source": "show_music_core", "episode": 937 },
         "2026-03-12": { "value": 7965, "source": "m_countdown", "episode": 919 },
-        "2026-03-11": { "value": 5218, "source": "show_champion", "episode": 588 }
+        "2026-03-11": { "value": 5218, "source": "show_champion", "episode": 588 },
+        "2026-03-08": { "value": 5405, "source": "inkigayo", "episode": 1302 },
+        "2026-03-07": { "value": 6876, "source": "show_music_core", "episode": 936 },
+        "2026-03-05": { "value": 9389, "source": "m_countdown", "episode": 918 },
+        "2026-03-04": { "value": 5579, "source": "show_champion", "episode": 587 }
       },
       "embeds": {
         "2026-03-14": [
@@ -33,6 +38,22 @@
             "eventType": "live_performance",
             "links": [
               { "url": "https://youtu.be/o_cBHoHY3mw?si=oXInfcIeohZ6Qs-4" }
+            ]
+          }
+        ],
+        "2026-03-08": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://youtu.be/Ai6FLQmajaI?si=ePTbUBIOiSSDSjwt" }
+            ]
+          }
+        ],
+        "2026-03-07": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://youtu.be/37VtoDg5O2o?si=MIGDQT6cMSP86897" }
             ]
           }
         ],

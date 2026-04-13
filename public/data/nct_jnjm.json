@@ -8,9 +8,19 @@
     {
       "title": "BOTH SIDES",
       "dailyValues": {
-        "2026-03-13": { "value": 4138, "source": "music_bank", "episode": 1284 }
+        "2026-03-13": { "value": 4138, "source": "music_bank", "episode": 1284 },
+        "2026-03-06": { "value": 6745, "source": "music_bank", "episode": 1283 },
+        "2026-03-04": { "value": 3799, "source": "show_champion", "episode": 587 }
       },
       "embeds": {
+        "2026-03-06": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://youtu.be/2pYCkdu1WCw?si=VCg6TaZeZrnh11XH" }
+            ]
+          }
+        ],
         "2026-02-23": [
           {
             "eventType": "release_date",

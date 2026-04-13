@@ -1,0 +1,39 @@
+{
+  "name": "ONE PACT",
+  "korean_name": "원팩트",
+  "artistType": "boy_group",
+  "generation": 5,
+  "debut": "2023-11-30",
+  "releases": [
+    {
+      "title": "SANE",
+      "dailyValues": {
+        "2026-03-04": { "value": 2294, "source": "show_champion", "episode": 587 }
+      },
+      "embeds": {
+        "2026-03-04": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://youtu.be/JRxlKh6mxUQ?si=lo1Q2pZS63KnSjRL" }
+            ]
+          }
+        ],
+        "2026-02-26": [
+          {
+            "eventType": "release_date",
+            "links": [
+              { "url": "https://music.apple.com/us/album/1only-ep/1877011630" }
+            ]
+          },
+          {
+            "eventType": "mv",
+            "links": [
+              { "url": "https://youtu.be/C6--84TzxZc?si=YPXPXynhbZStwFse" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

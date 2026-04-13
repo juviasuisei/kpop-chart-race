@@ -8,6 +8,7 @@
     {
       "title": "BANG BANG",
       "dailyValues": {
+        "2026-04-12": { "value": 4261, "source": "inkigayo", "episode": 1306 },
         "2026-04-05": { "value": 4047, "source": "inkigayo", "episode": 1305 },
         "2026-04-04": { "value": 4423, "source": "show_music_core", "episode": 939 },
         "2026-03-29": { "value": 4218, "source": "inkigayo", "episode": 1304 },
@@ -16,9 +17,28 @@
         "2026-03-21": { "value": 5976, "source": "show_music_core", "episode": 938 },
         "2026-03-15": { "value": 5422, "source": "inkigayo", "episode": 1303 },
         "2026-03-14": { "value": 6730, "source": "show_music_core", "episode": 937 },
-        "2026-03-13": { "value": 4405, "source": "music_bank", "episode": 1284 }
+        "2026-03-13": { "value": 4405, "source": "music_bank", "episode": 1284 },
+        "2026-03-08": { "value": 6612, "source": "inkigayo", "episode": 1302 },
+        "2026-03-07": { "value": 7205, "source": "show_music_core", "episode": 936 },
+        "2026-03-06": { "value": 8840, "source": "music_bank", "episode": 1283 }
       },
       "embeds": {
+        "2026-03-08": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://youtu.be/iVQz6J0mSY8?si=7vH4z0qkA-f2HQkE" }
+            ]
+          }
+        ],
+        "2026-03-07": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://youtu.be/eZjGoXOD82w?si=JIIQQF-n9WoLQI6j" }
+            ]
+          }
+        ],
         "2026-02-09": [
           {
             "eventType": "release_date",
@@ -39,7 +59,8 @@
       "title": "BLACKHOLE",
       "dailyValues": {
         "2026-03-18": { "value": 2887, "source": "show_champion", "episode": 589 },
-        "2026-03-11": { "value": 3643, "source": "show_champion", "episode": 588 }
+        "2026-03-11": { "value": 3643, "source": "show_champion", "episode": 588 },
+        "2026-03-04": { "value": 5716, "source": "show_champion", "episode": 587 }
       },
       "embeds": {
         "2026-02-23": [

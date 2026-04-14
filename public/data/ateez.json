@@ -1,0 +1,31 @@
+{
+  "name": "ATEEZ",
+  "korean_name": "에이티즈",
+  "artistType": "boy_group",
+  "generation": 4,
+  "debut": "2018-10-24",
+  "releases": [
+    {
+      "title": "Adrenaline",
+      "dailyValues": {
+        "2026-02-27": { "value": 5130, "source": "music_bank", "episode": 1282 }
+      },
+      "embeds": {
+        "2026-02-06": [
+          {
+            "eventType": "release_date",
+            "links": [
+              { "url": "https://music.apple.com/us/album/golden-hour-part-4-ep/1867153027" }
+            ]
+          },
+          {
+            "eventType": "mv",
+            "links": [
+              { "url": "https://youtu.be/vqkfEUqjl6Y?si=1oD4o64cv41HgB0b" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

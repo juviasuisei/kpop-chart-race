@@ -1,0 +1,31 @@
+{
+  "name": "LE SSERAFIM",
+  "korean_name": "르세라핌",
+  "artistType": "girl_group",
+  "generation": 4,
+  "debut": "2022-05-02",
+  "releases": [
+    {
+      "title": "SPAGHETTI",
+      "dailyValues": {
+        "2026-03-01": { "value": 4576, "source": "inkigayo", "episode": 1301 }
+      },
+      "embeds": {
+        "2025-10-24": [
+          {
+            "eventType": "release_date",
+            "links": [
+              { "url": "https://music.apple.com/us/album/spaghetti/1846119152" }
+            ]
+          },
+          {
+            "eventType": "mv",
+            "links": [
+              { "url": "https://youtu.be/TvVtYaqCni8?si=TwOZPP6vpvQzK-JM" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

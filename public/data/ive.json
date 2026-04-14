@@ -20,7 +20,11 @@
         "2026-03-13": { "value": 4405, "source": "music_bank", "episode": 1284 },
         "2026-03-08": { "value": 6612, "source": "inkigayo", "episode": 1302 },
         "2026-03-07": { "value": 7205, "source": "show_music_core", "episode": 936 },
-        "2026-03-06": { "value": 8840, "source": "music_bank", "episode": 1283 }
+        "2026-03-06": { "value": 8840, "source": "music_bank", "episode": 1283 },
+        "2026-03-01": { "value": 8345, "source": "inkigayo", "episode": 1301 },
+        "2026-02-28": { "value": 7103, "source": "show_music_core", "episode": 935 },
+        "2026-02-27": { "value": 7695, "source": "music_bank", "episode": 1282 },
+        "2026-02-26": { "value": 7985, "source": "m_countdown", "episode": 917 }
       },
       "embeds": {
         "2026-03-08": [

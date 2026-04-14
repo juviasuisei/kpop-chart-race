@@ -22,7 +22,8 @@
         "2026-03-08": { "value": 5405, "source": "inkigayo", "episode": 1302 },
         "2026-03-07": { "value": 6876, "source": "show_music_core", "episode": 936 },
         "2026-03-05": { "value": 9389, "source": "m_countdown", "episode": 918 },
-        "2026-03-04": { "value": 5579, "source": "show_champion", "episode": 587 }
+        "2026-03-04": { "value": 5579, "source": "show_champion", "episode": 587 },
+        "2026-02-28": { "value": 3735, "source": "show_music_core", "episode": 935 }
       },
       "embeds": {
         "2026-03-14": [
@@ -54,6 +55,14 @@
             "eventType": "live_performance",
             "links": [
               { "url": "https://youtu.be/37VtoDg5O2o?si=MIGDQT6cMSP86897" }
+            ]
+          }
+        ],
+        "2026-02-28": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://youtu.be/QtdZsoIKDyo?si=vTOk2oCkeHbp_RgH" }
             ]
           }
         ],

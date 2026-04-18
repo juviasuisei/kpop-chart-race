@@ -104,16 +104,14 @@ export function hasRecentActivity(
 /**
  * Filter entries by zoom level with a 30-day activity check for zoom 10.
  *
- * At zoom 10:
- * - Always show #1 (the ultimate goalpost).
- * - For each active artist, also keep the inactive artist immediately above
- *   them as a "goalpost" — the next target to chase.
- * - An inactive artist is only hidden if:
- *   (a) there are enough active artists + goalposts to fill 10 slots, AND
- *   (b) the inactive artist is not a goalpost for any active artist below it.
- * - Slots are always filled contiguously (no gaps) — if rank 7 is hidden,
- *   rank 8 takes the 7th visual slot.
- * - Backfill with inactive artists by rank if fewer than 10 qualify.
+ * Rules:
+ * - Always show #1.
+ * - Include all active artists (activity in last 30 days).
+ * - For each included artist, also include the entry immediately above it
+ *   (its "goalpost" — the next target to chase). This chains: if rank 10
+ *   is a goalpost for rank 11, then rank 9 becomes a goalpost for rank 10.
+ * - Slots are contiguous — no visual gaps.
+ * - Backfill with entries by rank if fewer than 10 qualify.
  * At zoom "all", returns all entries unchanged.
  */
 export function filterByActivity(
@@ -130,42 +128,44 @@ export function filterByActivity(
   const isActive = (e: RankedEntry) =>
     hasRecentActivity(e.artistId, cutoff, snapshotDate, dataStore);
 
-  // Build a set of entries to include:
-  // 1. Always include rank 1
-  // 2. Include all active entries
-  // 3. For each active entry, include the inactive entry immediately above it
-  //    (the goalpost — the next target to chase)
-  const includeSet = new Set<string>();
-  includeSet.add(entries[0].artistId); // rank 1 always
+  // Step 1: Mark all entries we must include
+  const include = new Array(entries.length).fill(false);
 
+  // Always include rank 1
+  include[0] = true;
+
+  // Include all active entries
   for (let i = 0; i < entries.length; i++) {
     if (isActive(entries[i])) {
-      includeSet.add(entries[i].artistId);
+      include[i] = true;
+    }
+  }
 
-      // Find the goalpost: the closest inactive entry above this active one
-      for (let j = i - 1; j >= 0; j--) {
-        if (!isActive(entries[j]) && !includeSet.has(entries[j].artistId)) {
-          includeSet.add(entries[j].artistId);
-          break; // only one goalpost per active artist
-        }
-        // If we hit another active or already-included entry, that's the goalpost boundary
-        if (isActive(entries[j]) || includeSet.has(entries[j].artistId)) {
-          break;
-        }
+  // Step 2: Goalpost chaining — for each included entry, also include
+  // the entry immediately above it IF that entry is inactive.
+  // This chains through consecutive inactive entries above an active one.
+  // Active entries above don't need goalpost chaining (they're already included).
+  let changed = true;
+  while (changed) {
+    changed = false;
+    for (let i = 1; i < entries.length; i++) {
+      if (include[i] && !include[i - 1] && !isActive(entries[i - 1])) {
+        include[i - 1] = true;
+        changed = true;
       }
     }
   }
 
-  // Build result from included entries, maintaining rank order
+  // Step 3: Build result from included entries, maintaining rank order
   const result: RankedEntry[] = [];
-  for (const entry of entries) {
+  for (let i = 0; i < entries.length; i++) {
     if (result.length >= 10) break;
-    if (includeSet.has(entry.artistId)) {
-      result.push(entry);
+    if (include[i]) {
+      result.push(entries[i]);
     }
   }
 
-  // Backfill remaining slots with next entries by rank if fewer than 10
+  // Step 4: Backfill remaining slots with next entries by rank
   if (result.length < 10) {
     for (const entry of entries) {
       if (result.length >= 10) break;

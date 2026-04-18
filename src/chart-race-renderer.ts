@@ -147,7 +147,8 @@ export class ChartRaceRenderer {
     // Track which artist IDs are in the current visible set
     const visibleIds = new Set<string>();
 
-    for (const entry of visibleEntries) {
+    for (let visIdx = 0; visIdx < visibleEntries.length; visIdx++) {
+      const entry = visibleEntries[visIdx];
       visibleIds.add(entry.artistId);
       let barEl = this.bars.get(entry.artistId);
 
@@ -165,7 +166,7 @@ export class ChartRaceRenderer {
         barEl.wrapper.offsetHeight;
       }
 
-      this.updateBarElement(barEl, entry, barHeight, maxCumulative, snapshot.date, dataStore);
+      this.updateBarElement(barEl, entry, barHeight, maxCumulative, snapshot.date, dataStore, visIdx);
     }
 
     // Remove bars no longer visible
@@ -364,6 +365,7 @@ export class ChartRaceRenderer {
     maxCumulative: number,
     snapshotDate: string,
     dataStore: DataStore,
+    visualIndex: number,
   ): void {
     // Update text content
     barEl.rankSpan.textContent = `#${entry.rank}`;
@@ -412,8 +414,8 @@ export class ChartRaceRenderer {
     // Ensure opacity is 1 (transitions from 0 for new bars)
     barEl.wrapper.style.opacity = "1";
 
-    // Bar position via translateY (rank is 1-based, so rank-1 for 0-based index)
-    const yPosition = (entry.rank - 1) * barHeight;
+    // Bar position via translateY (use visual index for contiguous positioning)
+    const yPosition = visualIndex * barHeight;
     barEl.wrapper.style.transform = `translateY(${yPosition}px)`;
     barEl.wrapper.style.height = `${barHeight}px`;
 

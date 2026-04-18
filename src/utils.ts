@@ -105,13 +105,15 @@ export function hasRecentActivity(
  * Filter entries by zoom level with a 30-day activity check for zoom 10.
  *
  * At zoom 10:
- * - Rank 1 is always shown (the ultimate goalpost).
- * - Active artists (activity in last 30 days) fill slots.
- * - One "goalpost" inactive artist is shown: the one ranked just above the
- *   highest-ranked active artist, giving them a visible target to chase.
- * - Inactive artists from the bottom of the top 10 are replaced by active
- *   artists from outside the top 10 when available.
- * - If fewer than 10 qualify, show what we have.
+ * - Always show #1 (the ultimate goalpost).
+ * - For each active artist, also keep the inactive artist immediately above
+ *   them as a "goalpost" — the next target to chase.
+ * - An inactive artist is only hidden if:
+ *   (a) there are enough active artists + goalposts to fill 10 slots, AND
+ *   (b) the inactive artist is not a goalpost for any active artist below it.
+ * - Slots are always filled contiguously (no gaps) — if rank 7 is hidden,
+ *   rank 8 takes the 7th visual slot.
+ * - Backfill with inactive artists by rank if fewer than 10 qualify.
  * At zoom "all", returns all entries unchanged.
  */
 export function filterByActivity(
@@ -125,46 +127,45 @@ export function filterByActivity(
 
   const cutoff = dateMinusDays(snapshotDate, 30);
 
-  // Classify all entries by activity
   const isActive = (e: RankedEntry) =>
     hasRecentActivity(e.artistId, cutoff, snapshotDate, dataStore);
 
-  // Always include rank 1
-  const result: RankedEntry[] = [entries[0]];
+  // Build a set of entries to include:
+  // 1. Always include rank 1
+  // 2. Include all active entries
+  // 3. For each active entry, include the inactive entry immediately above it
+  //    (the goalpost — the next target to chase)
+  const includeSet = new Set<string>();
+  includeSet.add(entries[0].artistId); // rank 1 always
 
-  // Find all active entries (excluding rank 1 which is already included)
-  const activeEntries = entries.filter((e, i) => i > 0 && isActive(e));
+  for (let i = 0; i < entries.length; i++) {
+    if (isActive(entries[i])) {
+      includeSet.add(entries[i].artistId);
 
-  // Find the "goalpost" — the inactive artist ranked just above the highest active one.
-  // This gives the top active artist a visible target to chase toward #1.
-  if (activeEntries.length > 0) {
-    const highestActiveRank = activeEntries[0].rank;
-
-    // Look for the inactive entry between rank 1 and the highest active rank
-    // Walk down from rank 2 to find the last inactive before the highest active
-    let goalpost: RankedEntry | null = null;
-    for (let i = 1; i < entries.length; i++) {
-      if (entries[i].rank >= highestActiveRank) break;
-      if (!isActive(entries[i])) {
-        goalpost = entries[i]; // keep updating — we want the one closest to the active
+      // Find the goalpost: the closest inactive entry above this active one
+      for (let j = i - 1; j >= 0; j--) {
+        if (!isActive(entries[j]) && !includeSet.has(entries[j].artistId)) {
+          includeSet.add(entries[j].artistId);
+          break; // only one goalpost per active artist
+        }
+        // If we hit another active or already-included entry, that's the goalpost boundary
+        if (isActive(entries[j]) || includeSet.has(entries[j].artistId)) {
+          break;
+        }
       }
-    }
-
-    if (goalpost && goalpost.artistId !== entries[0].artistId) {
-      result.push(goalpost);
     }
   }
 
-  // Add active entries (up to 10 total)
-  for (const entry of activeEntries) {
+  // Build result from included entries, maintaining rank order
+  const result: RankedEntry[] = [];
+  for (const entry of entries) {
     if (result.length >= 10) break;
-    if (!result.some(r => r.artistId === entry.artistId)) {
+    if (includeSet.has(entry.artistId)) {
       result.push(entry);
     }
   }
 
-  // Backfill remaining slots with inactive artists by rank (2, 3, 4, etc.)
-  // if there aren't enough active artists to fill 10 slots
+  // Backfill remaining slots with next entries by rank if fewer than 10
   if (result.length < 10) {
     for (const entry of entries) {
       if (result.length >= 10) break;

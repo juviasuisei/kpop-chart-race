@@ -1,0 +1,39 @@
+{
+  "name": "KickFlip",
+  "korean_name": "킥플립",
+  "artistType": "boy_group",
+  "generation": 5,
+  "debut": "2025-01-20",
+  "releases": [
+    {
+      "title": "Eye-Poppin'",
+      "dailyValues": {
+        "2026-04-15": { "value": 6351, "source": "show_champion", "episode": 593 }
+      },
+      "embeds": {
+        "2026-04-15": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://youtu.be/vmpAw4jqQ3o?si=NSJYGjzeEPH74-ey" }
+            ]
+          }
+        ],
+        "2026-04-06": [
+          {
+            "eventType": "release_date",
+            "links": [
+              { "url": "https://music.apple.com/us/album/my-first-kick/1887433170" }
+            ]
+          },
+          {
+            "eventType": "mv",
+            "links": [
+              { "url": "https://youtu.be/i5S7DBQnqP0?si=qEG9IJsFBbBmwmhI" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

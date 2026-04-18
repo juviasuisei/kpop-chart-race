@@ -141,18 +141,12 @@ export function filterByActivity(
     }
   }
 
-  // Step 2: Goalpost chaining — for each included entry, also include
-  // the entry immediately above it IF that entry is inactive.
-  // This chains through consecutive inactive entries above an active one.
-  // Active entries above don't need goalpost chaining (they're already included).
-  let changed = true;
-  while (changed) {
-    changed = false;
-    for (let i = 1; i < entries.length; i++) {
-      if (include[i] && !include[i - 1] && !isActive(entries[i - 1])) {
-        include[i - 1] = true;
-        changed = true;
-      }
+  // Step 2: For each included entry, if the entry immediately above it is
+  // inactive and not yet included, include it as a goalpost (one per active).
+  // No chaining — only the single closest inactive above each active.
+  for (let i = 1; i < entries.length; i++) {
+    if (include[i] && i > 0 && !include[i - 1] && !isActive(entries[i - 1])) {
+      include[i - 1] = true;
     }
   }
 

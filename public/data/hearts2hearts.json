@@ -8,6 +8,8 @@
     {
       "title": "RUDE!",
       "dailyValues": {
+        "2026-04-19": { "value": 4024, "source": "inkigayo", "episode": 1307 },
+        "2026-04-18": { "value": 5518, "source": "show_music_core", "episode": 941 },
         "2026-04-12": { "value": 4228, "source": "inkigayo", "episode": 1306 },
         "2026-04-11": { "value": 6214, "source": "show_music_core", "episode": 940 },
         "2026-04-04": { "value": 5125, "source": "show_music_core", "episode": 939 },

@@ -8,9 +8,18 @@
     {
       "title": "Eye-Poppin'",
       "dailyValues": {
+        "2026-04-17": { "value": 8974, "source": "music_bank", "episode": 1289 },
         "2026-04-15": { "value": 6351, "source": "show_champion", "episode": 593 }
       },
       "embeds": {
+        "2026-04-17": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://youtu.be/tgOuEC8o718?si=7hAikBfqS2u_IE61" }
+            ]
+          }
+        ],
         "2026-04-15": [
           {
             "eventType": "live_performance",

@@ -8,7 +8,8 @@
     {
       "title": "Adrenaline",
       "dailyValues": {
-        "2026-02-27": { "value": 5130, "source": "music_bank", "episode": 1282 }
+        "2026-02-27": { "value": 5130, "source": "music_bank", "episode": 1282 },
+        "2026-02-20": { "value": 10307, "source": "music_bank", "episode": 1281 }
       },
       "embeds": {
         "2026-02-06": [

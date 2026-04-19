@@ -8,6 +8,8 @@
     {
       "title": "SWIM",
       "dailyValues": {
+        "2026-04-19": { "value": 4701, "source": "inkigayo", "episode": 1307 },
+        "2026-04-18": { "value": 5723, "source": "show_music_core", "episode": 941 },
         "2026-04-12": { "value": 8590, "source": "inkigayo", "episode": 1306 },
         "2026-04-11": { "value": 8532, "source": "show_music_core", "episode": 940 },
         "2026-04-10": { "value": 5601, "source": "music_bank", "episode": 1288 },

@@ -8,6 +8,7 @@
     {
       "title": "BANG BANG",
       "dailyValues": {
+        "2026-04-19": { "value": 4361, "source": "inkigayo", "episode": 1307 },
         "2026-04-12": { "value": 4261, "source": "inkigayo", "episode": 1306 },
         "2026-04-05": { "value": 4047, "source": "inkigayo", "episode": 1305 },
         "2026-04-04": { "value": 4423, "source": "show_music_core", "episode": 939 },
@@ -24,7 +25,8 @@
         "2026-03-01": { "value": 8345, "source": "inkigayo", "episode": 1301 },
         "2026-02-28": { "value": 7103, "source": "show_music_core", "episode": 935 },
         "2026-02-27": { "value": 7695, "source": "music_bank", "episode": 1282 },
-        "2026-02-26": { "value": 7985, "source": "m_countdown", "episode": 917 }
+        "2026-02-26": { "value": 7985, "source": "m_countdown", "episode": 917 },
+        "2026-02-20": { "value": 4198, "source": "music_bank", "episode": 1281 }
       },
       "embeds": {
         "2026-03-08": [

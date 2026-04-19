@@ -1,0 +1,49 @@
+{
+  "name": "KISS OF LIFE",
+  "korean_name": "키스오브라이프",
+  "artistType": "girl_group",
+  "generation": 5,
+  "debut": "2023-07-05",
+  "releases": [
+    {
+      "title": "Who is she",
+      "dailyValues": {
+        "2026-04-17": { "value": 6984, "source": "music_bank", "episode": 1289 },
+        "2026-04-16": { "value": 8884, "source": "m_countdown", "episode": 924 },
+        "2026-04-15": { "value": 2961, "source": "show_champion", "episode": 593 }
+      },
+      "embeds": {
+        "2026-04-17": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://youtu.be/NqZhDNOiQRM?si=MzlSfqiaWuEeIwHv" }
+            ]
+          }
+        ],
+        "2026-04-16": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://youtu.be/SnU6VNElgSY?si=hGhQSbOMQ5Q_s3ut" }
+            ]
+          }
+        ],
+        "2026-04-08": [
+          {
+            "eventType": "release_date",
+            "links": [
+              { "url": "https://music.apple.com/us/album/who-is-she-single/1886385269" }
+            ]
+          },
+          {
+            "eventType": "mv",
+            "links": [
+              { "url": "https://youtu.be/ygYPwsjyCzQ?si=GwlAvcSwXibWJLEt" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

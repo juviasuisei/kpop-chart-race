@@ -35,7 +35,7 @@ describe('ZoomSelector', () => {
     expect(selector.getLevel()).toBe(10);
   });
 
-  it('shows Top 10 label as active by default', () => {
+  it('shows 10 label as active by default', () => {
     selector.mount(container);
     const labels = container.querySelectorAll('.zoom-toggle__label');
     expect(labels[0].classList.contains('zoom-toggle__label--active')).toBe(true);

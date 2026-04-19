@@ -22,12 +22,12 @@ export class ZoomSelector {
     this.wrapper.className = "zoom-toggle";
     this.wrapper.setAttribute("role", "switch");
     this.wrapper.setAttribute("aria-checked", "false");
-    this.wrapper.setAttribute("aria-label", "Toggle between Top 10 and All artists");
+    this.wrapper.setAttribute("aria-label", "Toggle between 10 and All artists");
     this.wrapper.tabIndex = 0;
 
     const labelLeft = document.createElement("span");
     labelLeft.className = "zoom-toggle__label zoom-toggle__label--active";
-    labelLeft.textContent = "Top 10";
+    labelLeft.textContent = "10";
 
     const track = document.createElement("span");
     track.className = "zoom-toggle__track";

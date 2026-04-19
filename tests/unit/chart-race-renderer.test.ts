@@ -346,7 +346,7 @@ describe('ChartRaceRenderer', () => {
     renderer.setDataNote('2024-01-15');
     const note = container.querySelector('.chart-race__data-note');
     expect(note).not.toBeNull();
-    expect(note!.textContent).toBe('Includes points earned from 2024-01-15 forward');
+    expect(note!.textContent).toBe('Points from 2024-01-15 forward. Inactive artists may be hidden — switch to All to see full rankings.');
   });
 
   // 23. setDataNote("") leaves note empty

@@ -195,7 +195,7 @@ export class ChartRaceRenderer {
   setDataNote(startDate: string): void {
     if (!this.dataNote) return;
     this.dataNote.textContent = startDate
-      ? `Includes points earned from ${startDate} forward`
+      ? `Points from ${startDate} forward. Inactive artists may be hidden — switch to All to see full rankings.`
       : "";
   }
 

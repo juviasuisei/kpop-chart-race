@@ -9,9 +9,38 @@
       "title": "Adrenaline",
       "dailyValues": {
         "2026-02-27": { "value": 5130, "source": "music_bank", "episode": 1282 },
-        "2026-02-20": { "value": 10307, "source": "music_bank", "episode": 1281 }
+        "2026-02-20": { "value": 10307, "source": "music_bank", "episode": 1281 },
+        "2026-02-15": { "value": 4764, "source": "inkigayo", "episode": 1300 },
+        "2026-02-14": { "value": 8835, "source": "show_music_core", "episode": 935 },
+        "2026-02-13": { "value": 14413, "source": "music_bank", "episode": 1280 },
+        "2026-02-12": { "value": 6251, "source": "m_countdown", "episode": 916 },
+        "2026-02-11": { "value": 5658, "source": "show_champion", "episode": 586 }
       },
       "embeds": {
+        "2026-02-15": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://youtu.be/NAEGzlsKr3A?si=7-7BLRNjfMjG9tG9" }
+            ]
+          }
+        ],
+        "2026-02-14": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://youtu.be/R9WTsxs6BPc?si=5hWd6TIsj46tQmNW" }
+            ]
+          }
+        ],
+        "2026-02-13": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://youtu.be/Sve8GuGSvYA?si=q42xhimUOvCJRMqM" }
+            ]
+          }
+        ],
         "2026-02-06": [
           {
             "eventType": "release_date",

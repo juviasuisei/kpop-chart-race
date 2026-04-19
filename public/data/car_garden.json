@@ -1,0 +1,17 @@
+{
+  "name": "Car, the Garden",
+  "korean_name": "차정원",
+  "artistType": "solo_male",
+  "generation": 3,
+  "debut": "2013-09-24",
+  "releases": [
+    {
+      "title": "그대 작은 나의 세상이 되어",
+      "dailyValues": {
+        "2026-02-15": { "value": 3939, "source": "inkigayo", "episode": 1300 }
+      },
+      "embeds": {
+      }
+    }
+  ]
+}

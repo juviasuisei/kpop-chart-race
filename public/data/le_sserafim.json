@@ -8,7 +8,8 @@
     {
       "title": "SPAGHETTI",
       "dailyValues": {
-        "2026-03-01": { "value": 4576, "source": "inkigayo", "episode": 1301 }
+        "2026-03-01": { "value": 4576, "source": "inkigayo", "episode": 1301 },
+        "2026-02-08": { "value": 4453, "source": "inkigayo", "episode": 1299 }
       },
       "embeds": {
         "2025-10-24": [

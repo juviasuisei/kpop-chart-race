@@ -8,9 +8,30 @@
     {
       "title": "Mono",
       "dailyValues": {
-        "2026-02-11": { "value": 1286, "source": "show_champion", "episode": 586 }
+        "2026-02-11": { "value": 1286, "source": "show_champion", "episode": 586 },
+        "2026-02-08": { "value": 4570, "source": "inkigayo", "episode": 1299 },
+        "2026-02-07": { "value": 5671, "source": "show_music_core", "episode": 934 },
+        "2026-02-06": { "value": 5886, "source": "music_bank", "episode": 1279 },
+        "2026-02-05": { "value": 7693, "source": "m_countdown", "episode": 915 },
+        "2026-02-04": { "value": 2910, "source": "show_champion", "episode": 585 }
       },
       "embeds": {
+        "2026-02-08": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://youtu.be/bu4x0QoApYQ?si=HJPZVdUy5_KQZdyl" }
+            ]
+          }
+        ],
+        "2026-02-05": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://youtu.be/-_YjFFoXZag?si=BafyPhfZgd-nW0TT" }
+            ]
+          }
+        ],
         "2026-01-27": [
           {
             "eventType": "release_date",

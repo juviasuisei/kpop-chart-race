@@ -1,0 +1,39 @@
+{
+  "name": "WHIB",
+  "korean_name": "휘브",
+  "artistType": "boy_group",
+  "generation": 5,
+  "debut": "2023-11-08",
+  "releases": [
+    {
+      "title": "ROCK THE NATION",
+      "dailyValues": {
+        "2026-02-04": { "value": 4563, "source": "show_champion", "episode": 585 }
+      },
+      "embeds": {
+        "2026-02-04": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://youtu.be/Yd88DNu6v7w?si=MrpFM1weMJzTLvww" }
+            ]
+          }
+        ],
+        "2026-01-19": [
+          {
+            "eventType": "release_date",
+            "links": [
+              { "url": "https://music.apple.com/us/album/rock-the-nation-ep/1871092829" }
+            ]
+          },
+          {
+            "eventType": "mv",
+            "links": [
+              { "url": "https://youtu.be/uRnl1Lj7GqM?si=VMPfjf2OGBkIPa5P" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

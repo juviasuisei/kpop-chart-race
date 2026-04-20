@@ -1,0 +1,32 @@
+{
+  "name": "EXO",
+  "korean_name": "엑소",
+  "artistType": "boy_group",
+  "generation": 3,
+  "debut": "2012-04-08",
+  "releases": [
+    {
+      "title": "Crown",
+      "dailyValues": {
+        "2026-02-07": { "value": 4910, "source": "show_music_core", "episode": 934 },
+        "2026-02-04": { "value": 2390, "source": "show_champion", "episode": 585 }
+      },
+      "embeds": {
+        "2026-01-19": [
+          {
+            "eventType": "release_date",
+            "links": [
+              { "url": "https://music.apple.com/us/album/reverxe-the-8th-album/1868596000" }
+            ]
+          },
+          {
+            "eventType": "mv",
+            "links": [
+              { "url": "https://youtu.be/BWfKkqo1Mk8?si=WSjVfIwR5apoAkmQ" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

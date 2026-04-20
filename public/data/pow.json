@@ -8,7 +8,8 @@
     {
       "title": "Come True",
       "dailyValues": {
-        "2026-02-11": { "value": 2119, "source": "show_champion", "episode": 586 }
+        "2026-02-11": { "value": 2119, "source": "show_champion", "episode": 586 },
+        "2026-02-04": { "value": 4622, "source": "show_champion", "episode": 585 }
       },
       "embeds": {
         "2026-02-11": [
@@ -16,6 +17,14 @@
             "eventType": "live_performance",
             "links": [
               { "url": "https://youtu.be/M2jTTgVcicU?si=r3EqbM5xfMAf8MQC" }
+            ]
+          }
+        ],
+        "2026-02-04": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://youtu.be/RnZkqSruPzU?si=Cv76zBpvw2Ekm3HG" }
             ]
           }
         ],

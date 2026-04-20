@@ -200,6 +200,11 @@ export async function loadAll(
       throw new Error(`HTTP ${manifestResponse.status}`);
     }
     filenames = (await manifestResponse.json()) as string[];
+    // Shuffle filenames so loading order is randomized
+    for (let i = filenames.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [filenames[i], filenames[j]] = [filenames[j], filenames[i]];
+    }
   } catch (err) {
     console.error(
       `[Data_Loader] Failed to load manifest at "${basePath}/index.json":`,

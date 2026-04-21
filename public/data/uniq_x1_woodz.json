@@ -1,0 +1,25 @@
+{
+  "name": "WOODZ [UNIQ / X1]",
+  "korean_name": "조승연",
+  "artistType": "solo_male",
+  "generation": 3,
+  "debut": "2016-07-29",
+  "releases": [
+    {
+      "title": "Drowning",
+      "dailyValues": {
+        "2026-02-01": { "value": 4054, "source": "inkigayo", "episode": 1298 }
+      },
+      "embeds": {
+        "2023-04-26": [
+          {
+            "eventType": "release_date",
+            "links": [
+              { "url": "https://music.apple.com/us/album/oo-li/1683448653" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

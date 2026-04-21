@@ -1,0 +1,39 @@
+{
+  "name": "ALPHA DRIVE ONE",
+  "korean_name": "알파드라이브원",
+  "artistType": "boy_group",
+  "generation": 5,
+  "debut": "2026-01-12",
+  "releases": [
+    {
+      "title": "FREAK ALARM",
+      "dailyValues": {
+        "2026-01-28": { "value": 2309, "source": "show_champion", "episode": 584 }
+      },
+      "embeds": {
+        "2026-01-28": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://youtu.be/8svyuuFd5U8?si=OA-ySkTTlXdkLgjE" }
+            ]
+          }
+        ],
+        "2026-01-12": [
+          {
+            "eventType": "release_date",
+            "links": [
+              { "url": "https://music.apple.com/us/album/euphoria-ep/1863635181" }
+            ]
+          },
+          {
+            "eventType": "mv",
+            "links": [
+              { "url": "https://youtu.be/P8VVnopM610?si=iTewX2-m7UqyW_7i" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -6,12 +6,20 @@
   "debut": "2013-09-24",
   "releases": [
     {
-      "title": "그대 작은 나의 세상이 되어",
+      "title": "My whole world",
       "dailyValues": {
         "2026-02-15": { "value": 3939, "source": "inkigayo", "episode": 1300 },
         "2026-02-08": { "value": 4082, "source": "inkigayo", "episode": 1299 }
       },
       "embeds": {
+        "2021-01-28": [
+          {
+            "eventType": "release_date",
+            "links": [
+              { "url": "https://music.apple.com/us/album/absence-ep/1661608701" }
+            ]
+          }
+        ]
       }
     }
   ]

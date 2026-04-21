@@ -1,0 +1,34 @@
+{
+  "name": "ENHYPEN",
+  "korean_name": "엔하이픈",
+  "artistType": "boy_group",
+  "generation": 4,
+  "debut": "2020-11-30",
+  "releases": [
+    {
+      "title": "Knife",
+      "dailyValues": {
+        "2026-01-31": { "value": 4377, "source": "show_music_core", "episode": 933 },
+        "2026-01-30": { "value": 7153, "source": "music_bank", "episode": 1278 },
+        "2026-01-29": { "value": 7941, "source": "m_countdown", "episode": 914 },
+        "2026-01-28": { "value": 3029, "source": "show_champion", "episode": 584 }
+      },
+      "embeds": {
+        "2026-01-16": [
+          {
+            "eventType": "release_date",
+            "links": [
+              { "url": "https://music.apple.com/us/album/the-sin-vanish/1862720020" }
+            ]
+          },
+          {
+            "eventType": "mv",
+            "links": [
+              { "url": "https://youtu.be/R6e4tBWxIxE?si=CGTRPf03W80a0GJ_" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

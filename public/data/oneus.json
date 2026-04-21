@@ -1,0 +1,39 @@
+{
+  "name": "ONEUS",
+  "korean_name": "원어스",
+  "artistType": "boy_group",
+  "generation": 4,
+  "debut": "2019-01-19",
+  "releases": [
+    {
+      "title": "Grenade",
+      "dailyValues": {
+        "2026-01-28": { "value": 3076, "source": "show_champion", "episode": 584 }
+      },
+      "embeds": {
+        "2026-01-28": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://youtu.be/q0gzb6KcuBU?si=1gdNl4J8lB_qik8h" }
+            ]
+          }
+        ],        
+        "2026-01-20": [
+          {
+            "eventType": "release_date",
+            "links": [
+              { "url": "https://music.apple.com/us/album/%E5%8E%9F-single/1868336540" }
+            ]
+          },
+          {
+            "eventType": "mv",
+            "links": [
+              { "url": "https://youtu.be/_UQCWEp-8BQ?si=brlUMU7oXZ9gu_Pg" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

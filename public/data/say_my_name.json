@@ -1,0 +1,39 @@
+{
+  "name": "SAY MY NAME",
+  "korean_name": "세이마이네임",
+  "artistType": "girl_group",
+  "generation": 5,
+  "debut": "2024-10-16",
+  "releases": [
+    {
+      "title": "UFO",
+      "dailyValues": {
+        "2026-01-21": { "value": 2009, "source": "show_champion", "episode": 583 }
+      },
+      "embeds": {
+        "2026-01-21": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://youtu.be/hTdypzeZoTM?si=cbV-VniTdR_6Rreg" }
+            ]
+          }
+        ],
+        "2025-12-29": [
+          {
+            "eventType": "release_date",
+            "links": [
+              { "url": "https://music.apple.com/us/album/our-vibe-ep/1861370118" }
+            ]
+          },
+          {
+            "eventType": "mv",
+            "links": [
+              { "url": "https://youtu.be/-fPz0KoVwog?si=8ASsSirPXnikS1my" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

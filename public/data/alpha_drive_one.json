@@ -8,7 +8,12 @@
     {
       "title": "FREAK ALARM",
       "dailyValues": {
-        "2026-01-28": { "value": 2309, "source": "show_champion", "episode": 584 }
+        "2026-01-28": { "value": 2309, "source": "show_champion", "episode": 584 },
+        "2026-01-25": { "value": 5023, "source": "inkigayo", "episode": 1297 },
+        "2026-01-24": { "value": 7192, "source": "show_music_core", "episode": 932 },
+        "2026-01-23": { "value": 10559, "source": "music_bank", "episode": 1277 },
+        "2026-01-22": { "value": 7763, "source": "m_countdown", "episode": 913 },
+        "2026-01-21": { "value": 9498, "source": "show_champion", "episode": 583 }
       },
       "embeds": {
         "2026-01-28": [
@@ -16,6 +21,46 @@
             "eventType": "live_performance",
             "links": [
               { "url": "https://youtu.be/8svyuuFd5U8?si=OA-ySkTTlXdkLgjE" }
+            ]
+          }
+        ],
+        "2026-01-25": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://youtu.be/BAVRXNZHXi4?si=6LHteqknOX_Tdge4" }
+            ]
+          }
+        ],
+        "2026-01-24": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://youtu.be/FdV9P5TduEM?si=ea7UTUTyY6gHy8-n" }
+            ]
+          }
+        ],
+        "2026-01-23": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://youtu.be/7r3en_fhZ5o?si=cbdozuIXl03EaJdu" }
+            ]
+          }
+        ],
+        "2026-01-22": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://youtu.be/p1wsdXGg86I?si=RuqMp1XcZPhL51Xy" }
+            ]
+          }
+        ],
+        "2026-01-21": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://youtu.be/JIkllU56fKI?si=zRpQwN6YUl2anR7J" }
             ]
           }
         ],

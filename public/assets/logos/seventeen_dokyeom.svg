@@ -1,6 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120" fill="white" fill-rule="evenodd">
-  <!-- D letter - angular/geometric with diamond-cut edges -->
-  <path d="M20,10 L70,10 L95,35 L95,85 L70,110 L20,110 Z M35,25 L35,95 L65,95 L80,80 L80,40 L65,25 Z"/>
-  <!-- K letter - angular/geometric with sharp chevron -->
-  <polygon points="110,10 110,110 130,110 130,65 165,110 190,110 148,58 185,10 160,10 130,52 130,10"/>
-</svg>

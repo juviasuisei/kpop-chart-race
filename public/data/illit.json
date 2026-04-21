@@ -1,0 +1,31 @@
+{
+  "name": "ILLIT",
+  "korean_name": "아일릿",
+  "artistType": "girl_group",
+  "generation": 5,
+  "debut": "2024-03-05",
+  "releases": [
+    {
+      "title": "NOT CUTE ANYMORE",
+      "dailyValues": {
+        "2026-01-24": { "value": 6081, "source": "show_music_core", "episode": 932 }
+      },
+      "embeds": {
+        "2025-11-24": [
+          {
+            "eventType": "release_date",
+            "links": [
+              { "url": "https://music.apple.com/us/album/not-cute-anymore-single/1849105513" }
+            ]
+          },
+          {
+            "eventType": "mv",
+            "links": [
+              { "url": "https://youtu.be/x_RYZsOfpKY?si=7BTTdumD7YLucT5T" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

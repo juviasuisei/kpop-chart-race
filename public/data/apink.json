@@ -8,7 +8,8 @@
     {
       "title": "Love Me More",
       "dailyValues": {
-        "2026-01-28": { "value": 3560, "source": "show_champion", "episode": 584 }
+        "2026-01-28": { "value": 3560, "source": "show_champion", "episode": 584 },
+        "2026-01-21": { "value": 3519, "source": "show_champion", "episode": 583 }
       },
       "embeds": {
         "2026-01-05": [

@@ -1,0 +1,31 @@
+{
+  "name": "DxS [SEVENTEEN]",
+  "korean_name": "이석민 / 부승관",
+  "artistType": "boy_group",
+  "generation": 3,
+  "debut": "2015-05-26",
+  "releases": [
+    {
+      "title": "Blue",
+      "dailyValues": {
+        "2026-01-21": { "value": 3007, "source": "show_champion", "episode": 583 }
+      },
+      "embeds": {
+        "2026-01-12": [
+          {
+            "eventType": "release_date",
+            "links": [
+              { "url": "https://music.apple.com/us/album/dxs-1st-mini-album-serenade-ep/1860810936" }
+            ]
+          },
+          {
+            "eventType": "mv",
+            "links": [
+              { "url": "https://youtu.be/N9X1o0q4aIc?si=1LPG3r-jTQ-oKT4N" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

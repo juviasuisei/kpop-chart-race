@@ -8,7 +8,8 @@
     {
       "title": "Drowning",
       "dailyValues": {
-        "2026-02-01": { "value": 4054, "source": "inkigayo", "episode": 1298 }
+        "2026-02-01": { "value": 4054, "source": "inkigayo", "episode": 1298 },
+        "2026-01-25": { "value": 4017, "source": "inkigayo", "episode": 1297 }
       },
       "embeds": {
         "2023-04-26": [

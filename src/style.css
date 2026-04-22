@@ -55,7 +55,7 @@ body {
   gap: 0;
   padding: 2px 0;
   overflow: hidden;
-  transition: transform 0.95s ease-in-out, height 0.95s ease-in-out, opacity 0.3s ease-in-out;
+  transition: transform 9.5s ease-in-out, height 9.5s ease-in-out, opacity 3s ease-in-out;
 }
 
 .chart-race__bar {
@@ -69,7 +69,7 @@ body {
   border-radius: 0 4px 4px 0;
   padding: 0 0.5rem;
   overflow: hidden;
-  transition: width 0.95s ease-in-out;
+  transition: width 9.5s ease-in-out;
   cursor: pointer;
 }
 

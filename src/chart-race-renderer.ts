@@ -38,7 +38,7 @@ const PLACEHOLDER_SVG = `data:image/svg+xml,${encodeURIComponent(
 const BAR_HEIGHT_ALL = 40;
 
 /** Duration for tween animation in ms — matches the 1s playback interval */
-const TWEEN_DURATION = 950;
+const TWEEN_DURATION = 9500;
 
 interface BarElement {
   wrapper: HTMLDivElement;
@@ -329,7 +329,7 @@ export class ChartRaceRenderer {
         for (const artistId of toHide) {
           const barEl = this.bars.get(artistId);
           if (!barEl || !barEl.hidden) continue;
-          barEl.wrapper.style.transition = "height 0.5s ease-in-out, opacity 0.5s ease-in-out";
+          barEl.wrapper.style.transition = "height 5s ease-in-out, opacity 5s ease-in-out";
           barEl.wrapper.style.height = "0";
           barEl.wrapper.style.opacity = "0";
           barEl.fadeOutTimeoutId = setTimeout(() => {
@@ -341,15 +341,15 @@ export class ChartRaceRenderer {
               }
               this.bars.delete(artistId);
             }
-          }, 500);
+          }, 5000);
         }
 
         // Expand restoring bars
         for (const artistId of toRestore) {
           const barEl = this.bars.get(artistId);
           if (!barEl) continue;
-          barEl.wrapper.style.transition = "height 0.5s ease-in-out, opacity 0.5s ease-in-out";
-          barEl.bar.style.transition = "width 0.5s ease-in-out";
+          barEl.wrapper.style.transition = "height 5s ease-in-out, opacity 5s ease-in-out";
+          barEl.bar.style.transition = "width 5s ease-in-out";
           barEl.wrapper.style.height = `${barHeight}px`;
         }
 
@@ -362,15 +362,15 @@ export class ChartRaceRenderer {
             barEl.bar.style.transition = "";
           }
           this.eventBus.emit("update:complete");
-        }, 500);
-      }, 960);
+        }, 5000);
+      }, 9600);
     } else {
       // No phase 2 needed — signal completion after phase 1
       if (!this.scrubbing) {
         this.phase2TimeoutId = setTimeout(() => {
           this.phase2TimeoutId = null;
           this.eventBus.emit("update:complete");
-        }, 960);
+        }, 9600);
       } else {
         this.eventBus.emit("update:complete");
       }
@@ -632,7 +632,7 @@ export class ChartRaceRenderer {
         barEl.bar.offsetHeight; // force layout
       }
       this.checkBarOverflow(barEl);
-    }, 960);
+    }, 9600);
 
     // Numeric value tweening
     this.tweenValue(barEl, entry.previousCumulativeValue, entry.cumulativeValue);

@@ -401,10 +401,18 @@ export class ChartRaceRenderer {
       }
     }
 
-    // Rank tracking — only during two-phase playback animation
-    if (!this.scrubbing && needsTwoPhase) {
-      // Keep bars at their pre-update ranks during phase 1.
-      // Ranks will be set to final values by stopRankTracking(true) at phase end.
+    // Determine if phase 2 will actually hide/show anything
+    const barsToHide = Array.from(this.bars.keys()).filter(id => 
+      !filteredIds.has(id) && !this.bars.get(id)!.hidden
+    );
+    const hasHideShowChanges = barsToHide.length > 0 || 
+      filteredEntries.some(e => !this.bars.has(e.artistId));
+
+    // Rank tracking — use progressive tracking when no hide/show changes
+    // (ranks are effectively contiguous). Use static ranks when hide/show
+    // changes make ranks non-contiguous.
+    if (!this.scrubbing && needsTwoPhase && hasHideShowChanges) {
+      // Two-phase with hide/show: keep pre-update ranks, snap at phase end
       for (const [artistId, barEl] of this.bars) {
         if (barEl.hidden) continue;
         const preRank = preUpdateRanks.get(artistId);
@@ -412,6 +420,9 @@ export class ChartRaceRenderer {
           barEl.rankSpan.textContent = `#${preRank}`;
         }
       }
+    } else if (!this.scrubbing && this.bars.size > 0 && zoomLevel === 10 && !hasHideShowChanges) {
+      // Normal playback, no hide/show changes: progressive rank tracking
+      this.startRankTracking(preUpdateRanks, new Set(visibleEntries.map(e => e.artistId)));
     } else {
       this.stopRankTracking(true);
     }
@@ -550,15 +561,15 @@ export class ChartRaceRenderer {
    * sorts them by position, and assigns rank numbers based on visual order.
    * This makes rank badges update progressively as bars pass each other.
    */
-  private startRankTracking(preUpdateRanks: Map<string, number>): void {
+  private startRankTracking(preUpdateRanks: Map<string, number>, trackedIds: Set<string>): void {
     this.stopRankTracking();
 
-    // Initialize displayed ranks from pre-update values (before updateBarElement changed them)
+    // Initialize displayed ranks from pre-update values
+    // Only track bars in the trackedIds set (filtered set)
     const displayedRanks = new Map<BarElement, number>();
-    // Only track bars that exist RIGHT NOW — bars added later (phase 2) are excluded
     const trackedBars = new Set<BarElement>();
     for (const [artistId, barEl] of this.bars) {
-      if (barEl.hidden) continue;
+      if (barEl.hidden || !trackedIds.has(artistId)) continue;
       const preRank = preUpdateRanks.get(artistId);
       displayedRanks.set(barEl, preRank ?? barEl.targetRank);
       barEl.rankSpan.textContent = `#${preRank ?? barEl.targetRank}`;
@@ -569,23 +580,25 @@ export class ChartRaceRenderer {
       const barPositions: { barEl: BarElement; y: number }[] = [];
       for (const barEl of trackedBars) {
         if (barEl.hidden) continue;
-        if (!barEl.wrapper.parentElement) continue; // removed from DOM
+        if (!barEl.wrapper.parentElement) continue;
         const rect = barEl.wrapper.getBoundingClientRect();
         barPositions.push({ barEl, y: rect.top });
       }
       barPositions.sort((a, b) => a.y - b.y);
 
-      // Pairwise swap: if adjacent bars are out of order by displayed rank, swap
-      let swapped = true;
-      while (swapped) {
-        swapped = false;
-        for (let i = 0; i < barPositions.length - 1; i++) {
-          const rankA = displayedRanks.get(barPositions[i].barEl) ?? 0;
-          const rankB = displayedRanks.get(barPositions[i + 1].barEl) ?? 0;
+      // Detect crossings: if two bars swapped visual order since last frame,
+      // swap their displayed ranks
+      for (let i = 0; i < barPositions.length; i++) {
+        for (let j = i + 1; j < barPositions.length; j++) {
+          const barA = barPositions[i].barEl;
+          const barB = barPositions[j].barEl;
+          const rankA = displayedRanks.get(barA) ?? 0;
+          const rankB = displayedRanks.get(barB) ?? 0;
+          // barA is visually above barB (lower Y). If rankA > rankB,
+          // barA should have a lower rank — they've crossed, swap.
           if (rankA > rankB) {
-            displayedRanks.set(barPositions[i].barEl, rankB);
-            displayedRanks.set(barPositions[i + 1].barEl, rankA);
-            swapped = true;
+            displayedRanks.set(barA, rankB);
+            displayedRanks.set(barB, rankA);
           }
         }
       }

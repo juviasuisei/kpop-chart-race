@@ -164,5 +164,8 @@ export function filterByActivity(
     }
   }
 
+  // Step 5: Sort by rank to maintain visual rank order
+  result.sort((a, b) => a.rank - b.rank);
+
   return result.slice(0, 10);
 }

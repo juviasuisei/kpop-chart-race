@@ -402,6 +402,32 @@ describe('filterByActivity — goalpost logic', () => {
     // Total should be 10
     expect(result.length).toBe(10);
   });
+
+  it('backfilled entries maintain rank order in final result', () => {
+    // 15 entries: ranks 1, 10, 11 active; rest inactive
+    // Goalposts: rank 9 (for 10). Backfill adds 2, 3, 4, 5, 6, 7 by rank.
+    // Final result must be sorted by rank: 1, 2, 3, 4, 5, 6, 7, 9, 10, 11
+    const entries = makeRankedEntries(15);
+    const ds = makeActivityDataStore(
+      entries.map(e => {
+        const rankNum = parseInt(e.artistId.replace('a', ''));
+        const isActive = rankNum === 1 || rankNum === 10 || rankNum === 11;
+        return { id: e.artistId, activityDate: isActive ? recentDate : oldDate };
+      }),
+    );
+    const result = filterByActivity(entries, snapshotDate, ds, 10);
+    expect(result.length).toBe(10);
+
+    // Result must be in ascending rank order
+    for (let i = 1; i < result.length; i++) {
+      expect(result[i].rank).toBeGreaterThan(result[i - 1].rank);
+    }
+
+    // Specifically: backfilled entries (ranks 2-7) should appear before
+    // the active entries at ranks 9-11, not appended at the end
+    const ranks = result.map(r => r.rank);
+    expect(ranks).toEqual([1, 2, 3, 4, 5, 6, 7, 9, 10, 11]);
+  });
 });
 
 // ============================================================

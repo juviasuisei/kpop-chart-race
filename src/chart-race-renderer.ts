@@ -164,19 +164,27 @@ export class ChartRaceRenderer {
         this.bars.set(entry.artistId, barEl);
         this.barsContainer.appendChild(barEl.wrapper);
 
-        // Start at correct Y position, full opacity, grow from previous width
-        barEl.wrapper.style.transition = "none";
-        const yPosition = visIdx * barHeight;
-        barEl.wrapper.style.transform = `translateY(${yPosition}px)`;
-        barEl.wrapper.style.height = `${barHeight}px`;
-        barEl.wrapper.style.opacity = "1";
-        const startWidth = maxCumulative > 0
-          ? computeBarWidth(entry.previousCumulativeValue, maxCumulative)
-          : 0;
-        barEl.bar.style.width = `${startWidth}%`;
-        barEl.wrapper.offsetHeight; // force reflow
-        if (!this.scrubbing) {
+        if (this.scrubbing) {
+          // Snap: place directly at target
+          barEl.wrapper.style.transition = "none";
+          barEl.bar.style.transition = "none";
+          barEl.wrapper.style.transform = `translateY(${visIdx * barHeight}px)`;
+          barEl.wrapper.style.height = `${barHeight}px`;
+          barEl.wrapper.style.opacity = "1";
+          barEl.bar.style.width = `${maxCumulative > 0 ? computeBarWidth(entry.cumulativeValue, maxCumulative) : 0}%`;
+          barEl.wrapper.offsetHeight;
+        } else {
+          // Start at bottom (last slot) with zero width, then animate up
+          barEl.wrapper.style.transition = "none";
+          barEl.bar.style.transition = "none";
+          const bottomY = containerHeight > 0 ? containerHeight : 500;
+          barEl.wrapper.style.transform = `translateY(${bottomY}px)`;
+          barEl.wrapper.style.height = `${barHeight}px`;
+          barEl.wrapper.style.opacity = "1";
+          barEl.bar.style.width = "0%";
+          barEl.wrapper.offsetHeight; // force reflow
           barEl.wrapper.style.transition = "";
+          barEl.bar.style.transition = "";
         }
       } else if (barEl.hidden) {
         // Bar was hidden due to inactivity — cancel any pending removal
@@ -194,14 +202,18 @@ export class ChartRaceRenderer {
         if (this.scrubbing) {
           // Snap: no animation
           barEl.wrapper.style.transition = "none";
+          barEl.bar.style.transition = "none";
           barEl.wrapper.style.height = `${barHeight}px`;
           barEl.wrapper.style.opacity = "1";
           barEl.wrapper.offsetHeight;
         } else {
-          // Expand from collapsed: snap position, then animate height open
+          // Expand from collapsed: start at height 0 at target position,
+          // then animate height open. Bars below simultaneously move down.
           barEl.wrapper.style.transition = "none";
+          barEl.bar.style.transition = "none";
           const yPosition = visIdx * barHeight;
           barEl.wrapper.style.transform = `translateY(${yPosition}px)`;
+          barEl.wrapper.style.height = "0";
           barEl.wrapper.style.opacity = "1";
           // Set bar width to previous value so it grows naturally
           const startWidth = maxCumulative > 0
@@ -210,6 +222,7 @@ export class ChartRaceRenderer {
           barEl.bar.style.width = `${startWidth}%`;
           barEl.wrapper.offsetHeight; // force reflow
           barEl.wrapper.style.transition = "";
+          barEl.bar.style.transition = "";
         }
       }
 
@@ -249,7 +262,9 @@ export class ChartRaceRenderer {
           }
           this.bars.delete(artistId);
         } else {
-          // Collapse: animate height to 0, then clean up
+          // Collapse in place: height → 0 while bars below slide up simultaneously.
+          // Don't change translateY — keep bar at its current position so the
+          // collapse visually happens where the bar was.
           barEl.wrapper.style.height = "0";
           barEl.wrapper.style.opacity = "0";
           barEl.fadeOutTimeoutId = setTimeout(() => {

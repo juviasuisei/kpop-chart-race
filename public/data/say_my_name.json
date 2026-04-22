@@ -8,7 +8,8 @@
     {
       "title": "UFO",
       "dailyValues": {
-        "2026-01-21": { "value": 2009, "source": "show_champion", "episode": 583 }
+        "2026-01-21": { "value": 2009, "source": "show_champion", "episode": 583 },
+        "2026-01-09": { "value": 11912, "source": "music_bank", "episode": 1275 }
       },
       "embeds": {
         "2026-01-21": [

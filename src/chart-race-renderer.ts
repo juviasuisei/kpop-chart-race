@@ -538,6 +538,14 @@ export class ChartRaceRenderer {
   private startRankTracking(): void {
     this.stopRankTracking();
 
+    // Initialize displayed ranks from current rankSpan text
+    const displayedRanks = new Map<BarElement, number>();
+    for (const [, barEl] of this.bars) {
+      if (barEl.hidden) continue;
+      const current = parseInt(barEl.rankSpan.textContent?.replace('#', '') || '0', 10);
+      displayedRanks.set(barEl, current || barEl.targetRank);
+    }
+
     const track = () => {
       // Collect all non-hidden bars with their current visual Y positions
       const barPositions: { barEl: BarElement; y: number }[] = [];
@@ -550,15 +558,24 @@ export class ChartRaceRenderer {
       // Sort by visual Y position (top to bottom)
       barPositions.sort((a, b) => a.y - b.y);
 
-      // Collect all target ranks and sort them
-      const sortedTargetRanks = barPositions
-        .map(bp => bp.barEl.targetRank)
-        .sort((a, b) => a - b);
+      // Pairwise swap: if adjacent bars are out of order by displayed rank, swap
+      let swapped = true;
+      while (swapped) {
+        swapped = false;
+        for (let i = 0; i < barPositions.length - 1; i++) {
+          const rankA = displayedRanks.get(barPositions[i].barEl) ?? 0;
+          const rankB = displayedRanks.get(barPositions[i + 1].barEl) ?? 0;
+          if (rankA > rankB) {
+            displayedRanks.set(barPositions[i].barEl, rankB);
+            displayedRanks.set(barPositions[i + 1].barEl, rankA);
+            swapped = true;
+          }
+        }
+      }
 
-      // Assign: the bar at the highest position gets the lowest rank, etc.
-      for (let i = 0; i < barPositions.length; i++) {
-        const rank = sortedTargetRanks[i];
-        const barEl = barPositions[i].barEl;
+      // Apply displayed ranks
+      for (const { barEl } of barPositions) {
+        const rank = displayedRanks.get(barEl) ?? barEl.targetRank;
         const label = `#${rank}`;
         if (barEl.rankSpan.textContent !== label) {
           barEl.rankSpan.textContent = label;

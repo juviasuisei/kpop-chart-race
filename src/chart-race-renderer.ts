@@ -353,7 +353,7 @@ export class ChartRaceRenderer {
         this.phase2TimeoutId = null;
         this.stopRankTracking();
         this.eventBus.emit("update:complete");
-      }, 50);
+      }, 2880);
     }
   }
 
@@ -684,7 +684,7 @@ export class ChartRaceRenderer {
           barEl.bar.offsetHeight; // force layout
         }
         this.checkBarOverflow(barEl);
-      }, 50);
+      }, 2880);
     }
 
     // Numeric value tweening (snap in scrub mode)

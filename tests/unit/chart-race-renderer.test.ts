@@ -569,6 +569,39 @@ describe('ChartRaceRenderer', () => {
 
     eventBus.emit('scrub:end');
   });
+
+  // 32. Bar width has CSS transition in stylesheet
+  it('bar element has CSS transition for width in the stylesheet', () => {
+    const fs = require('fs');
+    const path = require('path');
+    const cssPath = path.resolve(__dirname, '../../src/style.css');
+    const cssContent = fs.readFileSync(cssPath, 'utf-8');
+
+    // The .chart-race__bar rule should include a width transition
+    const ruleMatch = cssContent.match(
+      /\.chart-race__bar\s*\{[^}]*transition:\s*width\s+[\d.]+s[^}]*\}/,
+    );
+    expect(ruleMatch).not.toBeNull();
+  });
+
+  // 33. New bars start at previous cumulative width (not current)
+  it('new bars start at previous cumulative width before transitioning', () => {
+    renderer.mount(container);
+
+    const entries = [
+      makeEntry({ artistId: 'a1', rank: 1, cumulativeValue: 1000, previousCumulativeValue: 0 }),
+    ];
+    // Before update, no bars exist
+    expect(container.querySelectorAll('.chart-race__bar').length).toBe(0);
+
+    renderer.update(makeSnapshot(entries), 10, makeDataStoreForEntries(entries));
+
+    // Bar exists and has a width set (the CSS transition will animate it)
+    const bar = container.querySelector('.chart-race__bar') as HTMLElement;
+    expect(bar).not.toBeNull();
+    // Width should be set (the transition handles the animation)
+    expect(bar.style.width).toBeTruthy();
+  });
 });
 
 

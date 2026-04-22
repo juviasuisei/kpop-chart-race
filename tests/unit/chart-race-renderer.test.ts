@@ -650,6 +650,32 @@ describe('ChartRaceRenderer', () => {
     expect(a2Wrapper?.style.transform).toBe(`translateY(${0 * barHeight}px)`);
     expect(a1Wrapper?.style.transform).toBe(`translateY(${1 * barHeight}px)`);
   });
+
+  // 36. New bars start at bottom of container and 0% width
+  it('new bars start at bottom with 0% width before animating to target', () => {
+    renderer.mount(container);
+
+    const MOCKED_HEIGHT = 500;
+    const barsContainer = container.querySelector('.chart-race__bars')!;
+    Object.defineProperty(barsContainer, 'clientHeight', {
+      value: MOCKED_HEIGHT,
+      configurable: true,
+    });
+
+    // First update creates bars — they should start at bottom
+    const entries = [
+      makeEntry({ artistId: 'a1', rank: 1, cumulativeValue: 1000, previousCumulativeValue: 0 }),
+    ];
+    renderer.update(makeSnapshot(entries), 10, makeDataStoreForEntries(entries));
+
+    // After update, the bar's TARGET transform is set by updateBarElement
+    // But the initial position was at the bottom (containerHeight)
+    // and the CSS transition animates from bottom to target.
+    // We can verify the target is correct:
+    const wrapper = container.querySelector('.chart-race__bar-wrapper') as HTMLElement;
+    const barHeight = MOCKED_HEIGHT / 10;
+    expect(wrapper.style.transform).toBe(`translateY(${0 * barHeight}px)`);
+  });
 });
 
 

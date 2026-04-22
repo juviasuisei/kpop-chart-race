@@ -245,15 +245,14 @@ export class ChartRaceRenderer {
         this.barsContainer.appendChild(barEl.wrapper);
         this.seenArtists.add(entry.artistId);
 
-        // Place at target position with previous width
+        // New bar: start at bottom with 0 width, then animate to target
         barEl.wrapper.style.transition = "none";
         barEl.bar.style.transition = "none";
-        barEl.wrapper.style.transform = `translateY(${visIdx * barHeight}px)`;
+        const bottomY = containerHeight > 0 ? containerHeight : 500;
+        barEl.wrapper.style.transform = `translateY(${bottomY}px)`;
         barEl.wrapper.style.height = `${barHeight}px`;
         barEl.wrapper.style.opacity = "1";
-        const startWidth = maxCumulative > 0
-          ? computeBarWidth(entry.previousCumulativeValue, maxCumulative) : 0;
-        barEl.bar.style.width = `${startWidth}%`;
+        barEl.bar.style.width = "0%";
         barEl.wrapper.offsetHeight; // force reflow
 
         // Enable transitions (unless scrubbing)

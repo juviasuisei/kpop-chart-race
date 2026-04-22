@@ -55,7 +55,7 @@ body {
   gap: 0;
   padding: 2px 0;
   overflow: hidden;
-  transition: transform 0s, height 0s, opacity 0s;
+  transition: transform 2.85s ease-in-out, height 0s, opacity 0s;
 }
 
 .bar__wipe-cover {

@@ -602,6 +602,54 @@ describe('ChartRaceRenderer', () => {
     // Width should be set (the transition handles the animation)
     expect(bar.style.width).toBeTruthy();
   });
+
+  // 34. Bar wrapper has CSS transition for transform (position sliding)
+  it('bar wrapper has CSS transition for transform in the stylesheet', () => {
+    const fs = require('fs');
+    const path = require('path');
+    const cssPath = path.resolve(__dirname, '../../src/style.css');
+    const cssContent = fs.readFileSync(cssPath, 'utf-8');
+
+    const ruleMatch = cssContent.match(
+      /\.chart-race__bar-wrapper\s*\{[^}]*transition:[^}]*transform\s+[\d.]+s[^}]*\}/,
+    );
+    expect(ruleMatch).not.toBeNull();
+  });
+
+  // 35. Bars reposition via translateY when ranks change
+  it('bars update translateY when ranks swap', () => {
+    renderer.mount(container);
+
+    const MOCKED_HEIGHT = 500;
+    const barsContainer = container.querySelector('.chart-race__bars')!;
+    Object.defineProperty(barsContainer, 'clientHeight', {
+      value: MOCKED_HEIGHT,
+      configurable: true,
+    });
+
+    const barHeight = MOCKED_HEIGHT / 10;
+
+    const entries1 = [
+      makeEntry({ artistId: 'a1', artistName: 'Luna Park', rank: 1, cumulativeValue: 1000 }),
+      makeEntry({ artistId: 'a2', artistName: 'Jay Storm', rank: 2, cumulativeValue: 500 }),
+    ];
+    renderer.update(makeSnapshot(entries1), 10, makeDataStoreForEntries(entries1));
+
+    // Swap ranks
+    const entries2 = [
+      makeEntry({ artistId: 'a2', artistName: 'Jay Storm', rank: 1, cumulativeValue: 1200 }),
+      makeEntry({ artistId: 'a1', artistName: 'Luna Park', rank: 2, cumulativeValue: 1000 }),
+    ];
+    renderer.update(makeSnapshot(entries2), 10, makeDataStoreForEntries(entries2));
+
+    // Find wrappers by artist name
+    const allWrappers = Array.from(container.querySelectorAll('.chart-race__bar-wrapper'));
+    const a2Wrapper = allWrappers.find(w => w.querySelector('.bar__name')?.textContent === 'Jay Storm') as HTMLElement;
+    const a1Wrapper = allWrappers.find(w => w.querySelector('.bar__name')?.textContent === 'Luna Park') as HTMLElement;
+
+    expect(a2Wrapper?.style.transform).toBe(`translateY(${0 * barHeight}px)`);
+    expect(a1Wrapper?.style.transform).toBe(`translateY(${1 * barHeight}px)`);
+  });
 });
 
 

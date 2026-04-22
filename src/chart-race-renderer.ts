@@ -208,6 +208,9 @@ export class ChartRaceRenderer {
         this.barsContainer.appendChild(barEl.wrapper);
         this.seenArtists.add(entry.artistId);
 
+        // Determine if truly new (first time on chart) vs returning (had points before)
+        const isTrulyNew = entry.previousCumulativeValue === 0;
+
         if (this.scrubbing) {
           barEl.wrapper.style.transition = "none";
           barEl.bar.style.transition = "none";
@@ -216,7 +219,7 @@ export class ChartRaceRenderer {
           barEl.wrapper.style.opacity = "1";
           barEl.bar.style.width = `${maxCumulative > 0 ? computeBarWidth(entry.cumulativeValue, maxCumulative) : 0}%`;
           barEl.wrapper.offsetHeight;
-        } else if (toRestore.includes(entry.artistId)) {
+        } else if (!isTrulyNew && toRestore.includes(entry.artistId)) {
           // Returning artist — start hidden (height 0), will expand in phase 2
           barEl.wrapper.style.transition = "none";
           barEl.bar.style.transition = "none";
@@ -229,7 +232,7 @@ export class ChartRaceRenderer {
           barEl.wrapper.offsetHeight;
           // Don't enable transitions yet — phase 2 will handle that
         } else {
-          // Brand new artist — start at bottom, rise through ranks
+          // Brand new artist (first time on chart) — start at bottom, rise through ranks
           barEl.wrapper.style.transition = "none";
           barEl.bar.style.transition = "none";
           const bottomY = containerHeight > 0 ? containerHeight : 500;

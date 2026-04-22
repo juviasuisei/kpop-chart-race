@@ -298,16 +298,40 @@ export class ChartRaceRenderer {
           barEl.bar.style.width = `${maxCumulative > 0 ? computeBarWidth(entry.cumulativeValue, maxCumulative) : 0}%`;
           barEl.wrapper.offsetHeight;
         } else if (!isTrulyNew && toRestore.includes(entry.artistId)) {
-          // Returning artist still in DOM as hidden — start at height 0, will expand in phase 2
+          // Returning artist still in DOM as hidden — reverse wipe in phase 2
           barEl.wrapper.style.transition = "none";
           barEl.bar.style.transition = "none";
           barEl.wrapper.style.transform = `translateY(${visIdx * barHeight}px)`;
-          barEl.wrapper.style.height = "0";
+          barEl.wrapper.style.height = `${barHeight}px`;
           barEl.wrapper.style.opacity = "1";
+          // Start fully covered by wipe
+          barEl.wipeCover.style.transition = "none";
+          barEl.wipeCover.style.height = "100%";
+          barEl.wipeCover.offsetHeight;
           const startWidth = maxCumulative > 0
             ? computeBarWidth(entry.previousCumulativeValue, maxCumulative) : 0;
           barEl.bar.style.width = `${startWidth}%`;
           barEl.wrapper.offsetHeight;
+          // Don't enable transitions yet — phase 2 will handle that
+        } else if (!isTrulyNew) {
+          // Re-entering artist (cleaned up from DOM) — reverse wipe in phase 1
+          barEl.wrapper.style.transition = "none";
+          barEl.bar.style.transition = "none";
+          barEl.wrapper.style.transform = `translateY(${visIdx * barHeight}px)`;
+          barEl.wrapper.style.height = `${barHeight}px`;
+          barEl.wrapper.style.opacity = "1";
+          // Start fully covered by wipe, then reveal
+          barEl.wipeCover.style.transition = "none";
+          barEl.wipeCover.style.height = "100%";
+          barEl.wipeCover.offsetHeight;
+          barEl.wipeCover.style.transition = "";
+          barEl.wipeCover.style.height = "0";
+          const startWidth = maxCumulative > 0
+            ? computeBarWidth(entry.previousCumulativeValue, maxCumulative) : 0;
+          barEl.bar.style.width = `${startWidth}%`;
+          barEl.wrapper.offsetHeight;
+          barEl.wrapper.style.transition = "";
+          barEl.bar.style.transition = "";
           // Don't enable transitions yet — phase 2 will handle that
         } else {
           // Brand new or re-entering artist — start at bottom, rise through ranks
@@ -336,24 +360,26 @@ export class ChartRaceRenderer {
         }
         barEl.hidden = false;
         barEl.wrapper.style.pointerEvents = "";
-        barEl.wipeCover.style.transition = "none";
-        barEl.wipeCover.style.height = "0";
-        barEl.wipeCover.offsetHeight;
-        barEl.wipeCover.style.transition = "";
 
         if (this.scrubbing) {
+          barEl.wipeCover.style.transition = "none";
+          barEl.wipeCover.style.height = "0";
           barEl.wrapper.style.transition = "none";
           barEl.bar.style.transition = "none";
           barEl.wrapper.style.height = `${barHeight}px`;
           barEl.wrapper.style.opacity = "1";
           barEl.wrapper.offsetHeight;
         } else {
-          // Start at height 0 at target position — will expand in phase 2
+          // Reverse wipe: start fully covered at target position, reveal in phase 2
           barEl.wrapper.style.transition = "none";
           barEl.bar.style.transition = "none";
           barEl.wrapper.style.transform = `translateY(${visIdx * barHeight}px)`;
-          barEl.wrapper.style.height = "0";
+          barEl.wrapper.style.height = `${barHeight}px`;
           barEl.wrapper.style.opacity = "1";
+          // Ensure wipe cover is at 100% (fully covering)
+          barEl.wipeCover.style.transition = "none";
+          barEl.wipeCover.style.height = "100%";
+          barEl.wipeCover.offsetHeight;
           const startWidth = maxCumulative > 0
             ? computeBarWidth(entry.previousCumulativeValue, maxCumulative) : 0;
           barEl.bar.style.width = `${startWidth}%`;
@@ -467,13 +493,14 @@ export class ChartRaceRenderer {
           }, 5000);
         }
 
-        // Expand restoring bars
+        // Reveal restoring bars by removing wipe cover
         for (const artistId of toRestore) {
           const barEl = this.bars.get(artistId);
           if (!barEl) continue;
-          barEl.wrapper.style.transition = "height 5s ease-in-out, opacity 5s ease-in-out";
+          barEl.wipeCover.style.transition = "height 5s ease-in-out";
+          barEl.wipeCover.style.height = "0";
+          barEl.wrapper.style.transition = "";
           barEl.bar.style.transition = "width 5s ease-in-out";
-          barEl.wrapper.style.height = `${barHeight}px`;
         }
 
         // After phase 2 completes, re-enable normal transitions and signal done
@@ -483,6 +510,7 @@ export class ChartRaceRenderer {
             if (!barEl) continue;
             barEl.wrapper.style.transition = "";
             barEl.bar.style.transition = "";
+            barEl.wipeCover.style.transition = "";
           }
           this.eventBus.emit("update:complete");
         }, 5000);

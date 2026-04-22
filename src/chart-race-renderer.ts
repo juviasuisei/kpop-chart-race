@@ -399,16 +399,45 @@ export class ChartRaceRenderer {
         this.stopRankTracking();
         // Phase 2: apply activity filter — hide bars not in filtered set
         this.applyVisibilityFilter(filteredIds, barHeight);
-        // Simultaneously reposition remaining bars to close gaps
+        // Simultaneously reposition remaining bars and create new ones to close gaps
         let idx = 0;
         for (const entry of filteredEntries) {
-          const barEl = this.bars.get(entry.artistId);
-          if (!barEl || barEl.hidden) continue;
-          const yPosition = idx * barHeight;
-          barEl.wrapper.style.transform = `translateY(${yPosition}px)`;
-          barEl.wrapper.style.zIndex = String(1000 - entry.rank);
-          barEl.targetRank = entry.rank;
-          barEl.rankSpan.textContent = `#${entry.rank}`;
+          let barEl = this.bars.get(entry.artistId);
+          if (barEl && barEl.hidden) {
+            // This bar is being wiped — skip it
+            continue;
+          }
+          if (!barEl) {
+            // Bar doesn't exist yet (e.g., rank 11 entering as replacement)
+            // Create it at the target position
+            barEl = this.createBarElement(entry);
+            this.bars.set(entry.artistId, barEl);
+            this.barsContainer!.appendChild(barEl.wrapper);
+            this.seenArtists.add(entry.artistId);
+            barEl.wrapper.style.transition = "none";
+            barEl.bar.style.transition = "none";
+            barEl.wrapper.style.transform = `translateY(${idx * barHeight}px)`;
+            barEl.wrapper.style.height = `${barHeight}px`;
+            barEl.wrapper.style.opacity = "1";
+            const startWidth = maxCumulative > 0
+              ? computeBarWidth(entry.previousCumulativeValue, maxCumulative) : 0;
+            barEl.bar.style.width = `${startWidth}%`;
+            barEl.wrapper.offsetHeight;
+            barEl.wrapper.style.transition = "";
+            barEl.bar.style.transition = "";
+            // Set target width
+            barEl.bar.style.width = `${computeBarWidth(entry.cumulativeValue, maxCumulative)}%`;
+            barEl.targetRank = entry.rank;
+            barEl.rankSpan.textContent = `#${entry.rank}`;
+            this.updateBarElement(barEl, entry, barHeight, maxCumulative, snapshot.date, dataStore, idx);
+          } else {
+            // Existing bar — reposition to close gap
+            const yPosition = idx * barHeight;
+            barEl.wrapper.style.transform = `translateY(${yPosition}px)`;
+            barEl.wrapper.style.zIndex = String(1000 - entry.rank);
+            barEl.targetRank = entry.rank;
+            barEl.rankSpan.textContent = `#${entry.rank}`;
+          }
           idx++;
         }
         // Wait for wipe/reposition animation, then signal done

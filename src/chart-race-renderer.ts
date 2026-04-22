@@ -203,15 +203,14 @@ export class ChartRaceRenderer {
 
   /**
    * Update the chart with a new snapshot at the given zoom level.
-   * Two-phase animation:
-   *   Phase 1 (0.95s): All bars move to new positions (including soon-to-hide bars).
-   *   Phase 2 (0.5s, only if needed): Hiding bars collapse, restoring bars expand.
-   * Emits "update:complete" when all phases finish.
+   * Simplified debugging baseline: create/reuse bars, position them,
+   * remove non-visible bars immediately. No phase logic or wipe covers.
+   * Emits "update:complete" when the transition completes.
    */
   update(snapshot: ChartSnapshot, zoomLevel: ZoomLevel, dataStore: DataStore): void {
     if (!this.barsContainer || !this.dateDisplay) return;
 
-    // Cancel any pending phase 2 from a previous update
+    // Cancel any pending timeout from a previous update
     if (this.phase2TimeoutId !== null) {
       clearTimeout(this.phase2TimeoutId);
       this.phase2TimeoutId = null;
@@ -220,6 +219,7 @@ export class ChartRaceRenderer {
     // Update date display
     this.dateDisplay.textContent = snapshot.date;
 
+    // 1. Get visible entries
     const visibleEntries = filterByActivity(snapshot.entries, snapshot.date, dataStore, zoomLevel);
     const containerHeight = this.barsContainer.clientHeight || this.barsContainer.offsetHeight;
     const barHeight =
@@ -230,174 +230,87 @@ export class ChartRaceRenderer {
     this.barsContainer.style.overflowY = zoomLevel === "all" ? "auto" : "hidden";
 
     const visibleIds = new Set(visibleEntries.map(e => e.artistId));
-
-    // Determine which bars need to hide (currently shown, not in new visible set)
-    const toHide: string[] = [];
-    for (const [artistId, barEl] of this.bars) {
-      if (!visibleIds.has(artistId) && !barEl.hidden) {
-        toHide.push(artistId);
-      }
-    }
-
-    // Determine which bars need to restore (in visible set but currently hidden IN DOM
-    // OR need re-creation as returning artists)
-    const toRestoreIds = new Set<string>();
-    for (const entry of visibleEntries) {
-      const barEl = this.bars.get(entry.artistId);
-      if (barEl && barEl.hidden) {
-        toRestoreIds.add(entry.artistId);
-      } else if (!barEl && entry.previousCumulativeValue > 0) {
-        toRestoreIds.add(entry.artistId);
-      }
-    }
-
-    // Determine which hiding bars were overtaken vs just filtered out
-    const overtakenIds = new Set<string>();
-    for (const artistId of toHide) {
-      const fullEntry = snapshot.entries.find(e => e.artistId === artistId);
-      if (fullEntry && fullEntry.rank > fullEntry.previousRank && fullEntry.previousRank > 0) {
-        overtakenIds.add(artistId);
-      }
-    }
-
-    // Phase 0 for restoring, Phase 2 only for overtaken bars
-    const needsPhase0 = !this.scrubbing && toRestoreIds.size > 0;
-    const needsPhase2 = !this.scrubbing && overtakenIds.size > 0;
-
-    // --- PHASE 1: Position all bars (including soon-to-hide) ---
-    // Build the phase 1 layout: visible entries + soon-to-hide entries at the end
-    // Soon-to-hide bars get positioned one slot below their current position
-    // (as if they just got overtaken).
-
-    // First, handle all visible entries
     const maxCumulative = visibleEntries.reduce(
       (max, e) => Math.max(max, e.cumulativeValue), 0);
 
-    // For phase 1, restoring bars should NOT be visible yet — they appear in phase 2.
-    // So we position visible entries that are NOT restoring, plus soon-to-hide bars.
-    const phase1Entries: { entry: RankedEntry; barEl: BarElement }[] = [];
+    // 2–5. For each visible entry: create bar if needed, restore if hidden, update
     let visIdx = 0;
-
     for (const entry of visibleEntries) {
       let barEl = this.bars.get(entry.artistId);
 
       if (!barEl) {
-        // Create the bar element
+        // 2. Create new bar
         barEl = this.createBarElement(entry);
         this.bars.set(entry.artistId, barEl);
         this.barsContainer.appendChild(barEl.wrapper);
         this.seenArtists.add(entry.artistId);
 
-        // Determine if truly new (first time on chart) vs returning (had points before)
-        const isTrulyNew = entry.previousCumulativeValue === 0;
+        // Place at target position with previous width
+        barEl.wrapper.style.transition = "none";
+        barEl.bar.style.transition = "none";
+        barEl.wrapper.style.transform = `translateY(${visIdx * barHeight}px)`;
+        barEl.wrapper.style.height = `${barHeight}px`;
+        barEl.wrapper.style.opacity = "1";
+        const startWidth = maxCumulative > 0
+          ? computeBarWidth(entry.previousCumulativeValue, maxCumulative) : 0;
+        barEl.bar.style.width = `${startWidth}%`;
+        barEl.wrapper.offsetHeight; // force reflow
 
-        if (this.scrubbing) {
-          barEl.wrapper.style.transition = "none";
-          barEl.bar.style.transition = "none";
-          barEl.wrapper.style.transform = `translateY(${visIdx * barHeight}px)`;
-          barEl.wrapper.style.height = `${barHeight}px`;
-          barEl.wrapper.style.opacity = "1";
-          barEl.bar.style.width = `${maxCumulative > 0 ? computeBarWidth(entry.cumulativeValue, maxCumulative) : 0}%`;
-          barEl.wrapper.offsetHeight;
-        } else if (!isTrulyNew && toRestoreIds.has(entry.artistId)) {
-          // Returning artist (still in DOM or re-created) — fully covered, reveal in phase 0
-          barEl.wrapper.style.transition = "none";
-          barEl.bar.style.transition = "none";
-          barEl.wrapper.style.transform = `translateY(${visIdx * barHeight}px)`;
-          barEl.wrapper.style.height = `${barHeight}px`;
-          barEl.wrapper.style.opacity = "1";
-          barEl.wipeCover.style.transition = "none";
-          barEl.wipeCover.style.height = "100%";
-          const startWidth = maxCumulative > 0
-            ? computeBarWidth(entry.previousCumulativeValue, maxCumulative) : 0;
-          barEl.bar.style.width = `${startWidth}%`;
-          barEl.wrapper.offsetHeight;
-        } else if (!isTrulyNew) {
-          // Re-entering artist not in toRestore (shouldn't normally happen) — same as restore
-          barEl.wrapper.style.transition = "none";
-          barEl.bar.style.transition = "none";
-          barEl.wrapper.style.transform = `translateY(${visIdx * barHeight}px)`;
-          barEl.wrapper.style.height = `${barHeight}px`;
-          barEl.wrapper.style.opacity = "1";
-          barEl.wipeCover.style.transition = "none";
-          barEl.wipeCover.style.height = "100%";
-          const startWidth = maxCumulative > 0
-            ? computeBarWidth(entry.previousCumulativeValue, maxCumulative) : 0;
-          barEl.bar.style.width = `${startWidth}%`;
-          barEl.wrapper.offsetHeight;
-        } else {
-          // Brand new or re-entering artist — start at bottom, rise through ranks
-          barEl.wrapper.style.transition = "none";
-          barEl.bar.style.transition = "none";
-          const bottomY = containerHeight > 0 ? containerHeight : 500;
-          barEl.wrapper.style.transform = `translateY(${bottomY}px)`;
-          barEl.wrapper.style.height = `${barHeight}px`;
-          barEl.wrapper.style.opacity = "1";
-          // Start at previous width (0 for truly new, nonzero for re-entering)
-          const startWidth = maxCumulative > 0
-            ? computeBarWidth(entry.previousCumulativeValue, maxCumulative) : 0;
-          barEl.bar.style.width = `${startWidth}%`;
-          barEl.wrapper.offsetHeight;
+        // Enable transitions (unless scrubbing)
+        if (!this.scrubbing) {
           barEl.wrapper.style.transition = "";
           barEl.bar.style.transition = "";
         }
       } else if (barEl.hidden) {
-        // Existing bar being restored — cancel pending removal
+        // 4. Restore hidden bar: cancel timeouts, re-attach, place at target
         if (barEl.fadeOutTimeoutId !== null) {
           clearTimeout(barEl.fadeOutTimeoutId);
           barEl.fadeOutTimeoutId = null;
+        }
+        if (barEl.animationFrameId !== null) {
+          cancelAnimationFrame(barEl.animationFrameId);
+          this.pendingFrames.delete(barEl.animationFrameId);
+          barEl.animationFrameId = null;
         }
         if (!barEl.wrapper.parentElement) {
           this.barsContainer.appendChild(barEl.wrapper);
         }
         barEl.hidden = false;
         barEl.wrapper.style.pointerEvents = "";
+        barEl.wipeCover.style.transition = "none";
+        barEl.wipeCover.style.height = "0";
 
         if (this.scrubbing) {
-          barEl.wipeCover.style.transition = "none";
-          barEl.wipeCover.style.height = "0";
           barEl.wrapper.style.transition = "none";
           barEl.bar.style.transition = "none";
-          barEl.wrapper.style.height = `${barHeight}px`;
-          barEl.wrapper.style.opacity = "1";
-          barEl.wrapper.offsetHeight;
         } else {
-          // Place at target, fully covered, will reveal in phase 0
           barEl.wrapper.style.transition = "none";
           barEl.bar.style.transition = "none";
           barEl.wrapper.style.transform = `translateY(${visIdx * barHeight}px)`;
           barEl.wrapper.style.height = `${barHeight}px`;
           barEl.wrapper.style.opacity = "1";
-          barEl.wipeCover.style.transition = "none";
-          barEl.wipeCover.style.height = "100%";
-          const startWidth = maxCumulative > 0
-            ? computeBarWidth(entry.previousCumulativeValue, maxCumulative) : 0;
-          barEl.bar.style.width = `${startWidth}%`;
-          barEl.wrapper.offsetHeight;
+          barEl.wrapper.offsetHeight; // force reflow
+          barEl.wrapper.style.transition = "";
+          barEl.bar.style.transition = "";
         }
       }
 
-      // Set transitions for non-restoring bars
+      // Set scrubbing transitions
       if (this.scrubbing) {
         barEl.wrapper.style.transition = "none";
         barEl.bar.style.transition = "none";
-        barEl.wrapper.offsetHeight; // force reflow to apply transition:none
-      } else if (!toRestoreIds.has(entry.artistId)) {
-        barEl.wrapper.style.transition = "";
-        barEl.bar.style.transition = "";
+        barEl.wrapper.offsetHeight; // force reflow
       }
 
-      phase1Entries.push({ entry, barEl });
+      // 5. Update bar element (position, width, value, etc.)
       this.updateBarElement(barEl, entry, barHeight, maxCumulative, snapshot.date, dataStore, visIdx);
       visIdx++;
     }
 
-    // Handle soon-to-hide bars
-    // Two cases:
-    //   1. Overtaken: bar's rank worsened (another bar passed it) → slide down one slot, collapse in phase 2
-    //   2. Filtered out: bar's rank didn't worsen, just removed from visible set → collapse in place during phase 1
-    for (const artistId of toHide) {
-      const barEl = this.bars.get(artistId)!;
+    // 6. Remove bars no longer visible — immediately, no animation
+    for (const [artistId, barEl] of this.bars) {
+      if (visibleIds.has(artistId)) continue;
+      // Cancel any pending animations/timeouts
       if (barEl.animationFrameId !== null) {
         cancelAnimationFrame(barEl.animationFrameId);
         this.pendingFrames.delete(barEl.animationFrameId);
@@ -407,182 +320,40 @@ export class ChartRaceRenderer {
         clearTimeout(barEl.overflowTimeoutId);
         barEl.overflowTimeoutId = null;
       }
-      barEl.hidden = true;
-      barEl.wrapper.style.pointerEvents = "none";
-
-      if (this.scrubbing) {
-        barEl.wrapper.remove();
-        if (barEl.clickHandler) {
-          barEl.wrapper.removeEventListener('click', barEl.clickHandler);
-        }
-        this.bars.delete(artistId);
-      } else if (overtakenIds.has(artistId)) {
-        // Overtaken: slide down one slot in phase 1, collapse in phase 2
-        const currentTransform = barEl.wrapper.style.transform;
-        const currentY = parseFloat(currentTransform.replace(/[^0-9.-]/g, '')) || 0;
-        barEl.wrapper.style.transform = `translateY(${currentY + barHeight}px)`;
-      } else {
-        // Filtered out (not overtaken): wipe up in place during phase 1
-        // The wipe cover grows from bottom to top, covering the bar content
-        // Bars below slide up simultaneously via their translateY changes
-        // Set z-index low so bars sliding up render on top
-        barEl.wrapper.style.zIndex = "0";
-        barEl.wipeCover.style.height = "100%";
-        barEl.fadeOutTimeoutId = setTimeout(() => {
-          barEl.fadeOutTimeoutId = null;
-          if (barEl.hidden) {
-            barEl.wrapper.remove();
-            if (barEl.clickHandler) {
-              barEl.wrapper.removeEventListener('click', barEl.clickHandler);
-            }
-            this.bars.delete(artistId);
-          }
-        }, 9600); // matches phase 1 duration (10x slow)
+      if (barEl.fadeOutTimeoutId !== null) {
+        clearTimeout(barEl.fadeOutTimeoutId);
+        barEl.fadeOutTimeoutId = null;
       }
+      barEl.wrapper.remove();
+      if (barEl.clickHandler) {
+        barEl.wrapper.removeEventListener('click', barEl.clickHandler);
+      }
+      this.bars.delete(artistId);
     }
 
-    // Toggle logo visibility
+    // 7. Toggle logo visibility
     for (const [artistId, barEl] of this.bars) {
       if (visibleIds.has(artistId)) {
         barEl.logo.classList.toggle("bar__logo--hidden", zoomLevel === "all");
       }
     }
 
-    // --- PHASE EXECUTION ---
-    // Phase 0 (restore): Reveal restoring bars BEFORE any movement
-    // Phase 1 (movement): All bars move, filtered-out bars wipe up
-    // Phase 2 (overtaken collapse): Overtaken bars collapse after movement
+    // Rank tracking
+    if (!this.scrubbing) {
+      this.startRankTracking(visibleIds);
+    } else {
+      this.stopRankTracking();
+    }
 
-    const startPhase1 = () => {
-      // Enable transitions on visible bars and start movement
-      let idx = 0;
-      for (const entry of visibleEntries) {
-        const barEl = this.bars.get(entry.artistId);
-        if (!barEl) continue;
-        if (this.scrubbing) {
-          barEl.wrapper.style.transition = "none";
-          barEl.bar.style.transition = "none";
-          barEl.wrapper.offsetHeight;
-        } else if (!toRestoreIds.has(entry.artistId)) {
-          barEl.wrapper.style.transition = "";
-          barEl.bar.style.transition = "";
-        } else {
-          // Restoring bars: enable transitions now for phase 1 movement
-          barEl.wrapper.style.transition = "";
-          barEl.bar.style.transition = "";
-        }
-        this.updateBarElement(barEl, entry, barHeight, maxCumulative, snapshot.date, dataStore, idx);
-        idx++;
-      }
-
-      // Handle hiding bars
-      for (const artistId of toHide) {
-        const barEl = this.bars.get(artistId)!;
-        if (barEl.animationFrameId !== null) {
-          cancelAnimationFrame(barEl.animationFrameId);
-          this.pendingFrames.delete(barEl.animationFrameId);
-          barEl.animationFrameId = null;
-        }
-        if (barEl.overflowTimeoutId !== null) {
-          clearTimeout(barEl.overflowTimeoutId);
-          barEl.overflowTimeoutId = null;
-        }
-        barEl.hidden = true;
-        barEl.wrapper.style.pointerEvents = "none";
-
-        if (this.scrubbing) {
-          barEl.wrapper.remove();
-          if (barEl.clickHandler) {
-            barEl.wrapper.removeEventListener('click', barEl.clickHandler);
-          }
-          this.bars.delete(artistId);
-        } else if (overtakenIds.has(artistId)) {
-          const currentTransform = barEl.wrapper.style.transform;
-          const currentY = parseFloat(currentTransform.replace(/[^0-9.-]/g, '')) || 0;
-          barEl.wrapper.style.transform = `translateY(${currentY + barHeight}px)`;
-        } else {
-          barEl.wrapper.style.zIndex = "0";
-          barEl.wipeCover.style.height = "100%";
-          barEl.fadeOutTimeoutId = setTimeout(() => {
-            barEl.fadeOutTimeoutId = null;
-            if (barEl.hidden) {
-              barEl.wrapper.remove();
-              if (barEl.clickHandler) {
-                barEl.wrapper.removeEventListener('click', barEl.clickHandler);
-              }
-              this.bars.delete(artistId);
-            }
-          }, 9600);
-        }
-      }
-
-      // Start rank tracking
-      if (!this.scrubbing) {
-        this.startRankTracking(visibleIds);
-      } else {
-        this.stopRankTracking();
-      }
-
-      // Schedule phase 2 or completion
-      if (needsPhase2) {
-        this.phase2TimeoutId = setTimeout(() => {
-          this.phase2TimeoutId = null;
-          this.stopRankTracking();
-
-          for (const artistId of toHide) {
-            if (!overtakenIds.has(artistId)) continue;
-            const barEl = this.bars.get(artistId);
-            if (!barEl || !barEl.hidden) continue;
-            barEl.wrapper.style.transition = "height 5s ease-in-out, opacity 5s ease-in-out";
-            barEl.wrapper.style.height = "0";
-            barEl.wrapper.style.opacity = "0";
-            barEl.fadeOutTimeoutId = setTimeout(() => {
-              barEl.fadeOutTimeoutId = null;
-              if (barEl.hidden) {
-                barEl.wrapper.remove();
-                if (barEl.clickHandler) {
-                  barEl.wrapper.removeEventListener('click', barEl.clickHandler);
-                }
-                this.bars.delete(artistId);
-              }
-            }, 5000);
-          }
-
-          setTimeout(() => {
-            this.eventBus.emit("update:complete");
-          }, 5000);
-        }, 9600);
-      } else if (!this.scrubbing) {
-        this.phase2TimeoutId = setTimeout(() => {
-          this.phase2TimeoutId = null;
-          this.stopRankTracking();
-          this.eventBus.emit("update:complete");
-        }, 9600);
-      } else {
-        this.eventBus.emit("update:complete");
-      }
-    };
-
-    // --- Phase 0: Reveal restoring bars BEFORE any movement ---
-    if (needsPhase0) {
-      for (const artistId of toRestoreIds) {
-        const barEl = this.bars.get(artistId);
-        if (!barEl) continue;
-        barEl.wipeCover.style.transition = "height 5s ease-in-out";
-        barEl.wipeCover.style.height = "0";
-      }
-
+    // 8. Emit update:complete after transition duration (or immediately if scrubbing)
+    if (this.scrubbing) {
+      this.eventBus.emit("update:complete");
+    } else {
       this.phase2TimeoutId = setTimeout(() => {
         this.phase2TimeoutId = null;
-        for (const artistId of toRestoreIds) {
-          const barEl = this.bars.get(artistId);
-          if (!barEl) continue;
-          barEl.wipeCover.style.transition = "";
-        }
-        startPhase1();
-      }, 5000);
-    } else {
-      startPhase1();
+        this.stopRankTracking();
+        this.eventBus.emit("update:complete");
+      }, 9600);
     }
   }
 

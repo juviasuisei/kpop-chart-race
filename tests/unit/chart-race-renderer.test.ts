@@ -413,8 +413,8 @@ describe('ChartRaceRenderer', () => {
     expect(wrapper.style.opacity).toBe('1');
   });
 
-  // 27. Bars filtered out (not overtaken) get wipe cover animation
-  it('bars filtered out use wipe cover and set pointer-events none', () => {
+  // 27. Bars filtered out are removed from DOM immediately (simplified update)
+  it('bars filtered out are removed from DOM immediately', () => {
     renderer.mount(container);
 
     // First update: show artist
@@ -426,22 +426,17 @@ describe('ChartRaceRenderer', () => {
     renderer.update(snapshot1, 10, ds);
 
     expect(container.querySelectorAll('.chart-race__bar-wrapper').length).toBe(1);
-    const wrapper = container.querySelector('.chart-race__bar-wrapper') as HTMLElement;
-    expect(wrapper.style.opacity).toBe('1');
 
-    // Second update: artist no longer visible (filtered out, not overtaken)
+    // Second update: artist no longer visible
     const snapshot2 = makeSnapshot([]);
     renderer.update(snapshot2, 10, emptyDataStore);
 
-    // Filtered-out bar uses wipe cover (height stays full, cover grows)
-    expect(wrapper.style.pointerEvents).toBe('none');
-    const wipeCover = wrapper.querySelector('.bar__wipe-cover') as HTMLElement;
-    expect(wipeCover).not.toBeNull();
-    expect(wipeCover.style.height).toBe('100%');
+    // Bar is removed from DOM immediately (no wipe cover animation)
+    expect(container.querySelectorAll('.chart-race__bar-wrapper').length).toBe(0);
   });
 
-  // 28. Bars restored from hiding use reverse wipe at correct position
-  it('bars restored from hiding are placed at correct position with full height', () => {
+  // 28. Bars re-created after removal are placed at correct position
+  it('bars re-created after removal are placed at correct position with full height', () => {
     renderer.mount(container);
 
     const MOCKED_HEIGHT = 500;
@@ -456,23 +451,21 @@ describe('ChartRaceRenderer', () => {
     ];
     const ds = makeDataStoreForEntries(entries);
 
-    // Show, then hide
+    // Show, then remove (simplified update removes immediately)
     renderer.update(makeSnapshot(entries), 10, ds);
     renderer.update(makeSnapshot([]), 10, emptyDataStore);
 
-    const wrapper = container.querySelector('.chart-race__bar-wrapper') as HTMLElement;
-    expect(wrapper.style.pointerEvents).toBe('none');
+    // Bar was removed from DOM
+    expect(container.querySelectorAll('.chart-race__bar-wrapper').length).toBe(0);
 
-    // Restore — should be at correct position with full height
+    // Re-show — bar is re-created at correct position
     renderer.update(makeSnapshot(entries), 10, ds);
+    const wrapper = container.querySelector('.chart-race__bar-wrapper') as HTMLElement;
+    expect(wrapper).not.toBeNull();
     expect(wrapper.style.opacity).toBe('1');
-    expect(wrapper.style.pointerEvents).toBe('');
     const barHeight = MOCKED_HEIGHT / 10;
     expect(wrapper.style.transform).toBe(`translateY(${0 * barHeight}px)`);
     expect(wrapper.style.height).toBe(`${barHeight}px`);
-    // Wipe cover is animating to 0 (phase 0 started)
-    const wipeCover = wrapper.querySelector('.bar__wipe-cover') as HTMLElement;
-    expect(wipeCover).not.toBeNull();
   });
 
   // 29. Scrubbing disables CSS transitions for instant snapping
@@ -518,8 +511,8 @@ describe('ChartRaceRenderer', () => {
     eventBus.emit('scrub:end');
   });
 
-  // 30. Scrub:start cancels in-flight animations and cleans up hidden bars
-  it('scrub:start cancels pending animations and removes hidden bars', () => {
+  // 30. Scrub:start cancels in-flight animations on visible bars
+  it('scrub:start cancels pending animations and snaps visible bars', () => {
     renderer.mount(container);
 
     const entries = [
@@ -529,21 +522,20 @@ describe('ChartRaceRenderer', () => {
     const ds = makeDataStoreForEntries(entries);
     renderer.update(makeSnapshot(entries), 10, ds);
 
-    // Hide a2 by updating without it
+    // Hide a2 by updating without it (simplified: removed immediately)
     const entries2 = [
       makeEntry({ artistId: 'a1', rank: 1, cumulativeValue: 600 }),
     ];
     const ds2 = makeDataStoreForEntries(entries2);
     renderer.update(makeSnapshot(entries2), 10, ds2);
 
-    // a2 is now hidden but still in DOM (phase 1 slide, pending phase 2 collapse)
+    // a2 is already removed from DOM (simplified update removes immediately)
     const wrappersBeforeScrub = container.querySelectorAll('.chart-race__bar-wrapper');
-    expect(wrappersBeforeScrub.length).toBe(2); // both still in DOM
+    expect(wrappersBeforeScrub.length).toBe(1);
 
-    // Start scrubbing mid-animation — should clean up immediately
+    // Start scrubbing — should snap remaining bar
     eventBus.emit('scrub:start');
 
-    // Hidden bar should be removed from DOM
     const wrappersAfterScrub = container.querySelectorAll('.chart-race__bar-wrapper');
     expect(wrappersAfterScrub.length).toBe(1);
 

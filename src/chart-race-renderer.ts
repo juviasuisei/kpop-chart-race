@@ -129,7 +129,7 @@ export class ChartRaceRenderer {
     }
 
     // Stop rank tracking
-    this.stopRankTracking();
+    this.stopRankTracking(true);
 
     // Cancel all per-bar animations and timeouts, reset hidden bars
     for (const [artistId, barEl] of this.bars) {
@@ -262,7 +262,7 @@ export class ChartRaceRenderer {
     // Use filtered entries directly when scrubbing or on initial load (no existing bars).
     // For playback: phase 1 includes bars currently in DOM + bars in filtered set,
     // but NOT bars that were hidden and are still not in the filtered set.
-    const needsTwoPhase = !this.scrubbing && this.bars.size > 0;
+    const needsTwoPhase = !this.scrubbing && this.bars.size > 0 && zoomLevel === 10;
     let visibleEntries: RankedEntry[];
     if (!needsTwoPhase) {
       visibleEntries = filteredEntries;
@@ -284,6 +284,13 @@ export class ChartRaceRenderer {
     const visibleIds = new Set(visibleEntries.map(e => e.artistId));
     const maxCumulative = visibleEntries.reduce(
       (max, e) => Math.max(max, e.cumulativeValue), 0);
+
+    // Capture current displayed ranks BEFORE updating (for rank tracking initialization)
+    const preUpdateRanks = new Map<string, number>();
+    for (const [artistId, barEl] of this.bars) {
+      const current = parseInt(barEl.rankSpan.textContent?.replace('#', '') || '0', 10);
+      if (current > 0) preUpdateRanks.set(artistId, current);
+    }
 
     // 2–5. For each visible entry: create bar if needed, restore if hidden, update
     let visIdx = 0;
@@ -394,11 +401,11 @@ export class ChartRaceRenderer {
       }
     }
 
-    // Rank tracking
-    if (!this.scrubbing) {
-      this.startRankTracking();
+    // Rank tracking — only during two-phase playback animation
+    if (!this.scrubbing && needsTwoPhase) {
+      this.startRankTracking(preUpdateRanks);
     } else {
-      this.stopRankTracking();
+      this.stopRankTracking(true);
     }
 
     // 8. Emit update:complete after transition duration (or immediately if scrubbing)
@@ -409,13 +416,13 @@ export class ChartRaceRenderer {
       // Initial load or no existing bars — already showing filtered set, just wait for animation
       this.phase2TimeoutId = setTimeout(() => {
         this.phase2TimeoutId = null;
-        this.stopRankTracking();
+        this.stopRankTracking(true);
         this.eventBus.emit("update:complete");
       }, 2880);
     } else {
       this.phase2TimeoutId = setTimeout(() => {
         this.phase2TimeoutId = null;
-        this.stopRankTracking();
+        this.stopRankTracking(true);
         // Phase 2: apply activity filter — hide bars not in filtered set
         this.applyVisibilityFilter(filteredIds, barHeight);
         // Reposition existing visible bars and create replacements simultaneously
@@ -535,15 +542,17 @@ export class ChartRaceRenderer {
    * sorts them by position, and assigns rank numbers based on visual order.
    * This makes rank badges update progressively as bars pass each other.
    */
-  private startRankTracking(): void {
+  private startRankTracking(preUpdateRanks: Map<string, number>): void {
     this.stopRankTracking();
 
-    // Initialize displayed ranks from current rankSpan text
+    // Initialize displayed ranks from pre-update values (before updateBarElement changed them)
     const displayedRanks = new Map<BarElement, number>();
-    for (const [, barEl] of this.bars) {
+    for (const [artistId, barEl] of this.bars) {
       if (barEl.hidden) continue;
-      const current = parseInt(barEl.rankSpan.textContent?.replace('#', '') || '0', 10);
-      displayedRanks.set(barEl, current || barEl.targetRank);
+      const preRank = preUpdateRanks.get(artistId);
+      displayedRanks.set(barEl, preRank ?? barEl.targetRank);
+      // Set the span back to the pre-update rank for smooth transition
+      barEl.rankSpan.textContent = `#${preRank ?? barEl.targetRank}`;
     }
 
     const track = () => {
@@ -554,15 +563,6 @@ export class ChartRaceRenderer {
         barPositions.push({ barEl, y: rect.top });
       }
       barPositions.sort((a, b) => a.y - b.y);
-
-      // Debug: log Say My Name's rank on first frame
-      for (const { barEl } of barPositions) {
-        if (barEl.nameSpan.textContent === 'SAY MY NAME') {
-          const dr = displayedRanks.get(barEl);
-          console.log('[RANK DEBUG] SAY MY NAME displayed:', dr, 'target:', barEl.targetRank, 'span:', barEl.rankSpan.textContent);
-          break;
-        }
-      }
 
       // Pairwise swap: if adjacent bars are out of order by displayed rank, swap
       let swapped = true;
@@ -595,15 +595,16 @@ export class ChartRaceRenderer {
   }
 
   /** Stop the rank tracking rAF loop */
-  private stopRankTracking(): void {
+  private stopRankTracking(setFinalRanks = false): void {
     if (this.rankTrackingFrameId !== null) {
       cancelAnimationFrame(this.rankTrackingFrameId);
       this.rankTrackingFrameId = null;
     }
-    // Set final rank values
-    for (const [, barEl] of this.bars) {
-      if (!barEl.hidden) {
-        barEl.rankSpan.textContent = `#${barEl.targetRank}`;
+    if (setFinalRanks) {
+      for (const [, barEl] of this.bars) {
+        if (!barEl.hidden) {
+          barEl.rankSpan.textContent = `#${barEl.targetRank}`;
+        }
       }
     }
   }
@@ -640,7 +641,7 @@ export class ChartRaceRenderer {
       clearTimeout(this.phase2TimeoutId);
       this.phase2TimeoutId = null;
     }
-    this.stopRankTracking();
+    this.stopRankTracking(true);
     for (const frameId of this.pendingFrames) {
       cancelAnimationFrame(frameId);
     }
@@ -804,8 +805,9 @@ export class ChartRaceRenderer {
     dataStore: DataStore,
     visualIndex: number,
   ): void {
-    // Store target rank — rank text updated by rank tracking loop during animation
+    // Store target rank and set displayed rank
     barEl.targetRank = entry.rank;
+    barEl.rankSpan.textContent = `#${entry.rank}`;
     barEl.rankSpan.style.backgroundColor = ARTIST_TYPE_COLORS[entry.artistType];
     barEl.nameSpan.textContent = entry.artistName;
     barEl.genSpan.textContent = toRomanNumeral(entry.generation);

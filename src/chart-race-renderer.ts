@@ -399,7 +399,19 @@ export class ChartRaceRenderer {
         this.stopRankTracking();
         // Phase 2: apply activity filter — hide bars not in filtered set
         this.applyVisibilityFilter(filteredIds, barHeight);
-        // Wait for wipe animation, then signal done
+        // Simultaneously reposition remaining bars to close gaps
+        let idx = 0;
+        for (const entry of filteredEntries) {
+          const barEl = this.bars.get(entry.artistId);
+          if (!barEl || barEl.hidden) continue;
+          const yPosition = idx * barHeight;
+          barEl.wrapper.style.transform = `translateY(${yPosition}px)`;
+          barEl.wrapper.style.zIndex = String(1000 - entry.rank);
+          barEl.targetRank = entry.rank;
+          barEl.rankSpan.textContent = `#${entry.rank}`;
+          idx++;
+        }
+        // Wait for wipe/reposition animation, then signal done
         const hasHides = Array.from(this.bars.values()).some(b => b.hidden);
         if (hasHides) {
           setTimeout(() => {

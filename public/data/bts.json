@@ -6,9 +6,40 @@
   "debut": "2013-06-13",
   "releases": [
     {
+      "title": "2.0",
+      "dailyValues": {
+        "2026-04-19": { "value": 4701, "source": "inkigayo", "episode": 1307 }
+      },
+      "embeds": {
+        "2026-04-01": [
+          {
+            "eventType": "mv",
+            "links": [
+              { "url": "https://youtu.be/_gyultVTesk?si=ZN9hZd6-1Uj3Mjuf" }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "title": "Body to Body",
+      "dailyValues": {
+        "2026-04-05": { "value": 4250, "source": "inkigayo", "episode": 1305 }
+      },
+      "embeds": {
+        "2026-03-22": [
+          {
+            "eventType": "mv",
+            "links": [
+              { "url": "https://youtu.be/3PHs-o5JPHM?si=fgDC_K3e5BtwcTM4" }
+            ]
+          }
+        ]
+      }
+    },
+    {
       "title": "SWIM",
       "dailyValues": {
-        "2026-04-19": { "value": 4701, "source": "inkigayo", "episode": 1307 },
         "2026-04-18": { "value": 5723, "source": "show_music_core", "episode": 941 },
         "2026-04-12": { "value": 8590, "source": "inkigayo", "episode": 1306 },
         "2026-04-11": { "value": 8532, "source": "show_music_core", "episode": 940 },
@@ -40,12 +71,6 @@
             ]
           }
         ]
-      }
-    },
-    {
-      "title": "Body to Body",
-      "dailyValues": {
-        "2026-04-05": { "value": 4250, "source": "inkigayo", "episode": 1305 }
       }
     }
   ]

@@ -102,8 +102,10 @@ interface TimelineItem {
   dailyValue?: DailyValueEntry;
   embedGroups: ParsedEmbedDateEntry[];
   crownLevel: number;
-  /** Additional releases on the same (date, source, episode) — merged into one card */
-  subReleases: { title: string; releaseId: string; value: number }[];
+  /** Additional releases on the same date — merged into one card */
+  subReleases: { title: string; releaseId: string; value: number; source?: string; episode?: number }[];
+  /** Embeds from other releases merged into this card, with their release title */
+  mergedEmbeds: { releaseTitle: string; groups: ParsedEmbedDateEntry[] }[];
 }
 
 /** A date group containing all timeline items for that date */
@@ -397,6 +399,7 @@ export class DetailPanel {
           embedGroups,
           crownLevel,
           subReleases: [],
+          mergedEmbeds: [],
         });
       }
     }
@@ -408,9 +411,10 @@ export class DetailPanel {
     const mergeMap = new Map<string, TimelineItem>();
 
     for (const item of items) {
+      const key = item.date;
+      const existing = mergeMap.get(key);
+
       if (item.dailyValue) {
-        const key = `${item.date}|${item.dailyValue.source}|${item.dailyValue.episode}`;
-        const existing = mergeMap.get(key);
         if (existing && existing.dailyValue) {
           // Merge: add as sub-release
           if (item.dailyValue.value > existing.dailyValue.value) {
@@ -419,31 +423,62 @@ export class DetailPanel {
               title: existing.releaseTitle,
               releaseId: existing.releaseId,
               value: existing.dailyValue.value,
+              source: existing.dailyValue.source,
+              episode: existing.dailyValue.episode,
             });
+            // Move existing's embeds to mergedEmbeds if they belong to the old release
+            if (existing.embedGroups.length > 0) {
+              existing.mergedEmbeds.push({ releaseTitle: existing.releaseTitle, groups: existing.embedGroups });
+              existing.embedGroups = [];
+            }
             existing.releaseTitle = item.releaseTitle;
             existing.releaseId = item.releaseId;
             existing.dailyValue = item.dailyValue;
             existing.crownLevel = item.crownLevel;
-            // Merge embeds
-            existing.embedGroups = existing.embedGroups.concat(item.embedGroups);
+            if (item.embedGroups.length > 0) {
+              existing.embedGroups = item.embedGroups;
+            }
           } else {
             // Existing is higher or equal — add new as sub-release
             existing.subReleases.push({
               title: item.releaseTitle,
               releaseId: item.releaseId,
               value: item.dailyValue.value,
+              source: item.dailyValue.source,
+              episode: item.dailyValue.episode,
             });
-            // Only keep crown on the primary (highest value)
-            // Merge embeds
-            existing.embedGroups = existing.embedGroups.concat(item.embedGroups);
+            if (item.embedGroups.length > 0) {
+              existing.mergedEmbeds.push({ releaseTitle: item.releaseTitle, groups: item.embedGroups });
+            }
+          }
+        } else if (existing) {
+          // Existing is embed-only, new has chart data — new becomes primary
+          // Keep existing embeds as merged (they're from a different release)
+          if (existing.embedGroups.length > 0) {
+            existing.mergedEmbeds.push({ releaseTitle: existing.releaseTitle, groups: existing.embedGroups });
+            existing.embedGroups = [];
+          }
+          existing.releaseTitle = item.releaseTitle;
+          existing.releaseId = item.releaseId;
+          existing.dailyValue = item.dailyValue;
+          existing.crownLevel = item.crownLevel;
+          if (item.embedGroups.length > 0) {
+            existing.embedGroups = item.embedGroups;
           }
         } else {
           mergeMap.set(key, item);
           mergedItems.push(item);
         }
       } else {
-        // Embed-only items don't merge
-        mergedItems.push(item);
+        // Embed-only item — merge into existing card for same date
+        if (existing) {
+          if (item.embedGroups.length > 0) {
+            existing.mergedEmbeds.push({ releaseTitle: item.releaseTitle, groups: item.embedGroups });
+          }
+        } else {
+          mergeMap.set(key, item);
+          mergedItems.push(item);
+        }
       }
     }
 
@@ -570,11 +605,14 @@ export class DetailPanel {
       valueEl.textContent = `${item.dailyValue.value.toLocaleString()} pts`;
       entry.appendChild(valueEl);
 
-      // Sub-releases (other songs on the same show/episode)
+      // Sub-releases (other songs on the same day, possibly different shows)
       for (const sub of item.subReleases) {
         const subEl = document.createElement("div");
         subEl.className = "timeline-entry__sub-release";
-        subEl.textContent = `♪ ${sub.title} — ${sub.value.toLocaleString()} pts`;
+        const sourceLabel = sub.source && sub.source !== item.dailyValue.source
+          ? ` (${sub.source} Ep ${sub.episode})`
+          : "";
+        subEl.textContent = `♪ ${sub.title}${sourceLabel} — ${sub.value.toLocaleString()} pts`;
         entry.appendChild(subEl);
       }
     } else {
@@ -627,6 +665,49 @@ export class DetailPanel {
       }
 
       entry.appendChild(groupEl);
+    }
+
+    // Merged embeds from other releases on the same date — with song headings
+    for (const merged of item.mergedEmbeds) {
+      const songHeading = document.createElement("div");
+      songHeading.className = "timeline-entry__release";
+      songHeading.textContent = `♪ ${merged.releaseTitle}`;
+      songHeading.style.marginTop = "0.75rem";
+      entry.appendChild(songHeading);
+
+      const sortedMerged = [...merged.groups].sort((a, b) => {
+        const order: Record<string, number> = {
+          live_performance: 0, chart_performance: 1, mv: 2, release_date: 3,
+          trailer: 4, dance_practice: 5, promotion: 6, behind_the_scenes: 7,
+          variety_show: 8, fan_event: 9,
+        };
+        return (order[a.eventType] ?? 10) - (order[b.eventType] ?? 10);
+      });
+
+      for (const group of sortedMerged) {
+        const groupEl = document.createElement("div");
+        groupEl.className = "timeline-entry__embed-group";
+
+        const labelEl = document.createElement("div");
+        labelEl.className = "timeline-entry__event-type";
+        labelEl.textContent = EVENT_TYPE_LABELS[group.eventType] ?? group.eventType;
+        groupEl.appendChild(labelEl);
+
+        for (const link of group.links) {
+          const placeholder = document.createElement("div");
+          placeholder.className = "detail-panel__embed-placeholder";
+          placeholder.dataset.embedUrl = link.url;
+          if (link.description) {
+            placeholder.dataset.embedDescription = link.description;
+          }
+          groupEl.appendChild(placeholder);
+          if (this.observer) {
+            this.observer.observe(placeholder);
+          }
+        }
+
+        entry.appendChild(groupEl);
+      }
     }
 
     return entry;

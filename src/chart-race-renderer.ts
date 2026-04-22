@@ -81,11 +81,12 @@ export class ChartRaceRenderer {
   constructor(private eventBus: EventBus) {
     this.eventBus.on("scrub:start", () => {
       this.scrubbing = true;
-      this.cancelAllAnimations();
       // Force no-transition via CSS class (more reliable than inline styles)
       if (this.barsContainer) {
         this.barsContainer.classList.add("chart-race__bars--no-transition");
+        this.barsContainer.offsetHeight; // force reflow so class takes effect
       }
+      this.cancelAllAnimations();
     });
     this.eventBus.on("scrub:end", () => {
       this.scrubbing = false;

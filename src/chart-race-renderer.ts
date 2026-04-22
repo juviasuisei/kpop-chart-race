@@ -702,18 +702,36 @@ export class ChartRaceRenderer {
     if (barEl.overflowTimeoutId !== null) {
       clearTimeout(barEl.overflowTimeoutId);
     }
-    // After transition completes, check what fits.
-    barEl.overflowTimeoutId = setTimeout(() => {
-      barEl.overflowTimeoutId = null;
-      if (barGrew) {
-        this.moveAllInside(barEl);
-        barEl.bar.offsetHeight; // force layout
-      }
+    if (this.scrubbing) {
+      // Snap: check overflow immediately
+      this.moveAllInside(barEl);
+      barEl.bar.offsetHeight;
       this.checkBarOverflow(barEl);
-    }, 9600);
+    } else {
+      // After transition completes, check what fits.
+      barEl.overflowTimeoutId = setTimeout(() => {
+        barEl.overflowTimeoutId = null;
+        if (barGrew) {
+          this.moveAllInside(barEl);
+          barEl.bar.offsetHeight; // force layout
+        }
+        this.checkBarOverflow(barEl);
+      }, 9600);
+    }
 
-    // Numeric value tweening
-    this.tweenValue(barEl, entry.previousCumulativeValue, entry.cumulativeValue);
+    // Numeric value tweening (snap in scrub mode)
+    if (this.scrubbing) {
+      barEl.valueSpan.textContent = Math.round(entry.cumulativeValue).toLocaleString();
+      barEl.currentDisplayValue = entry.cumulativeValue;
+      // Cancel any running tween
+      if (barEl.animationFrameId !== null) {
+        cancelAnimationFrame(barEl.animationFrameId);
+        this.pendingFrames.delete(barEl.animationFrameId);
+        barEl.animationFrameId = null;
+      }
+    } else {
+      this.tweenValue(barEl, entry.previousCumulativeValue, entry.cumulativeValue);
+    }
   }
 
   /** Move all overflow elements back inside the bar */

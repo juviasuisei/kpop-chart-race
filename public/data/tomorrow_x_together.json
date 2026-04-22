@@ -1,0 +1,31 @@
+{
+  "name": "TOMORROW X TOGETHER",
+  "korean_name": "투모로우바이투게더",
+  "artistType": "boy_group",
+  "generation": 4,
+  "debut": "2019-03-04",
+  "releases": [
+    {
+      "title": "Stick With You",
+      "dailyValues": {
+        "2026-04-22": { "value": 6102, "source": "show_champion", "episode": 594 }
+      },
+      "embeds": {
+        "2026-04-13": [
+          {
+            "eventType": "release_date",
+            "links": [
+              { "url": "https://music.apple.com/us/album/7th-year-a-moment-of-stillness-in-the-thorns-ep/1886536327" }
+            ]
+          },
+          {
+            "eventType": "mv",
+            "links": [
+              { "url": "https://youtu.be/jOnLqqDRfY4?si=4k9jh8w_2i_XJwxQ" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

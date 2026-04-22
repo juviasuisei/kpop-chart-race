@@ -8,11 +8,20 @@
     {
       "title": "Who is she",
       "dailyValues": {
+        "2026-04-22": { "value": 2707, "source": "show_champion", "episode": 594 },
         "2026-04-17": { "value": 6984, "source": "music_bank", "episode": 1289 },
         "2026-04-16": { "value": 8884, "source": "m_countdown", "episode": 924 },
         "2026-04-15": { "value": 2961, "source": "show_champion", "episode": 593 }
       },
-      "embeds": {
+      "embeds": { 
+        "2026-04-22": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://youtu.be/LR-sSsO8Fu4?si=eBnlNZ909bVs69Aj" }
+            ]
+          }
+        ],
         "2026-04-17": [
           {
             "eventType": "live_performance",

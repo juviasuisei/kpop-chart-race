@@ -524,7 +524,7 @@ describe('Property 1: Zero-value exclusion invariant', () => {
 // **Validates: Requirements 1.1, 1.2, 1.3, 1.5, 1.6**
 // ============================================================
 
-import { dateMinus365, hasRecentActivity, filterByActivity } from '../../src/utils.ts';
+import { hasRecentActivity, filterByActivity } from '../../src/utils.ts';
 import type { RankedEntry } from '../../src/models.ts';
 
 describe('Feature 0014, Property 1: Chart Win Deduplication and Crown Correctness', () => {
@@ -733,8 +733,8 @@ describe('Feature 0014, Property 2: Activity Filter Correctness at Zoom 10', () 
         (entryCount, activeCount) => {
           const clampedActive = Math.min(activeCount, entryCount - 1);
           const snapshotDate = '2024-06-15';
-          const recentDate = '2024-06-01'; // within 30 days
-          const oldDate = '2024-01-01'; // outside 30 days
+          const recentDate = '2024-06-01'; // within 14 days
+          const oldDate = '2024-01-01'; // outside 14 days
 
           const entries: RankedEntry[] = [];
           const artists = new Map<string, ParsedArtist>();

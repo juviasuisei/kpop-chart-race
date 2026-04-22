@@ -1,0 +1,31 @@
+{
+  "name": "ZICO [Block B]",
+  "korean_name": "우지호",
+  "artistType": "solo_male",
+  "generation": 2,
+  "debut": "2014-11-07",
+  "releases": [
+    {
+      "title": "DUET",
+      "dailyValues": {
+        "2026-01-15": { "value": 5662, "source": "m_countdown", "episode": 912 }
+      },
+      "embeds": {
+        "2025-12-18": [
+          {
+            "eventType": "release_date",
+            "links": [
+              { "url": "https://music.apple.com/us/album/duet-single/1859542278" }
+            ]
+          },
+          {
+            "eventType": "mv",
+            "links": [
+              { "url": "https://youtu.be/sssoyDLFPWE?si=WrDYNTiy0Dve6KFe" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

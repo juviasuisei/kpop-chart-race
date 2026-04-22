@@ -8,6 +8,7 @@
     {
       "title": "Joy, Sorrow, a Beautiful Heart",
       "dailyValues": {
+        "2026-04-22": { "value": 3555, "source": "show_champion", "episode": 594 },
         "2026-04-18": { "value": 5586, "source": "show_music_core", "episode": 941 },
         "2026-04-16": { "value": 5199, "source": "m_countdown", "episode": 924 },
         "2026-04-15": { "value": 3621, "source": "show_champion", "episode": 593 }

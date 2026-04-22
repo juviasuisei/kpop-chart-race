@@ -1,10 +1,10 @@
 /**
  * Unit tests for Feature 0014: Chart Display Improvements
- * Tests dedup tie-breaking, dateMinus365 leap year, rank badge class, logo toggle CSS class.
+ * Tests dedup tie-breaking, dateMinusDays, rank badge class, logo toggle CSS class.
  */
 
 import { computeChartWins } from '../../src/chart-engine.ts';
-import { dateMinus365, filterByActivity, filterByZoom, hasRecentActivity, dateMinusDays, toRomanNumeral } from '../../src/utils.ts';
+import { filterByActivity, filterByZoom, hasRecentActivity, dateMinusDays, toRomanNumeral } from '../../src/utils.ts';
 import { ChartRaceRenderer } from '../../src/chart-race-renderer.ts';
 import { EventBus } from '../../src/event-bus.ts';
 import type { DataStore, ParsedArtist, RankedEntry, ChartSnapshot } from '../../src/models.ts';
@@ -102,23 +102,23 @@ describe('Dedup tie-breaking', () => {
 });
 
 // ============================================================
-// dateMinus365 with leap year boundary
+// dateMinusDays
 // ============================================================
 
-describe('dateMinus365 (now 30 days)', () => {
-  it('returns 30 days before the given date', () => {
-    const result = dateMinus365('2024-03-15');
-    expect(result).toBe('2024-02-14');
+describe('dateMinusDays', () => {
+  it('returns 14 days before the given date', () => {
+    const result = dateMinusDays('2024-03-15', 14);
+    expect(result).toBe('2024-03-01');
   });
 
   it('handles month boundary', () => {
-    const result = dateMinus365('2024-01-15');
-    expect(result).toBe('2023-12-16');
+    const result = dateMinusDays('2024-01-15', 14);
+    expect(result).toBe('2024-01-01');
   });
 
   it('handles year boundary', () => {
-    const result = dateMinus365('2024-01-01');
-    expect(result).toBe('2023-12-02');
+    const result = dateMinusDays('2024-01-01', 14);
+    expect(result).toBe('2023-12-18');
   });
 });
 
@@ -283,8 +283,8 @@ function makeRankedEntries(count: number): RankedEntry[] {
 
 describe('filterByActivity — goalpost logic', () => {
   const snapshotDate = '2024-06-15';
-  const recentDate = '2024-06-10'; // within 30 days of snapshot
-  const oldDate = '2023-01-01';    // outside 30 days
+  const recentDate = '2024-06-10'; // within 14 days of snapshot
+  const oldDate = '2023-01-01';    // outside 14 days
 
   it('rank 1 is always included even if inactive', () => {
     const entries = makeRankedEntries(5);

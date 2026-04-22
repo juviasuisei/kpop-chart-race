@@ -1,0 +1,31 @@
+{
+  "name": "HWASA [MAMAMOO]",
+  "korean_name": "안혜진",
+  "artistType": "solo_female",
+  "generation": 3,
+  "debut": "2019-02-13",
+  "releases": [
+    {
+      "title": "Good Goodbye",
+      "dailyValues": {
+        "2026-01-18": { "value": 6048, "source": "inkigayo", "episode": 1296 }
+      },
+      "embeds": {
+        "2025-10-15": [
+          {
+            "eventType": "release_date",
+            "links": [
+              { "url": "https://music.apple.com/us/album/good-goodbye-single/1843518967" }
+            ]
+          },
+          {
+            "eventType": "mv",
+            "links": [
+              { "url": "https://youtu.be/Qe8fa4b5xNU?si=P-JHr4Q3zCrlJiec" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

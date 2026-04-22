@@ -1,0 +1,31 @@
+{
+  "name": "ALLDAY PROJECT",
+  "korean_name": "올데이프로젝트",
+  "artistType": "mixed_group",
+  "generation": 5,
+  "debut": "2025-06-23",
+  "releases": [
+    {
+      "title": "ONE MORE TIME",
+      "dailyValues": {
+        "2026-01-17": { "value": 5735, "source": "show_music_core", "episode": 931 }
+      },
+      "embeds": {
+        "2025-11-17": [
+          {
+            "eventType": "release_date",
+            "links": [
+              { "url": "https://music.apple.com/us/album/one-more-time-single/1850392562" }
+            ]
+          },
+          {
+            "eventType": "mv",
+            "links": [
+              { "url": "https://youtu.be/9nOrPNxjvck?si=7NOoLbLLiT2JAzAB" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

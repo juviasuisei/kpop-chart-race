@@ -738,6 +738,32 @@ describe('ChartRaceRenderer', () => {
     // We verify the tween was initiated by checking the value is set.
     expect(value!.textContent).toBeTruthy();
   });
+
+  // 39. applyVisibilityFilter hides bars not in filtered set with wipe cover
+  it('applyVisibilityFilter marks bars as hidden with wipe cover', () => {
+    renderer.mount(container);
+
+    const entries = [
+      makeEntry({ artistId: 'a1', artistName: 'Luna Park', rank: 1, cumulativeValue: 1000 }),
+      makeEntry({ artistId: 'a2', artistName: 'Jay Storm', rank: 2, cumulativeValue: 500 }),
+    ];
+    renderer.update(makeSnapshot(entries), 10, makeDataStoreForEntries(entries));
+    expect(container.querySelectorAll('.chart-race__bar-wrapper').length).toBe(2);
+
+    // Apply filter that only includes a1
+    renderer.applyVisibilityFilter(new Set(['a1']), 50);
+
+    // a2 still in DOM (wipe in progress) with pointer-events disabled
+    const wrappers = container.querySelectorAll('.chart-race__bar-wrapper');
+    expect(wrappers.length).toBe(2);
+    const a2Wrapper = Array.from(wrappers).find(
+      w => w.querySelector('.bar__name')?.textContent === 'Jay Storm'
+    ) as HTMLElement;
+    expect(a2Wrapper).not.toBeNull();
+    expect(a2Wrapper.style.pointerEvents).toBe('none');
+    const wipeCover = a2Wrapper.querySelector('.bar__wipe-cover') as HTMLElement;
+    expect(wipeCover.style.height).toBe('100%');
+  });
 });
 
 

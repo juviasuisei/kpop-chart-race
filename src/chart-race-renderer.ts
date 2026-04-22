@@ -5,7 +5,7 @@
 
 import type { ChartSnapshot, DataStore, RankedEntry } from "./models.ts";
 import type { ArtistType, ZoomLevel } from "./types.ts";
-import { filterByActivity, computeBarWidth, toRomanNumeral, tween } from "./utils.ts";
+import { filterByActivity, filterByZoom, computeBarWidth, toRomanNumeral, tween } from "./utils.ts";
 import { EventBus } from "./event-bus.ts";
 import { ARTIST_TYPE_COLORS } from "./colors.ts";
 import { computeTotalWins, computeReleaseCumulativeValue } from "./chart-engine.ts";
@@ -254,8 +254,13 @@ export class ChartRaceRenderer {
     // Update date display
     this.dateDisplay.textContent = snapshot.date;
 
-    // 1. Get visible entries
-    const visibleEntries = filterByActivity(snapshot.entries, snapshot.date, dataStore, zoomLevel);
+    // 1. Phase 1 uses unfiltered top-10 by rank (all bars participate in position animation)
+    // Phase 2 (after transition) applies activity filter to hide/show bars
+    const phase1Entries = filterByZoom(snapshot.entries, zoomLevel);
+    const filteredEntries = filterByActivity(snapshot.entries, snapshot.date, dataStore, zoomLevel);
+    const filteredIds = new Set(filteredEntries.map(e => e.artistId));
+
+    const visibleEntries = phase1Entries;
     const containerHeight = this.barsContainer.clientHeight || this.barsContainer.offsetHeight;
     const barHeight =
       zoomLevel === 10
@@ -345,9 +350,10 @@ export class ChartRaceRenderer {
       visIdx++;
     }
 
-    // 6. Remove bars no longer visible — immediately, no animation
+    // 6. Remove bars no longer visible — immediately (hide animation handled by applyVisibilityFilter)
     for (const [artistId, barEl] of this.bars) {
       if (visibleIds.has(artistId)) continue;
+      if (barEl.hidden) continue; // already being hidden
       // Cancel any pending animations/timeouts
       if (barEl.animationFrameId !== null) {
         cancelAnimationFrame(barEl.animationFrameId);
@@ -385,13 +391,80 @@ export class ChartRaceRenderer {
 
     // 8. Emit update:complete after transition duration (or immediately if scrubbing)
     if (this.scrubbing) {
+      this.applyVisibilityFilter(filteredIds, barHeight);
       this.eventBus.emit("update:complete");
     } else {
       this.phase2TimeoutId = setTimeout(() => {
         this.phase2TimeoutId = null;
         this.stopRankTracking();
-        this.eventBus.emit("update:complete");
+        // Phase 2: apply activity filter — hide bars not in filtered set
+        this.applyVisibilityFilter(filteredIds, barHeight);
+        // Wait for wipe animation, then signal done
+        const hasHides = Array.from(this.bars.values()).some(b => b.hidden);
+        if (hasHides) {
+          setTimeout(() => {
+            this.eventBus.emit("update:complete");
+          }, 2880);
+        } else {
+          this.eventBus.emit("update:complete");
+        }
       }, 2880);
+    }
+  }
+
+  /**
+   * Apply visibility filter after position animations complete.
+   * Bars not in the filtered set get the wipe cover treatment (hide).
+   * Called after phase 1 (position/width transitions) finishes.
+   * For scrubbing, removes bars instantly.
+   */
+  applyVisibilityFilter(
+    filteredIds: Set<string>,
+    _barHeight: number,
+  ): void {
+    const toHide: string[] = [];
+    for (const [artistId, barEl] of this.bars) {
+      if (!filteredIds.has(artistId) && !barEl.hidden) {
+        toHide.push(artistId);
+      }
+    }
+
+    if (toHide.length === 0) return;
+
+    for (const artistId of toHide) {
+      const barEl = this.bars.get(artistId)!;
+      if (barEl.animationFrameId !== null) {
+        cancelAnimationFrame(barEl.animationFrameId);
+        this.pendingFrames.delete(barEl.animationFrameId);
+        barEl.animationFrameId = null;
+      }
+      if (barEl.overflowTimeoutId !== null) {
+        clearTimeout(barEl.overflowTimeoutId);
+        barEl.overflowTimeoutId = null;
+      }
+
+      if (this.scrubbing) {
+        barEl.wrapper.remove();
+        if (barEl.clickHandler) {
+          barEl.wrapper.removeEventListener('click', barEl.clickHandler);
+        }
+        this.bars.delete(artistId);
+      } else {
+        barEl.hidden = true;
+        barEl.wrapper.style.pointerEvents = "none";
+        barEl.wrapper.style.zIndex = "0";
+        barEl.wipeCover.style.height = "100%";
+        barEl.fadeOutTimeoutId = setTimeout(() => {
+          barEl.fadeOutTimeoutId = null;
+          if (barEl.hidden) {
+            barEl.wrapper.remove();
+            if (barEl.clickHandler) {
+              barEl.wrapper.removeEventListener('click', barEl.clickHandler);
+            }
+            this.bars.delete(artistId);
+          }
+        }, 2880);
+      }
     }
   }
 

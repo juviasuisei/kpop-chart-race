@@ -413,8 +413,8 @@ describe('ChartRaceRenderer', () => {
     expect(wrapper.style.opacity).toBe('1');
   });
 
-  // 27. Bars hidden by inactivity collapse height instead of being removed
-  it('bars hidden by inactivity collapse height and set pointer-events none', () => {
+  // 27. Bars hidden by inactivity slide down then collapse
+  it('bars hidden by inactivity slide to exit position and set pointer-events none', () => {
     renderer.mount(container);
 
     // First update: show artist
@@ -433,9 +433,10 @@ describe('ChartRaceRenderer', () => {
     const snapshot2 = makeSnapshot([]);
     renderer.update(snapshot2, 10, emptyDataStore);
 
-    // Bar should still be in DOM but collapsed
-    expect(wrapper.style.height).toBe('0px');
+    // Phase 1: bar slides to exit position, height stays full, pointer-events disabled
     expect(wrapper.style.pointerEvents).toBe('none');
+    // Height is still full during phase 1 (collapse happens after 960ms)
+    expect(wrapper.style.height).not.toBe('0px');
   });
 
   // 28. Bars restored from hiding expand at correct position
@@ -459,9 +460,10 @@ describe('ChartRaceRenderer', () => {
     renderer.update(makeSnapshot([]), 10, emptyDataStore);
 
     const wrapper = container.querySelector('.chart-race__bar-wrapper') as HTMLElement;
-    expect(wrapper.style.height).toBe('0px');
+    // Phase 1 of hide: bar is still full height, sliding to exit position
+    expect(wrapper.style.pointerEvents).toBe('none');
 
-    // Restore — should expand at position, not slide from bottom
+    // Restore — should expand at correct position
     renderer.update(makeSnapshot(entries), 10, ds);
     expect(wrapper.style.opacity).toBe('1');
     expect(wrapper.style.pointerEvents).toBe('');

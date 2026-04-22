@@ -282,20 +282,26 @@ export class ChartRaceRenderer {
           }
           this.bars.delete(artistId);
         } else {
-          // Collapse in place: height → 0 while bars below slide up simultaneously.
-          // Don't change translateY — keep bar at its current position so the
-          // collapse visually happens where the bar was.
-          barEl.wrapper.style.height = "0";
-          barEl.wrapper.style.opacity = "0";
+          // Two-phase hide:
+          // Phase 1: Slide down to just below the last visible bar (0.95s)
+          // Phase 2: After arriving, collapse height to 0
+          const exitY = visibleEntries.length * barHeight;
+          barEl.wrapper.style.transform = `translateY(${exitY}px)`;
+
           barEl.fadeOutTimeoutId = setTimeout(() => {
-            barEl.fadeOutTimeoutId = null;
-            if (barEl.hidden) {
-              barEl.wrapper.remove();
-              if (barEl.clickHandler) {
-                barEl.wrapper.removeEventListener('click', barEl.clickHandler);
+            // Phase 2: collapse after position transition completes
+            barEl.wrapper.style.height = "0";
+            barEl.wrapper.style.opacity = "0";
+            barEl.fadeOutTimeoutId = setTimeout(() => {
+              barEl.fadeOutTimeoutId = null;
+              if (barEl.hidden) {
+                barEl.wrapper.remove();
+                if (barEl.clickHandler) {
+                  barEl.wrapper.removeEventListener('click', barEl.clickHandler);
+                }
+                this.bars.delete(artistId);
               }
-              this.bars.delete(artistId);
-            }
+            }, 960);
           }, 960);
         }
       }

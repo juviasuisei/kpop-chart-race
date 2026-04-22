@@ -93,6 +93,7 @@ async function main(): Promise<void> {
 
   // reset → clear snapshot history so next date starts fresh
   eventBus.on("reset", () => {
+    console.log("[DEBUG] main.ts reset: clearing snapshots");
     previousSnapshot = undefined;
     currentSnapshot = undefined;
   });

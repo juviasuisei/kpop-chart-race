@@ -80,19 +80,20 @@ export class ChartRaceRenderer {
 
   constructor(private eventBus: EventBus) {
     this.eventBus.on("scrub:start", () => {
+      console.log("[DEBUG] scrub:start: bars before clear:", this.bars.size);
       this.scrubbing = true;
-      // Nuclear option: remove all bars from DOM. The next update() will
-      // re-create them with transition:none, guaranteeing no animation.
       this.cancelAllAnimations();
       for (const [, barEl] of this.bars) {
         barEl.wrapper.remove();
       }
       this.bars.clear();
+      console.log("[DEBUG] scrub:start: bars after clear:", this.bars.size);
       if (this.barsContainer) {
         this.barsContainer.classList.add("chart-race__bars--no-transition");
       }
     });
     this.eventBus.on("scrub:end", () => {
+      console.log("[DEBUG] scrub:end");
       this.scrubbing = false;
       if (this.barsContainer) {
         this.barsContainer.classList.remove("chart-race__bars--no-transition");
@@ -104,6 +105,7 @@ export class ChartRaceRenderer {
       }
     });
     this.eventBus.on("reset", () => {
+      console.log("[DEBUG] reset: clearing", this.bars.size, "bars");
       // Remove all bars from DOM so next update starts fresh
       for (const [, barEl] of this.bars) {
         if (barEl.animationFrameId !== null) {
@@ -240,6 +242,7 @@ export class ChartRaceRenderer {
    * Emits "update:complete" when the transition completes.
    */
   update(snapshot: ChartSnapshot, zoomLevel: ZoomLevel, dataStore: DataStore): void {
+    console.log("[DEBUG] update:", snapshot.date, "scrubbing:", this.scrubbing, "existing bars:", this.bars.size);
     if (!this.barsContainer || !this.dateDisplay) return;
 
     // Cancel any pending timeout from a previous update

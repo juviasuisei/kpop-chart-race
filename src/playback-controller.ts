@@ -230,6 +230,13 @@ export class PlaybackController {
         this.scrubberTooltip.style.opacity = "1";
       }
       this.eventBus.emit("date:change", date);
+
+      // If the user released the scrubber, end scrub mode after this update
+      if (this.scrubEndPending) {
+        this.scrubEndPending = false;
+        this.isScrubbing = false;
+        this.eventBus.emit("scrub:end");
+      }
     });
   };
 
@@ -245,9 +252,19 @@ export class PlaybackController {
   };
 
   private handleScrubEnd = (): void => {
-    this.isScrubbing = false;
-    this.eventBus.emit("scrub:end");
+    // Don't emit scrub:end here — the rAF-deferred update may not have run yet.
+    // Mark pending and let the next input handler emit it, or use a fallback timeout.
+    this.scrubEndPending = true;
+    setTimeout(() => {
+      if (this.scrubEndPending) {
+        this.scrubEndPending = false;
+        this.isScrubbing = false;
+        this.eventBus.emit("scrub:end");
+      }
+    }, 100);
   };
+
+  private scrubEndPending = false;
 
   private handleScrubberHover = (e: MouseEvent): void => {
     if (!this.scrubber || !this.scrubberTooltip) return;

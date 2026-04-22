@@ -413,8 +413,8 @@ describe('ChartRaceRenderer', () => {
     expect(wrapper.style.opacity).toBe('1');
   });
 
-  // 27. Bars filtered out (not overtaken) collapse in place during phase 1
-  it('bars filtered out collapse height immediately and set pointer-events none', () => {
+  // 27. Bars filtered out (not overtaken) get wipe cover animation
+  it('bars filtered out use wipe cover and set pointer-events none', () => {
     renderer.mount(container);
 
     // First update: show artist
@@ -433,9 +433,11 @@ describe('ChartRaceRenderer', () => {
     const snapshot2 = makeSnapshot([]);
     renderer.update(snapshot2, 10, emptyDataStore);
 
-    // Filtered-out bar collapses in place during phase 1
-    expect(wrapper.style.height).toBe('0px');
+    // Filtered-out bar uses wipe cover (height stays full, cover grows)
     expect(wrapper.style.pointerEvents).toBe('none');
+    const wipeCover = wrapper.querySelector('.bar__wipe-cover') as HTMLElement;
+    expect(wipeCover).not.toBeNull();
+    expect(wipeCover.style.height).toBe('100%');
   });
 
   // 28. Bars restored from hiding expand at correct position

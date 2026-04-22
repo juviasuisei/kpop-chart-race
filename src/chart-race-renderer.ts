@@ -43,6 +43,7 @@ const TWEEN_DURATION = 9500;
 interface BarElement {
   wrapper: HTMLDivElement;
   bar: HTMLDivElement;
+  wipeCover: HTMLDivElement;
   rankSpan: HTMLSpanElement;
   logo: HTMLImageElement;
   nameSpan: HTMLSpanElement;
@@ -141,6 +142,9 @@ export class ChartRaceRenderer {
         barEl.wrapper.style.transition = "none";
       }
       barEl.bar.style.transition = "none";
+      // Reset wipe cover
+      barEl.wipeCover.style.transition = "none";
+      barEl.wipeCover.style.height = "0";
       // Snap value display
       barEl.valueSpan.textContent = Math.round(barEl.currentDisplayValue).toLocaleString();
     }
@@ -332,6 +336,10 @@ export class ChartRaceRenderer {
         }
         barEl.hidden = false;
         barEl.wrapper.style.pointerEvents = "";
+        barEl.wipeCover.style.transition = "none";
+        barEl.wipeCover.style.height = "0";
+        barEl.wipeCover.offsetHeight;
+        barEl.wipeCover.style.transition = "";
 
         if (this.scrubbing) {
           barEl.wrapper.style.transition = "none";
@@ -399,10 +407,10 @@ export class ChartRaceRenderer {
         const currentY = parseFloat(currentTransform.replace(/[^0-9.-]/g, '')) || 0;
         barEl.wrapper.style.transform = `translateY(${currentY + barHeight}px)`;
       } else {
-        // Filtered out (not overtaken): collapse in place during phase 1
-        // Bars below will slide up simultaneously
-        barEl.wrapper.style.height = "0";
-        barEl.wrapper.style.opacity = "0";
+        // Filtered out (not overtaken): wipe up in place during phase 1
+        // The wipe cover grows from bottom to top, covering the bar content
+        // Bars below slide up simultaneously via their translateY changes
+        barEl.wipeCover.style.height = "100%";
         barEl.fadeOutTimeoutId = setTimeout(() => {
           barEl.fadeOutTimeoutId = null;
           if (barEl.hidden) {
@@ -693,10 +701,15 @@ export class ChartRaceRenderer {
     winsSpan.className = "bar__wins";
     winsSpan.textContent = "";
 
+    // Wipe cover — white overlay that grows to cover the bar for wipe-up animation
+    const wipeCover = document.createElement("div");
+    wipeCover.className = "bar__wipe-cover";
+
     wrapper.appendChild(rankSpan);
     wrapper.appendChild(bar);
     wrapper.appendChild(valueSpan);
     wrapper.appendChild(winsSpan);
+    wrapper.appendChild(wipeCover);
 
     const clickHandler = (e: Event) => {
       const target = e.target as HTMLElement;
@@ -709,6 +722,7 @@ export class ChartRaceRenderer {
     return {
       wrapper,
       bar,
+      wipeCover,
       rankSpan,
       logo,
       nameSpan,

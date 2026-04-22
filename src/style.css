@@ -58,6 +58,18 @@ body {
   transition: transform 9.5s ease-in-out, height 9.5s ease-in-out, opacity 3s ease-in-out;
 }
 
+.bar__wipe-cover {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 0;
+  background: #f5f5f5;
+  z-index: 10;
+  transition: height 9.5s ease-in-out;
+  pointer-events: none;
+}
+
 .chart-race__bar {
   position: relative;
   display: flex;

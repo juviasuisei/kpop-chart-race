@@ -199,8 +199,19 @@ export class PlaybackController {
     }
   };
 
+  private isScrubbing = false;
+
   private handleScrubberInput = (): void => {
     if (this.rafId !== null) return;
+
+    // Emit scrub:start on first input if not already scrubbing
+    if (!this.isScrubbing) {
+      this.isScrubbing = true;
+      if (this.isPlaying()) {
+        this.pause();
+      }
+      this.eventBus.emit("scrub:start");
+    }
 
     this.rafId = requestAnimationFrame(() => {
       this.rafId = null;
@@ -223,16 +234,19 @@ export class PlaybackController {
   };
 
   private handleScrubStart = (): void => {
-    // Always pause when scrubbing starts — do not resume on scrub end
-    if (this.isPlaying()) {
-      this.pause();
+    // Also handle mousedown/touchstart as backup
+    if (!this.isScrubbing) {
+      this.isScrubbing = true;
+      if (this.isPlaying()) {
+        this.pause();
+      }
+      this.eventBus.emit("scrub:start");
     }
-    this.eventBus.emit("scrub:start");
   };
 
   private handleScrubEnd = (): void => {
+    this.isScrubbing = false;
     this.eventBus.emit("scrub:end");
-    // Scrubbing always leaves the player paused
   };
 
   private handleScrubberHover = (e: MouseEvent): void => {

@@ -398,6 +398,77 @@ describe('ChartRaceRenderer', () => {
     expect((wrappers[1] as HTMLElement).style.transform).toBe(`translateY(${1 * barHeight}px)`);
     expect((wrappers[2] as HTMLElement).style.transform).toBe(`translateY(${2 * barHeight}px)`);
   });
+
+  // 26. New bars start at full opacity (no fade-in from 0)
+  it('new bars start at full opacity and grow from their previous width', () => {
+    renderer.mount(container);
+    const entries = [
+      makeEntry({ artistId: 'a1', rank: 1, cumulativeValue: 1000, previousCumulativeValue: 800 }),
+    ];
+    const snapshot = makeSnapshot(entries);
+    renderer.update(snapshot, 10, emptyDataStore);
+
+    const wrapper = container.querySelector('.chart-race__bar-wrapper') as HTMLElement;
+    // After update, opacity should be "1" (not starting from "0")
+    expect(wrapper.style.opacity).toBe('1');
+  });
+
+  // 27. Bars hidden by inactivity fade out in place (opacity 0, pointer-events none)
+  it('bars hidden by inactivity fade out in place instead of being removed', () => {
+    renderer.mount(container);
+
+    // First update: show artist
+    const entries = [
+      makeEntry({ artistId: 'a1', rank: 1, cumulativeValue: 500 }),
+    ];
+    const snapshot1 = makeSnapshot(entries);
+    const ds = makeDataStoreForEntries(entries);
+    renderer.update(snapshot1, 10, ds);
+
+    expect(container.querySelectorAll('.chart-race__bar-wrapper').length).toBe(1);
+    const wrapper = container.querySelector('.chart-race__bar-wrapper') as HTMLElement;
+    expect(wrapper.style.opacity).toBe('1');
+
+    // Second update: artist no longer visible (empty visible set)
+    const snapshot2 = makeSnapshot([]);
+    renderer.update(snapshot2, 10, emptyDataStore);
+
+    // Bar should still be in DOM but faded out
+    expect(wrapper.style.opacity).toBe('0');
+    expect(wrapper.style.pointerEvents).toBe('none');
+  });
+
+  // 28. Bars restored from hiding fade back in without sliding from bottom
+  it('bars restored from hiding fade in at correct position', () => {
+    renderer.mount(container);
+
+    const MOCKED_HEIGHT = 500;
+    const barsContainer = container.querySelector('.chart-race__bars')!;
+    Object.defineProperty(barsContainer, 'clientHeight', {
+      value: MOCKED_HEIGHT,
+      configurable: true,
+    });
+
+    const entries = [
+      makeEntry({ artistId: 'a1', rank: 1, cumulativeValue: 500 }),
+    ];
+    const ds = makeDataStoreForEntries(entries);
+
+    // Show, then hide
+    renderer.update(makeSnapshot(entries), 10, ds);
+    renderer.update(makeSnapshot([]), 10, emptyDataStore);
+
+    const wrapper = container.querySelector('.chart-race__bar-wrapper') as HTMLElement;
+    expect(wrapper.style.opacity).toBe('0');
+
+    // Restore — should fade in at position, not slide from bottom
+    renderer.update(makeSnapshot(entries), 10, ds);
+    expect(wrapper.style.opacity).toBe('1');
+    expect(wrapper.style.pointerEvents).toBe('');
+    // Should be at visual index 0 position, not at the bottom
+    const barHeight = MOCKED_HEIGHT / 10;
+    expect(wrapper.style.transform).toBe(`translateY(${0 * barHeight}px)`);
+  });
 });
 
 

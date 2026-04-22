@@ -55,6 +55,10 @@ interface BarElement {
   animationFrameId: number | null;
   overflowTimeoutId: ReturnType<typeof setTimeout> | null;
   clickHandler: ((e: Event) => void) | null;
+  /** Whether this bar is currently hidden due to inactivity filtering */
+  hidden: boolean;
+  /** Timeout for deferred DOM removal after fade-out */
+  fadeOutTimeoutId: ReturnType<typeof setTimeout> | null;
 }
 
 export class ChartRaceRenderer {
@@ -153,31 +157,64 @@ export class ChartRaceRenderer {
       let barEl = this.bars.get(entry.artistId);
 
       if (!barEl) {
+        // Brand new bar — never seen before
         barEl = this.createBarElement(entry);
         this.bars.set(entry.artistId, barEl);
         this.barsContainer.appendChild(barEl.wrapper);
 
-        // Start new bars at the bottom with zero width for entrance animation
-        const bottomY = containerHeight > 0 ? containerHeight : 500;
-        barEl.wrapper.style.transform = `translateY(${bottomY}px)`;
-        barEl.wrapper.style.opacity = "0";
-        barEl.bar.style.width = "0%";
-        // Force reflow so the initial position is applied before transition
+        // Start at correct Y position, full opacity, zero width — grows from left
+        const yPosition = visIdx * barHeight;
+        barEl.wrapper.style.transform = `translateY(${yPosition}px)`;
+        barEl.wrapper.style.opacity = "1";
+        // Use previousCumulativeValue so returning artists start from where they were
+        const startWidth = maxCumulative > 0
+          ? computeBarWidth(entry.previousCumulativeValue, maxCumulative)
+          : 0;
+        barEl.bar.style.width = `${startWidth}%`;
+        // Force reflow so the initial position/width is applied before transition
         barEl.wrapper.offsetHeight;
+      } else if (barEl.hidden) {
+        // Bar was hidden due to inactivity — cancel any pending fade-out removal
+        if (barEl.fadeOutTimeoutId !== null) {
+          clearTimeout(barEl.fadeOutTimeoutId);
+          barEl.fadeOutTimeoutId = null;
+        }
+        // Restore: fade in at correct position (no slide from bottom)
+        barEl.hidden = false;
+        barEl.wrapper.style.pointerEvents = "";
       }
 
       this.updateBarElement(barEl, entry, barHeight, maxCumulative, snapshot.date, dataStore, visIdx);
     }
 
-    // Remove bars no longer visible
+    // Hide bars no longer visible — fade out in place instead of removing
     for (const [artistId, barEl] of this.bars) {
-      if (!visibleIds.has(artistId)) {
+      if (!visibleIds.has(artistId) && !barEl.hidden) {
         if (barEl.animationFrameId !== null) {
           cancelAnimationFrame(barEl.animationFrameId);
           this.pendingFrames.delete(barEl.animationFrameId);
+          barEl.animationFrameId = null;
         }
-        barEl.wrapper.remove();
-        this.bars.delete(artistId);
+        if (barEl.overflowTimeoutId !== null) {
+          clearTimeout(barEl.overflowTimeoutId);
+          barEl.overflowTimeoutId = null;
+        }
+        // Fade out in place
+        barEl.hidden = true;
+        barEl.wrapper.style.opacity = "0";
+        barEl.wrapper.style.pointerEvents = "none";
+        // Remove from DOM after fade-out transition completes to keep DOM clean
+        barEl.fadeOutTimeoutId = setTimeout(() => {
+          barEl.fadeOutTimeoutId = null;
+          // Only remove if still hidden (wasn't restored in the meantime)
+          if (barEl.hidden) {
+            barEl.wrapper.remove();
+            if (barEl.clickHandler) {
+              barEl.wrapper.removeEventListener('click', barEl.clickHandler);
+            }
+            this.bars.delete(artistId);
+          }
+        }, 1000);
       }
     }
 
@@ -225,6 +262,9 @@ export class ChartRaceRenderer {
     for (const [, barEl] of this.bars) {
       if (barEl.animationFrameId !== null) {
         cancelAnimationFrame(barEl.animationFrameId);
+      }
+      if (barEl.fadeOutTimeoutId !== null) {
+        clearTimeout(barEl.fadeOutTimeoutId);
       }
       if (barEl.clickHandler) {
         barEl.wrapper.removeEventListener('click', barEl.clickHandler);
@@ -354,6 +394,8 @@ export class ChartRaceRenderer {
       animationFrameId: null,
       overflowTimeoutId: null,
       clickHandler,
+      hidden: false,
+      fadeOutTimeoutId: null,
     };
   }
 

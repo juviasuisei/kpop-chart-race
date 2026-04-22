@@ -8,7 +8,8 @@
     {
       "title": "Good Goodbye",
       "dailyValues": {
-        "2026-01-18": { "value": 6048, "source": "inkigayo", "episode": 1296 }
+        "2026-01-18": { "value": 6048, "source": "inkigayo", "episode": 1296 },
+        "2026-01-11": { "value": 7249, "source": "inkigayo", "episode": 1295 }
       },
       "embeds": {
         "2025-10-15": [

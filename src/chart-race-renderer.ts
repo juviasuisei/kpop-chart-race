@@ -246,7 +246,17 @@ export class ChartRaceRenderer {
       }
     }
 
-    const needsPhase2 = !this.scrubbing && (toHide.length > 0 || toRestore.length > 0);
+    // Determine which hiding bars were overtaken vs just filtered out
+    const overtakenIds = new Set<string>();
+    for (const artistId of toHide) {
+      const fullEntry = snapshot.entries.find(e => e.artistId === artistId);
+      if (fullEntry && fullEntry.rank > fullEntry.previousRank && fullEntry.previousRank > 0) {
+        overtakenIds.add(artistId);
+      }
+    }
+
+    // Phase 2 only needed for overtaken bars or restoring bars
+    const needsPhase2 = !this.scrubbing && (overtakenIds.size > 0 || toRestore.length > 0);
 
     // --- PHASE 1: Position all bars (including soon-to-hide) ---
     // Build the phase 1 layout: visible entries + soon-to-hide entries at the end
@@ -359,7 +369,10 @@ export class ChartRaceRenderer {
       visIdx++;
     }
 
-    // Handle soon-to-hide bars: move them one slot down from their current position
+    // Handle soon-to-hide bars
+    // Two cases:
+    //   1. Overtaken: bar's rank worsened (another bar passed it) → slide down one slot, collapse in phase 2
+    //   2. Filtered out: bar's rank didn't worsen, just removed from visible set → collapse in place during phase 1
     for (const artistId of toHide) {
       const barEl = this.bars.get(artistId)!;
       if (barEl.animationFrameId !== null) {
@@ -380,11 +393,26 @@ export class ChartRaceRenderer {
           barEl.wrapper.removeEventListener('click', barEl.clickHandler);
         }
         this.bars.delete(artistId);
-      } else {
-        // Phase 1: slide down one slot
+      } else if (overtakenIds.has(artistId)) {
+        // Overtaken: slide down one slot in phase 1, collapse in phase 2
         const currentTransform = barEl.wrapper.style.transform;
         const currentY = parseFloat(currentTransform.replace(/[^0-9.-]/g, '')) || 0;
         barEl.wrapper.style.transform = `translateY(${currentY + barHeight}px)`;
+      } else {
+        // Filtered out (not overtaken): collapse in place during phase 1
+        // Bars below will slide up simultaneously
+        barEl.wrapper.style.height = "0";
+        barEl.wrapper.style.opacity = "0";
+        barEl.fadeOutTimeoutId = setTimeout(() => {
+          barEl.fadeOutTimeoutId = null;
+          if (barEl.hidden) {
+            barEl.wrapper.remove();
+            if (barEl.clickHandler) {
+              barEl.wrapper.removeEventListener('click', barEl.clickHandler);
+            }
+            this.bars.delete(artistId);
+          }
+        }, 9600); // matches phase 1 duration (10x slow)
       }
     }
 
@@ -409,8 +437,9 @@ export class ChartRaceRenderer {
         this.phase2TimeoutId = null;
         this.stopRankTracking();
 
-        // Collapse hiding bars
+        // Collapse overtaken hiding bars (filtered-out bars already collapsed in phase 1)
         for (const artistId of toHide) {
+          if (!overtakenIds.has(artistId)) continue;
           const barEl = this.bars.get(artistId);
           if (!barEl || !barEl.hidden) continue;
           barEl.wrapper.style.transition = "height 5s ease-in-out, opacity 5s ease-in-out";

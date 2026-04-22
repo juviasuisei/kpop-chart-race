@@ -413,8 +413,8 @@ describe('ChartRaceRenderer', () => {
     expect(wrapper.style.opacity).toBe('1');
   });
 
-  // 27. Bars hidden by inactivity slide down then collapse
-  it('bars hidden by inactivity slide to exit position and set pointer-events none', () => {
+  // 27. Bars filtered out (not overtaken) collapse in place during phase 1
+  it('bars filtered out collapse height immediately and set pointer-events none', () => {
     renderer.mount(container);
 
     // First update: show artist
@@ -429,14 +429,13 @@ describe('ChartRaceRenderer', () => {
     const wrapper = container.querySelector('.chart-race__bar-wrapper') as HTMLElement;
     expect(wrapper.style.opacity).toBe('1');
 
-    // Second update: artist no longer visible (empty visible set)
+    // Second update: artist no longer visible (filtered out, not overtaken)
     const snapshot2 = makeSnapshot([]);
     renderer.update(snapshot2, 10, emptyDataStore);
 
-    // Phase 1: bar slides to exit position, height stays full, pointer-events disabled
+    // Filtered-out bar collapses in place during phase 1
+    expect(wrapper.style.height).toBe('0px');
     expect(wrapper.style.pointerEvents).toBe('none');
-    // Height is still full during phase 1 (collapse happens after 960ms)
-    expect(wrapper.style.height).not.toBe('0px');
   });
 
   // 28. Bars restored from hiding expand at correct position

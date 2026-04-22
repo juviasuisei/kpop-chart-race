@@ -8,7 +8,8 @@
     {
       "title": "DUET",
       "dailyValues": {
-        "2026-01-15": { "value": 5662, "source": "m_countdown", "episode": 912 }
+        "2026-01-15": { "value": 5662, "source": "m_countdown", "episode": 912 },
+        "2026-01-08": { "value": 6759, "source": "m_countdown", "episode": 911 }
       },
       "embeds": {
         "2025-12-18": [

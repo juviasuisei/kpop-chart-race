@@ -70,6 +70,8 @@ export class ChartRaceRenderer {
   private pendingFrames: Set<number> = new Set();
   /** When true, all CSS transitions are disabled (scrubbing mode) */
   private scrubbing = false;
+  /** Artist IDs that have been seen before (for distinguishing new vs returning) */
+  private seenArtists: Set<string> = new Set();
 
   constructor(private eventBus: EventBus) {
     this.eventBus.on("scrub:start", () => { this.scrubbing = true; });
@@ -159,10 +161,12 @@ export class ChartRaceRenderer {
       let barEl = this.bars.get(entry.artistId);
 
       if (!barEl) {
-        // Brand new bar — never seen before
         barEl = this.createBarElement(entry);
         this.bars.set(entry.artistId, barEl);
         this.barsContainer.appendChild(barEl.wrapper);
+
+        const isReturning = this.seenArtists.has(entry.artistId);
+        this.seenArtists.add(entry.artistId);
 
         if (this.scrubbing) {
           // Snap: place directly at target
@@ -173,8 +177,24 @@ export class ChartRaceRenderer {
           barEl.wrapper.style.opacity = "1";
           barEl.bar.style.width = `${maxCumulative > 0 ? computeBarWidth(entry.cumulativeValue, maxCumulative) : 0}%`;
           barEl.wrapper.offsetHeight;
+        } else if (isReturning) {
+          // Returning artist (was cleaned up after hide) — expand from height 0
+          barEl.wrapper.style.transition = "none";
+          barEl.bar.style.transition = "none";
+          const yPosition = visIdx * barHeight;
+          barEl.wrapper.style.transform = `translateY(${yPosition}px)`;
+          barEl.wrapper.style.height = "0";
+          barEl.wrapper.style.opacity = "1";
+          const startWidth = maxCumulative > 0
+            ? computeBarWidth(entry.previousCumulativeValue, maxCumulative)
+            : 0;
+          barEl.bar.style.width = `${startWidth}%`;
+          barEl.wrapper.offsetHeight; // force reflow
+          barEl.wrapper.style.transition = "";
+          barEl.bar.style.transition = "";
         } else {
-          // Start at bottom (last slot) with zero width, then animate up
+          // Brand new artist — start at bottom, rise through ranks
+          this.seenArtists.add(entry.artistId);
           barEl.wrapper.style.transition = "none";
           barEl.bar.style.transition = "none";
           const bottomY = containerHeight > 0 ? containerHeight : 500;
@@ -334,6 +354,7 @@ export class ChartRaceRenderer {
       }
     }
     this.bars.clear();
+    this.seenArtists.clear();
 
     if (this.wrapper && this.wrapper.parentNode) {
       this.wrapper.parentNode.removeChild(this.wrapper);

@@ -410,6 +410,8 @@ export class ChartRaceRenderer {
         // Filtered out (not overtaken): wipe up in place during phase 1
         // The wipe cover grows from bottom to top, covering the bar content
         // Bars below slide up simultaneously via their translateY changes
+        // Set z-index low so bars sliding up render on top
+        barEl.wrapper.style.zIndex = "0";
         barEl.wipeCover.style.height = "100%";
         barEl.fadeOutTimeoutId = setTimeout(() => {
           barEl.fadeOutTimeoutId = null;

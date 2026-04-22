@@ -690,6 +690,8 @@ export class ChartRaceRenderer {
     barEl.wrapper.style.transform = `translateY(${yPosition}px)`;
     barEl.wrapper.style.height = `${barHeight}px`;
     barEl.wrapper.style.opacity = "1";
+    // Higher rank (lower number) = higher z-index so rising bars overlap falling ones
+    barEl.wrapper.style.zIndex = String(1000 - entry.rank);
 
     // Smart overflow: never reset inside during the update to avoid flicker.
     // Only check after the transition completes.

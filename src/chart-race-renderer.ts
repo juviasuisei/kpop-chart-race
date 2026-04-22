@@ -409,33 +409,35 @@ export class ChartRaceRenderer {
         this.stopRankTracking();
         // Phase 2: apply activity filter — hide bars not in filtered set
         this.applyVisibilityFilter(filteredIds, barHeight);
-        // Simultaneously reposition remaining bars and create new ones to close gaps
+        // Reposition existing visible bars and create replacements simultaneously
         let idx = 0;
         for (const entry of filteredEntries) {
           let barEl = this.bars.get(entry.artistId);
           if (barEl && barEl.hidden) {
-            // This bar is being wiped — skip it
             continue;
           }
           if (!barEl) {
-            // Bar doesn't exist yet (e.g., rank 11 entering as replacement)
-            // Create it at the target position
+            // Replacement bar — create at bottom, animate up to target
             barEl = this.createBarElement(entry);
             this.bars.set(entry.artistId, barEl);
             this.barsContainer!.appendChild(barEl.wrapper);
             this.seenArtists.add(entry.artistId);
+            // Start at bottom with previous width
             barEl.wrapper.style.transition = "none";
             barEl.bar.style.transition = "none";
-            barEl.wrapper.style.transform = `translateY(${idx * barHeight}px)`;
+            const bottomY = containerHeight > 0 ? containerHeight : 500;
+            barEl.wrapper.style.transform = `translateY(${bottomY}px)`;
             barEl.wrapper.style.height = `${barHeight}px`;
             barEl.wrapper.style.opacity = "1";
+            barEl.wrapper.style.zIndex = String(1000 - entry.rank);
             const startWidth = maxCumulative > 0
               ? computeBarWidth(entry.previousCumulativeValue, maxCumulative) : 0;
             barEl.bar.style.width = `${startWidth}%`;
-            barEl.wrapper.offsetHeight;
+            barEl.wrapper.offsetHeight; // force reflow
+            // Enable transitions and set target
             barEl.wrapper.style.transition = "";
             barEl.bar.style.transition = "";
-            // Set target width
+            barEl.wrapper.style.transform = `translateY(${idx * barHeight}px)`;
             barEl.bar.style.width = `${computeBarWidth(entry.cumulativeValue, maxCumulative)}%`;
             barEl.targetRank = entry.rank;
             barEl.rankSpan.textContent = `#${entry.rank}`;
@@ -450,7 +452,7 @@ export class ChartRaceRenderer {
           }
           idx++;
         }
-        // Wait for wipe/reposition animation, then signal done
+        // Wait for wipe/reposition/slide-up animation, then signal done
         const hasHides = Array.from(this.bars.values()).some(b => b.hidden);
         if (hasHides) {
           setTimeout(() => {

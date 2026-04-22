@@ -403,7 +403,15 @@ export class ChartRaceRenderer {
 
     // Rank tracking — only during two-phase playback animation
     if (!this.scrubbing && needsTwoPhase) {
-      this.startRankTracking(preUpdateRanks);
+      // Keep bars at their pre-update ranks during phase 1.
+      // Ranks will be set to final values by stopRankTracking(true) at phase end.
+      for (const [artistId, barEl] of this.bars) {
+        if (barEl.hidden) continue;
+        const preRank = preUpdateRanks.get(artistId);
+        if (preRank) {
+          barEl.rankSpan.textContent = `#${preRank}`;
+        }
+      }
     } else {
       this.stopRankTracking(true);
     }

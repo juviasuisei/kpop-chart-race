@@ -179,6 +179,22 @@ export class ChartRaceRenderer {
           clearTimeout(barEl.fadeOutTimeoutId);
           barEl.fadeOutTimeoutId = null;
         }
+        // Re-attach to DOM if it was removed during fade-out cleanup
+        if (!barEl.wrapper.parentElement) {
+          this.barsContainer.appendChild(barEl.wrapper);
+        }
+        // Snap to correct position instantly (disable transition), then re-enable
+        barEl.wrapper.style.transition = "none";
+        barEl.wrapper.style.opacity = "0";
+        const yPosition = visIdx * barHeight;
+        barEl.wrapper.style.transform = `translateY(${yPosition}px)`;
+        // Set bar width to previous value so it grows naturally
+        const startWidth = maxCumulative > 0
+          ? computeBarWidth(entry.previousCumulativeValue, maxCumulative)
+          : 0;
+        barEl.bar.style.width = `${startWidth}%`;
+        barEl.wrapper.offsetHeight; // force reflow
+        barEl.wrapper.style.transition = "";
         // Restore: fade in at correct position (no slide from bottom)
         barEl.hidden = false;
         barEl.wrapper.style.pointerEvents = "";
@@ -214,7 +230,7 @@ export class ChartRaceRenderer {
             }
             this.bars.delete(artistId);
           }
-        }, 1000);
+        }, 960);
       }
     }
 

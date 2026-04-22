@@ -131,27 +131,27 @@ export class ChartRaceRenderer {
         this.bars.delete(artistId);
         continue;
       }
-      // Snap visible bars to their current computed position, then disable transitions
+      // Snap visible bars: disable transitions first, then set current computed position
+      barEl.wrapper.style.transition = "none";
+      barEl.bar.style.transition = "none";
+      barEl.wipeCover.style.transition = "none";
+      barEl.wipeCover.style.height = "0";
+      barEl.wrapper.offsetHeight; // force reflow so transition:none takes effect
+
       const computed = getComputedStyle(barEl.wrapper);
       const matrix = computed.transform;
       if (matrix && matrix !== 'none') {
-        // Extract translateY from matrix(a,b,c,d,tx,ty)
         const match = matrix.match(/matrix.*\((.+)\)/);
         if (match) {
           const values = match[1].split(',').map(Number);
           const ty = values[5] ?? 0;
-          barEl.wrapper.style.transition = "none";
           barEl.wrapper.style.transform = `translateY(${ty}px)`;
-        } else {
-          barEl.wrapper.style.transition = "none";
         }
-      } else {
-        barEl.wrapper.style.transition = "none";
       }
-      barEl.bar.style.transition = "none";
-      // Reset wipe cover
-      barEl.wipeCover.style.transition = "none";
-      barEl.wipeCover.style.height = "0";
+      // Snap bar width to current computed width
+      const computedBar = getComputedStyle(barEl.bar);
+      barEl.bar.style.width = computedBar.width;
+
       // Snap value display
       barEl.valueSpan.textContent = Math.round(barEl.currentDisplayValue).toLocaleString();
     }

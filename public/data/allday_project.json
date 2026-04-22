@@ -8,7 +8,8 @@
     {
       "title": "ONE MORE TIME",
       "dailyValues": {
-        "2026-01-17": { "value": 5735, "source": "show_music_core", "episode": 931 }
+        "2026-01-17": { "value": 5735, "source": "show_music_core", "episode": 931 },
+        "2026-01-10": { "value": 4536, "source": "show_music_core", "episode": 930 }
       },
       "embeds": {
         "2025-11-17": [

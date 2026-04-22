@@ -16,6 +16,7 @@ export class PlaybackController {
   private wrapper: HTMLDivElement | null = null;
   private playBtn: HTMLButtonElement | null = null;
   private scrubber: HTMLInputElement | null = null;
+  private scrubberTooltip: HTMLDivElement | null = null;
   private dateLabel: HTMLSpanElement | null = null;
   private wasPlayingBeforeScrub = false;
 
@@ -53,13 +54,26 @@ export class PlaybackController {
     this.scrubber.addEventListener("touchstart", this.handleScrubStart);
     this.scrubber.addEventListener("change", this.handleScrubEnd);
 
+    // Scrubber tooltip (shows date on hover/drag)
+    this.scrubberTooltip = document.createElement("div");
+    this.scrubberTooltip.className = "playback-controls__scrubber-tooltip";
+    this.scrubberTooltip.textContent = initialDate;
+
+    // Scrubber container (for tooltip positioning)
+    const scrubberContainer = document.createElement("div");
+    scrubberContainer.className = "playback-controls__scrubber-container";
+    scrubberContainer.appendChild(this.scrubber);
+    scrubberContainer.appendChild(this.scrubberTooltip);
+    this.scrubber.addEventListener("mousemove", this.handleScrubberHover);
+    this.scrubber.addEventListener("mouseleave", this.handleScrubberLeave);
+
     // Date label
     this.dateLabel = document.createElement("span");
     this.dateLabel.className = "playback-controls__date-label";
     this.dateLabel.textContent = initialDate;
 
     this.wrapper.appendChild(this.playBtn);
-    this.wrapper.appendChild(this.scrubber);
+    this.wrapper.appendChild(scrubberContainer);
     this.wrapper.appendChild(this.dateLabel);
     container.appendChild(this.wrapper);
   }
@@ -71,7 +85,10 @@ export class PlaybackController {
     if (this.currentIndex >= this.dates.length - 1) {
       this.currentIndex = 0;
       this.updateScrubberAndLabel();
+      // Snap (no animation) for the wrap-around reset
+      this.eventBus.emit("scrub:start");
       this.eventBus.emit("date:change", this.dates[0]);
+      this.eventBus.emit("scrub:end");
     }
 
     this.updateButtonToPause();
@@ -132,6 +149,8 @@ export class PlaybackController {
       this.scrubber.removeEventListener("mousedown", this.handleScrubStart);
       this.scrubber.removeEventListener("touchstart", this.handleScrubStart);
       this.scrubber.removeEventListener("change", this.handleScrubEnd);
+      this.scrubber.removeEventListener("mousemove", this.handleScrubberHover);
+      this.scrubber.removeEventListener("mouseleave", this.handleScrubberLeave);
     }
 
     if (this.wrapper && this.wrapper.parentElement) {
@@ -141,6 +160,7 @@ export class PlaybackController {
     this.wrapper = null;
     this.playBtn = null;
     this.scrubber = null;
+    this.scrubberTooltip = null;
     this.dateLabel = null;
   }
 
@@ -164,6 +184,13 @@ export class PlaybackController {
       this.currentIndex = position;
       this.updateDateLabel(date);
       this.scrubber.setAttribute("aria-valuenow", date);
+      // Update tooltip during drag
+      if (this.scrubberTooltip) {
+        this.scrubberTooltip.textContent = date;
+        const fraction = position / Math.max(1, this.dates.length - 1);
+        this.scrubberTooltip.style.left = `${fraction * 100}%`;
+        this.scrubberTooltip.style.opacity = "1";
+      }
       this.eventBus.emit("date:change", date);
     });
   };
@@ -173,13 +200,31 @@ export class PlaybackController {
     if (this.wasPlayingBeforeScrub) {
       this.pause();
     }
+    this.eventBus.emit("scrub:start");
   };
 
   private handleScrubEnd = (): void => {
+    this.eventBus.emit("scrub:end");
     if (this.wasPlayingBeforeScrub) {
       this.wasPlayingBeforeScrub = false;
       this.play();
     }
+  };
+
+  private handleScrubberHover = (e: MouseEvent): void => {
+    if (!this.scrubber || !this.scrubberTooltip) return;
+    const rect = this.scrubber.getBoundingClientRect();
+    const fraction = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    const index = Math.round(fraction * (this.dates.length - 1));
+    const date = this.dates[index] ?? "";
+    this.scrubberTooltip.textContent = date;
+    this.scrubberTooltip.style.left = `${fraction * 100}%`;
+    this.scrubberTooltip.style.opacity = "1";
+  };
+
+  private handleScrubberLeave = (): void => {
+    if (!this.scrubberTooltip) return;
+    this.scrubberTooltip.style.opacity = "0";
   };
 
   private updateScrubberAndLabel(): void {

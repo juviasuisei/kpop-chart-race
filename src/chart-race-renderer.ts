@@ -68,8 +68,13 @@ export class ChartRaceRenderer {
   private dataNote: HTMLDivElement | null = null;
   private bars: Map<string, BarElement> = new Map();
   private pendingFrames: Set<number> = new Set();
+  /** When true, all CSS transitions are disabled (scrubbing mode) */
+  private scrubbing = false;
 
-  constructor(private eventBus: EventBus) {}
+  constructor(private eventBus: EventBus) {
+    this.eventBus.on("scrub:start", () => { this.scrubbing = true; });
+    this.eventBus.on("scrub:end", () => { this.scrubbing = false; });
+  }
 
   /**
    * Mount the chart race into the given container.
@@ -131,9 +136,6 @@ export class ChartRaceRenderer {
 
     const visibleEntries = filterByActivity(snapshot.entries, snapshot.date, dataStore, zoomLevel);
     const containerHeight = this.barsContainer.clientHeight || this.barsContainer.offsetHeight;
-    // Bar height at zoom 10 is always containerHeight / 10 (not divided by
-    // visibleEntries.length), so bars maintain consistent size even when fewer
-    // than 10 entries are visible. Satisfies Requirement 3 (display-behavior-enhancements).
     const barHeight =
       zoomLevel === 10
         ? (containerHeight > 0 ? containerHeight / 10 : 50)
@@ -162,48 +164,68 @@ export class ChartRaceRenderer {
         this.bars.set(entry.artistId, barEl);
         this.barsContainer.appendChild(barEl.wrapper);
 
-        // Start at correct Y position, full opacity, zero width — grows from left
-        const yPosition = visIdx * barHeight;
-        barEl.wrapper.style.transform = `translateY(${yPosition}px)`;
-        barEl.wrapper.style.opacity = "1";
-        // Use previousCumulativeValue so returning artists start from where they were
-        const startWidth = maxCumulative > 0
-          ? computeBarWidth(entry.previousCumulativeValue, maxCumulative)
-          : 0;
-        barEl.bar.style.width = `${startWidth}%`;
-        // Force reflow so the initial position/width is applied before transition
-        barEl.wrapper.offsetHeight;
-      } else if (barEl.hidden) {
-        // Bar was hidden due to inactivity — cancel any pending fade-out removal
-        if (barEl.fadeOutTimeoutId !== null) {
-          clearTimeout(barEl.fadeOutTimeoutId);
-          barEl.fadeOutTimeoutId = null;
-        }
-        // Re-attach to DOM if it was removed during fade-out cleanup
-        if (!barEl.wrapper.parentElement) {
-          this.barsContainer.appendChild(barEl.wrapper);
-        }
-        // Snap to correct position instantly (disable transition), then re-enable
+        // Start at correct Y position, full opacity, grow from previous width
         barEl.wrapper.style.transition = "none";
-        barEl.wrapper.style.opacity = "0";
         const yPosition = visIdx * barHeight;
         barEl.wrapper.style.transform = `translateY(${yPosition}px)`;
-        // Set bar width to previous value so it grows naturally
+        barEl.wrapper.style.height = `${barHeight}px`;
+        barEl.wrapper.style.opacity = "1";
         const startWidth = maxCumulative > 0
           ? computeBarWidth(entry.previousCumulativeValue, maxCumulative)
           : 0;
         barEl.bar.style.width = `${startWidth}%`;
         barEl.wrapper.offsetHeight; // force reflow
-        barEl.wrapper.style.transition = "";
-        // Restore: fade in at correct position (no slide from bottom)
+        if (!this.scrubbing) {
+          barEl.wrapper.style.transition = "";
+        }
+      } else if (barEl.hidden) {
+        // Bar was hidden due to inactivity — cancel any pending removal
+        if (barEl.fadeOutTimeoutId !== null) {
+          clearTimeout(barEl.fadeOutTimeoutId);
+          barEl.fadeOutTimeoutId = null;
+        }
+        // Re-attach to DOM if it was removed during cleanup
+        if (!barEl.wrapper.parentElement) {
+          this.barsContainer.appendChild(barEl.wrapper);
+        }
         barEl.hidden = false;
         barEl.wrapper.style.pointerEvents = "";
+
+        if (this.scrubbing) {
+          // Snap: no animation
+          barEl.wrapper.style.transition = "none";
+          barEl.wrapper.style.height = `${barHeight}px`;
+          barEl.wrapper.style.opacity = "1";
+          barEl.wrapper.offsetHeight;
+        } else {
+          // Expand from collapsed: snap position, then animate height open
+          barEl.wrapper.style.transition = "none";
+          const yPosition = visIdx * barHeight;
+          barEl.wrapper.style.transform = `translateY(${yPosition}px)`;
+          barEl.wrapper.style.opacity = "1";
+          // Set bar width to previous value so it grows naturally
+          const startWidth = maxCumulative > 0
+            ? computeBarWidth(entry.previousCumulativeValue, maxCumulative)
+            : 0;
+          barEl.bar.style.width = `${startWidth}%`;
+          barEl.wrapper.offsetHeight; // force reflow
+          barEl.wrapper.style.transition = "";
+        }
+      }
+
+      // In scrub mode, disable transitions on existing bars too
+      if (this.scrubbing) {
+        barEl.wrapper.style.transition = "none";
+        barEl.bar.style.transition = "none";
+      } else {
+        barEl.wrapper.style.transition = "";
+        barEl.bar.style.transition = "";
       }
 
       this.updateBarElement(barEl, entry, barHeight, maxCumulative, snapshot.date, dataStore, visIdx);
     }
 
-    // Hide bars no longer visible — fade out in place instead of removing
+    // Hide bars no longer visible — collapse height instead of fading
     for (const [artistId, barEl] of this.bars) {
       if (!visibleIds.has(artistId) && !barEl.hidden) {
         if (barEl.animationFrameId !== null) {
@@ -215,22 +237,32 @@ export class ChartRaceRenderer {
           clearTimeout(barEl.overflowTimeoutId);
           barEl.overflowTimeoutId = null;
         }
-        // Fade out in place
+
         barEl.hidden = true;
-        barEl.wrapper.style.opacity = "0";
         barEl.wrapper.style.pointerEvents = "none";
-        // Remove from DOM after fade-out transition completes to keep DOM clean
-        barEl.fadeOutTimeoutId = setTimeout(() => {
-          barEl.fadeOutTimeoutId = null;
-          // Only remove if still hidden (wasn't restored in the meantime)
-          if (barEl.hidden) {
-            barEl.wrapper.remove();
-            if (barEl.clickHandler) {
-              barEl.wrapper.removeEventListener('click', barEl.clickHandler);
-            }
-            this.bars.delete(artistId);
+
+        if (this.scrubbing) {
+          // Snap: remove immediately
+          barEl.wrapper.remove();
+          if (barEl.clickHandler) {
+            barEl.wrapper.removeEventListener('click', barEl.clickHandler);
           }
-        }, 960);
+          this.bars.delete(artistId);
+        } else {
+          // Collapse: animate height to 0, then clean up
+          barEl.wrapper.style.height = "0";
+          barEl.wrapper.style.opacity = "0";
+          barEl.fadeOutTimeoutId = setTimeout(() => {
+            barEl.fadeOutTimeoutId = null;
+            if (barEl.hidden) {
+              barEl.wrapper.remove();
+              if (barEl.clickHandler) {
+                barEl.wrapper.removeEventListener('click', barEl.clickHandler);
+              }
+              this.bars.delete(artistId);
+            }
+          }, 960);
+        }
       }
     }
 
@@ -469,13 +501,11 @@ export class ChartRaceRenderer {
     const oldWidth = barEl.bar.style.width;
     barEl.bar.style.width = `${widthPercent}%`;
 
-    // Ensure opacity is 1 (transitions from 0 for new bars)
-    barEl.wrapper.style.opacity = "1";
-
     // Bar position via translateY (use visual index for contiguous positioning)
     const yPosition = visualIndex * barHeight;
     barEl.wrapper.style.transform = `translateY(${yPosition}px)`;
     barEl.wrapper.style.height = `${barHeight}px`;
+    barEl.wrapper.style.opacity = "1";
 
     // Smart overflow: never reset inside during the update to avoid flicker.
     // Only check after the transition completes.

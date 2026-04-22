@@ -413,8 +413,8 @@ describe('ChartRaceRenderer', () => {
     expect(wrapper.style.opacity).toBe('1');
   });
 
-  // 27. Bars hidden by inactivity fade out in place (opacity 0, pointer-events none)
-  it('bars hidden by inactivity fade out in place instead of being removed', () => {
+  // 27. Bars hidden by inactivity collapse height instead of being removed
+  it('bars hidden by inactivity collapse height and set pointer-events none', () => {
     renderer.mount(container);
 
     // First update: show artist
@@ -433,13 +433,13 @@ describe('ChartRaceRenderer', () => {
     const snapshot2 = makeSnapshot([]);
     renderer.update(snapshot2, 10, emptyDataStore);
 
-    // Bar should still be in DOM but faded out
-    expect(wrapper.style.opacity).toBe('0');
+    // Bar should still be in DOM but collapsed
+    expect(wrapper.style.height).toBe('0px');
     expect(wrapper.style.pointerEvents).toBe('none');
   });
 
-  // 28. Bars restored from hiding fade back in without sliding from bottom
-  it('bars restored from hiding fade in at correct position', () => {
+  // 28. Bars restored from hiding expand at correct position
+  it('bars restored from hiding expand at correct position', () => {
     renderer.mount(container);
 
     const MOCKED_HEIGHT = 500;
@@ -459,13 +459,13 @@ describe('ChartRaceRenderer', () => {
     renderer.update(makeSnapshot([]), 10, emptyDataStore);
 
     const wrapper = container.querySelector('.chart-race__bar-wrapper') as HTMLElement;
-    expect(wrapper.style.opacity).toBe('0');
+    expect(wrapper.style.height).toBe('0px');
 
-    // Restore — should fade in at position, not slide from bottom
+    // Restore — should expand at position, not slide from bottom
     renderer.update(makeSnapshot(entries), 10, ds);
     expect(wrapper.style.opacity).toBe('1');
     expect(wrapper.style.pointerEvents).toBe('');
-    // Should be at visual index 0 position, not at the bottom
+    // Should be at visual index 0 position
     const barHeight = MOCKED_HEIGHT / 10;
     expect(wrapper.style.transform).toBe(`translateY(${0 * barHeight}px)`);
   });

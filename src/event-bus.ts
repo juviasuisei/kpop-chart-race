@@ -15,6 +15,8 @@ export interface EventMap {
   "zoom:change": (level: ZoomLevel) => void;
   "bar:click": (artistId: string) => void;
   "panel:close": () => void;
+  "scrub:start": () => void;
+  "scrub:end": () => void;
   "loading:progress": (loaded: number, total: number, artistNames: string[]) => void;
   "loading:complete": () => void;
   "loading:error": (message: string) => void;

@@ -5,7 +5,7 @@
 
 import type { ChartSnapshot, DataStore, RankedEntry } from "./models.ts";
 import type { ArtistType, ZoomLevel } from "./types.ts";
-import { filterByActivity, filterByZoom, computeBarWidth, toRomanNumeral, tween } from "./utils.ts";
+import { filterByActivity, computeBarWidth, toRomanNumeral, tween } from "./utils.ts";
 import { EventBus } from "./event-bus.ts";
 import { ARTIST_TYPE_COLORS } from "./colors.ts";
 import { computeTotalWins, computeReleaseCumulativeValue } from "./chart-engine.ts";
@@ -256,7 +256,6 @@ export class ChartRaceRenderer {
 
     // 1. Phase 1 uses unfiltered top-10 by rank (all bars participate in position animation)
     // Phase 2 (after transition) applies activity filter to hide/show bars
-    const unfilteredEntries = filterByZoom(snapshot.entries, zoomLevel);
     const filteredEntries = filterByActivity(snapshot.entries, snapshot.date, dataStore, zoomLevel);
     const filteredIds = new Set(filteredEntries.map(e => e.artistId));
 
@@ -268,18 +267,11 @@ export class ChartRaceRenderer {
     if (!needsTwoPhase) {
       visibleEntries = filteredEntries;
     } else {
-      // Build phase 1 set: existing DOM bars + filtered entries, sorted by rank, capped at 10
+      // Build phase 1 set: existing DOM bars + filtered entries, sorted by rank
       const existingIds = new Set(Array.from(this.bars.keys()).filter(id => !this.bars.get(id)!.hidden));
       const phase1Ids = new Set([...existingIds, ...filteredIds]);
-      visibleEntries = unfilteredEntries.filter(e => phase1Ids.has(e.artistId));
-      // Also include any filtered entries beyond rank 10 that aren't in unfilteredEntries
-      for (const entry of filteredEntries) {
-        if (!visibleEntries.some(e => e.artistId === entry.artistId)) {
-          visibleEntries.push(entry);
-        }
-      }
-      visibleEntries.sort((a, b) => a.rank - b.rank);
-      visibleEntries = visibleEntries.slice(0, Math.max(10, visibleEntries.length));
+      // Look up entries from the FULL snapshot (not just top 10)
+      visibleEntries = snapshot.entries.filter(e => phase1Ids.has(e.artistId));
     }
     const containerHeight = this.barsContainer.clientHeight || this.barsContainer.offsetHeight;
     const barHeight =

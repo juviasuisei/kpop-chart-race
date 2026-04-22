@@ -547,18 +547,21 @@ export class ChartRaceRenderer {
 
     // Initialize displayed ranks from pre-update values (before updateBarElement changed them)
     const displayedRanks = new Map<BarElement, number>();
+    // Only track bars that exist RIGHT NOW — bars added later (phase 2) are excluded
+    const trackedBars = new Set<BarElement>();
     for (const [artistId, barEl] of this.bars) {
       if (barEl.hidden) continue;
       const preRank = preUpdateRanks.get(artistId);
       displayedRanks.set(barEl, preRank ?? barEl.targetRank);
-      // Set the span back to the pre-update rank for smooth transition
       barEl.rankSpan.textContent = `#${preRank ?? barEl.targetRank}`;
+      trackedBars.add(barEl);
     }
 
     const track = () => {
       const barPositions: { barEl: BarElement; y: number }[] = [];
-      for (const [, barEl] of this.bars) {
+      for (const barEl of trackedBars) {
         if (barEl.hidden) continue;
+        if (!barEl.wrapper.parentElement) continue; // removed from DOM
         const rect = barEl.wrapper.getBoundingClientRect();
         barPositions.push({ barEl, y: rect.top });
       }

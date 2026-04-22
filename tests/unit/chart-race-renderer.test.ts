@@ -531,6 +531,42 @@ describe('ChartRaceRenderer', () => {
     eventBus.emit('scrub:end');
   });
 
+  // 30b. Update during scrub mode creates bars without transitions
+  it('update during scrub creates bars with transition:none', () => {
+    renderer.mount(container);
+
+    const entries1 = [
+      makeEntry({ artistId: 'a1', rank: 1, cumulativeValue: 500 }),
+    ];
+    renderer.update(makeSnapshot(entries1), 10, makeDataStoreForEntries(entries1));
+
+    // Start scrubbing — clears all bars
+    eventBus.emit('scrub:start');
+    expect(container.querySelectorAll('.chart-race__bar-wrapper').length).toBe(0);
+
+    // Update while scrubbing — bars re-created with no transitions
+    const entries2 = [
+      makeEntry({ artistId: 'a1', rank: 1, cumulativeValue: 1000 }),
+      makeEntry({ artistId: 'a2', rank: 2, cumulativeValue: 800 }),
+    ];
+    renderer.update(makeSnapshot(entries2), 10, makeDataStoreForEntries(entries2));
+
+    const wrappers = container.querySelectorAll('.chart-race__bar-wrapper');
+    expect(wrappers.length).toBe(2);
+    // Bars should have transition:none (from inline style or CSS class)
+    for (const w of wrappers) {
+      const style = (w as HTMLElement).style.transition;
+      expect(style).toBe('none');
+    }
+
+    // Values should be final (no tweening)
+    const values = container.querySelectorAll('.bar__value');
+    expect(values[0].textContent).toBe('1,000');
+    expect(values[1].textContent).toBe('800');
+
+    eventBus.emit('scrub:end');
+  });
+
   // 31. Scrub mode snaps value text instantly (no tween)
   it('scrub mode sets value text instantly without tweening', () => {
     renderer.mount(container);

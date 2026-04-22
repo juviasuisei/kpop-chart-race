@@ -83,7 +83,8 @@ export class PlaybackController {
     if (this.intervalId !== null) return;
 
     // If at the last date, reset to the beginning before starting playback
-    if (this.currentIndex >= this.dates.length - 1) {
+    const isWrapping = this.currentIndex >= this.dates.length - 1;
+    if (isWrapping) {
       this.currentIndex = 0;
       this.updateScrubberAndLabel();
       // Clear all bars so day 1 starts fresh with bars rising from bottom
@@ -118,8 +119,11 @@ export class PlaybackController {
     this.eventBus.on("update:complete", onComplete);
     this.updateCompleteHandler = onComplete;
 
-    // Start the first advance
-    advance();
+    // Start the first advance — but if wrapping, day 1 is already emitted,
+    // so wait for its update:complete to trigger the first advance naturally
+    if (!isWrapping) {
+      advance();
+    }
   }
 
   pause(): void {

@@ -239,14 +239,15 @@ export class ChartRaceRenderer {
       }
     }
 
-    // Determine which bars need to restore (in visible set but currently hidden IN DOM)
-    // Only bars still in the DOM with hidden=true get the phase 2 expand animation.
-    // Bars that were fully cleaned up will be re-created and rise from the bottom.
-    const toRestore: string[] = [];
+    // Determine which bars need to restore (in visible set but currently hidden IN DOM
+    // OR need re-creation as returning artists)
+    const toRestoreIds = new Set<string>();
     for (const entry of visibleEntries) {
       const barEl = this.bars.get(entry.artistId);
       if (barEl && barEl.hidden) {
-        toRestore.push(entry.artistId);
+        toRestoreIds.add(entry.artistId);
+      } else if (!barEl && entry.previousCumulativeValue > 0) {
+        toRestoreIds.add(entry.artistId);
       }
     }
 
@@ -259,8 +260,9 @@ export class ChartRaceRenderer {
       }
     }
 
-    // Phase 2 only needed for overtaken bars or restoring bars
-    const needsPhase2 = !this.scrubbing && (overtakenIds.size > 0 || toRestore.length > 0);
+    // Phase 0 for restoring, Phase 2 only for overtaken bars
+    const needsPhase0 = !this.scrubbing && toRestoreIds.size > 0;
+    const needsPhase2 = !this.scrubbing && overtakenIds.size > 0;
 
     // --- PHASE 1: Position all bars (including soon-to-hide) ---
     // Build the phase 1 layout: visible entries + soon-to-hide entries at the end
@@ -297,42 +299,32 @@ export class ChartRaceRenderer {
           barEl.wrapper.style.opacity = "1";
           barEl.bar.style.width = `${maxCumulative > 0 ? computeBarWidth(entry.cumulativeValue, maxCumulative) : 0}%`;
           barEl.wrapper.offsetHeight;
-        } else if (!isTrulyNew && toRestore.includes(entry.artistId)) {
-          // Returning artist still in DOM as hidden — reverse wipe in phase 2
+        } else if (!isTrulyNew && toRestoreIds.has(entry.artistId)) {
+          // Returning artist (still in DOM or re-created) — fully covered, reveal in phase 0
           barEl.wrapper.style.transition = "none";
           barEl.bar.style.transition = "none";
           barEl.wrapper.style.transform = `translateY(${visIdx * barHeight}px)`;
           barEl.wrapper.style.height = `${barHeight}px`;
           barEl.wrapper.style.opacity = "1";
-          // Start fully covered by wipe
           barEl.wipeCover.style.transition = "none";
           barEl.wipeCover.style.height = "100%";
-          barEl.wipeCover.offsetHeight;
           const startWidth = maxCumulative > 0
             ? computeBarWidth(entry.previousCumulativeValue, maxCumulative) : 0;
           barEl.bar.style.width = `${startWidth}%`;
           barEl.wrapper.offsetHeight;
-          // Don't enable transitions yet — phase 2 will handle that
         } else if (!isTrulyNew) {
-          // Re-entering artist (cleaned up from DOM) — reverse wipe in phase 1
+          // Re-entering artist not in toRestore (shouldn't normally happen) — same as restore
           barEl.wrapper.style.transition = "none";
           barEl.bar.style.transition = "none";
           barEl.wrapper.style.transform = `translateY(${visIdx * barHeight}px)`;
           barEl.wrapper.style.height = `${barHeight}px`;
           barEl.wrapper.style.opacity = "1";
-          // Start fully covered by wipe, then reveal
           barEl.wipeCover.style.transition = "none";
           barEl.wipeCover.style.height = "100%";
-          barEl.wipeCover.offsetHeight;
-          barEl.wipeCover.style.transition = "";
-          barEl.wipeCover.style.height = "0";
           const startWidth = maxCumulative > 0
             ? computeBarWidth(entry.previousCumulativeValue, maxCumulative) : 0;
           barEl.bar.style.width = `${startWidth}%`;
           barEl.wrapper.offsetHeight;
-          barEl.wrapper.style.transition = "";
-          barEl.bar.style.transition = "";
-          // Don't enable transitions yet — phase 2 will handle that
         } else {
           // Brand new or re-entering artist — start at bottom, rise through ranks
           barEl.wrapper.style.transition = "none";
@@ -370,21 +362,18 @@ export class ChartRaceRenderer {
           barEl.wrapper.style.opacity = "1";
           barEl.wrapper.offsetHeight;
         } else {
-          // Reverse wipe: start fully covered at target position, reveal in phase 2
+          // Place at target, fully covered, will reveal in phase 0
           barEl.wrapper.style.transition = "none";
           barEl.bar.style.transition = "none";
           barEl.wrapper.style.transform = `translateY(${visIdx * barHeight}px)`;
           barEl.wrapper.style.height = `${barHeight}px`;
           barEl.wrapper.style.opacity = "1";
-          // Ensure wipe cover is at 100% (fully covering)
           barEl.wipeCover.style.transition = "none";
           barEl.wipeCover.style.height = "100%";
-          barEl.wipeCover.offsetHeight;
           const startWidth = maxCumulative > 0
             ? computeBarWidth(entry.previousCumulativeValue, maxCumulative) : 0;
           barEl.bar.style.width = `${startWidth}%`;
           barEl.wrapper.offsetHeight;
-          // Don't enable transitions yet — phase 2 will handle that
         }
       }
 
@@ -393,7 +382,7 @@ export class ChartRaceRenderer {
         barEl.wrapper.style.transition = "none";
         barEl.bar.style.transition = "none";
         barEl.wrapper.offsetHeight; // force reflow to apply transition:none
-      } else if (!toRestore.includes(entry.artistId)) {
+      } else if (!toRestoreIds.has(entry.artistId)) {
         barEl.wrapper.style.transition = "";
         barEl.bar.style.transition = "";
       }
@@ -459,28 +448,61 @@ export class ChartRaceRenderer {
       }
     }
 
-    // --- PHASE 2: After phase 1 transition completes, collapse/expand ---
-    // Start rank tracking during phase 1 (unless scrubbing)
-    if (!this.scrubbing) {
-      this.startRankTracking(visibleIds);
-    } else {
-      // In scrub mode, just set final ranks immediately
-      this.stopRankTracking();
-    }
+    // --- PHASE EXECUTION ---
+    // Phase 0 (restore): Reveal restoring bars BEFORE any movement
+    // Phase 1 (movement): All bars move, filtered-out bars wipe up
+    // Phase 2 (overtaken collapse): Overtaken bars collapse after movement
 
-    if (needsPhase2) {
-      this.phase2TimeoutId = setTimeout(() => {
-        this.phase2TimeoutId = null;
-        this.stopRankTracking();
+    const startPhase1 = () => {
+      // Enable transitions on visible bars and start movement
+      let idx = 0;
+      for (const entry of visibleEntries) {
+        const barEl = this.bars.get(entry.artistId);
+        if (!barEl) continue;
+        if (this.scrubbing) {
+          barEl.wrapper.style.transition = "none";
+          barEl.bar.style.transition = "none";
+          barEl.wrapper.offsetHeight;
+        } else if (!toRestoreIds.has(entry.artistId)) {
+          barEl.wrapper.style.transition = "";
+          barEl.bar.style.transition = "";
+        } else {
+          // Restoring bars: enable transitions now for phase 1 movement
+          barEl.wrapper.style.transition = "";
+          barEl.bar.style.transition = "";
+        }
+        this.updateBarElement(barEl, entry, barHeight, maxCumulative, snapshot.date, dataStore, idx);
+        idx++;
+      }
 
-        // Collapse overtaken hiding bars (filtered-out bars already collapsed in phase 1)
-        for (const artistId of toHide) {
-          if (!overtakenIds.has(artistId)) continue;
-          const barEl = this.bars.get(artistId);
-          if (!barEl || !barEl.hidden) continue;
-          barEl.wrapper.style.transition = "height 5s ease-in-out, opacity 5s ease-in-out";
-          barEl.wrapper.style.height = "0";
-          barEl.wrapper.style.opacity = "0";
+      // Handle hiding bars
+      for (const artistId of toHide) {
+        const barEl = this.bars.get(artistId)!;
+        if (barEl.animationFrameId !== null) {
+          cancelAnimationFrame(barEl.animationFrameId);
+          this.pendingFrames.delete(barEl.animationFrameId);
+          barEl.animationFrameId = null;
+        }
+        if (barEl.overflowTimeoutId !== null) {
+          clearTimeout(barEl.overflowTimeoutId);
+          barEl.overflowTimeoutId = null;
+        }
+        barEl.hidden = true;
+        barEl.wrapper.style.pointerEvents = "none";
+
+        if (this.scrubbing) {
+          barEl.wrapper.remove();
+          if (barEl.clickHandler) {
+            barEl.wrapper.removeEventListener('click', barEl.clickHandler);
+          }
+          this.bars.delete(artistId);
+        } else if (overtakenIds.has(artistId)) {
+          const currentTransform = barEl.wrapper.style.transform;
+          const currentY = parseFloat(currentTransform.replace(/[^0-9.-]/g, '')) || 0;
+          barEl.wrapper.style.transform = `translateY(${currentY + barHeight}px)`;
+        } else {
+          barEl.wrapper.style.zIndex = "0";
+          barEl.wipeCover.style.height = "100%";
           barEl.fadeOutTimeoutId = setTimeout(() => {
             barEl.fadeOutTimeoutId = null;
             if (barEl.hidden) {
@@ -490,34 +512,47 @@ export class ChartRaceRenderer {
               }
               this.bars.delete(artistId);
             }
-          }, 5000);
+          }, 9600);
         }
+      }
 
-        // Reveal restoring bars by removing wipe cover
-        for (const artistId of toRestore) {
-          const barEl = this.bars.get(artistId);
-          if (!barEl) continue;
-          barEl.wipeCover.style.transition = "height 5s ease-in-out";
-          barEl.wipeCover.style.height = "0";
-          barEl.wrapper.style.transition = "";
-          barEl.bar.style.transition = "width 5s ease-in-out";
-        }
-
-        // After phase 2 completes, re-enable normal transitions and signal done
-        setTimeout(() => {
-          for (const artistId of toRestore) {
-            const barEl = this.bars.get(artistId);
-            if (!barEl) continue;
-            barEl.wrapper.style.transition = "";
-            barEl.bar.style.transition = "";
-            barEl.wipeCover.style.transition = "";
-          }
-          this.eventBus.emit("update:complete");
-        }, 5000);
-      }, 9600);
-    } else {
-      // No phase 2 needed — signal completion after phase 1
+      // Start rank tracking
       if (!this.scrubbing) {
+        this.startRankTracking(visibleIds);
+      } else {
+        this.stopRankTracking();
+      }
+
+      // Schedule phase 2 or completion
+      if (needsPhase2) {
+        this.phase2TimeoutId = setTimeout(() => {
+          this.phase2TimeoutId = null;
+          this.stopRankTracking();
+
+          for (const artistId of toHide) {
+            if (!overtakenIds.has(artistId)) continue;
+            const barEl = this.bars.get(artistId);
+            if (!barEl || !barEl.hidden) continue;
+            barEl.wrapper.style.transition = "height 5s ease-in-out, opacity 5s ease-in-out";
+            barEl.wrapper.style.height = "0";
+            barEl.wrapper.style.opacity = "0";
+            barEl.fadeOutTimeoutId = setTimeout(() => {
+              barEl.fadeOutTimeoutId = null;
+              if (barEl.hidden) {
+                barEl.wrapper.remove();
+                if (barEl.clickHandler) {
+                  barEl.wrapper.removeEventListener('click', barEl.clickHandler);
+                }
+                this.bars.delete(artistId);
+              }
+            }, 5000);
+          }
+
+          setTimeout(() => {
+            this.eventBus.emit("update:complete");
+          }, 5000);
+        }, 9600);
+      } else if (!this.scrubbing) {
         this.phase2TimeoutId = setTimeout(() => {
           this.phase2TimeoutId = null;
           this.stopRankTracking();
@@ -526,6 +561,28 @@ export class ChartRaceRenderer {
       } else {
         this.eventBus.emit("update:complete");
       }
+    };
+
+    // --- Phase 0: Reveal restoring bars BEFORE any movement ---
+    if (needsPhase0) {
+      for (const artistId of toRestoreIds) {
+        const barEl = this.bars.get(artistId);
+        if (!barEl) continue;
+        barEl.wipeCover.style.transition = "height 5s ease-in-out";
+        barEl.wipeCover.style.height = "0";
+      }
+
+      this.phase2TimeoutId = setTimeout(() => {
+        this.phase2TimeoutId = null;
+        for (const artistId of toRestoreIds) {
+          const barEl = this.bars.get(artistId);
+          if (!barEl) continue;
+          barEl.wipeCover.style.transition = "";
+        }
+        startPhase1();
+      }, 5000);
+    } else {
+      startPhase1();
     }
   }
 

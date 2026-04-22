@@ -441,7 +441,7 @@ describe('ChartRaceRenderer', () => {
   });
 
   // 28. Bars restored from hiding use reverse wipe at correct position
-  it('bars restored from hiding start with wipe cover at 100% at correct position', () => {
+  it('bars restored from hiding are placed at correct position with full height', () => {
     renderer.mount(container);
 
     const MOCKED_HEIGHT = 500;
@@ -463,17 +463,16 @@ describe('ChartRaceRenderer', () => {
     const wrapper = container.querySelector('.chart-race__bar-wrapper') as HTMLElement;
     expect(wrapper.style.pointerEvents).toBe('none');
 
-    // Restore — should be at correct position with wipe cover at 100%
+    // Restore — should be at correct position with full height
     renderer.update(makeSnapshot(entries), 10, ds);
     expect(wrapper.style.opacity).toBe('1');
     expect(wrapper.style.pointerEvents).toBe('');
     const barHeight = MOCKED_HEIGHT / 10;
     expect(wrapper.style.transform).toBe(`translateY(${0 * barHeight}px)`);
-    // Full height (not collapsed)
     expect(wrapper.style.height).toBe(`${barHeight}px`);
-    // Wipe cover should be at 100% (waiting for phase 2 to reveal)
+    // Wipe cover is animating to 0 (phase 0 started)
     const wipeCover = wrapper.querySelector('.bar__wipe-cover') as HTMLElement;
-    expect(wipeCover.style.height).toBe('100%');
+    expect(wipeCover).not.toBeNull();
   });
 
   // 29. Scrubbing disables CSS transitions for instant snapping

@@ -256,11 +256,14 @@ export class ChartRaceRenderer {
 
     // 1. Phase 1 uses unfiltered top-10 by rank (all bars participate in position animation)
     // Phase 2 (after transition) applies activity filter to hide/show bars
-    const phase1Entries = filterByZoom(snapshot.entries, zoomLevel);
+    const unfilteredEntries = filterByZoom(snapshot.entries, zoomLevel);
     const filteredEntries = filterByActivity(snapshot.entries, snapshot.date, dataStore, zoomLevel);
     const filteredIds = new Set(filteredEntries.map(e => e.artistId));
 
-    const visibleEntries = phase1Entries;
+    // Use filtered entries directly when scrubbing or on initial load (no existing bars).
+    // Use unfiltered for playback so bars can animate to new positions before being hidden.
+    const needsTwoPhase = !this.scrubbing && this.bars.size > 0;
+    const visibleEntries = needsTwoPhase ? unfilteredEntries : filteredEntries;
     const containerHeight = this.barsContainer.clientHeight || this.barsContainer.offsetHeight;
     const barHeight =
       zoomLevel === 10
@@ -393,6 +396,13 @@ export class ChartRaceRenderer {
     if (this.scrubbing) {
       this.applyVisibilityFilter(filteredIds, barHeight);
       this.eventBus.emit("update:complete");
+    } else if (!needsTwoPhase) {
+      // Initial load or no existing bars — already showing filtered set, just wait for animation
+      this.phase2TimeoutId = setTimeout(() => {
+        this.phase2TimeoutId = null;
+        this.stopRankTracking();
+        this.eventBus.emit("update:complete");
+      }, 2880);
     } else {
       this.phase2TimeoutId = setTimeout(() => {
         this.phase2TimeoutId = null;

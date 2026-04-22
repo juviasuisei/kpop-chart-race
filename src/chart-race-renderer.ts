@@ -396,7 +396,7 @@ export class ChartRaceRenderer {
 
     // Rank tracking
     if (!this.scrubbing) {
-      this.startRankTracking(visibleIds);
+      this.startRankTracking(filteredIds);
     } else {
       this.stopRankTracking();
     }
@@ -535,24 +535,27 @@ export class ChartRaceRenderer {
    * sorts them by position, and assigns rank numbers based on visual order.
    * This makes rank badges update progressively as bars pass each other.
    */
-  private startRankTracking(visibleArtistIds: Set<string>): void {
+  private startRankTracking(trackedIds: Set<string>): void {
     this.stopRankTracking();
 
     const track = () => {
-      // Collect visible bars with their current visual Y positions
       const barPositions: { artistId: string; barEl: BarElement; y: number }[] = [];
       for (const [artistId, barEl] of this.bars) {
-        if (!visibleArtistIds.has(artistId) || barEl.hidden) continue;
+        if (barEl.hidden) continue;
+        if (!trackedIds.has(artistId)) {
+          // Not tracked — just show its own target rank
+          const label = `#${barEl.targetRank}`;
+          if (barEl.rankSpan.textContent !== label) {
+            barEl.rankSpan.textContent = label;
+          }
+          continue;
+        }
         const rect = barEl.wrapper.getBoundingClientRect();
         barPositions.push({ artistId, barEl, y: rect.top });
       }
 
-      // Sort by visual Y position (top to bottom)
       barPositions.sort((a, b) => a.y - b.y);
 
-      // Assign rank numbers based on visual order
-      // Use the target ranks of all bars sorted by position to determine
-      // what rank label each position should show
       const sortedTargetRanks = barPositions
         .map(bp => bp.barEl.targetRank)
         .sort((a, b) => a - b);
@@ -782,7 +785,7 @@ export class ChartRaceRenderer {
     dataStore: DataStore,
     visualIndex: number,
   ): void {
-    // Store target rank — actual rank text is updated by the rank tracking loop
+    // Store target rank — rank text updated by rank tracking loop during animation
     barEl.targetRank = entry.rank;
     barEl.rankSpan.style.backgroundColor = ARTIST_TYPE_COLORS[entry.artistType];
     barEl.nameSpan.textContent = entry.artistName;

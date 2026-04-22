@@ -235,13 +235,13 @@ export class ChartRaceRenderer {
       }
     }
 
-    // Determine which bars need to restore (in visible set but currently hidden or not yet created as returning)
+    // Determine which bars need to restore (in visible set but currently hidden IN DOM)
+    // Only bars still in the DOM with hidden=true get the phase 2 expand animation.
+    // Bars that were fully cleaned up will be re-created and rise from the bottom.
     const toRestore: string[] = [];
     for (const entry of visibleEntries) {
       const barEl = this.bars.get(entry.artistId);
       if (barEl && barEl.hidden) {
-        toRestore.push(entry.artistId);
-      } else if (!barEl && this.seenArtists.has(entry.artistId)) {
         toRestore.push(entry.artistId);
       }
     }
@@ -284,7 +284,7 @@ export class ChartRaceRenderer {
           barEl.bar.style.width = `${maxCumulative > 0 ? computeBarWidth(entry.cumulativeValue, maxCumulative) : 0}%`;
           barEl.wrapper.offsetHeight;
         } else if (!isTrulyNew && toRestore.includes(entry.artistId)) {
-          // Returning artist — start hidden (height 0), will expand in phase 2
+          // Returning artist still in DOM as hidden — start at height 0, will expand in phase 2
           barEl.wrapper.style.transition = "none";
           barEl.bar.style.transition = "none";
           barEl.wrapper.style.transform = `translateY(${visIdx * barHeight}px)`;
@@ -296,14 +296,17 @@ export class ChartRaceRenderer {
           barEl.wrapper.offsetHeight;
           // Don't enable transitions yet — phase 2 will handle that
         } else {
-          // Brand new artist (first time on chart) — start at bottom, rise through ranks
+          // Brand new or re-entering artist — start at bottom, rise through ranks
           barEl.wrapper.style.transition = "none";
           barEl.bar.style.transition = "none";
           const bottomY = containerHeight > 0 ? containerHeight : 500;
           barEl.wrapper.style.transform = `translateY(${bottomY}px)`;
           barEl.wrapper.style.height = `${barHeight}px`;
           barEl.wrapper.style.opacity = "1";
-          barEl.bar.style.width = "0%";
+          // Start at previous width (0 for truly new, nonzero for re-entering)
+          const startWidth = maxCumulative > 0
+            ? computeBarWidth(entry.previousCumulativeValue, maxCumulative) : 0;
+          barEl.bar.style.width = `${startWidth}%`;
           barEl.wrapper.offsetHeight;
           barEl.wrapper.style.transition = "";
           barEl.bar.style.transition = "";

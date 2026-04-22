@@ -82,14 +82,34 @@ export class ChartRaceRenderer {
     this.eventBus.on("scrub:start", () => {
       this.scrubbing = true;
       this.cancelAllAnimations();
+      // Force no-transition via CSS class (more reliable than inline styles)
+      if (this.barsContainer) {
+        this.barsContainer.classList.add("chart-race__bars--no-transition");
+      }
     });
     this.eventBus.on("scrub:end", () => {
       this.scrubbing = false;
-      // Clear inline transition overrides so CSS stylesheet transitions take effect
+      if (this.barsContainer) {
+        this.barsContainer.classList.remove("chart-race__bars--no-transition");
+      }
+      // Also clear any inline transition overrides from cancelAllAnimations
       for (const [, barEl] of this.bars) {
         barEl.wrapper.style.transition = "";
         barEl.bar.style.transition = "";
       }
+    });
+    this.eventBus.on("reset", () => {
+      // Remove all bars from DOM so next update starts fresh
+      for (const [, barEl] of this.bars) {
+        if (barEl.animationFrameId !== null) {
+          cancelAnimationFrame(barEl.animationFrameId);
+          this.pendingFrames.delete(barEl.animationFrameId);
+        }
+        if (barEl.overflowTimeoutId !== null) clearTimeout(barEl.overflowTimeoutId);
+        if (barEl.fadeOutTimeoutId !== null) clearTimeout(barEl.fadeOutTimeoutId);
+        barEl.wrapper.remove();
+      }
+      this.bars.clear();
     });
   }
 

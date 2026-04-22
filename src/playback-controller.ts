@@ -86,8 +86,8 @@ export class PlaybackController {
     if (this.currentIndex >= this.dates.length - 1) {
       this.currentIndex = 0;
       this.updateScrubberAndLabel();
-      // Emit date:change normally — bars will animate from their current state
-      // to the first date's state (new bars rise from bottom)
+      // Clear all bars so day 1 starts fresh with bars rising from bottom
+      this.eventBus.emit("reset");
       this.eventBus.emit("date:change", this.dates[0]);
     }
 

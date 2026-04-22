@@ -46,6 +46,11 @@ body {
   overflow: hidden;
 }
 
+.chart-race__bars--no-transition .chart-race__bar-wrapper,
+.chart-race__bars--no-transition .chart-race__bar {
+  transition: none !important;
+}
+
 .chart-race__bar-wrapper {
   position: absolute;
   left: 0;

@@ -396,7 +396,7 @@ export class ChartRaceRenderer {
 
     // Rank tracking
     if (!this.scrubbing) {
-      this.startRankTracking(filteredIds);
+      this.startRankTracking();
     } else {
       this.stopRankTracking();
     }
@@ -535,31 +535,27 @@ export class ChartRaceRenderer {
    * sorts them by position, and assigns rank numbers based on visual order.
    * This makes rank badges update progressively as bars pass each other.
    */
-  private startRankTracking(trackedIds: Set<string>): void {
+  private startRankTracking(): void {
     this.stopRankTracking();
 
     const track = () => {
-      const barPositions: { artistId: string; barEl: BarElement; y: number }[] = [];
-      for (const [artistId, barEl] of this.bars) {
+      // Collect all non-hidden bars with their current visual Y positions
+      const barPositions: { barEl: BarElement; y: number }[] = [];
+      for (const [, barEl] of this.bars) {
         if (barEl.hidden) continue;
-        if (!trackedIds.has(artistId)) {
-          // Not tracked — just show its own target rank
-          const label = `#${barEl.targetRank}`;
-          if (barEl.rankSpan.textContent !== label) {
-            barEl.rankSpan.textContent = label;
-          }
-          continue;
-        }
         const rect = barEl.wrapper.getBoundingClientRect();
-        barPositions.push({ artistId, barEl, y: rect.top });
+        barPositions.push({ barEl, y: rect.top });
       }
 
+      // Sort by visual Y position (top to bottom)
       barPositions.sort((a, b) => a.y - b.y);
 
+      // Collect all target ranks and sort them
       const sortedTargetRanks = barPositions
         .map(bp => bp.barEl.targetRank)
         .sort((a, b) => a - b);
 
+      // Assign: the bar at the highest position gets the lowest rank, etc.
       for (let i = 0; i < barPositions.length; i++) {
         const rank = sortedTargetRanks[i];
         const barEl = barPositions[i].barEl;

@@ -676,6 +676,27 @@ describe('ChartRaceRenderer', () => {
     const barHeight = MOCKED_HEIGHT / 10;
     expect(wrapper.style.transform).toBe(`translateY(${0 * barHeight}px)`);
   });
+
+  // 37. scrub:end clears inline transition overrides
+  it('scrub:end clears inline transition:none so CSS transitions resume', () => {
+    renderer.mount(container);
+
+    const entries = [
+      makeEntry({ artistId: 'a1', rank: 1, cumulativeValue: 500 }),
+    ];
+    renderer.update(makeSnapshot(entries), 10, makeDataStoreForEntries(entries));
+
+    // Enter scrub mode — sets transition: none
+    eventBus.emit('scrub:start');
+    renderer.update(makeSnapshot(entries), 10, makeDataStoreForEntries(entries));
+
+    const wrapper = container.querySelector('.chart-race__bar-wrapper') as HTMLElement;
+    expect(wrapper.style.transition).toBe('none');
+
+    // Exit scrub mode — should clear inline transition
+    eventBus.emit('scrub:end');
+    expect(wrapper.style.transition).toBe('');
+  });
 });
 
 

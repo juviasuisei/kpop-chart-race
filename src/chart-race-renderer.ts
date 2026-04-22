@@ -83,7 +83,14 @@ export class ChartRaceRenderer {
       this.scrubbing = true;
       this.cancelAllAnimations();
     });
-    this.eventBus.on("scrub:end", () => { this.scrubbing = false; });
+    this.eventBus.on("scrub:end", () => {
+      this.scrubbing = false;
+      // Clear inline transition overrides so CSS stylesheet transitions take effect
+      for (const [, barEl] of this.bars) {
+        barEl.wrapper.style.transition = "";
+        barEl.bar.style.transition = "";
+      }
+    });
   }
 
   /** Cancel all in-flight animations, timeouts, and pending phase 2 work */
@@ -299,6 +306,10 @@ export class ChartRaceRenderer {
         barEl.wrapper.style.transition = "none";
         barEl.bar.style.transition = "none";
         barEl.wrapper.offsetHeight; // force reflow
+      } else {
+        // Ensure transitions are enabled (clears any leftover inline overrides)
+        barEl.wrapper.style.transition = "";
+        barEl.bar.style.transition = "";
       }
 
       // 5. Update bar element (position, width, value, etc.)

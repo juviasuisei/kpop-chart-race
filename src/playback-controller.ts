@@ -86,10 +86,9 @@ export class PlaybackController {
     if (this.currentIndex >= this.dates.length - 1) {
       this.currentIndex = 0;
       this.updateScrubberAndLabel();
-      // Snap (no animation) for the wrap-around reset
-      this.eventBus.emit("scrub:start");
+      // Emit date:change normally — bars will animate from their current state
+      // to the first date's state (new bars rise from bottom)
       this.eventBus.emit("date:change", this.dates[0]);
-      this.eventBus.emit("scrub:end");
     }
 
     this.updateButtonToPause();

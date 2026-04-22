@@ -547,16 +547,22 @@ export class ChartRaceRenderer {
     }
 
     const track = () => {
-      // Collect all non-hidden bars with their current visual Y positions
       const barPositions: { barEl: BarElement; y: number }[] = [];
       for (const [, barEl] of this.bars) {
         if (barEl.hidden) continue;
         const rect = barEl.wrapper.getBoundingClientRect();
         barPositions.push({ barEl, y: rect.top });
       }
-
-      // Sort by visual Y position (top to bottom)
       barPositions.sort((a, b) => a.y - b.y);
+
+      // Debug: log Say My Name's rank on first frame
+      for (const { barEl } of barPositions) {
+        if (barEl.nameSpan.textContent === 'SAY MY NAME') {
+          const dr = displayedRanks.get(barEl);
+          console.log('[RANK DEBUG] SAY MY NAME displayed:', dr, 'target:', barEl.targetRank, 'span:', barEl.rankSpan.textContent);
+          break;
+        }
+      }
 
       // Pairwise swap: if adjacent bars are out of order by displayed rank, swap
       let swapped = true;

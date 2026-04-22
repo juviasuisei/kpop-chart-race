@@ -511,8 +511,8 @@ describe('ChartRaceRenderer', () => {
     eventBus.emit('scrub:end');
   });
 
-  // 30. Scrub:start cancels in-flight animations on visible bars
-  it('scrub:start cancels pending animations and snaps visible bars', () => {
+  // 30. Scrub:start removes all bars for clean slate
+  it('scrub:start removes all bars from DOM for clean re-creation', () => {
     renderer.mount(container);
 
     const entries = [
@@ -522,25 +522,11 @@ describe('ChartRaceRenderer', () => {
     const ds = makeDataStoreForEntries(entries);
     renderer.update(makeSnapshot(entries), 10, ds);
 
-    // Hide a2 by updating without it (simplified: removed immediately)
-    const entries2 = [
-      makeEntry({ artistId: 'a1', rank: 1, cumulativeValue: 600 }),
-    ];
-    const ds2 = makeDataStoreForEntries(entries2);
-    renderer.update(makeSnapshot(entries2), 10, ds2);
+    expect(container.querySelectorAll('.chart-race__bar-wrapper').length).toBe(2);
 
-    // a2 is already removed from DOM (simplified update removes immediately)
-    const wrappersBeforeScrub = container.querySelectorAll('.chart-race__bar-wrapper');
-    expect(wrappersBeforeScrub.length).toBe(1);
-
-    // Start scrubbing — should snap remaining bar
+    // Start scrubbing — all bars removed
     eventBus.emit('scrub:start');
-
-    const wrappersAfterScrub = container.querySelectorAll('.chart-race__bar-wrapper');
-    expect(wrappersAfterScrub.length).toBe(1);
-
-    // Remaining bar should have transition: none
-    expect((wrappersAfterScrub[0] as HTMLElement).style.transition).toBe('none');
+    expect(container.querySelectorAll('.chart-race__bar-wrapper').length).toBe(0);
 
     eventBus.emit('scrub:end');
   });

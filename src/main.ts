@@ -91,6 +91,12 @@ async function main(): Promise<void> {
     eventBus.emit("state:updated", currentSnapshot);
   });
 
+  // reset → clear snapshot history so next date starts fresh
+  eventBus.on("reset", () => {
+    previousSnapshot = undefined;
+    currentSnapshot = undefined;
+  });
+
   // state:updated → update renderer + announce for screen readers
   eventBus.on("state:updated", (snapshot: ChartSnapshot) => {
     renderer.update(snapshot, currentZoom, dataStore);

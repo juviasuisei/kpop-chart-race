@@ -471,6 +471,49 @@ describe('ChartRaceRenderer', () => {
     const barHeight = MOCKED_HEIGHT / 10;
     expect(wrapper.style.transform).toBe(`translateY(${0 * barHeight}px)`);
   });
+
+  // 29. Scrubbing disables CSS transitions for instant snapping
+  it('scrubbing mode disables transitions on bar wrappers and bars', () => {
+    renderer.mount(container);
+
+    const MOCKED_HEIGHT = 500;
+    const barsContainer = container.querySelector('.chart-race__bars')!;
+    Object.defineProperty(barsContainer, 'clientHeight', {
+      value: MOCKED_HEIGHT,
+      configurable: true,
+    });
+
+    // Initial render
+    const entries1 = [
+      makeEntry({ artistId: 'a1', rank: 1, cumulativeValue: 1000 }),
+      makeEntry({ artistId: 'a2', rank: 2, cumulativeValue: 500 }),
+    ];
+    renderer.update(makeSnapshot(entries1), 10, makeDataStoreForEntries(entries1));
+
+    // Enter scrub mode
+    eventBus.emit('scrub:start');
+
+    // Update with swapped positions
+    const entries2 = [
+      makeEntry({ artistId: 'a2', rank: 1, cumulativeValue: 1200 }),
+      makeEntry({ artistId: 'a1', rank: 2, cumulativeValue: 1000 }),
+    ];
+    renderer.update(makeSnapshot(entries2), 10, makeDataStoreForEntries(entries2));
+
+    // All bar wrappers should have transition: none
+    const wrappers = container.querySelectorAll('.chart-race__bar-wrapper');
+    for (const w of wrappers) {
+      expect((w as HTMLElement).style.transition).toBe('none');
+    }
+
+    // All bars should have transition: none
+    const bars = container.querySelectorAll('.chart-race__bar');
+    for (const b of bars) {
+      expect((b as HTMLElement).style.transition).toBe('none');
+    }
+
+    eventBus.emit('scrub:end');
+  });
 });
 
 

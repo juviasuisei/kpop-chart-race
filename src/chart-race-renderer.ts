@@ -278,6 +278,7 @@ export class ChartRaceRenderer {
       if (this.scrubbing) {
         barEl.wrapper.style.transition = "none";
         barEl.bar.style.transition = "none";
+        barEl.wrapper.offsetHeight; // force reflow to apply transition:none
       } else if (!toRestore.includes(entry.artistId)) {
         barEl.wrapper.style.transition = "";
         barEl.bar.style.transition = "";

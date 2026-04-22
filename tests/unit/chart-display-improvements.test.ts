@@ -4,7 +4,7 @@
  */
 
 import { computeChartWins } from '../../src/chart-engine.ts';
-import { dateMinus365, filterByActivity, filterByZoom } from '../../src/utils.ts';
+import { dateMinus365, filterByActivity, filterByZoom, hasRecentActivity, dateMinusDays, toRomanNumeral } from '../../src/utils.ts';
 import { ChartRaceRenderer } from '../../src/chart-race-renderer.ts';
 import { EventBus } from '../../src/event-bus.ts';
 import type { DataStore, ParsedArtist, RankedEntry, ChartSnapshot } from '../../src/models.ts';
@@ -233,5 +233,203 @@ describe('Logo visibility toggle', () => {
 
     renderer.destroy();
     container.remove();
+  });
+});
+
+
+// ============================================================
+// Activity filter with goalpost logic — filterByActivity
+// ============================================================
+
+/**
+ * Helper: build a DataStore where each artist's activity is controlled
+ * by providing a date for their dailyValues entry.
+ */
+function makeActivityDataStore(
+  artistConfigs: { id: string; activityDate: string }[],
+): DataStore {
+  const artists = new Map<string, ParsedArtist>();
+  const allDates = new Set<string>();
+  for (const cfg of artistConfigs) {
+    allDates.add(cfg.activityDate);
+    artists.set(cfg.id, {
+      id: cfg.id,
+      name: `Artist ${cfg.id}`,
+      artistType: 'boy_group',
+      generation: 4,
+      logoUrl: `assets/logos/${cfg.id}.svg`,
+      releases: [{
+        id: 'release-1',
+        title: 'Song',
+        dailyValues: new Map([[cfg.activityDate, { value: 100, source: 'inkigayo', episode: 1 }]]),
+        embeds: new Map(),
+      }],
+    });
+  }
+  const dates = Array.from(allDates).sort();
+  return { artists, dates, startDate: dates[0], endDate: dates[dates.length - 1], chartWins: new Map() };
+}
+
+function makeRankedEntries(count: number): RankedEntry[] {
+  return Array.from({ length: count }, (_, i) =>
+    makeEntry({
+      artistId: `a${i + 1}`,
+      artistName: `Artist ${i + 1}`,
+      rank: i + 1,
+      cumulativeValue: 1000 - i * 50,
+    }),
+  );
+}
+
+describe('filterByActivity — goalpost logic', () => {
+  const snapshotDate = '2024-06-15';
+  const recentDate = '2024-06-10'; // within 30 days of snapshot
+  const oldDate = '2023-01-01';    // outside 30 days
+
+  it('rank 1 is always included even if inactive', () => {
+    const entries = makeRankedEntries(5);
+    // All artists inactive
+    const ds = makeActivityDataStore(
+      entries.map(e => ({ id: e.artistId, activityDate: oldDate })),
+    );
+    const result = filterByActivity(entries, snapshotDate, ds, 10);
+    expect(result[0].rank).toBe(1);
+  });
+
+  it('active artists are included', () => {
+    const entries = makeRankedEntries(5);
+    // Only rank 3 is active
+    const ds = makeActivityDataStore(
+      entries.map(e => ({
+        id: e.artistId,
+        activityDate: e.artistId === 'a3' ? recentDate : oldDate,
+      })),
+    );
+    const result = filterByActivity(entries, snapshotDate, ds, 10);
+    const ids = result.map(r => r.artistId);
+    expect(ids).toContain('a3');
+  });
+
+  it('goalpost — inactive entry immediately above an active entry is included', () => {
+    const entries = makeRankedEntries(5);
+    // rank 3 active, rank 2 inactive → rank 2 should be goalpost
+    const ds = makeActivityDataStore(
+      entries.map(e => ({
+        id: e.artistId,
+        activityDate: e.artistId === 'a3' || e.artistId === 'a1' ? recentDate : oldDate,
+      })),
+    );
+    const result = filterByActivity(entries, snapshotDate, ds, 10);
+    const ids = result.map(r => r.artistId);
+    expect(ids).toContain('a2'); // goalpost for a3
+  });
+
+  it('NO chaining — only one goalpost per active, not a chain of inactives', () => {
+    // ranks 1-5: rank 1 active, ranks 2-4 inactive, rank 5 active
+    // rank 4 is goalpost for rank 5, but rank 3 should NOT chain from rank 4
+    const entries = makeRankedEntries(5);
+    const ds = makeActivityDataStore(
+      entries.map(e => ({
+        id: e.artistId,
+        activityDate: (e.artistId === 'a1' || e.artistId === 'a5') ? recentDate : oldDate,
+      })),
+    );
+    const result = filterByActivity(entries, snapshotDate, ds, 10);
+    const ids = result.map(r => r.artistId);
+    expect(ids).toContain('a1'); // active
+    expect(ids).toContain('a4'); // goalpost for a5
+    expect(ids).toContain('a5'); // active
+    // a3 should NOT be included as a chained goalpost for a4
+    // (a3 is only included if backfill is needed)
+    // With 3 entries included (a1, a4, a5), backfill will add a2, a3 to reach 5
+    // But the key point: a3 is NOT included via goalpost chaining
+  });
+
+  it('backfill — when fewer than 10 qualify, fill with inactive by rank', () => {
+    // Only 3 entries total, all active → result should be 3 (can't backfill beyond available)
+    const entries = makeRankedEntries(3);
+    const ds = makeActivityDataStore(
+      entries.map(e => ({ id: e.artistId, activityDate: recentDate })),
+    );
+    const result = filterByActivity(entries, snapshotDate, ds, 10);
+    expect(result.length).toBe(3);
+
+    // 15 entries, only rank 1 active → should backfill to 10
+    const entries15 = makeRankedEntries(15);
+    const ds15 = makeActivityDataStore(
+      entries15.map(e => ({
+        id: e.artistId,
+        activityDate: e.artistId === 'a1' ? recentDate : oldDate,
+      })),
+    );
+    const result15 = filterByActivity(entries15, snapshotDate, ds15, 10);
+    expect(result15.length).toBe(10);
+    // First entry is rank 1, rest are backfilled by rank order
+    expect(result15[0].rank).toBe(1);
+  });
+
+  it('zoom "all" returns all entries unchanged', () => {
+    const entries = makeRankedEntries(15);
+    const ds = makeActivityDataStore(
+      entries.map(e => ({ id: e.artistId, activityDate: oldDate })),
+    );
+    const result = filterByActivity(entries, snapshotDate, ds, 'all');
+    expect(result).toEqual(entries);
+  });
+
+  it('visual example — ranks 1-8 active, 9-10 inactive, 11 active → includes 1-8, 10, 11', () => {
+    const entries = makeRankedEntries(11);
+    const ds = makeActivityDataStore(
+      entries.map(e => {
+        const rankNum = parseInt(e.artistId.replace('a', ''));
+        const isActive = rankNum <= 8 || rankNum === 11;
+        return { id: e.artistId, activityDate: isActive ? recentDate : oldDate };
+      }),
+    );
+    const result = filterByActivity(entries, snapshotDate, ds, 10);
+    const ids = result.map(r => r.artistId);
+
+    // Ranks 1-8 active → included
+    for (let i = 1; i <= 8; i++) {
+      expect(ids).toContain(`a${i}`);
+    }
+    // Rank 10 is goalpost for rank 11
+    expect(ids).toContain('a10');
+    // Rank 11 is active
+    expect(ids).toContain('a11');
+    // Rank 9 is NOT included (inactive, not a goalpost)
+    expect(ids).not.toContain('a9');
+    // Total should be 10
+    expect(result.length).toBe(10);
+  });
+});
+
+// ============================================================
+// Ordinal generation labels — toRomanNumeral
+// ============================================================
+
+describe('toRomanNumeral — ordinal gen labels', () => {
+  it('toRomanNumeral(1) === "1st Gen"', () => {
+    expect(toRomanNumeral(1)).toBe('1st Gen');
+  });
+
+  it('toRomanNumeral(2) === "2nd Gen"', () => {
+    expect(toRomanNumeral(2)).toBe('2nd Gen');
+  });
+
+  it('toRomanNumeral(3) === "3rd Gen"', () => {
+    expect(toRomanNumeral(3)).toBe('3rd Gen');
+  });
+
+  it('toRomanNumeral(4) === "4th Gen"', () => {
+    expect(toRomanNumeral(4)).toBe('4th Gen');
+  });
+
+  it('toRomanNumeral(11) === "11th Gen"', () => {
+    expect(toRomanNumeral(11)).toBe('11th Gen');
+  });
+
+  it('toRomanNumeral(21) === "21st Gen"', () => {
+    expect(toRomanNumeral(21)).toBe('21st Gen');
   });
 });

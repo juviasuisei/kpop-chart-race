@@ -348,3 +348,307 @@ describe('DetailPanel', () => {
     expect(metaEl!.textContent).toContain('Gen');
   });
 });
+
+
+// ============================================================
+// Same-date card merging — buildDateGroups
+// ============================================================
+
+describe('DetailPanel — same-date card merging', () => {
+  let eventBus: EventBus;
+  let panel: DetailPanel;
+
+  beforeEach(() => {
+    eventBus = new EventBus();
+    panel = new DetailPanel(eventBus);
+  });
+
+  afterEach(() => {
+    panel.destroy();
+    document.querySelectorAll('.detail-panel').forEach((el) => el.remove());
+  });
+
+  it('two chart performances on same date merge into one card (primary = highest value)', () => {
+    const release1: ParsedRelease = {
+      id: 'song-a',
+      title: 'Song A',
+      dailyValues: new Map([
+        ['2024-05-13', { value: 500, source: 'inkigayo', episode: 100 }],
+      ]),
+      embeds: new Map(),
+    };
+    const release2: ParsedRelease = {
+      id: 'song-b',
+      title: 'Song B',
+      dailyValues: new Map([
+        ['2024-05-13', { value: 800, source: 'music_bank', episode: 200 }],
+      ]),
+      embeds: new Map(),
+    };
+
+    const artist: ParsedArtist = {
+      id: 'merge-artist',
+      name: 'Merge Artist',
+      artistType: 'girl_group',
+      generation: 4,
+      logoUrl: 'assets/logos/merge.svg',
+      releases: [release1, release2],
+    };
+
+    const store: DataStore = {
+      artists: new Map([['merge-artist', artist]]),
+      dates: ['2024-05-13'],
+      startDate: '2024-05-13',
+      endDate: '2024-05-13',
+      chartWins: new Map(),
+    };
+
+    panel.open('merge-artist', store);
+
+    // Should be one date group with one card
+    const dateGroups = document.body.querySelectorAll('.timeline-date-group');
+    expect(dateGroups.length).toBe(1);
+
+    // The primary release should be Song B (higher value: 800)
+    const releaseEls = dateGroups[0].querySelectorAll('.timeline-entry__release');
+    expect(releaseEls[0].textContent).toBe('♪ Song B');
+
+    // Song A should appear as a sub-release
+    const subReleases = dateGroups[0].querySelectorAll('.timeline-entry__sub-release');
+    expect(subReleases.length).toBe(1);
+    expect(subReleases[0].textContent).toContain('Song A');
+    expect(subReleases[0].textContent).toContain('500');
+  });
+
+  it('embed-only item on same date as chart performance merges into same card', () => {
+    const chartRelease: ParsedRelease = {
+      id: 'chart-song',
+      title: 'Chart Song',
+      dailyValues: new Map([
+        ['2024-05-13', { value: 700, source: 'inkigayo', episode: 100 }],
+      ]),
+      embeds: new Map(),
+    };
+    const embedRelease: ParsedRelease = {
+      id: 'embed-song',
+      title: 'Embed Song',
+      dailyValues: new Map(),
+      embeds: new Map([
+        ['2024-05-13', [
+          { eventType: 'mv', links: [{ url: 'https://www.youtube.com/watch?v=test1', description: 'MV' }] },
+        ]],
+      ]),
+    };
+
+    const artist: ParsedArtist = {
+      id: 'embed-merge-artist',
+      name: 'Embed Merge Artist',
+      artistType: 'girl_group',
+      generation: 4,
+      logoUrl: 'assets/logos/embed-merge.svg',
+      releases: [chartRelease, embedRelease],
+    };
+
+    const store: DataStore = {
+      artists: new Map([['embed-merge-artist', artist]]),
+      dates: ['2024-05-13'],
+      startDate: '2024-05-13',
+      endDate: '2024-05-13',
+      chartWins: new Map(),
+    };
+
+    panel.open('embed-merge-artist', store);
+
+    // Should be one date group — embed-only merged into chart card
+    const dateGroups = document.body.querySelectorAll('.timeline-date-group');
+    expect(dateGroups.length).toBe(1);
+
+    // The primary release is the chart song
+    const entries = dateGroups[0].querySelectorAll('.timeline-entry');
+    expect(entries.length).toBe(1);
+
+    // The embed from the other release should appear under a song heading
+    const releaseHeadings = entries[0].querySelectorAll('.timeline-entry__release');
+    // First heading is the primary chart song, second is the merged embed song heading
+    expect(releaseHeadings.length).toBe(2);
+    expect(releaseHeadings[0].textContent).toBe('♪ Chart Song');
+    expect(releaseHeadings[1].textContent).toBe('♪ Embed Song');
+  });
+
+  it('merged embeds from different release show under song heading', () => {
+    const primaryRelease: ParsedRelease = {
+      id: 'primary-song',
+      title: 'Primary Song',
+      dailyValues: new Map([
+        ['2024-05-13', { value: 900, source: 'inkigayo', episode: 100 }],
+      ]),
+      embeds: new Map(),
+    };
+    const otherRelease: ParsedRelease = {
+      id: 'other-song',
+      title: 'Other Song',
+      dailyValues: new Map(),
+      embeds: new Map([
+        ['2024-05-13', [
+          { eventType: 'live_performance', links: [{ url: 'https://www.youtube.com/watch?v=lp1', description: 'Live' }] },
+        ]],
+      ]),
+    };
+
+    const artist: ParsedArtist = {
+      id: 'heading-artist',
+      name: 'Heading Artist',
+      artistType: 'boy_group',
+      generation: 4,
+      logoUrl: 'assets/logos/heading.svg',
+      releases: [primaryRelease, otherRelease],
+    };
+
+    const store: DataStore = {
+      artists: new Map([['heading-artist', artist]]),
+      dates: ['2024-05-13'],
+      startDate: '2024-05-13',
+      endDate: '2024-05-13',
+      chartWins: new Map(),
+    };
+
+    panel.open('heading-artist', store);
+
+    const entry = document.body.querySelector('.timeline-entry')!;
+    const releaseHeadings = entry.querySelectorAll('.timeline-entry__release');
+    // Second heading should be the other song
+    expect(releaseHeadings.length).toBeGreaterThanOrEqual(2);
+    expect(releaseHeadings[1].textContent).toBe('♪ Other Song');
+
+    // The embed group should follow the song heading
+    const embedGroups = entry.querySelectorAll('.timeline-entry__embed-group');
+    expect(embedGroups.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('sub-releases include source info when source differs from primary', () => {
+    const release1: ParsedRelease = {
+      id: 'primary-rel',
+      title: 'Primary Hit',
+      dailyValues: new Map([
+        ['2024-05-13', { value: 900, source: 'inkigayo', episode: 100 }],
+      ]),
+      embeds: new Map(),
+    };
+    const release2: ParsedRelease = {
+      id: 'secondary-rel',
+      title: 'Secondary Hit',
+      dailyValues: new Map([
+        ['2024-05-13', { value: 400, source: 'music_bank', episode: 200 }],
+      ]),
+      embeds: new Map(),
+    };
+
+    const artist: ParsedArtist = {
+      id: 'source-diff-artist',
+      name: 'Source Diff Artist',
+      artistType: 'girl_group',
+      generation: 4,
+      logoUrl: 'assets/logos/source-diff.svg',
+      releases: [release1, release2],
+    };
+
+    const store: DataStore = {
+      artists: new Map([['source-diff-artist', artist]]),
+      dates: ['2024-05-13'],
+      startDate: '2024-05-13',
+      endDate: '2024-05-13',
+      chartWins: new Map(),
+    };
+
+    panel.open('source-diff-artist', store);
+
+    const subReleases = document.body.querySelectorAll('.timeline-entry__sub-release');
+    expect(subReleases.length).toBe(1);
+    // Sub-release should include source info since music_bank ≠ inkigayo
+    expect(subReleases[0].textContent).toContain('music_bank');
+    expect(subReleases[0].textContent).toContain('Ep 200');
+  });
+});
+
+// ============================================================
+// Crown label simplification — getCrownLabel (tested via rendered output)
+// ============================================================
+
+describe('DetailPanel — crown label simplification', () => {
+  let eventBus: EventBus;
+  let panel: DetailPanel;
+
+  beforeEach(() => {
+    eventBus = new EventBus();
+    panel = new DetailPanel(eventBus);
+  });
+
+  afterEach(() => {
+    panel.destroy();
+    document.querySelectorAll('.detail-panel').forEach((el) => el.remove());
+  });
+
+  function createStoreWithCrownLevel(level: number): DataStore {
+    const release: ParsedRelease = {
+      id: 'crown-song',
+      title: 'Crown Song',
+      dailyValues: new Map([
+        ['2024-05-13', { value: 850, source: 'inkigayo', episode: 100 }],
+      ]),
+      embeds: new Map(),
+    };
+
+    const artist: ParsedArtist = {
+      id: 'crown-artist',
+      name: 'Crown Artist',
+      artistType: 'girl_group',
+      generation: 4,
+      logoUrl: 'assets/logos/crown.svg',
+      releases: [release],
+    };
+
+    const chartWins: DataStore['chartWins'] = new Map([
+      ['2024-05-13', new Map([
+        ['inkigayo', {
+          artistIds: ['crown-artist'],
+          crownLevels: new Map([['crown-artist', level]]),
+        }],
+      ])],
+    ]);
+
+    return {
+      artists: new Map([['crown-artist', artist]]),
+      dates: ['2024-05-13'],
+      startDate: '2024-05-13',
+      endDate: '2024-05-13',
+      chartWins,
+    };
+  }
+
+  it('crown level 3 shows "Triple Crown"', () => {
+    const store = createStoreWithCrownLevel(3);
+    panel.open('crown-artist', store);
+
+    const crownLabel = document.body.querySelector('.crown__label');
+    expect(crownLabel).not.toBeNull();
+    expect(crownLabel!.textContent).toBe('Triple Crown');
+  });
+
+  it('crown level 6 shows "2nd Triple Crown"', () => {
+    const store = createStoreWithCrownLevel(6);
+    panel.open('crown-artist', store);
+
+    const crownLabel = document.body.querySelector('.crown__label');
+    expect(crownLabel).not.toBeNull();
+    expect(crownLabel!.textContent).toBe('2nd Triple Crown');
+  });
+
+  it('crown level 2 shows "2nd Win"', () => {
+    const store = createStoreWithCrownLevel(2);
+    panel.open('crown-artist', store);
+
+    const crownLabel = document.body.querySelector('.crown__label');
+    expect(crownLabel).not.toBeNull();
+    expect(crownLabel!.textContent).toBe('2nd Win');
+  });
+});

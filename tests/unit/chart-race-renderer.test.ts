@@ -365,6 +365,39 @@ describe('ChartRaceRenderer', () => {
     renderer.destroy();
     expect(container.querySelector('.chart-race__title-header')).toBeNull();
   });
+
+  // 25. Bars are positioned by visual index (0, 1, 2...) not by entry.rank
+  it('bars are positioned by visual index not by entry.rank', () => {
+    renderer.mount(container);
+
+    const MOCKED_HEIGHT = 500;
+    const barsContainer = container.querySelector('.chart-race__bars')!;
+    Object.defineProperty(barsContainer, 'clientHeight', {
+      value: MOCKED_HEIGHT,
+      configurable: true,
+    });
+
+    // Create entries with non-contiguous ranks (e.g., ranks 2, 5, 8)
+    // simulating what filterByActivity might produce
+    const entries = [
+      makeEntry({ artistId: 'a1', artistName: 'Artist A', rank: 2, cumulativeValue: 900 }),
+      makeEntry({ artistId: 'a2', artistName: 'Artist B', rank: 5, cumulativeValue: 700 }),
+      makeEntry({ artistId: 'a3', artistName: 'Artist C', rank: 8, cumulativeValue: 500 }),
+    ];
+    const snapshot = makeSnapshot(entries);
+    const ds = makeDataStoreForEntries(snapshot.entries);
+
+    renderer.update(snapshot, 10, ds);
+
+    const barHeight = MOCKED_HEIGHT / 10;
+    const wrappers = container.querySelectorAll('.chart-race__bar-wrapper');
+    expect(wrappers.length).toBe(3);
+
+    // Visual index 0 → translateY(0), visual index 1 → translateY(barHeight), etc.
+    expect((wrappers[0] as HTMLElement).style.transform).toBe(`translateY(${0 * barHeight}px)`);
+    expect((wrappers[1] as HTMLElement).style.transform).toBe(`translateY(${1 * barHeight}px)`);
+    expect((wrappers[2] as HTMLElement).style.transform).toBe(`translateY(${2 * barHeight}px)`);
+  });
 });
 
 

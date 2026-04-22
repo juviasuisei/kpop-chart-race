@@ -20,6 +20,14 @@
 - Artist logos are white SVGs; source show logos are PNGs
 - korean_name and debut are optional fields
 
+## Testing
+- Every functional change MUST include new or updated test cases
+- Tests should cover the specific behavior being changed, not just pass existing tests
+- Add unit tests for concrete examples and edge cases
+- Add property-based tests for algorithmic/data-driven logic
+- Never commit functional changes without verifying tests cover the new behavior
+- Test files: `tests/unit/` for example-based, `tests/property/` for PBT with fast-check
+
 ## Specs
 - Spec numbering: 4-digit zero-padded prefix (0001-, 0002-, etc.) in .kiro/specs/
 - Specs are historical records; new bugs/features get new specs

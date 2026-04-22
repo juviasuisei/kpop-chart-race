@@ -98,3 +98,46 @@ describe('LoadingScreen', () => {
     expect(container.querySelector('.loading-screen')).toBeNull();
   });
 });
+
+
+// ============================================================
+// Loading screen per-file progress
+// ============================================================
+
+describe('LoadingScreen — per-file progress', () => {
+  let container: HTMLElement;
+  let screen: LoadingScreen;
+
+  beforeEach(() => {
+    container = document.createElement('div');
+    document.body.appendChild(container);
+    screen = new LoadingScreen();
+    screen.mount(container);
+  });
+
+  afterEach(() => {
+    screen.destroy();
+    container.remove();
+  });
+
+  it('onFileProgress with empty array shows "Loading artists..."', () => {
+    screen.onFileProgress(0, 10, []);
+
+    const text = container.querySelector('.loading-screen__progress-text');
+    expect(text).not.toBeNull();
+    expect(text!.textContent).toBe('Loading artists...');
+  });
+
+  it('progress bar width updates correctly', () => {
+    screen.onFileProgress(3, 12, ['Artist A']);
+    const fill = container.querySelector('.progress-bar-fill') as HTMLElement;
+    expect(fill).not.toBeNull();
+    expect(fill.style.width).toBe('25%');
+
+    screen.onFileProgress(6, 12, ['Artist B']);
+    expect(fill.style.width).toBe('50%');
+
+    screen.onFileProgress(12, 12, ['Artist C']);
+    expect(fill.style.width).toBe('100%');
+  });
+});

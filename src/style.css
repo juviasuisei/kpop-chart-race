@@ -55,7 +55,7 @@ body {
   gap: 0;
   padding: 2px 0;
   overflow: hidden;
-  transition: transform 9.5s ease-in-out, height 9.5s ease-in-out, opacity 3s ease-in-out;
+  transition: transform 2.85s ease-in-out, height 2.85s ease-in-out, opacity 0.9s ease-in-out;
 }
 
 .bar__wipe-cover {
@@ -66,7 +66,7 @@ body {
   height: 0;
   background: #ffffff;
   z-index: 10;
-  transition: height 9.5s ease-in-out;
+  transition: height 2.85s ease-in-out;
   pointer-events: none;
 }
 
@@ -81,7 +81,7 @@ body {
   border-radius: 0 4px 4px 0;
   padding: 0 0.5rem;
   overflow: hidden;
-  transition: width 9.5s ease-in-out;
+  transition: width 2.85s ease-in-out;
   cursor: pointer;
 }
 

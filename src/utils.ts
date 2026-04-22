@@ -115,8 +115,9 @@ export function filterByActivity(
   dataStore: DataStore,
   zoomLevel: ZoomLevel,
 ): RankedEntry[] {
-  if (zoomLevel !== 10) return filterByZoom(entries, zoomLevel);
-  if (entries.length === 0) return [];
+  // TEMPORARY: bypass all filtering, just return top 10 by rank
+  if (zoomLevel === 10) return entries.slice(0, 10);
+  return filterByZoom(entries, zoomLevel);
 
   const cutoff = dateMinusDays(snapshotDate, 14);
 

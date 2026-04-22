@@ -38,7 +38,7 @@ const PLACEHOLDER_SVG = `data:image/svg+xml,${encodeURIComponent(
 const BAR_HEIGHT_ALL = 40;
 
 /** Duration for tween animation in ms — matches the 1s playback interval */
-const TWEEN_DURATION = 9500;
+const TWEEN_DURATION = 2850;
 
 interface BarElement {
   wrapper: HTMLDivElement;
@@ -353,7 +353,7 @@ export class ChartRaceRenderer {
         this.phase2TimeoutId = null;
         this.stopRankTracking();
         this.eventBus.emit("update:complete");
-      }, 9600);
+      }, 2880);
     }
   }
 
@@ -684,7 +684,7 @@ export class ChartRaceRenderer {
           barEl.bar.offsetHeight; // force layout
         }
         this.checkBarOverflow(barEl);
-      }, 9600);
+      }, 2880);
     }
 
     // Numeric value tweening (snap in scrub mode)

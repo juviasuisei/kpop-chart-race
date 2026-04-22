@@ -125,27 +125,42 @@ export function filterByActivity(
 
   // Always include rank 1
   // Include all active artists
+  // For each active, include the inactive entry immediately above as goalpost
   // Backfill remaining slots with inactive by rank
-  const result: RankedEntry[] = [];
+  const include = new Array(entries.length).fill(false);
 
   // Rank 1 always included
-  if (entries.length > 0) {
-    result.push(entries[0]);
+  include[0] = true;
+
+  // Include all active entries
+  for (let i = 0; i < entries.length; i++) {
+    if (isActive(entries[i])) {
+      include[i] = true;
+    }
   }
 
-  // Add all active entries (skip rank 1 if already added)
+  // Goalpost: for each included entry, if the entry immediately above is
+  // inactive and not yet included, include it as a goalpost (one per active)
   for (let i = 1; i < entries.length; i++) {
+    if (include[i] && !include[i - 1] && !isActive(entries[i - 1])) {
+      include[i - 1] = true;
+    }
+  }
+
+  // Build result from included entries
+  const result: RankedEntry[] = [];
+  for (let i = 0; i < entries.length; i++) {
     if (result.length >= 10) break;
-    if (isActive(entries[i])) {
+    if (include[i]) {
       result.push(entries[i]);
     }
   }
 
   // Backfill with inactive by rank
   if (result.length < 10) {
-    for (let i = 1; i < entries.length; i++) {
+    for (let i = 0; i < entries.length; i++) {
       if (result.length >= 10) break;
-      if (!result.some(r => r.artistId === entries[i].artistId)) {
+      if (!include[i]) {
         result.push(entries[i]);
       }
     }

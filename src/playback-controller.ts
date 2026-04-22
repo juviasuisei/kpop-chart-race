@@ -18,7 +18,6 @@ export class PlaybackController {
   private scrubber: HTMLInputElement | null = null;
   private scrubberTooltip: HTMLDivElement | null = null;
   private dateLabel: HTMLSpanElement | null = null;
-  private wasPlayingBeforeScrub = false;
   private updateCompleteHandler: (() => void) | null = null;
   private playing = false;
 
@@ -225,8 +224,8 @@ export class PlaybackController {
   };
 
   private handleScrubStart = (): void => {
-    this.wasPlayingBeforeScrub = this.isPlaying();
-    if (this.wasPlayingBeforeScrub) {
+    // Always pause when scrubbing starts — do not resume on scrub end
+    if (this.isPlaying()) {
       this.pause();
     }
     this.eventBus.emit("scrub:start");
@@ -234,10 +233,7 @@ export class PlaybackController {
 
   private handleScrubEnd = (): void => {
     this.eventBus.emit("scrub:end");
-    if (this.wasPlayingBeforeScrub) {
-      this.wasPlayingBeforeScrub = false;
-      this.play();
-    }
+    // Scrubbing always leaves the player paused
   };
 
   private handleScrubberHover = (e: MouseEvent): void => {

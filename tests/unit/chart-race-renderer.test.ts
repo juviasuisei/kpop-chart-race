@@ -514,6 +514,66 @@ describe('ChartRaceRenderer', () => {
 
     eventBus.emit('scrub:end');
   });
+
+  // 30. Scrub:start cancels in-flight animations and cleans up hidden bars
+  it('scrub:start cancels pending animations and removes hidden bars', () => {
+    renderer.mount(container);
+
+    const entries = [
+      makeEntry({ artistId: 'a1', rank: 1, cumulativeValue: 500 }),
+      makeEntry({ artistId: 'a2', rank: 2, cumulativeValue: 300 }),
+    ];
+    const ds = makeDataStoreForEntries(entries);
+    renderer.update(makeSnapshot(entries), 10, ds);
+
+    // Hide a2 by updating without it
+    const entries2 = [
+      makeEntry({ artistId: 'a1', rank: 1, cumulativeValue: 600 }),
+    ];
+    const ds2 = makeDataStoreForEntries(entries2);
+    renderer.update(makeSnapshot(entries2), 10, ds2);
+
+    // a2 is now hidden but still in DOM (phase 1 slide, pending phase 2 collapse)
+    const wrappersBeforeScrub = container.querySelectorAll('.chart-race__bar-wrapper');
+    expect(wrappersBeforeScrub.length).toBe(2); // both still in DOM
+
+    // Start scrubbing mid-animation — should clean up immediately
+    eventBus.emit('scrub:start');
+
+    // Hidden bar should be removed from DOM
+    const wrappersAfterScrub = container.querySelectorAll('.chart-race__bar-wrapper');
+    expect(wrappersAfterScrub.length).toBe(1);
+
+    // Remaining bar should have transition: none
+    expect((wrappersAfterScrub[0] as HTMLElement).style.transition).toBe('none');
+
+    eventBus.emit('scrub:end');
+  });
+
+  // 31. Scrub mode snaps value text instantly (no tween)
+  it('scrub mode sets value text instantly without tweening', () => {
+    renderer.mount(container);
+
+    const entries = [
+      makeEntry({ artistId: 'a1', rank: 1, cumulativeValue: 100, previousCumulativeValue: 100 }),
+    ];
+    renderer.update(makeSnapshot(entries), 10, makeDataStoreForEntries(entries));
+
+    // Enter scrub mode
+    eventBus.emit('scrub:start');
+
+    // Update with a big jump
+    const entries2 = [
+      makeEntry({ artistId: 'a1', rank: 1, cumulativeValue: 99999, previousCumulativeValue: 100 }),
+    ];
+    renderer.update(makeSnapshot(entries2), 10, makeDataStoreForEntries(entries2));
+
+    // Value should be the final value immediately, not mid-tween
+    const value = container.querySelector('.bar__value');
+    expect(value!.textContent).toBe('99,999');
+
+    eventBus.emit('scrub:end');
+  });
 });
 
 

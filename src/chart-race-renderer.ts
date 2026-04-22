@@ -78,8 +78,55 @@ export class ChartRaceRenderer {
   private rankTrackingFrameId: number | null = null;
 
   constructor(private eventBus: EventBus) {
-    this.eventBus.on("scrub:start", () => { this.scrubbing = true; });
+    this.eventBus.on("scrub:start", () => {
+      this.scrubbing = true;
+      this.cancelAllAnimations();
+    });
     this.eventBus.on("scrub:end", () => { this.scrubbing = false; });
+  }
+
+  /** Cancel all in-flight animations, timeouts, and pending phase 2 work */
+  private cancelAllAnimations(): void {
+    // Cancel phase 2 timeout
+    if (this.phase2TimeoutId !== null) {
+      clearTimeout(this.phase2TimeoutId);
+      this.phase2TimeoutId = null;
+    }
+
+    // Stop rank tracking
+    this.stopRankTracking();
+
+    // Cancel all per-bar animations and timeouts, reset hidden bars
+    for (const [artistId, barEl] of this.bars) {
+      // Cancel tween
+      if (barEl.animationFrameId !== null) {
+        cancelAnimationFrame(barEl.animationFrameId);
+        this.pendingFrames.delete(barEl.animationFrameId);
+        barEl.animationFrameId = null;
+      }
+      // Cancel overflow check
+      if (barEl.overflowTimeoutId !== null) {
+        clearTimeout(barEl.overflowTimeoutId);
+        barEl.overflowTimeoutId = null;
+      }
+      // Cancel fade-out / collapse timeout
+      if (barEl.fadeOutTimeoutId !== null) {
+        clearTimeout(barEl.fadeOutTimeoutId);
+        barEl.fadeOutTimeoutId = null;
+      }
+      // Remove hidden bars from DOM immediately
+      if (barEl.hidden) {
+        barEl.wrapper.remove();
+        if (barEl.clickHandler) {
+          barEl.wrapper.removeEventListener('click', barEl.clickHandler);
+        }
+        this.bars.delete(artistId);
+        continue;
+      }
+      // Reset transitions on visible bars
+      barEl.wrapper.style.transition = "none";
+      barEl.bar.style.transition = "none";
+    }
   }
 
   /**

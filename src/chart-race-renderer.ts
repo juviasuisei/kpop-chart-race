@@ -59,6 +59,8 @@ interface BarElement {
   hidden: boolean;
   /** Timeout for deferred DOM removal after fade-out */
   fadeOutTimeoutId: ReturnType<typeof setTimeout> | null;
+  /** The target rank this bar is animating toward */
+  targetRank: number;
 }
 
 export class ChartRaceRenderer {
@@ -72,6 +74,8 @@ export class ChartRaceRenderer {
   private scrubbing = false;
   /** Artist IDs that have been seen before (for distinguishing new vs returning) */
   private seenArtists: Set<string> = new Set();
+  /** rAF ID for the rank tracking loop during phase 1 */
+  private rankTrackingFrameId: number | null = null;
 
   constructor(private eventBus: EventBus) {
     this.eventBus.on("scrub:start", () => { this.scrubbing = true; });
@@ -321,9 +325,18 @@ export class ChartRaceRenderer {
     }
 
     // --- PHASE 2: After phase 1 transition completes, collapse/expand ---
+    // Start rank tracking during phase 1 (unless scrubbing)
+    if (!this.scrubbing) {
+      this.startRankTracking(visibleIds);
+    } else {
+      // In scrub mode, just set final ranks immediately
+      this.stopRankTracking();
+    }
+
     if (needsPhase2) {
       this.phase2TimeoutId = setTimeout(() => {
         this.phase2TimeoutId = null;
+        this.stopRankTracking();
 
         // Collapse hiding bars
         for (const artistId of toHide) {
@@ -369,10 +382,67 @@ export class ChartRaceRenderer {
       if (!this.scrubbing) {
         this.phase2TimeoutId = setTimeout(() => {
           this.phase2TimeoutId = null;
+          this.stopRankTracking();
           this.eventBus.emit("update:complete");
         }, 9600);
       } else {
         this.eventBus.emit("update:complete");
+      }
+    }
+  }
+
+  /**
+   * Start a rAF loop that reads each visible bar's current visual Y position,
+   * sorts them by position, and assigns rank numbers based on visual order.
+   * This makes rank badges update progressively as bars pass each other.
+   */
+  private startRankTracking(visibleArtistIds: Set<string>): void {
+    this.stopRankTracking();
+
+    const track = () => {
+      // Collect visible bars with their current visual Y positions
+      const barPositions: { artistId: string; barEl: BarElement; y: number }[] = [];
+      for (const [artistId, barEl] of this.bars) {
+        if (!visibleArtistIds.has(artistId) || barEl.hidden) continue;
+        const rect = barEl.wrapper.getBoundingClientRect();
+        barPositions.push({ artistId, barEl, y: rect.top });
+      }
+
+      // Sort by visual Y position (top to bottom)
+      barPositions.sort((a, b) => a.y - b.y);
+
+      // Assign rank numbers based on visual order
+      // Use the target ranks of all bars sorted by position to determine
+      // what rank label each position should show
+      const sortedTargetRanks = barPositions
+        .map(bp => bp.barEl.targetRank)
+        .sort((a, b) => a - b);
+
+      for (let i = 0; i < barPositions.length; i++) {
+        const rank = sortedTargetRanks[i];
+        const barEl = barPositions[i].barEl;
+        const label = `#${rank}`;
+        if (barEl.rankSpan.textContent !== label) {
+          barEl.rankSpan.textContent = label;
+        }
+      }
+
+      this.rankTrackingFrameId = requestAnimationFrame(track);
+    };
+
+    this.rankTrackingFrameId = requestAnimationFrame(track);
+  }
+
+  /** Stop the rank tracking rAF loop */
+  private stopRankTracking(): void {
+    if (this.rankTrackingFrameId !== null) {
+      cancelAnimationFrame(this.rankTrackingFrameId);
+      this.rankTrackingFrameId = null;
+    }
+    // Set final rank values
+    for (const [, barEl] of this.bars) {
+      if (!barEl.hidden) {
+        barEl.rankSpan.textContent = `#${barEl.targetRank}`;
       }
     }
   }
@@ -409,6 +479,7 @@ export class ChartRaceRenderer {
       clearTimeout(this.phase2TimeoutId);
       this.phase2TimeoutId = null;
     }
+    this.stopRankTracking();
     for (const frameId of this.pendingFrames) {
       cancelAnimationFrame(frameId);
     }
@@ -552,6 +623,7 @@ export class ChartRaceRenderer {
       clickHandler,
       hidden: false,
       fadeOutTimeoutId: null,
+      targetRank: entry.rank,
     };
   }
 
@@ -565,8 +637,8 @@ export class ChartRaceRenderer {
     dataStore: DataStore,
     visualIndex: number,
   ): void {
-    // Update text content
-    barEl.rankSpan.textContent = `#${entry.rank}`;
+    // Store target rank — actual rank text is updated by the rank tracking loop
+    barEl.targetRank = entry.rank;
     barEl.rankSpan.style.backgroundColor = ARTIST_TYPE_COLORS[entry.artistType];
     barEl.nameSpan.textContent = entry.artistName;
     barEl.genSpan.textContent = toRomanNumeral(entry.generation);

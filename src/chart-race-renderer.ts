@@ -261,9 +261,26 @@ export class ChartRaceRenderer {
     const filteredIds = new Set(filteredEntries.map(e => e.artistId));
 
     // Use filtered entries directly when scrubbing or on initial load (no existing bars).
-    // Use unfiltered for playback so bars can animate to new positions before being hidden.
+    // For playback: phase 1 includes bars currently in DOM + bars in filtered set,
+    // but NOT bars that were hidden and are still not in the filtered set.
     const needsTwoPhase = !this.scrubbing && this.bars.size > 0;
-    const visibleEntries = needsTwoPhase ? unfilteredEntries : filteredEntries;
+    let visibleEntries: RankedEntry[];
+    if (!needsTwoPhase) {
+      visibleEntries = filteredEntries;
+    } else {
+      // Build phase 1 set: existing DOM bars + filtered entries, sorted by rank, capped at 10
+      const existingIds = new Set(Array.from(this.bars.keys()).filter(id => !this.bars.get(id)!.hidden));
+      const phase1Ids = new Set([...existingIds, ...filteredIds]);
+      visibleEntries = unfilteredEntries.filter(e => phase1Ids.has(e.artistId));
+      // Also include any filtered entries beyond rank 10 that aren't in unfilteredEntries
+      for (const entry of filteredEntries) {
+        if (!visibleEntries.some(e => e.artistId === entry.artistId)) {
+          visibleEntries.push(entry);
+        }
+      }
+      visibleEntries.sort((a, b) => a.rank - b.rank);
+      visibleEntries = visibleEntries.slice(0, Math.max(10, visibleEntries.length));
+    }
     const containerHeight = this.barsContainer.clientHeight || this.barsContainer.offsetHeight;
     const barHeight =
       zoomLevel === 10

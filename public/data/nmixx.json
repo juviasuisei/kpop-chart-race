@@ -1,0 +1,59 @@
+{
+  "name": "NMIXX",
+  "korean_name": "에이핑크",
+  "artistType": "girl_group",
+  "generation": 2,
+  "debut": "2011-04-19",
+  "releases": [
+    {
+      "title": "Love Me More",
+      "dailyValues": {
+        "2026-01-28": { "value": 3560, "source": "show_champion", "episode": 584 },
+        "2026-01-21": { "value": 3519, "source": "show_champion", "episode": 583 },
+        "2026-01-18": { "value": 4378, "source": "inkigayo", "episode": 1296 },
+        "2026-01-16": { "value": 7439, "source": "music_bank", "episode": 1276 },
+        "2026-01-15": { "value": 7567, "source": "m_countdown", "episode": 912 }
+      },
+      "embeds": {
+        "2026-01-18": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://youtu.be/Wk_9d2XSyvk?si=KYKWnGLU-5q87R7G" }
+            ]
+          }
+        ],
+        "2026-01-16": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://youtu.be/VDH265vPjOc?si=sQP8obHtQk0gxjNw" }
+            ]
+          }
+        ],
+        "2026-01-15": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://youtu.be/gPNM1KzoN_4?si=1hRaafaE3X9CCZjT" }
+            ]
+          }
+        ],
+        "2026-01-05": [
+          {
+            "eventType": "release_date",
+            "links": [
+              { "url": "https://music.apple.com/us/album/re-love-ep/1862911444" }
+            ]
+          },
+          {
+            "eventType": "mv",
+            "links": [
+              { "url": "https://youtu.be/y2os26sMjOg?si=E3JECbXD15KEY2-f" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

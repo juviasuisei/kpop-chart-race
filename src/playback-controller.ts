@@ -19,6 +19,8 @@ export class PlaybackController {
   private scrubberTooltip: HTMLDivElement | null = null;
   private dateLabel: HTMLSpanElement | null = null;
   private wasPlayingBeforeScrub = false;
+  private updateCompleteHandler: (() => void) | null = null;
+  private playing = false;
 
   constructor(eventBus: EventBus, dates: string[]) {
     this.eventBus = eventBus;
@@ -92,9 +94,11 @@ export class PlaybackController {
     }
 
     this.updateButtonToPause();
+    this.playing = true;
     this.eventBus.emit("play");
 
-    this.intervalId = setInterval(() => {
+    // Use event-driven advancement: wait for update:complete before advancing
+    const advance = () => {
       if (this.currentIndex >= this.dates.length - 1) {
         this.pause();
         return;
@@ -103,13 +107,33 @@ export class PlaybackController {
       this.currentIndex++;
       this.updateScrubberAndLabel();
       this.eventBus.emit("date:change", this.dates[this.currentIndex]);
-    }, 1000);
+    };
+
+    // Listen for update:complete to schedule next advance
+    const onComplete = () => {
+      if (!this.playing) return; // paused
+      this.intervalId = setTimeout(() => {
+        advance();
+      }, 50) as unknown as ReturnType<typeof setInterval>; // small gap between days
+    };
+
+    this.eventBus.on("update:complete", onComplete);
+    this.updateCompleteHandler = onComplete;
+
+    // Start the first advance
+    advance();
   }
 
   pause(): void {
+    this.playing = false;
     if (this.intervalId !== null) {
-      clearInterval(this.intervalId);
+      clearTimeout(this.intervalId as unknown as number);
       this.intervalId = null;
+    }
+
+    if (this.updateCompleteHandler) {
+      this.eventBus.off("update:complete", this.updateCompleteHandler);
+      this.updateCompleteHandler = null;
     }
 
     this.updateButtonToPlay();
@@ -126,13 +150,18 @@ export class PlaybackController {
   }
 
   isPlaying(): boolean {
-    return this.intervalId !== null;
+    return this.playing;
   }
 
   destroy(): void {
     if (this.intervalId !== null) {
-      clearInterval(this.intervalId);
+      clearTimeout(this.intervalId as unknown as number);
       this.intervalId = null;
+    }
+
+    if (this.updateCompleteHandler) {
+      this.eventBus.off("update:complete", this.updateCompleteHandler);
+      this.updateCompleteHandler = null;
     }
 
     if (this.rafId !== null) {

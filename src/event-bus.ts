@@ -17,6 +17,7 @@ export interface EventMap {
   "panel:close": () => void;
   "scrub:start": () => void;
   "scrub:end": () => void;
+  "update:complete": () => void;
   "loading:progress": (loaded: number, total: number, artistNames: string[]) => void;
   "loading:complete": () => void;
   "loading:error": (message: string) => void;

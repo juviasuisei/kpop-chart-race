@@ -377,6 +377,26 @@ describe('filterByActivity — goalpost logic', () => {
     expect(result).toEqual(entries);
   });
 
+  it('active artists prioritized over inactive, backfill by rank, sorted by rank', () => {
+    // 15 entries: ranks 1, 5, 10 active; rest inactive
+    // Expected: rank 1 (always), rank 5 (active), rank 10 (active), then backfill 2,3,4,6,7,8,9
+    // Sorted: 1,2,3,4,5,6,7,8,9,10
+    const entries = makeRankedEntries(15);
+    const ds = makeActivityDataStore(
+      entries.map(e => {
+        const rankNum = parseInt(e.artistId.replace('a', ''));
+        const isActive = rankNum === 1 || rankNum === 5 || rankNum === 10;
+        return { id: e.artistId, activityDate: isActive ? recentDate : oldDate };
+      }),
+    );
+    const result = filterByActivity(entries, snapshotDate, ds, 10);
+    expect(result.length).toBe(10);
+
+    const ranks = result.map(r => r.rank);
+    // Active: 1, 5, 10. Backfill: 2, 3, 4, 6, 7, 8, 9. Total 10, sorted.
+    expect(ranks).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+  });
+
   it.skip('visual example — ranks 1-8 active, 9-10 inactive, 11 active → includes 1-8, 10, 11', () => {
     const entries = makeRankedEntries(11);
     const ds = makeActivityDataStore(

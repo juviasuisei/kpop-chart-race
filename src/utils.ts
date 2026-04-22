@@ -115,57 +115,43 @@ export function filterByActivity(
   dataStore: DataStore,
   zoomLevel: ZoomLevel,
 ): RankedEntry[] {
-  // TEMPORARY: bypass all filtering, just return top 10 by rank
-  if (zoomLevel === 10) return entries.slice(0, 10);
-  return filterByZoom(entries, zoomLevel);
+  if (zoomLevel !== 10) return filterByZoom(entries, zoomLevel);
+  if (entries.length === 0) return [];
 
   const cutoff = dateMinusDays(snapshotDate, 14);
 
   const isActive = (e: RankedEntry) =>
     hasRecentActivity(e.artistId, cutoff, snapshotDate, dataStore);
 
-  // Step 1: Mark all entries we must include
-  const include = new Array(entries.length).fill(false);
-
   // Always include rank 1
-  include[0] = true;
-
-  // Include all active entries
-  for (let i = 0; i < entries.length; i++) {
-    if (isActive(entries[i])) {
-      include[i] = true;
-    }
-  }
-
-  // Step 2: For each included entry, if the entry immediately above it is
-  // inactive and not yet included, include it as a goalpost (one per active).
-  // No chaining — only the single closest inactive above each active.
-  for (let i = 1; i < entries.length; i++) {
-    if (include[i] && i > 0 && !include[i - 1] && !isActive(entries[i - 1])) {
-      include[i - 1] = true;
-    }
-  }
-
-  // Step 3: Build result from included entries, maintaining rank order
+  // Include all active artists
+  // Backfill remaining slots with inactive by rank
   const result: RankedEntry[] = [];
-  for (let i = 0; i < entries.length; i++) {
+
+  // Rank 1 always included
+  if (entries.length > 0) {
+    result.push(entries[0]);
+  }
+
+  // Add all active entries (skip rank 1 if already added)
+  for (let i = 1; i < entries.length; i++) {
     if (result.length >= 10) break;
-    if (include[i]) {
+    if (isActive(entries[i])) {
       result.push(entries[i]);
     }
   }
 
-  // Step 4: Backfill remaining slots with next entries by rank
+  // Backfill with inactive by rank
   if (result.length < 10) {
-    for (const entry of entries) {
+    for (let i = 1; i < entries.length; i++) {
       if (result.length >= 10) break;
-      if (!result.some(r => r.artistId === entry.artistId)) {
-        result.push(entry);
+      if (!result.some(r => r.artistId === entries[i].artistId)) {
+        result.push(entries[i]);
       }
     }
   }
 
-  // Step 5: Sort by rank to maintain visual rank order
+  // Sort by rank to maintain visual order
   result.sort((a, b) => a.rank - b.rank);
 
   return result.slice(0, 10);

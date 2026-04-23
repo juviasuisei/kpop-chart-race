@@ -727,9 +727,12 @@ export class ChartRaceRenderer {
 
     if (isGoalpost) {
       // Goalpost mode: hide normal elements, show compact label
-      // Keep rank span taking space but invisible (so dashed line aligns with regular bars)
+      // Keep rank span taking space but style it as part of the dashed line
       barEl.rankSpan.style.display = "";
       barEl.rankSpan.style.visibility = "hidden";
+      barEl.rankSpan.style.borderTop = `2px dashed ${ARTIST_TYPE_COLORS[entry.artistType]}`;
+      barEl.rankSpan.style.height = "2px";
+      barEl.rankSpan.style.alignSelf = "center";
       barEl.logo.style.display = "none";
       barEl.nameSpan.style.display = "none";
       barEl.genSpan.style.display = "none";
@@ -738,15 +741,21 @@ export class ChartRaceRenderer {
       barEl.valueSpan.style.display = "none";
       barEl.winsSpan.style.display = "none";
 
+      // Set dashed line color on the bar element
+      barEl.bar.style.borderTopColor = ARTIST_TYPE_COLORS[entry.artistType];
+
       // Build compact label: #X · Artist · Points · N wins
       const winsText = totalWins > 0 ? ` · ${totalWins} ${totalWins === 1 ? "win" : "wins"}` : "";
       barEl.goalpostLabel.textContent = `#${entry.rank} · ${entry.artistName} · ${Math.round(entry.cumulativeValue).toLocaleString()}${winsText}`;
-      barEl.goalpostLabel.style.display = "";
+      barEl.goalpostLabel.style.display = "inline";
       barEl.goalpostLabel.style.color = ARTIST_TYPE_COLORS[entry.artistType];
     } else {
       // Normal mode: show normal elements, hide goalpost label
       barEl.rankSpan.style.display = "";
       barEl.rankSpan.style.visibility = "";
+      barEl.rankSpan.style.borderTop = "";
+      barEl.rankSpan.style.height = "";
+      barEl.rankSpan.style.alignSelf = "";
       barEl.logo.style.display = "";
       barEl.nameSpan.style.display = "";
       barEl.genSpan.style.display = "";
@@ -756,6 +765,7 @@ export class ChartRaceRenderer {
       barEl.winsSpan.textContent = totalWins > 0 ? `${totalWins} ${totalWins === 1 ? "win" : "wins"}` : "";
       barEl.winsSpan.style.display = totalWins > 0 ? "" : "none";
       barEl.goalpostLabel.style.display = "none";
+      barEl.bar.style.borderTopColor = "";
     }
 
     // Update logo if changed

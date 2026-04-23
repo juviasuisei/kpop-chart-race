@@ -1368,4 +1368,123 @@ describe('Bugfix 0007: Bug Condition — Missing Pointer Cursor', () => {
 
     vi.useRealTimers();
   });
+
+  it('collapsing bar keeps regular appearance during phase 2 animation', () => {
+    vi.useFakeTimers();
+    renderer.mount(container);
+    const barsContainer = container.querySelector('.chart-race__bars')!;
+    Object.defineProperty(barsContainer, 'clientHeight', { value: 500, configurable: true });
+
+    const isGoalpostClass = (name: string) => {
+      const w = Array.from(container.querySelectorAll('.chart-race__bar-wrapper'))
+        .find(w => (w.querySelector('.bar__name')?.textContent === name) ||
+                   (w.querySelector('.bar__goalpost-label')?.textContent?.includes(name))) as HTMLElement;
+      return w?.classList.contains('chart-race__bar-wrapper--goalpost') ?? false;
+    };
+
+    // Day 1: a2 is regular
+    const day1 = [
+      makeEntry({ artistId: 'a1', artistName: 'Active', rank: 1, cumulativeValue: 1000, previousCumulativeValue: 900 }),
+      makeEntry({ artistId: 'a2', artistName: 'Collapsing', rank: 2, cumulativeValue: 800, previousCumulativeValue: 700, isGoalpost: false }),
+    ];
+    renderer.update(makeSnapshot(day1), 'all', emptyDataStore);
+    vi.advanceTimersByTime(5000);
+
+    // Day 2: a2 becomes goalpost
+    const day2 = [
+      makeEntry({ artistId: 'a1', artistName: 'Active', rank: 1, cumulativeValue: 1100, previousCumulativeValue: 1000 }),
+      makeEntry({ artistId: 'a2', artistName: 'Collapsing', rank: 2, cumulativeValue: 900, previousCumulativeValue: 800, isGoalpost: true }),
+    ];
+    renderer.update(makeSnapshot(day2), 'all', emptyDataStore);
+
+    // Advance past phase 1 into phase 2 (but not past phase 2)
+    vi.advanceTimersByTime(2880);
+
+    // During phase 2 animation: bar should still have regular appearance (not goalpost yet)
+    expect(isGoalpostClass('Collapsing')).toBe(false);
+
+    // After phase 2 completes: now it's goalpost
+    vi.advanceTimersByTime(1440);
+    expect(isGoalpostClass('Collapsing')).toBe(true);
+
+    vi.useRealTimers();
+  });
+
+  it('scrubbing applies goalpost state immediately without phase 2', () => {
+    vi.useFakeTimers();
+    renderer.mount(container);
+    const barsContainer = container.querySelector('.chart-race__bars')!;
+    Object.defineProperty(barsContainer, 'clientHeight', { value: 500, configurable: true });
+
+    // Day 1: a2 is regular
+    const day1 = [
+      makeEntry({ artistId: 'a1', artistName: 'Active', rank: 1, cumulativeValue: 1000, previousCumulativeValue: 900 }),
+      makeEntry({ artistId: 'a2', artistName: 'Target', rank: 2, cumulativeValue: 800, previousCumulativeValue: 700, isGoalpost: false }),
+    ];
+    renderer.update(makeSnapshot(day1), 'all', emptyDataStore);
+    vi.advanceTimersByTime(5000);
+
+    // Scrub to a date where a2 is a goalpost
+    eventBus.emit('scrub:start');
+    const day2 = [
+      makeEntry({ artistId: 'a1', artistName: 'Active', rank: 1, cumulativeValue: 1100, previousCumulativeValue: 1000 }),
+      makeEntry({ artistId: 'a2', artistName: 'Target', rank: 2, cumulativeValue: 900, previousCumulativeValue: 800, isGoalpost: true }),
+    ];
+    renderer.update(makeSnapshot(day2), 'all', emptyDataStore);
+    eventBus.emit('scrub:end');
+
+    // Goalpost should be applied immediately (no phase 2 delay)
+    const a2 = Array.from(container.querySelectorAll('.chart-race__bar-wrapper'))
+      .find(w => w.classList.contains('chart-race__bar-wrapper--goalpost')) as HTMLElement;
+    expect(a2).toBeTruthy();
+
+    vi.useRealTimers();
+  });
+
+  it('simultaneous collapse and expand: one bar becomes goalpost while another leaves', () => {
+    vi.useFakeTimers();
+    renderer.mount(container);
+    const barsContainer = container.querySelector('.chart-race__bars')!;
+    Object.defineProperty(barsContainer, 'clientHeight', { value: 500, configurable: true });
+
+    const isGoalpostClass = (name: string) => {
+      const w = Array.from(container.querySelectorAll('.chart-race__bar-wrapper'))
+        .find(w => (w.querySelector('.bar__name')?.textContent === name) ||
+                   (w.querySelector('.bar__goalpost-label')?.textContent?.includes(name))) as HTMLElement;
+      return w?.classList.contains('chart-race__bar-wrapper--goalpost') ?? false;
+    };
+
+    // Day 1: a2 is regular, a3 is goalpost
+    const day1 = [
+      makeEntry({ artistId: 'a1', artistName: 'Active', rank: 1, cumulativeValue: 1000, previousCumulativeValue: 900 }),
+      makeEntry({ artistId: 'a2', artistName: 'Will Collapse', rank: 2, cumulativeValue: 800, previousCumulativeValue: 700, isGoalpost: false }),
+      makeEntry({ artistId: 'a3', artistName: 'Will Expand', rank: 3, cumulativeValue: 600, previousCumulativeValue: 500, isGoalpost: true }),
+      makeEntry({ artistId: 'a4', artistName: 'Active 2', rank: 4, cumulativeValue: 400, previousCumulativeValue: 300 }),
+    ];
+    renderer.update(makeSnapshot(day1), 'all', emptyDataStore);
+    vi.advanceTimersByTime(5000);
+
+    expect(isGoalpostClass('Will Collapse')).toBe(false);
+    expect(isGoalpostClass('Will Expand')).toBe(true);
+
+    // Day 2: a2 becomes goalpost, a3 becomes regular
+    const day2 = [
+      makeEntry({ artistId: 'a1', artistName: 'Active', rank: 1, cumulativeValue: 1100, previousCumulativeValue: 1000 }),
+      makeEntry({ artistId: 'a2', artistName: 'Will Collapse', rank: 2, cumulativeValue: 900, previousCumulativeValue: 800, isGoalpost: true }),
+      makeEntry({ artistId: 'a3', artistName: 'Will Expand', rank: 3, cumulativeValue: 700, previousCumulativeValue: 600, isGoalpost: false }),
+      makeEntry({ artistId: 'a4', artistName: 'Active 2', rank: 4, cumulativeValue: 500, previousCumulativeValue: 400 }),
+    ];
+    renderer.update(makeSnapshot(day2), 'all', emptyDataStore);
+
+    // During phase 1: both keep their current state
+    expect(isGoalpostClass('Will Collapse')).toBe(false);
+    expect(isGoalpostClass('Will Expand')).toBe(true);
+
+    // After phase 1 + phase 2: states swapped
+    vi.advanceTimersByTime(2880 + 1440);
+    expect(isGoalpostClass('Will Collapse')).toBe(true);
+    expect(isGoalpostClass('Will Expand')).toBe(false);
+
+    vi.useRealTimers();
+  });
 });

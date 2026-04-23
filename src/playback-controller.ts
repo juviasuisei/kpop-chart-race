@@ -74,13 +74,23 @@ export class PlaybackController {
     this.startDateLabel.className = "playback-controls__date-label";
     this.startDateLabel.textContent = this.dates[0] ?? "";
     this.startDateLabel.style.cursor = "pointer";
-    this.startDateLabel.addEventListener("click", () => this.seekTo(this.dates[0]));
+    this.startDateLabel.addEventListener("click", () => {
+      if (this.isPlaying()) this.pause();
+      this.eventBus.emit("scrub:start");
+      this.seekTo(this.dates[0]);
+      this.eventBus.emit("scrub:end");
+    });
 
     this.endDateLabel = document.createElement("span");
     this.endDateLabel.className = "playback-controls__date-label";
     this.endDateLabel.textContent = this.dates[this.dates.length - 1] ?? "";
     this.endDateLabel.style.cursor = "pointer";
-    this.endDateLabel.addEventListener("click", () => this.seekTo(this.dates[this.dates.length - 1]));
+    this.endDateLabel.addEventListener("click", () => {
+      if (this.isPlaying()) this.pause();
+      this.eventBus.emit("scrub:start");
+      this.seekTo(this.dates[this.dates.length - 1]);
+      this.eventBus.emit("scrub:end");
+    });
 
     this.wrapper.appendChild(this.playBtn);
     this.wrapper.appendChild(this.startDateLabel);

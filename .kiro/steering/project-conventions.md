@@ -23,10 +23,14 @@
 ## Testing
 - Every functional change MUST include new or updated test cases
 - Tests should cover the specific behavior being changed, not just pass existing tests
+- When adding a feature, add tests that will FAIL if the feature is removed or broken
+- When fixing a bug, add a test that reproduces the bug scenario
 - Add unit tests for concrete examples and edge cases
 - Add property-based tests for algorithmic/data-driven logic
 - Never commit functional changes without verifying tests cover the new behavior
 - Test files: `tests/unit/` for example-based, `tests/property/` for PBT with fast-check
+- Before implementing a change, review existing tests to ensure the change won't silently break them
+- If a test needs updating due to intentional behavior change, update it explicitly — never skip or delete tests without replacement
 
 ## Specs
 - Spec numbering: 4-digit zero-padded prefix (0001-, 0002-, etc.) in .kiro/specs/

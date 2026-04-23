@@ -935,6 +935,7 @@ describe('Bugfix 0007: Bug Condition — Missing Pointer Cursor', () => {
   });
 
   it('goalpost → regular transition: bar switches to normal rendering when no longer goalpost', () => {
+    vi.useFakeTimers();
     renderer.mount(container);
     const barsContainer = container.querySelector('.chart-race__bars')!;
     Object.defineProperty(barsContainer, 'clientHeight', { value: 500, configurable: true });
@@ -946,6 +947,7 @@ describe('Bugfix 0007: Bug Condition — Missing Pointer Cursor', () => {
       makeEntry({ artistId: 'a3', artistName: 'Active 2', rank: 3, cumulativeValue: 600, previousCumulativeValue: 500 }),
     ];
     renderer.update(makeSnapshot(day1), 'all', emptyDataStore);
+    vi.advanceTimersByTime(5000);
 
     // Verify a2 is goalpost
     let a2 = Array.from(container.querySelectorAll('.chart-race__bar-wrapper'))
@@ -959,6 +961,8 @@ describe('Bugfix 0007: Bug Condition — Missing Pointer Cursor', () => {
       makeEntry({ artistId: 'a3', artistName: 'Active 2', rank: 3, cumulativeValue: 700, previousCumulativeValue: 600 }),
     ];
     renderer.update(makeSnapshot(day2), 'all', emptyDataStore);
+    // Advance past phase 1 + phase 2
+    vi.advanceTimersByTime(2880 + 1440);
 
     // a2 should no longer have goalpost class
     a2 = Array.from(container.querySelectorAll('.chart-race__bar-wrapper'))
@@ -973,9 +977,12 @@ describe('Bugfix 0007: Bug Condition — Missing Pointer Cursor', () => {
     expect(rankSpan.style.display).not.toBe('none');
     const label = a2.querySelector('.bar__goalpost-label') as HTMLElement;
     expect(label.style.display).toBe('none');
+
+    vi.useRealTimers();
   });
 
   it('regular → goalpost transition: bar switches to goalpost rendering', () => {
+    vi.useFakeTimers();
     renderer.mount(container);
     const barsContainer = container.querySelector('.chart-race__bars')!;
     Object.defineProperty(barsContainer, 'clientHeight', { value: 500, configurable: true });
@@ -987,6 +994,7 @@ describe('Bugfix 0007: Bug Condition — Missing Pointer Cursor', () => {
       makeEntry({ artistId: 'a3', artistName: 'Active 2', rank: 3, cumulativeValue: 600, previousCumulativeValue: 500 }),
     ];
     renderer.update(makeSnapshot(day1), 'all', emptyDataStore);
+    vi.advanceTimersByTime(5000);
 
     // Verify a2 is regular
     let a2 = Array.from(container.querySelectorAll('.chart-race__bar-wrapper'))
@@ -1000,6 +1008,8 @@ describe('Bugfix 0007: Bug Condition — Missing Pointer Cursor', () => {
       makeEntry({ artistId: 'a3', artistName: 'Active 2', rank: 3, cumulativeValue: 700, previousCumulativeValue: 600 }),
     ];
     renderer.update(makeSnapshot(day2), 'all', emptyDataStore);
+    // Advance past phase 1 + phase 2
+    vi.advanceTimersByTime(2880 + 1440);
 
     // a2 should now have goalpost class
     a2 = Array.from(container.querySelectorAll('.chart-race__bar-wrapper'))
@@ -1015,6 +1025,8 @@ describe('Bugfix 0007: Bug Condition — Missing Pointer Cursor', () => {
     const label = a2.querySelector('.bar__goalpost-label') as HTMLElement;
     expect(label.style.display).toBe('inline');
     expect(label.textContent).toContain('Becomes Goalpost');
+
+    vi.useRealTimers();
   });
 
   it('goalpost rows get smaller height than regular bars (zoom 10)', () => {
@@ -1236,6 +1248,123 @@ describe('Bugfix 0007: Bug Condition — Missing Pointer Cursor', () => {
     expect(getRank('First')).toBe('#1');
     expect(getRank('New Entry')).toBe('#2');
     expect(getRank('Second')).toBe('#3');
+
+    vi.useRealTimers();
+  });
+
+  // ═══════════════════════════════════════════════════════════════════
+  // Goalpost phase 2 transitions
+  // ═══════════════════════════════════════════════════════════════════
+
+  it('regular→goalpost: bar keeps regular appearance during phase 1, switches in phase 2', () => {
+    vi.useFakeTimers();
+    renderer.mount(container);
+    const barsContainer = container.querySelector('.chart-race__bars')!;
+    Object.defineProperty(barsContainer, 'clientHeight', { value: 500, configurable: true });
+
+    const isGoalpostClass = (name: string) => {
+      const w = Array.from(container.querySelectorAll('.chart-race__bar-wrapper'))
+        .find(w => (w.querySelector('.bar__name')?.textContent === name) ||
+                   (w.querySelector('.bar__goalpost-label')?.textContent?.includes(name))) as HTMLElement;
+      return w?.classList.contains('chart-race__bar-wrapper--goalpost') ?? false;
+    };
+
+    // Day 1: a2 is a regular bar
+    const day1 = [
+      makeEntry({ artistId: 'a1', artistName: 'Active', rank: 1, cumulativeValue: 1000, previousCumulativeValue: 900 }),
+      makeEntry({ artistId: 'a2', artistName: 'Soon Goalpost', rank: 2, cumulativeValue: 800, previousCumulativeValue: 700, isGoalpost: false }),
+      makeEntry({ artistId: 'a3', artistName: 'Active 2', rank: 3, cumulativeValue: 600, previousCumulativeValue: 500 }),
+    ];
+    renderer.update(makeSnapshot(day1), 'all', emptyDataStore);
+    vi.advanceTimersByTime(5000);
+    expect(isGoalpostClass('Soon Goalpost')).toBe(false);
+
+    // Day 2: a2 becomes a goalpost
+    const day2 = [
+      makeEntry({ artistId: 'a1', artistName: 'Active', rank: 1, cumulativeValue: 1100, previousCumulativeValue: 1000 }),
+      makeEntry({ artistId: 'a2', artistName: 'Soon Goalpost', rank: 2, cumulativeValue: 900, previousCumulativeValue: 800, isGoalpost: true }),
+      makeEntry({ artistId: 'a3', artistName: 'Active 2', rank: 3, cumulativeValue: 700, previousCumulativeValue: 600 }),
+    ];
+    renderer.update(makeSnapshot(day2), 'all', emptyDataStore);
+
+    // During phase 1: a2 should still be regular (not goalpost yet)
+    expect(isGoalpostClass('Soon Goalpost')).toBe(false);
+
+    // After phase 1 + phase 2: a2 should be goalpost
+    vi.advanceTimersByTime(2880 + 1440);
+    expect(isGoalpostClass('Soon Goalpost')).toBe(true);
+
+    vi.useRealTimers();
+  });
+
+  it('goalpost→regular: bar keeps goalpost appearance during phase 1, switches in phase 2', () => {
+    vi.useFakeTimers();
+    renderer.mount(container);
+    const barsContainer = container.querySelector('.chart-race__bars')!;
+    Object.defineProperty(barsContainer, 'clientHeight', { value: 500, configurable: true });
+
+    const isGoalpostClass = (name: string) => {
+      const w = Array.from(container.querySelectorAll('.chart-race__bar-wrapper'))
+        .find(w => (w.querySelector('.bar__name')?.textContent === name) ||
+                   (w.querySelector('.bar__goalpost-label')?.textContent?.includes(name))) as HTMLElement;
+      return w?.classList.contains('chart-race__bar-wrapper--goalpost') ?? false;
+    };
+
+    // Day 1: a2 is a goalpost
+    const day1 = [
+      makeEntry({ artistId: 'a1', artistName: 'Active', rank: 1, cumulativeValue: 1000, previousCumulativeValue: 900 }),
+      makeEntry({ artistId: 'a2', artistName: 'Was Goalpost', rank: 2, cumulativeValue: 800, previousCumulativeValue: 700, isGoalpost: true }),
+      makeEntry({ artistId: 'a3', artistName: 'Active 2', rank: 3, cumulativeValue: 600, previousCumulativeValue: 500 }),
+    ];
+    renderer.update(makeSnapshot(day1), 'all', emptyDataStore);
+    vi.advanceTimersByTime(5000);
+    expect(isGoalpostClass('Was Goalpost')).toBe(true);
+
+    // Day 2: a2 becomes regular
+    const day2 = [
+      makeEntry({ artistId: 'a1', artistName: 'Active', rank: 1, cumulativeValue: 1100, previousCumulativeValue: 1000 }),
+      makeEntry({ artistId: 'a2', artistName: 'Was Goalpost', rank: 2, cumulativeValue: 900, previousCumulativeValue: 800, isGoalpost: false }),
+      makeEntry({ artistId: 'a3', artistName: 'Active 2', rank: 3, cumulativeValue: 700, previousCumulativeValue: 600 }),
+    ];
+    renderer.update(makeSnapshot(day2), 'all', emptyDataStore);
+
+    // During phase 1: a2 should still be goalpost
+    expect(isGoalpostClass('Was Goalpost')).toBe(true);
+
+    // After phase 1 + phase 2: a2 should be regular
+    vi.advanceTimersByTime(2880 + 1440);
+    expect(isGoalpostClass('Was Goalpost')).toBe(false);
+
+    vi.useRealTimers();
+  });
+
+  it('phase 2 skipped when no goalpost state changes', () => {
+    vi.useFakeTimers();
+    renderer.mount(container);
+    const barsContainer = container.querySelector('.chart-race__bars')!;
+    Object.defineProperty(barsContainer, 'clientHeight', { value: 500, configurable: true });
+
+    const day1 = [
+      makeEntry({ artistId: 'a1', rank: 1, cumulativeValue: 1000, previousCumulativeValue: 900 }),
+      makeEntry({ artistId: 'a2', rank: 2, cumulativeValue: 800, previousCumulativeValue: 700 }),
+    ];
+    renderer.update(makeSnapshot(day1), 'all', emptyDataStore);
+    vi.advanceTimersByTime(5000);
+
+    // Day 2: same bars, no goalpost changes
+    const day2 = [
+      makeEntry({ artistId: 'a1', rank: 1, cumulativeValue: 1100, previousCumulativeValue: 1000 }),
+      makeEntry({ artistId: 'a2', rank: 2, cumulativeValue: 900, previousCumulativeValue: 800 }),
+    ];
+
+    const completions: number[] = [];
+    eventBus.on('update:complete', () => completions.push(Date.now()));
+
+    renderer.update(makeSnapshot(day2), 'all', emptyDataStore);
+
+    // update:complete should fire after phase 1 only (2880ms), not phase 1 + phase 2
+    vi.advanceTimersByTime(2880);
+    expect(completions.length).toBe(1);
 
     vi.useRealTimers();
   });

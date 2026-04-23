@@ -261,21 +261,59 @@ export class ChartRaceRenderer {
     const containerHeight = this.barsContainer.clientHeight || this.barsContainer.offsetHeight;
 
     // Compute bar heights: goalposts get a fixed small height, regular bars share the rest
-    // Regular bars always divide by 10 (the fixed slot count for zoom 10)
     const GOALPOST_HEIGHT = 16;
-    const goalpostCount = zoomLevel === 10 ? visibleEntries.filter(e => e.isGoalpost).length : 0;
-    const remainingHeight = containerHeight - (goalpostCount * GOALPOST_HEIGHT);
-    const regularBarHeight =
+    const PHASE2_DURATION = 1440; // half of phase 1
+
+    // Detect goalpost state changes (bars switching between regular and goalpost)
+    const becomingGoalpost: Set<string> = new Set();
+    const leavingGoalpost: Set<string> = new Set();
+    if (!this.scrubbing) {
+      for (const entry of visibleEntries) {
+        const barEl = this.bars.get(entry.artistId);
+        if (!barEl) continue;
+        const currentlyGoalpost = barEl.wrapper.classList.contains("chart-race__bar-wrapper--goalpost");
+        if (entry.isGoalpost && !currentlyGoalpost) {
+          becomingGoalpost.add(entry.artistId);
+        } else if (!entry.isGoalpost && currentlyGoalpost) {
+          leavingGoalpost.add(entry.artistId);
+        }
+      }
+    }
+    const hasPhase2Work = becomingGoalpost.size > 0 || leavingGoalpost.size > 0;
+
+    // For phase 1 height calculation, bars changing state keep their CURRENT height
+    // becomingGoalpost bars stay full height; leavingGoalpost bars stay at 16px
+    const phase1GoalpostCount = zoomLevel === 10
+      ? visibleEntries.filter(e =>
+          (e.isGoalpost && !becomingGoalpost.has(e.artistId)) ||
+          leavingGoalpost.has(e.artistId)
+        ).length
+      : 0;
+    const phase1RemainingHeight = containerHeight - (phase1GoalpostCount * GOALPOST_HEIGHT);
+    const phase1RegularBarHeight =
       zoomLevel === 10
-        ? (remainingHeight > 0 ? remainingHeight / 10 : 50)
+        ? (phase1RemainingHeight > 0 ? phase1RemainingHeight / 10 : 50)
         : BAR_HEIGHT_ALL;
 
-    // Build a Y-offset map: each entry gets a cumulative Y position
+    // Phase 1 Y-offsets: use current state for transitioning bars
     const yOffsets: number[] = [];
     const heights: number[] = [];
     let yAccum = 0;
     for (const entry of visibleEntries) {
-      const h = (zoomLevel === 10 && entry.isGoalpost) ? GOALPOST_HEIGHT : regularBarHeight;
+      let h: number;
+      if (zoomLevel !== "all") {
+        if (becomingGoalpost.has(entry.artistId)) {
+          h = phase1RegularBarHeight; // stays full during phase 1
+        } else if (leavingGoalpost.has(entry.artistId)) {
+          h = GOALPOST_HEIGHT; // stays small during phase 1
+        } else if (entry.isGoalpost) {
+          h = GOALPOST_HEIGHT;
+        } else {
+          h = phase1RegularBarHeight;
+        }
+      } else {
+        h = BAR_HEIGHT_ALL;
+      }
       yOffsets.push(yAccum);
       heights.push(h);
       yAccum += h;
@@ -360,7 +398,11 @@ export class ChartRaceRenderer {
       }
 
       // 5. Update bar element (position, width, value, etc.)
-      this.updateBarElement(barEl, entry, yOffsets[visIdx], heights[visIdx], maxCumulative, snapshot.date, dataStore);
+      // For bars changing goalpost state, keep current appearance during phase 1
+      const phase1GoalpostOverride = becomingGoalpost.has(entry.artistId) ? false
+        : leavingGoalpost.has(entry.artistId) ? true
+        : undefined;
+      this.updateBarElement(barEl, entry, yOffsets[visIdx], heights[visIdx], maxCumulative, snapshot.date, dataStore, phase1GoalpostOverride);
       visIdx++;
     }
 
@@ -405,7 +447,67 @@ export class ChartRaceRenderer {
     // 8. Emit update:complete after transition duration (or immediately if scrubbing)
     if (this.scrubbing) {
       this.eventBus.emit("update:complete");
+    } else if (hasPhase2Work) {
+      // Phase 1 complete → execute phase 2 (goalpost state changes)
+      this.phase2TimeoutId = setTimeout(() => {
+        this.phase2TimeoutId = null;
+        this.stopRankTracking();
+
+        // Compute target heights for phase 2
+        const targetGoalpostCount = visibleEntries.filter(e => e.isGoalpost).length;
+        const targetRemainingHeight = containerHeight - (targetGoalpostCount * GOALPOST_HEIGHT);
+        const targetRegularBarHeight = zoomLevel === 10
+          ? (targetRemainingHeight > 0 ? targetRemainingHeight / 10 : 50)
+          : BAR_HEIGHT_ALL;
+
+        // Apply goalpost state changes and compute new Y offsets
+        let phase2YAccum = 0;
+        let phase2VisIdx = 0;
+        for (const entry of visibleEntries) {
+          const barEl = this.bars.get(entry.artistId);
+          if (!barEl) { phase2VisIdx++; continue; }
+
+          const targetHeight = entry.isGoalpost ? GOALPOST_HEIGHT : targetRegularBarHeight;
+          const isChanging = becomingGoalpost.has(entry.artistId) || leavingGoalpost.has(entry.artistId);
+
+          if (isChanging) {
+            // Enable height transition for the state change
+            barEl.wrapper.style.transition = `transform ${PHASE2_DURATION}ms ease-in-out, height ${PHASE2_DURATION}ms ease-in-out`;
+            barEl.bar.style.transition = `width ${PHASE2_DURATION}ms ease-in-out`;
+
+            // Apply the goalpost appearance change
+            this.updateBarElement(barEl, entry, phase2YAccum, targetHeight, maxCumulative, snapshot.date, dataStore);
+          } else {
+            // Non-changing bars just slide to new Y position
+            barEl.wrapper.style.transition = `transform ${PHASE2_DURATION}ms ease-in-out`;
+            barEl.wrapper.style.transform = `translateY(${phase2YAccum}px)`;
+          }
+
+          phase2YAccum += targetHeight;
+          phase2VisIdx++;
+        }
+
+        // Emit update:complete after phase 2
+        this.phase2TimeoutId = setTimeout(() => {
+          this.phase2TimeoutId = null;
+          // Reset transitions back to default
+          for (const [, barEl] of this.bars) {
+            if (!barEl.hidden) {
+              const isGp = barEl.wrapper.classList.contains("chart-race__bar-wrapper--goalpost");
+              if (isGp) {
+                barEl.wrapper.style.transition = "none";
+                barEl.bar.style.transition = "none";
+              } else {
+                barEl.wrapper.style.transition = "";
+                barEl.bar.style.transition = "";
+              }
+            }
+          }
+          this.eventBus.emit("update:complete");
+        }, PHASE2_DURATION);
+      }, 2880);
     } else {
+      // No phase 2 needed — just wait for phase 1
       this.phase2TimeoutId = setTimeout(() => {
         this.phase2TimeoutId = null;
         this.stopRankTracking();
@@ -681,6 +783,7 @@ export class ChartRaceRenderer {
     maxCumulative: number,
     snapshotDate: string,
     dataStore: DataStore,
+    goalpostOverride?: boolean,
   ): void {
     // Store target rank — actual rank text is updated by the rank tracking loop
     barEl.targetRank = entry.rank;
@@ -693,8 +796,8 @@ export class ChartRaceRenderer {
     // Compute total wins (used by both goalpost label and normal display)
     const totalWins = computeTotalWins(entry.artistId, snapshotDate, dataStore);
 
-    // Toggle goalpost mode
-    const isGoalpost = !!entry.isGoalpost;
+    // Toggle goalpost mode (use override if provided, otherwise use entry flag)
+    const isGoalpost = goalpostOverride !== undefined ? goalpostOverride : !!entry.isGoalpost;
     barEl.wrapper.classList.toggle("chart-race__bar-wrapper--goalpost", isGoalpost);
     barEl.bar.classList.toggle("chart-race__bar--goalpost", isGoalpost);
 

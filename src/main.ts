@@ -164,7 +164,7 @@ async function main(): Promise<void> {
     chartRaceEl.addEventListener("click", (event) => {
       const target = event.target as HTMLElement;
       // Only skip if clicking the colored bar, value text, or release text
-      if (target.closest(".chart-race__bar") || target.closest(".bar__rank") || target.closest(".chart-race__bar-wrapper--goalpost") || target.classList.contains("bar__value") || target.classList.contains("bar__release") || target.classList.contains("bar__name") || target.classList.contains("bar__gen") || target.classList.contains("bar__type-indicator") || target.classList.contains("bar__wins") || target.classList.contains("bar__goalpost-label")) return;
+      if (target.closest(".chart-race__bar-wrapper")) return;
       if (target.closest(".detail-panel")) return;
       if (detailPanel.isOpen()) {
         detailPanel.close();

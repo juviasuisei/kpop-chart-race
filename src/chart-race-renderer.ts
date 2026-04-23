@@ -820,22 +820,11 @@ export class ChartRaceRenderer {
     wrapper.appendChild(goalpostLabel);
     wrapper.appendChild(wipeCover);
 
-    const clickHandler = (e: Event) => {
-      const target = e.target as HTMLElement;
-      // For goalpost bars, any click on the wrapper triggers the detail panel
-      if (wrapper.classList.contains('chart-race__bar-wrapper--goalpost')) {
-        this.eventBus.emit('bar:click', entry.artistId);
-        return;
-      }
-      if (target.closest('.chart-race__bar') || target.classList.contains('bar__value') || target.classList.contains('bar__release') || target.classList.contains('bar__name') || target.classList.contains('bar__gen') || target.classList.contains('bar__type-indicator') || target.classList.contains('bar__wins') || target.classList.contains('bar__rank') || target.classList.contains('bar__goalpost-label')) {
-        this.eventBus.emit('bar:click', entry.artistId);
-      }
+    const clickHandler = () => {
+      this.eventBus.emit('bar:click', entry.artistId);
     };
     wrapper.addEventListener('click', clickHandler);
-    // Direct click handler on goalpost label (may extend beyond wrapper bounds)
-    goalpostLabel.addEventListener('click', () => {
-      this.eventBus.emit('bar:click', entry.artistId);
-    });
+    wrapper.style.cursor = "pointer";
 
     return {
       wrapper,

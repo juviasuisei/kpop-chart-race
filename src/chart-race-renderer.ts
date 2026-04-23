@@ -38,7 +38,7 @@ const PLACEHOLDER_SVG = `data:image/svg+xml,${encodeURIComponent(
 const BAR_HEIGHT_ALL = 40;
 
 /** Duration for tween animation in ms — matches the 1s playback interval */
-const TWEEN_DURATION = 950;
+const TWEEN_DURATION = 1200;
 
 interface BarElement {
   wrapper: HTMLDivElement;
@@ -271,7 +271,7 @@ export class ChartRaceRenderer {
 
     // Compute bar heights: goalposts get a fixed small height, regular bars share the rest
     const GOALPOST_HEIGHT = 16;
-    const PHASE2_DURATION = 480; // half of phase 1
+    const PHASE2_DURATION = 600; // half of phase 1
 
     // Detect goalpost state changes (bars switching between regular and goalpost)
     const becomingGoalpost: Set<string> = new Set();
@@ -487,7 +487,7 @@ export class ChartRaceRenderer {
     }
 
     // 8. Emit update:complete after transition duration (or immediately if scrubbing)
-    const phase1Duration = isZoomChange ? ZOOM_TRANSITION_MS : 960;
+    const phase1Duration = isZoomChange ? ZOOM_TRANSITION_MS : 1200;
     if (this.scrubbing) {
       this.eventBus.emit("update:complete");
     } else if (hasPhase2Work && !isZoomChange) {
@@ -581,7 +581,7 @@ export class ChartRaceRenderer {
           }
           this.eventBus.emit("update:complete");
         }, PHASE2_DURATION);
-      }, 960);
+      }, 1200);
     } else {
       // No phase 2 needed — just wait for phase 1
       this.phase2TimeoutId = setTimeout(() => {
@@ -1009,7 +1009,7 @@ export class ChartRaceRenderer {
             barEl.bar.offsetHeight;
           }
           this.checkBarOverflow(barEl);
-        }, 960);
+        }, 1200);
       }
     }
 

@@ -962,7 +962,7 @@ describe('Bugfix 0007: Bug Condition — Missing Pointer Cursor', () => {
     ];
     renderer.update(makeSnapshot(day2), 'all', emptyDataStore);
     // Advance past phase 1 + phase 2
-    vi.advanceTimersByTime(960 + 480);
+    vi.advanceTimersByTime(1200 + 600);
 
     // a2 should no longer have goalpost class
     a2 = Array.from(container.querySelectorAll('.chart-race__bar-wrapper'))
@@ -1009,7 +1009,7 @@ describe('Bugfix 0007: Bug Condition — Missing Pointer Cursor', () => {
     ];
     renderer.update(makeSnapshot(day2), 'all', emptyDataStore);
     // Advance past phase 1 + phase 2
-    vi.advanceTimersByTime(960 + 480);
+    vi.advanceTimersByTime(1200 + 600);
 
     // a2 should now have goalpost class
     a2 = Array.from(container.querySelectorAll('.chart-race__bar-wrapper'))
@@ -1291,7 +1291,7 @@ describe('Bugfix 0007: Bug Condition — Missing Pointer Cursor', () => {
     expect(isGoalpostClass('Soon Goalpost')).toBe(false);
 
     // After phase 1 + phase 2: a2 should be goalpost
-    vi.advanceTimersByTime(960 + 480);
+    vi.advanceTimersByTime(1200 + 600);
     expect(isGoalpostClass('Soon Goalpost')).toBe(true);
 
     vi.useRealTimers();
@@ -1332,7 +1332,7 @@ describe('Bugfix 0007: Bug Condition — Missing Pointer Cursor', () => {
     expect(isGoalpostClass('Was Goalpost')).toBe(true);
 
     // After phase 1 + phase 2: a2 should be regular
-    vi.advanceTimersByTime(960 + 480);
+    vi.advanceTimersByTime(1200 + 600);
     expect(isGoalpostClass('Was Goalpost')).toBe(false);
 
     vi.useRealTimers();
@@ -1363,7 +1363,7 @@ describe('Bugfix 0007: Bug Condition — Missing Pointer Cursor', () => {
     renderer.update(makeSnapshot(day2), 'all', emptyDataStore);
 
     // update:complete should fire after phase 1 only (960ms), not phase 1 + phase 2
-    vi.advanceTimersByTime(960);
+    vi.advanceTimersByTime(1200);
     expect(completions.length).toBe(1);
 
     vi.useRealTimers();
@@ -1398,13 +1398,13 @@ describe('Bugfix 0007: Bug Condition — Missing Pointer Cursor', () => {
     renderer.update(makeSnapshot(day2), 'all', emptyDataStore);
 
     // Advance past phase 1 into phase 2 (but not past phase 2)
-    vi.advanceTimersByTime(960);
+    vi.advanceTimersByTime(1200);
 
     // During phase 2 animation: bar should still have regular appearance (not goalpost yet)
     expect(isGoalpostClass('Collapsing')).toBe(false);
 
     // After phase 2 completes: now it's goalpost
-    vi.advanceTimersByTime(480);
+    vi.advanceTimersByTime(600);
     expect(isGoalpostClass('Collapsing')).toBe(true);
 
     vi.useRealTimers();
@@ -1481,7 +1481,7 @@ describe('Bugfix 0007: Bug Condition — Missing Pointer Cursor', () => {
     expect(isGoalpostClass('Will Expand')).toBe(true);
 
     // After phase 1 + phase 2: states swapped
-    vi.advanceTimersByTime(960 + 480);
+    vi.advanceTimersByTime(1200 + 600);
     expect(isGoalpostClass('Will Collapse')).toBe(true);
     expect(isGoalpostClass('Will Expand')).toBe(false);
 

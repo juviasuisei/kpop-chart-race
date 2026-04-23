@@ -1,0 +1,49 @@
+{
+  "name": "NCT DREAM",
+  "korean_name": "엔시티 드림",
+  "artistType": "boy_group",
+  "generation": 3,
+  "debut": "2016-08-15",
+  "releases": [
+    {
+      "title": "Beat It Up",
+      "dailyValues": {
+        "2025-11-29": { "value": 6570, "source": "show_music_core", "episode": 926 },
+        "2025-11-28": { "value": 9147, "source": "music_bank", "episode": 1269 },
+        "2025-11-26": { "value": 6554, "source": "show_champion", "episode": 579 }
+      },
+      "embeds": {
+        "2025-11-29": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://youtu.be/B0wAJcQo5xs?si=kn0krSw8Qdba7WKK" }
+            ]
+          }
+        ],
+        "2025-11-28": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://youtu.be/qx5nNKClveo?si=hpEJf2B2lcyfdfYZ" }
+            ]
+          }
+        ],
+        "2025-11-17": [
+          {
+            "eventType": "release_date",
+            "links": [
+              { "url": "https://music.apple.com/us/album/beat-it-up-ep/1849135853" }
+            ]
+          },
+          {
+            "eventType": "mv",
+            "links": [
+              { "url": "https://youtu.be/wvtNmMmcAYw?si=931_LskQfkVsI47k" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

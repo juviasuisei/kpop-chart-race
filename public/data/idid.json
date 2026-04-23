@@ -1,0 +1,31 @@
+{
+  "name": "IDID",
+  "korean_name": "아이딧",
+  "artistType": "boy_group",
+  "generation": 5,
+  "debut": "2025-09-15",
+  "releases": [
+    {
+      "title": "PUSH BACK",
+      "dailyValues": {
+        "2025-11-26": { "value": 644, "source": "show_champion", "episode": 579 }
+      },
+      "embeds": {
+        "2025-11-20": [
+          {
+            "eventType": "release_date",
+            "links": [
+              { "url": "https://music.apple.com/us/album/push-back-single/1853021340" }
+            ]
+          },
+          {
+            "eventType": "mv",
+            "links": [
+              { "url": "https://youtu.be/dWZCMV5ZEFk?si=0z5QxdI3qeNWT5wN" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

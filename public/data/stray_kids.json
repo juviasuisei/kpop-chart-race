@@ -1,6 +1,6 @@
 {
   "name": "Stray Kids",
-  "korean_name": "스트레이키즈",
+  "korean_name": "스트레이 키즈",
   "artistType": "boy_group",
   "generation": 4,
   "debut": "2018-03-25",
@@ -9,7 +9,9 @@
       "title": "Do It",
       "dailyValues": {
         "2025-12-10": { "value": 2758, "source": "show_champion", "episode": 581 },
-        "2025-12-03": { "value": 7416, "source": "show_champion", "episode": 580 }
+        "2025-12-03": { "value": 7416, "source": "show_champion", "episode": 580 },
+        "2025-11-28": { "value": 8024, "source": "music_bank", "episode": 1269 },
+        "2025-11-26": { "value": 6637, "source": "show_champion", "episode": 579 }
       },
       "embeds": {
         "2025-11-21": [

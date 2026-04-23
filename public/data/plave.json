@@ -30,7 +30,8 @@
     {
       "title": "BBUU!",
       "dailyValues": {
-        "2025-12-03": { "value": 2429, "source": "show_champion", "episode": 580 }
+        "2025-12-03": { "value": 2429, "source": "show_champion", "episode": 580 },
+        "2025-11-26": { "value": 3096, "source": "show_champion", "episode": 579 }
       },
       "embeds": {
         "2025-11-10": [

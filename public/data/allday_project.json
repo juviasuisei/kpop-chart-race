@@ -1,6 +1,6 @@
 {
   "name": "ALLDAY PROJECT",
-  "korean_name": "올데이프로젝트",
+  "korean_name": "올데이 프로젝트",
   "artistType": "mixed_group",
   "generation": 5,
   "debut": "2025-06-23",
@@ -15,7 +15,9 @@
         "2025-12-19": { "value": 5804, "source": "music_bank", "episode": 1272 },
         "2025-12-17": { "value": 5610, "source": "show_champion", "episode": 582 },
         "2025-12-13": { "value": 3590, "source": "show_music_core", "episode": 928 },
-        "2025-12-06": { "value": 3739, "source": "show_music_core", "episode": 927 }
+        "2025-12-06": { "value": 3739, "source": "show_music_core", "episode": 927 },
+        "2025-11-30": { "value": 6010, "source": "inkigayo", "episode": 1293 },
+        "2025-11-29": { "value": 6426, "source": "show_music_core", "episode": 926 }
       },
       "embeds": {
         "2025-11-17": [

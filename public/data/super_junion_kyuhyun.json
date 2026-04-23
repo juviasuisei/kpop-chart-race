@@ -1,0 +1,31 @@
+{
+  "name": "KYUHYUN [SUPER JUNIOR]",
+  "korean_name": "조규현",
+  "artistType": "solo_male",
+  "generation": 2,
+  "debut": "2014-11-07",
+  "releases": [
+    {
+      "title": "Like Our First Snow",
+      "dailyValues": {
+        "2025-11-26": { "value": 987, "source": "show_champion", "episode": 579 }
+      },
+      "embeds": {
+        "2025-11-20": [
+          {
+            "eventType": "release_date",
+            "links": [
+              { "url": "https://music.apple.com/us/album/the-classic-ep/1852969119" }
+            ]
+          },
+          {
+            "eventType": "mv",
+            "links": [
+              { "url": "https://youtu.be/FWo48Kb_mxE?si=F_qoNsKMPXR2J0vn" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

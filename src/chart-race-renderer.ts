@@ -728,10 +728,9 @@ export class ChartRaceRenderer {
     barEl.bar.classList.toggle("chart-race__bar--goalpost", isGoalpost);
 
     if (isGoalpost) {
-      // Goalpost mode: hide all normal elements, use wrapper border as single dashed line
+      // Goalpost mode: hide normal elements, bar becomes a thin dashed line
       barEl.rankSpan.style.display = "none";
       barEl.rankSpan.textContent = "";
-      barEl.bar.style.display = "none";
       barEl.logo.style.display = "none";
       barEl.nameSpan.style.display = "none";
       barEl.genSpan.style.display = "none";
@@ -740,8 +739,15 @@ export class ChartRaceRenderer {
       barEl.valueSpan.style.display = "none";
       barEl.winsSpan.style.display = "none";
 
-      // Single dashed line via wrapper border-bottom (spans full width)
-      barEl.wrapper.style.borderBottom = `2px dashed ${ARTIST_TYPE_COLORS[entry.artistType]}`;
+      // Bar becomes a dashed line (keeps its percentage width)
+      barEl.bar.style.display = "";
+      barEl.bar.style.height = "0";
+      barEl.bar.style.padding = "0";
+      barEl.bar.style.backgroundColor = "transparent";
+      barEl.bar.style.borderRadius = "0";
+      barEl.bar.style.borderTop = `2px dashed ${ARTIST_TYPE_COLORS[entry.artistType]}`;
+      barEl.bar.style.overflow = "visible";
+      barEl.wrapper.style.borderBottom = "";
 
       // Build compact label: #X · Artist · Points · N wins
       const winsText = totalWins > 0 ? ` · ${totalWins} ${totalWins === 1 ? "win" : "wins"}` : "";
@@ -752,6 +758,12 @@ export class ChartRaceRenderer {
       // Normal mode: show normal elements, hide goalpost label
       barEl.rankSpan.style.display = "";
       barEl.bar.style.display = "";
+      barEl.bar.style.height = "";
+      barEl.bar.style.padding = "";
+      barEl.bar.style.backgroundColor = ARTIST_TYPE_COLORS[entry.artistType];
+      barEl.bar.style.borderRadius = "";
+      barEl.bar.style.borderTop = "";
+      barEl.bar.style.overflow = "";
       barEl.logo.style.display = "";
       barEl.nameSpan.style.display = "";
       barEl.genSpan.style.display = "";

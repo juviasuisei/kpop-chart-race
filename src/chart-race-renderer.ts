@@ -335,27 +335,16 @@ export class ChartRaceRenderer {
         barEl = this.createBarElement(entry);
         this.bars.set(entry.artistId, barEl);
         this.barsContainer.appendChild(barEl.wrapper);
-        // New bar positioning depends on whether it's truly new or returning
-        const isReturning = this.seenArtists.has(entry.artistId);
+        this.seenArtists.add(entry.artistId);
+
+        // New bar: start at bottom with 0 width, then animate to target
         barEl.wrapper.style.transition = "none";
         barEl.bar.style.transition = "none";
-
-        if (isReturning) {
-          // Returning bar (was visible before, removed by zoom/filter change)
-          // Start at target position — no rise-from-bottom animation
-          barEl.wrapper.style.transform = `translateY(${yOffsets[visIdx]}px)`;
-          barEl.wrapper.style.height = `${heights[visIdx]}px`;
-          barEl.wrapper.style.opacity = "1";
-          barEl.bar.style.width = "0%";
-        } else {
-          // Truly new bar: start at bottom with 0 width, then animate to target
-          const bottomY = containerHeight > 0 ? containerHeight : 500;
-          barEl.wrapper.style.transform = `translateY(${bottomY}px)`;
-          barEl.wrapper.style.height = `${heights[visIdx]}px`;
-          barEl.wrapper.style.opacity = "1";
-          barEl.bar.style.width = "0%";
-        }
-        this.seenArtists.add(entry.artistId);
+        const bottomY = containerHeight > 0 ? containerHeight : 500;
+        barEl.wrapper.style.transform = `translateY(${bottomY}px)`;
+        barEl.wrapper.style.height = `${heights[visIdx]}px`;
+        barEl.wrapper.style.opacity = "1";
+        barEl.bar.style.width = "0%";
         barEl.wrapper.offsetHeight; // force reflow
 
         // Enable transitions (unless scrubbing)

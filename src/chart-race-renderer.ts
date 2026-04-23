@@ -499,9 +499,9 @@ export class ChartRaceRenderer {
       cancelAnimationFrame(this.rankTrackingFrameId);
       this.rankTrackingFrameId = null;
     }
-    // Set final rank values
+    // Set final rank values (skip goalpost bars — they show rank in the label)
     for (const [, barEl] of this.bars) {
-      if (!barEl.hidden) {
+      if (!barEl.hidden && !barEl.wrapper.classList.contains("chart-race__bar-wrapper--goalpost")) {
         barEl.rankSpan.textContent = `#${barEl.targetRank}`;
       }
     }
@@ -757,7 +757,7 @@ export class ChartRaceRenderer {
       // Normal mode: show normal elements, hide goalpost label
       barEl.rankSpan.style.display = "";
       barEl.rankSpan.style.visibility = "";
-      barEl.rankSpan.style.backgroundColor = "";
+      // Don't reset backgroundColor — it's set at the top of updateBarElement
       barEl.rankSpan.style.borderTop = "";
       barEl.rankSpan.style.borderBottom = "";
       barEl.rankSpan.style.height = "";

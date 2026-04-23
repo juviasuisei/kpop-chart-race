@@ -710,6 +710,7 @@ describe('Feature 0014, Property 4: Rank Badge Reflects Entry Rank', () => {
         fc.integer({ min: 1, max: 10 }),
         fc.integer({ min: 1, max: 10 }),
         (rank1, rank2) => {
+          vi.useFakeTimers();
           const container = document.createElement('div');
           document.body.appendChild(container);
 
@@ -734,6 +735,8 @@ describe('Feature 0014, Property 4: Rank Badge Reflects Entry Rank', () => {
           // First update
           const snapshot1: ChartSnapshot = { date: '2024-06-01', entries: [makeEntryWithRank(rank1)] };
           renderer.update(snapshot1, 'all', emptyDataStore);
+          // Advance past transition so stopRankTracking sets final rank
+          vi.advanceTimersByTime(3000);
 
           let rankBadge = container.querySelector('.bar__rank');
           expect(rankBadge!.textContent).toBe(`#${rank1}`);
@@ -741,12 +744,15 @@ describe('Feature 0014, Property 4: Rank Badge Reflects Entry Rank', () => {
           // Second update with different rank
           const snapshot2: ChartSnapshot = { date: '2024-06-02', entries: [makeEntryWithRank(rank2)] };
           renderer.update(snapshot2, 'all', emptyDataStore);
+          // Advance past transition so stopRankTracking sets final rank
+          vi.advanceTimersByTime(3000);
 
           rankBadge = container.querySelector('.bar__rank');
           expect(rankBadge!.textContent).toBe(`#${rank2}`);
 
           renderer.destroy();
           container.remove();
+          vi.useRealTimers();
         },
       ),
       { numRuns: 100 },

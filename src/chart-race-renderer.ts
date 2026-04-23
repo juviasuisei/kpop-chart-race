@@ -420,9 +420,15 @@ export class ChartRaceRenderer {
    * This makes rank badges update progressively as bars pass each other.
    */
   private startRankTracking(visibleArtistIds: Set<string>): void {
-    this.stopRankTracking();
+    // Cancel any existing rank tracking loop WITHOUT overwriting rank text
+    // (stopRankTracking writes target ranks, which would erase the previous ranks
+    // that we need as the starting point for crossing detection)
+    if (this.rankTrackingFrameId !== null) {
+      cancelAnimationFrame(this.rankTrackingFrameId);
+      this.rankTrackingFrameId = null;
+    }
 
-    // Initialize displayed ranks from current rankSpan text
+    // Initialize displayed ranks from current rankSpan text (preserves previous ranks)
     const displayedRanks = new Map<BarElement, number>();
     const trackedBars: BarElement[] = [];
     for (const [artistId, barEl] of this.bars) {

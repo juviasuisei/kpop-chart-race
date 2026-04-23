@@ -1110,4 +1110,59 @@ describe('Bugfix 0007: Bug Condition — Missing Pointer Cursor', () => {
       expect(w.classList.contains('chart-race__bar-wrapper--goalpost')).toBe(false);
     }
   });
+
+  // ═══════════════════════════════════════════════════════════════════
+  // Rank tracking during transitions
+  // ═══════════════════════════════════════════════════════════════════
+
+  it('rank display starts from previous rank, not target rank, when bars reorder', () => {
+    vi.useFakeTimers();
+    renderer.mount(container);
+    const barsContainer = container.querySelector('.chart-race__bars')!;
+    Object.defineProperty(barsContainer, 'clientHeight', { value: 500, configurable: true });
+
+    // Day 1: a1=#1, a2=#2, a3=#3
+    const day1 = [
+      makeEntry({ artistId: 'a1', artistName: 'Artist 1', rank: 1, cumulativeValue: 1000, previousCumulativeValue: 900 }),
+      makeEntry({ artistId: 'a2', artistName: 'Artist 2', rank: 2, cumulativeValue: 800, previousCumulativeValue: 700 }),
+      makeEntry({ artistId: 'a3', artistName: 'Artist 3', rank: 3, cumulativeValue: 600, previousCumulativeValue: 500 }),
+    ];
+    renderer.update(makeSnapshot(day1), 'all', emptyDataStore);
+
+    // Advance past phase 1 so ranks settle
+    vi.advanceTimersByTime(3000);
+
+    // Verify ranks are correct after day 1
+    const getRank = (name: string) => {
+      const w = Array.from(container.querySelectorAll('.chart-race__bar-wrapper'))
+        .find(w => w.querySelector('.bar__name')?.textContent === name) as HTMLElement;
+      return w?.querySelector('.bar__rank')?.textContent;
+    };
+    expect(getRank('Artist 1')).toBe('#1');
+    expect(getRank('Artist 2')).toBe('#2');
+    expect(getRank('Artist 3')).toBe('#3');
+
+    // Day 2: a3 jumps to #1, a1 drops to #2, a2 drops to #3
+    const day2 = [
+      makeEntry({ artistId: 'a3', artistName: 'Artist 3', rank: 1, cumulativeValue: 1500, previousCumulativeValue: 600 }),
+      makeEntry({ artistId: 'a1', artistName: 'Artist 1', rank: 2, cumulativeValue: 1100, previousCumulativeValue: 1000 }),
+      makeEntry({ artistId: 'a2', artistName: 'Artist 2', rank: 3, cumulativeValue: 900, previousCumulativeValue: 800 }),
+    ];
+    renderer.update(makeSnapshot(day2), 'all', emptyDataStore);
+
+    // IMMEDIATELY after update (before any rAF runs), ranks should show
+    // the PREVIOUS values (1, 2, 3) not the target values (2, 3, 1)
+    // because crossing detection hasn't happened yet
+    expect(getRank('Artist 1')).toBe('#1');
+    expect(getRank('Artist 2')).toBe('#2');
+    expect(getRank('Artist 3')).toBe('#3');
+
+    // After transition completes, ranks should show final values
+    vi.advanceTimersByTime(3000);
+    expect(getRank('Artist 1')).toBe('#2');
+    expect(getRank('Artist 2')).toBe('#3');
+    expect(getRank('Artist 3')).toBe('#1');
+
+    vi.useRealTimers();
+  });
 });

@@ -739,7 +739,7 @@ export class ChartRaceRenderer {
       barEl.valueSpan.style.display = "none";
       barEl.winsSpan.style.display = "none";
 
-      // Bar becomes a dashed line (keeps its percentage width)
+      // Bar becomes a dashed line (keeps its percentage width + rank badge width)
       barEl.bar.style.display = "";
       barEl.bar.style.height = "0";
       barEl.bar.style.padding = "0";
@@ -808,7 +808,12 @@ export class ChartRaceRenderer {
     // Bar width as percentage
     const widthPercent = computeBarWidth(entry.cumulativeValue, maxCumulative);
     const oldWidth = barEl.bar.style.width;
-    barEl.bar.style.width = `${widthPercent}%`;
+    if (isGoalpost) {
+      // Add rank badge width so dashed line visually matches regular bar alignment
+      barEl.bar.style.width = `calc(${widthPercent}% + 2.5em)`;
+    } else {
+      barEl.bar.style.width = `${widthPercent}%`;
+    }
 
     // Bar position via translateY
     barEl.wrapper.style.transform = `translateY(${yPosition}px)`;

@@ -78,7 +78,7 @@ body {
 /* ===== Goalpost Bar ===== */
 
 .chart-race__bar-wrapper--goalpost {
-  align-items: flex-end;
+  align-items: center;
   padding: 0;
   overflow: visible;
 }
@@ -94,7 +94,6 @@ body {
   display: none;
   flex-shrink: 1;
   min-width: 0;
-  padding-bottom: 2px;
 }
 
 .chart-race__bar {

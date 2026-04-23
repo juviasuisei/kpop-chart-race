@@ -10,7 +10,10 @@
       "dailyValues": {
         "2026-01-18": { "value": 6048, "source": "inkigayo", "episode": 1296 },
         "2026-01-11": { "value": 7249, "source": "inkigayo", "episode": 1295 },
-        "2026-01-09": { "value": 3345, "source": "music_bank", "episode": 1275 }
+        "2026-01-09": { "value": 3345, "source": "music_bank", "episode": 1275 },
+        "2025-12-13": { "value": 6268, "source": "show_music_core", "episode": 928 },
+        "2025-12-07": { "value": 5993, "source": "inkigayo", "episode": 1294 },
+        "2025-12-06": { "value": 6128, "source": "show_music_core", "episode": 927 }
       },
       "embeds": {
         "2025-10-15": [

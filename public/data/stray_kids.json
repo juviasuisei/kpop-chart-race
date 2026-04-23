@@ -1,0 +1,32 @@
+{
+  "name": "Stray Kids",
+  "korean_name": "스트레이키즈",
+  "artistType": "boy_group",
+  "generation": 4,
+  "debut": "2018-03-25",
+  "releases": [
+    {
+      "title": "Do It",
+      "dailyValues": {
+        "2025-12-10": { "value": 2758, "source": "show_champion", "episode": 581 },
+        "2025-12-03": { "value": 7416, "source": "show_champion", "episode": 580 }
+      },
+      "embeds": {
+        "2025-11-21": [
+          {
+            "eventType": "release_date",
+            "links": [
+              { "url": "https://music.apple.com/us/album/do-it-ep/1846266203" }
+            ]
+          },
+          {
+            "eventType": "mv",
+            "links": [
+              { "url": "https://youtu.be/NED7nev2ywQ?si=RND3XAVsHAH1n6DQ" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "name": "tripleS",
+  "korean_name": "트리플에스",
+  "artistType": "girl_group",
+  "generation": 5,
+  "debut": "2023-02-13",
+  "releases": [
+    {
+      "title": "Christmas Alone",
+      "dailyValues": {
+        "2025-12-03": { "value": 3035, "source": "show_champion", "episode": 580 }
+      },
+      "embeds": {
+        "2025-11-24": [
+          {
+            "eventType": "release_date",
+            "links": [
+              { "url": "https://music.apple.com/us/album/msnz-beyond-beauty-ep/1852753248" }
+            ]
+          },
+          {
+            "eventType": "mv",
+            "links": [
+              { "url": "https://youtu.be/28mVLa2S9yw?si=oURhsFn1tZqnLChN" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

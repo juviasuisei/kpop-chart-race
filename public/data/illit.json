@@ -11,7 +11,13 @@
         "2026-01-24": { "value": 6081, "source": "show_music_core", "episode": 932 },
         "2026-01-17": { "value": 6395, "source": "show_music_core", "episode": 931 },
         "2026-01-11": { "value": 3937, "source": "inkigayo", "episode": 1295 },
-        "2026-01-10": { "value": 5196, "source": "show_music_core", "episode": 930 }
+        "2026-01-10": { "value": 5196, "source": "show_music_core", "episode": 930 },
+        "2025-12-26": { "value": 3275, "source": "music_bank", "episode": 1273 },
+        "2025-12-17": { "value": 5647, "source": "show_champion", "episode": 582 },
+        "2025-12-10": { "value": 4473, "source": "show_champion", "episode": 581 },
+        "2025-12-07": { "value": 3542, "source": "inkigayo", "episode": 1294 },
+        "2025-12-05": { "value": 7593, "source": "music_bank", "episode": 1270 },
+        "2025-12-03": { "value": 4570, "source": "show_champion", "episode": 580 }
       },
       "embeds": {
         "2026-01-11": [
@@ -19,6 +25,22 @@
             "eventType": "live_performance",
             "links": [
               { "url": "https://youtu.be/1vPGEJ3WwrA?si=XJpWDc5tHC3ls8y1" }
+            ]
+          }
+        ],
+        "2025-12-07": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://youtu.be/FzqSsg4nVKc?si=GBqyzm2Rzrv2OeOb" }
+            ]
+          }
+        ],
+        "2025-12-05": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://youtu.be/m__-X4hU3oE?si=-P12FBHiMUCmVJdB" }
             ]
           }
         ],

@@ -1,0 +1,32 @@
+{
+  "name": "CHUEI LI YU",
+  "korean_name": "崔立于",
+  "artistType": "solo_male",
+  "generation": 5,
+  "debut": "2025-12-03",
+  "releases": [
+    {
+      "title": "UxYOUxU",
+      "dailyValues": {
+        "2025-12-17": { "value": 511, "source": "show_champion", "episode": 582 },
+        "2025-12-10": { "value": 4751, "source": "show_champion", "episode": 581 }
+      },
+      "embeds": {
+        "2025-12-03": [
+          {
+            "eventType": "release_date",
+            "links": [
+              { "url": "https://music.apple.com/us/album/sweet-dream-single/1856542021" }
+            ]
+          },
+          {
+            "eventType": "mv",
+            "links": [
+              { "url": "https://youtu.be/HjsyPgCO5Vk?si=3x1dGW4k_zjSSRFB" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

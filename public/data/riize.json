@@ -1,0 +1,35 @@
+{
+  "name": "RIIZE",
+  "korean_name": "라이즈",
+  "artistType": "boy_group",
+  "generation": 5,
+  "debut": "2023-09-04",
+  "releases": [
+    {
+      "title": "Fame",
+      "dailyValues": {
+        "2025-12-17": { "value": 1160, "source": "show_champion", "episode": 582 },
+        "2025-12-07": { "value": 4284, "source": "inkigayo", "episode": 1294 },
+        "2025-12-06": { "value": 4715, "source": "show_music_core", "episode": 927 },
+        "2025-12-05": { "value": 7039, "source": "music_bank", "episode": 1270 },
+        "2025-12-03": { "value": 6908, "source": "show_champion", "episode": 580 }
+      },
+      "embeds": {
+        "2025-11-24": [
+          {
+            "eventType": "release_date",
+            "links": [
+              { "url": "https://music.apple.com/us/album/fame-single/1854164004" }
+            ]
+          },
+          {
+            "eventType": "mv",
+            "links": [
+              { "url": "https://youtu.be/TVqEwvbZP30?si=nbz64kuZy7nn9meb" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "name": "TAEYEON [Girls' Generation]",
+  "korean_name": "김태연",
+  "artistType": "solo_female",
+  "generation": 2,
+  "debut": "2015-10-07",
+  "releases": [
+    {
+      "title": "Panorama",
+      "dailyValues": {
+        "2025-12-17": { "value": 1450, "source": "show_champion", "episode": 582 },
+        "2025-12-10": { "value": 5586, "source": "show_champion", "episode": 581 }
+      },
+      "embeds": {
+        "2025-12-01": [
+          {
+            "eventType": "release_date",
+            "links": [
+              { "url": "https://music.apple.com/us/album/panorama-the-best-of-taeyeon/1854676984" }
+            ]
+          },
+          {
+            "eventType": "mv",
+            "links": [
+              { "url": "https://youtu.be/xGhaNqnjgr4?si=IdsR2V5OfFuf9VtQ" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

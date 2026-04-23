@@ -10,7 +10,11 @@
       "dailyValues": {
         "2026-01-31": { "value": 5638, "source": "show_music_core", "episode": 933 },
         "2026-01-17": { "value": 5967, "source": "show_music_core", "episode": 931 },
-        "2026-01-10": { "value": 6822, "source": "show_music_core", "episode": 930 }
+        "2026-01-10": { "value": 6822, "source": "show_music_core", "episode": 930 },
+        "2025-12-26": { "value": 4875, "source": "music_bank", "episode": 1273 },
+        "2025-12-19": { "value": 5201, "source": "music_bank", "episode": 1272 },
+        "2025-12-13": { "value": 4100, "source": "show_music_core", "episode": 928 },
+        "2025-12-12": { "value": 4651, "source": "music_bank", "episode": 1271 }
       },
       "embeds": {
         "2025-12-02": [

@@ -1,0 +1,32 @@
+{
+  "name": "VERIVERY",
+  "korean_name": "베리베리",
+  "artistType": "boy_group",
+  "generation": 4,
+  "debut": "2019-01-09",
+  "releases": [
+    {
+      "title": "RED",
+      "dailyValues": {
+        "2025-12-12": { "value": 6238, "source": "music_bank", "episode": 1271 },
+        "2025-12-10": { "value": 4126, "source": "show_champion", "episode": 581 }
+      },
+      "embeds": {
+        "2025-12-01": [
+          {
+            "eventType": "release_date",
+            "links": [
+              { "url": "https://music.apple.com/us/album/lost-and-found-single/1856079148" }
+            ]
+          },
+          {
+            "eventType": "mv",
+            "links": [
+              { "url": "https://youtu.be/-gzqfjzqG6U?si=ccAqMmIsVEssJ20DCan " }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

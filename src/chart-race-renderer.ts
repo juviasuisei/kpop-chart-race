@@ -475,8 +475,15 @@ export class ChartRaceRenderer {
             barEl.wrapper.style.transition = `transform ${PHASE2_DURATION}ms ease-in-out, height ${PHASE2_DURATION}ms ease-in-out`;
             barEl.bar.style.transition = `width ${PHASE2_DURATION}ms ease-in-out`;
 
-            // Apply the goalpost appearance change
-            this.updateBarElement(barEl, entry, phase2YAccum, targetHeight, maxCumulative, snapshot.date, dataStore);
+            if (becomingGoalpost.has(entry.artistId)) {
+              // COLLAPSING: keep regular appearance, just shrink height + reposition
+              // Appearance swap happens after the transition completes
+              barEl.wrapper.style.transform = `translateY(${phase2YAccum}px)`;
+              barEl.wrapper.style.height = `${targetHeight}px`;
+            } else {
+              // EXPANDING: apply regular appearance immediately, then grow height
+              this.updateBarElement(barEl, entry, phase2YAccum, targetHeight, maxCumulative, snapshot.date, dataStore);
+            }
           } else {
             // Non-changing bars just slide to new Y position
             barEl.wrapper.style.transition = `transform ${PHASE2_DURATION}ms ease-in-out`;
@@ -490,6 +497,23 @@ export class ChartRaceRenderer {
         // Emit update:complete after phase 2
         this.phase2TimeoutId = setTimeout(() => {
           this.phase2TimeoutId = null;
+
+          // Apply goalpost appearance to bars that finished collapsing
+          for (const artistId of becomingGoalpost) {
+            const barEl = this.bars.get(artistId);
+            const entry = visibleEntries.find(e => e.artistId === artistId);
+            if (!barEl || !entry) continue;
+            const visIdx = visibleEntries.indexOf(entry);
+            const finalY = visibleEntries.slice(0, visIdx).reduce((sum, e) => {
+              return sum + (e.isGoalpost ? GOALPOST_HEIGHT : targetRegularBarHeight);
+            }, 0);
+            // Snap to goalpost appearance (no transition)
+            barEl.wrapper.style.transition = "none";
+            barEl.bar.style.transition = "none";
+            barEl.wrapper.offsetHeight;
+            this.updateBarElement(barEl, entry, finalY, GOALPOST_HEIGHT, maxCumulative, snapshot.date, dataStore);
+          }
+
           // Reset transitions back to default
           for (const [, barEl] of this.bars) {
             if (!barEl.hidden) {

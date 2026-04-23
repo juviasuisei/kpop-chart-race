@@ -55,6 +55,40 @@ function makeDataStoreForEntries(entries: RankedEntry[], date = '2024-06-01'): D
   return { artists, dates: [date], startDate: date, endDate: date, chartWins: new Map() };
 }
 
+/**
+ * Build a DataStore where only specific artists have recent activity.
+ * Artists in activeIds get a dailyValue entry on the snapshot date;
+ * artists in inactiveIds get no dailyValue entries (inactive).
+ */
+function makeDataStoreWithActivity(
+  allEntries: RankedEntry[],
+  activeIds: Set<string>,
+  date = '2024-06-01',
+): DataStore {
+  const artists = new Map<string, ParsedArtist>();
+  for (const entry of allEntries) {
+    const isActive = activeIds.has(entry.artistId);
+    const dailyValues = new Map<string, DailyValueEntry>();
+    if (isActive) {
+      dailyValues.set(date, { value: entry.dailyValue || 100, source: 'inkigayo', episode: 1 });
+    }
+    artists.set(entry.artistId, {
+      id: entry.artistId,
+      name: entry.artistName,
+      artistType: entry.artistType,
+      generation: entry.generation,
+      logoUrl: entry.logoUrl,
+      releases: [{
+        id: 'release-1',
+        title: 'Song',
+        dailyValues,
+        embeds: new Map(),
+      }],
+    });
+  }
+  return { artists, dates: [date], startDate: date, endDate: date, chartWins: new Map() };
+}
+
 const emptyDataStore: DataStore = { artists: new Map(), dates: [], startDate: '', endDate: '', chartWins: new Map() };
 
 describe('ChartRaceRenderer', () => {
@@ -139,7 +173,6 @@ describe('ChartRaceRenderer', () => {
 
     const value = container.querySelector('.bar__value');
     expect(value).not.toBeNull();
-    // Value should display the cumulative value (may be formatted with locale)
     expect(value!.textContent).toContain('1,234');
   });
 
@@ -153,10 +186,7 @@ describe('ChartRaceRenderer', () => {
 
     const logo = container.querySelector('.bar__logo') as HTMLImageElement;
     expect(logo).not.toBeNull();
-
-    // Trigger onerror handler
     logo.onerror!(new Event('error'));
-
     expect(logo.src).toContain('data:image/svg+xml');
   });
 
@@ -372,28 +402,20 @@ describe('ChartRaceRenderer', () => {
 
     const MOCKED_HEIGHT = 500;
     const barsContainer = container.querySelector('.chart-race__bars')!;
-    Object.defineProperty(barsContainer, 'clientHeight', {
-      value: MOCKED_HEIGHT,
-      configurable: true,
-    });
+    Object.defineProperty(barsContainer, 'clientHeight', { value: MOCKED_HEIGHT, configurable: true });
 
-    // Create entries with non-contiguous ranks (e.g., ranks 2, 5, 8)
-    // simulating what filterByActivity might produce
     const entries = [
       makeEntry({ artistId: 'a1', artistName: 'Artist A', rank: 2, cumulativeValue: 900 }),
       makeEntry({ artistId: 'a2', artistName: 'Artist B', rank: 5, cumulativeValue: 700 }),
       makeEntry({ artistId: 'a3', artistName: 'Artist C', rank: 8, cumulativeValue: 500 }),
     ];
     const snapshot = makeSnapshot(entries);
-    const ds = makeDataStoreForEntries(snapshot.entries);
-
-    renderer.update(snapshot, 10, ds);
+    renderer.update(snapshot, 10, makeDataStoreForEntries(snapshot.entries));
 
     const barHeight = MOCKED_HEIGHT / 10;
     const wrappers = container.querySelectorAll('.chart-race__bar-wrapper');
     expect(wrappers.length).toBe(3);
 
-    // Visual index 0 → translateY(0), visual index 1 → translateY(barHeight), etc.
     expect((wrappers[0] as HTMLElement).style.transform).toBe(`translateY(${0 * barHeight}px)`);
     expect((wrappers[1] as HTMLElement).style.transform).toBe(`translateY(${1 * barHeight}px)`);
     expect((wrappers[2] as HTMLElement).style.transform).toBe(`translateY(${2 * barHeight}px)`);
@@ -405,11 +427,9 @@ describe('ChartRaceRenderer', () => {
     const entries = [
       makeEntry({ artistId: 'a1', rank: 1, cumulativeValue: 1000, previousCumulativeValue: 800 }),
     ];
-    const snapshot = makeSnapshot(entries);
-    renderer.update(snapshot, 10, emptyDataStore);
+    renderer.update(makeSnapshot(entries), 10, emptyDataStore);
 
     const wrapper = container.querySelector('.chart-race__bar-wrapper') as HTMLElement;
-    // After update, opacity should be "1" (not starting from "0")
     expect(wrapper.style.opacity).toBe('1');
   });
 
@@ -417,21 +437,11 @@ describe('ChartRaceRenderer', () => {
   it('bars filtered out are removed from DOM immediately', () => {
     renderer.mount(container);
 
-    // First update: show artist
-    const entries = [
-      makeEntry({ artistId: 'a1', rank: 1, cumulativeValue: 500 }),
-    ];
-    const snapshot1 = makeSnapshot(entries);
-    const ds = makeDataStoreForEntries(entries);
-    renderer.update(snapshot1, 10, ds);
-
+    const entries = [makeEntry({ artistId: 'a1', rank: 1, cumulativeValue: 500 })];
+    renderer.update(makeSnapshot(entries), 10, makeDataStoreForEntries(entries));
     expect(container.querySelectorAll('.chart-race__bar-wrapper').length).toBe(1);
 
-    // Second update: artist no longer visible
-    const snapshot2 = makeSnapshot([]);
-    renderer.update(snapshot2, 10, emptyDataStore);
-
-    // Bar is removed from DOM immediately (no wipe cover animation)
+    renderer.update(makeSnapshot([]), 10, emptyDataStore);
     expect(container.querySelectorAll('.chart-race__bar-wrapper').length).toBe(0);
   });
 
@@ -441,24 +451,15 @@ describe('ChartRaceRenderer', () => {
 
     const MOCKED_HEIGHT = 500;
     const barsContainer = container.querySelector('.chart-race__bars')!;
-    Object.defineProperty(barsContainer, 'clientHeight', {
-      value: MOCKED_HEIGHT,
-      configurable: true,
-    });
+    Object.defineProperty(barsContainer, 'clientHeight', { value: MOCKED_HEIGHT, configurable: true });
 
-    const entries = [
-      makeEntry({ artistId: 'a1', rank: 1, cumulativeValue: 500 }),
-    ];
+    const entries = [makeEntry({ artistId: 'a1', rank: 1, cumulativeValue: 500 })];
     const ds = makeDataStoreForEntries(entries);
 
-    // Show, then remove (simplified update removes immediately)
     renderer.update(makeSnapshot(entries), 10, ds);
     renderer.update(makeSnapshot([]), 10, emptyDataStore);
-
-    // Bar was removed from DOM
     expect(container.querySelectorAll('.chart-race__bar-wrapper').length).toBe(0);
 
-    // Re-show — bar is re-created at correct position
     renderer.update(makeSnapshot(entries), 10, ds);
     const wrapper = container.querySelector('.chart-race__bar-wrapper') as HTMLElement;
     expect(wrapper).not.toBeNull();
@@ -474,37 +475,26 @@ describe('ChartRaceRenderer', () => {
 
     const MOCKED_HEIGHT = 500;
     const barsContainer = container.querySelector('.chart-race__bars')!;
-    Object.defineProperty(barsContainer, 'clientHeight', {
-      value: MOCKED_HEIGHT,
-      configurable: true,
-    });
+    Object.defineProperty(barsContainer, 'clientHeight', { value: MOCKED_HEIGHT, configurable: true });
 
-    // Initial render
     const entries1 = [
       makeEntry({ artistId: 'a1', rank: 1, cumulativeValue: 1000 }),
       makeEntry({ artistId: 'a2', rank: 2, cumulativeValue: 500 }),
     ];
     renderer.update(makeSnapshot(entries1), 10, makeDataStoreForEntries(entries1));
 
-    // Enter scrub mode
     eventBus.emit('scrub:start');
 
-    // Update with swapped positions
     const entries2 = [
       makeEntry({ artistId: 'a2', rank: 1, cumulativeValue: 1200 }),
       makeEntry({ artistId: 'a1', rank: 2, cumulativeValue: 1000 }),
     ];
     renderer.update(makeSnapshot(entries2), 10, makeDataStoreForEntries(entries2));
 
-    // All bar wrappers should have transition: none
-    const wrappers = container.querySelectorAll('.chart-race__bar-wrapper');
-    for (const w of wrappers) {
+    for (const w of container.querySelectorAll('.chart-race__bar-wrapper')) {
       expect((w as HTMLElement).style.transition).toBe('none');
     }
-
-    // All bars should have transition: none
-    const bars = container.querySelectorAll('.chart-race__bar');
-    for (const b of bars) {
+    for (const b of container.querySelectorAll('.chart-race__bar')) {
       expect((b as HTMLElement).style.transition).toBe('none');
     }
 
@@ -519,12 +509,9 @@ describe('ChartRaceRenderer', () => {
       makeEntry({ artistId: 'a1', rank: 1, cumulativeValue: 500 }),
       makeEntry({ artistId: 'a2', rank: 2, cumulativeValue: 300 }),
     ];
-    const ds = makeDataStoreForEntries(entries);
-    renderer.update(makeSnapshot(entries), 10, ds);
-
+    renderer.update(makeSnapshot(entries), 10, makeDataStoreForEntries(entries));
     expect(container.querySelectorAll('.chart-race__bar-wrapper').length).toBe(2);
 
-    // Start scrubbing — all bars removed
     eventBus.emit('scrub:start');
     expect(container.querySelectorAll('.chart-race__bar-wrapper').length).toBe(0);
 
@@ -535,16 +522,12 @@ describe('ChartRaceRenderer', () => {
   it('update during scrub creates bars with transition:none', () => {
     renderer.mount(container);
 
-    const entries1 = [
-      makeEntry({ artistId: 'a1', rank: 1, cumulativeValue: 500 }),
-    ];
+    const entries1 = [makeEntry({ artistId: 'a1', rank: 1, cumulativeValue: 500 })];
     renderer.update(makeSnapshot(entries1), 10, makeDataStoreForEntries(entries1));
 
-    // Start scrubbing — clears all bars
     eventBus.emit('scrub:start');
     expect(container.querySelectorAll('.chart-race__bar-wrapper').length).toBe(0);
 
-    // Update while scrubbing — bars re-created with no transitions
     const entries2 = [
       makeEntry({ artistId: 'a1', rank: 1, cumulativeValue: 1000 }),
       makeEntry({ artistId: 'a2', rank: 2, cumulativeValue: 800 }),
@@ -553,13 +536,10 @@ describe('ChartRaceRenderer', () => {
 
     const wrappers = container.querySelectorAll('.chart-race__bar-wrapper');
     expect(wrappers.length).toBe(2);
-    // Bars should have transition:none (from inline style or CSS class)
     for (const w of wrappers) {
-      const style = (w as HTMLElement).style.transition;
-      expect(style).toBe('none');
+      expect((w as HTMLElement).style.transition).toBe('none');
     }
 
-    // Values should be final (no tweening)
     const values = container.querySelectorAll('.bar__value');
     expect(values[0].textContent).toBe('1,000');
     expect(values[1].textContent).toBe('800');
@@ -571,23 +551,15 @@ describe('ChartRaceRenderer', () => {
   it('scrub mode sets value text instantly without tweening', () => {
     renderer.mount(container);
 
-    const entries = [
-      makeEntry({ artistId: 'a1', rank: 1, cumulativeValue: 100, previousCumulativeValue: 100 }),
-    ];
+    const entries = [makeEntry({ artistId: 'a1', rank: 1, cumulativeValue: 100, previousCumulativeValue: 100 })];
     renderer.update(makeSnapshot(entries), 10, makeDataStoreForEntries(entries));
 
-    // Enter scrub mode
     eventBus.emit('scrub:start');
 
-    // Update with a big jump
-    const entries2 = [
-      makeEntry({ artistId: 'a1', rank: 1, cumulativeValue: 99999, previousCumulativeValue: 100 }),
-    ];
+    const entries2 = [makeEntry({ artistId: 'a1', rank: 1, cumulativeValue: 99999, previousCumulativeValue: 100 })];
     renderer.update(makeSnapshot(entries2), 10, makeDataStoreForEntries(entries2));
 
-    // Value should be the final value immediately, not mid-tween
-    const value = container.querySelector('.bar__value');
-    expect(value!.textContent).toBe('99,999');
+    expect(container.querySelector('.bar__value')!.textContent).toBe('99,999');
 
     eventBus.emit('scrub:end');
   });
@@ -599,7 +571,6 @@ describe('ChartRaceRenderer', () => {
     const cssPath = path.resolve(__dirname, '../../src/style.css');
     const cssContent = fs.readFileSync(cssPath, 'utf-8');
 
-    // The .chart-race__bar rule should include a width transition
     const ruleMatch = cssContent.match(
       /\.chart-race__bar\s*\{[^}]*transition:\s*width\s+[\d.]+s[^}]*\}/,
     );
@@ -610,18 +581,13 @@ describe('ChartRaceRenderer', () => {
   it('new bars start at previous cumulative width before transitioning', () => {
     renderer.mount(container);
 
-    const entries = [
-      makeEntry({ artistId: 'a1', rank: 1, cumulativeValue: 1000, previousCumulativeValue: 0 }),
-    ];
-    // Before update, no bars exist
+    const entries = [makeEntry({ artistId: 'a1', rank: 1, cumulativeValue: 1000, previousCumulativeValue: 0 })];
     expect(container.querySelectorAll('.chart-race__bar').length).toBe(0);
 
     renderer.update(makeSnapshot(entries), 10, makeDataStoreForEntries(entries));
 
-    // Bar exists and has a width set (the CSS transition will animate it)
     const bar = container.querySelector('.chart-race__bar') as HTMLElement;
     expect(bar).not.toBeNull();
-    // Width should be set (the transition handles the animation)
     expect(bar.style.width).toBeTruthy();
   });
 
@@ -644,10 +610,7 @@ describe('ChartRaceRenderer', () => {
 
     const MOCKED_HEIGHT = 500;
     const barsContainer = container.querySelector('.chart-race__bars')!;
-    Object.defineProperty(barsContainer, 'clientHeight', {
-      value: MOCKED_HEIGHT,
-      configurable: true,
-    });
+    Object.defineProperty(barsContainer, 'clientHeight', { value: MOCKED_HEIGHT, configurable: true });
 
     const barHeight = MOCKED_HEIGHT / 10;
 
@@ -657,14 +620,12 @@ describe('ChartRaceRenderer', () => {
     ];
     renderer.update(makeSnapshot(entries1), 10, makeDataStoreForEntries(entries1));
 
-    // Swap ranks
     const entries2 = [
       makeEntry({ artistId: 'a2', artistName: 'Jay Storm', rank: 1, cumulativeValue: 1200 }),
       makeEntry({ artistId: 'a1', artistName: 'Luna Park', rank: 2, cumulativeValue: 1000 }),
     ];
     renderer.update(makeSnapshot(entries2), 10, makeDataStoreForEntries(entries2));
 
-    // Find wrappers by artist name
     const allWrappers = Array.from(container.querySelectorAll('.chart-race__bar-wrapper'));
     const a2Wrapper = allWrappers.find(w => w.querySelector('.bar__name')?.textContent === 'Jay Storm') as HTMLElement;
     const a1Wrapper = allWrappers.find(w => w.querySelector('.bar__name')?.textContent === 'Luna Park') as HTMLElement;
@@ -679,21 +640,11 @@ describe('ChartRaceRenderer', () => {
 
     const MOCKED_HEIGHT = 500;
     const barsContainer = container.querySelector('.chart-race__bars')!;
-    Object.defineProperty(barsContainer, 'clientHeight', {
-      value: MOCKED_HEIGHT,
-      configurable: true,
-    });
+    Object.defineProperty(barsContainer, 'clientHeight', { value: MOCKED_HEIGHT, configurable: true });
 
-    // First update creates bars — they should start at bottom
-    const entries = [
-      makeEntry({ artistId: 'a1', rank: 1, cumulativeValue: 1000, previousCumulativeValue: 0 }),
-    ];
+    const entries = [makeEntry({ artistId: 'a1', rank: 1, cumulativeValue: 1000, previousCumulativeValue: 0 })];
     renderer.update(makeSnapshot(entries), 10, makeDataStoreForEntries(entries));
 
-    // After update, the bar's TARGET transform is set by updateBarElement
-    // But the initial position was at the bottom (containerHeight)
-    // and the CSS transition animates from bottom to target.
-    // We can verify the target is correct:
     const wrapper = container.querySelector('.chart-race__bar-wrapper') as HTMLElement;
     const barHeight = MOCKED_HEIGHT / 10;
     expect(wrapper.style.transform).toBe(`translateY(${0 * barHeight}px)`);
@@ -703,39 +654,28 @@ describe('ChartRaceRenderer', () => {
   it('scrub:end clears inline transition:none so CSS transitions resume', () => {
     renderer.mount(container);
 
-    const entries = [
-      makeEntry({ artistId: 'a1', rank: 1, cumulativeValue: 500 }),
-    ];
+    const entries = [makeEntry({ artistId: 'a1', rank: 1, cumulativeValue: 500 })];
     renderer.update(makeSnapshot(entries), 10, makeDataStoreForEntries(entries));
 
-    // Enter scrub mode — sets transition: none
     eventBus.emit('scrub:start');
     renderer.update(makeSnapshot(entries), 10, makeDataStoreForEntries(entries));
 
     const wrapper = container.querySelector('.chart-race__bar-wrapper') as HTMLElement;
     expect(wrapper.style.transition).toBe('none');
 
-    // Exit scrub mode — should clear inline transition
     eventBus.emit('scrub:end');
     expect(wrapper.style.transition).toBe('');
   });
 
   // 38. Value tweening is active (tween duration > 0)
   it('value tween duration is set for animation', () => {
-    // Verify TWEEN_DURATION is nonzero by checking that after an update
-    // with different previous/current values, the value span exists
     renderer.mount(container);
 
-    const entries = [
-      makeEntry({ artistId: 'a1', rank: 1, cumulativeValue: 1000, previousCumulativeValue: 500 }),
-    ];
+    const entries = [makeEntry({ artistId: 'a1', rank: 1, cumulativeValue: 1000, previousCumulativeValue: 500 })];
     renderer.update(makeSnapshot(entries), 10, makeDataStoreForEntries(entries));
 
     const value = container.querySelector('.bar__value');
     expect(value).not.toBeNull();
-    // In jsdom, rAF doesn't fire, so the value is whatever was set initially.
-    // The key test is that scrub mode snaps (test 31) while normal mode tweens.
-    // We verify the tween was initiated by checking the value is set.
     expect(value!.textContent).toBeTruthy();
   });
 
@@ -750,10 +690,8 @@ describe('ChartRaceRenderer', () => {
     renderer.update(makeSnapshot(entries), 10, makeDataStoreForEntries(entries));
     expect(container.querySelectorAll('.chart-race__bar-wrapper').length).toBe(2);
 
-    // Apply filter that only includes a1
     renderer.applyVisibilityFilter(new Set(['a1']), 50);
 
-    // a2 still in DOM (wipe in progress) with pointer-events disabled
     const wrappers = container.querySelectorAll('.chart-race__bar-wrapper');
     expect(wrappers.length).toBe(2);
     const a2Wrapper = Array.from(wrappers).find(
@@ -763,6 +701,456 @@ describe('ChartRaceRenderer', () => {
     expect(a2Wrapper.style.pointerEvents).toBe('none');
     const wipeCover = a2Wrapper.querySelector('.bar__wipe-cover') as HTMLElement;
     expect(wipeCover.style.height).toBe('100%');
+  });
+
+  // ============================================================
+  // Task 1: Comprehensive tests for current animation behavior
+  // ============================================================
+
+  // 40. Two-phase update: unfiltered bars exist in DOM during phase 1
+  it('two-phase update keeps unfiltered-top-10 bars in DOM during phase 1', () => {
+    renderer.mount(container);
+
+    const MOCKED_HEIGHT = 500;
+    const barsContainer = container.querySelector('.chart-race__bars')!;
+    Object.defineProperty(barsContainer, 'clientHeight', { value: MOCKED_HEIGHT, configurable: true });
+
+    // Initial update with 3 active bars (establishes existing bars for two-phase)
+    const entries1 = [
+      makeEntry({ artistId: 'a1', artistName: 'Active 1', rank: 1, cumulativeValue: 1000 }),
+      makeEntry({ artistId: 'a2', artistName: 'Active 2', rank: 2, cumulativeValue: 900 }),
+      makeEntry({ artistId: 'a3', artistName: 'Inactive', rank: 3, cumulativeValue: 800 }),
+    ];
+    const ds1 = makeDataStoreForEntries(entries1);
+    renderer.update(makeSnapshot(entries1), 10, ds1);
+    expect(container.querySelectorAll('.chart-race__bar-wrapper').length).toBe(3);
+
+    // Second update: a3 is in the unfiltered top-10 but NOT active.
+    // With two-phase, a3 should still be in DOM during phase 1 (position animation).
+    // Build a DataStore where only a1 and a2 are active.
+    const entries2 = [
+      makeEntry({ artistId: 'a1', artistName: 'Active 1', rank: 1, cumulativeValue: 1100 }),
+      makeEntry({ artistId: 'a2', artistName: 'Active 2', rank: 2, cumulativeValue: 1000 }),
+      makeEntry({ artistId: 'a3', artistName: 'Inactive', rank: 3, cumulativeValue: 800 }),
+    ];
+    const ds2 = makeDataStoreWithActivity(entries2, new Set(['a1', 'a2']));
+    renderer.update(makeSnapshot(entries2), 10, ds2);
+
+    // During phase 1 (before the 2880ms timeout), a3 should still be in the DOM
+    const wrappers = container.querySelectorAll('.chart-race__bar-wrapper');
+    const a3Wrapper = Array.from(wrappers).find(
+      w => w.querySelector('.bar__name')?.textContent === 'Inactive'
+    );
+    expect(a3Wrapper).not.toBeNull();
+    // a3 is still visible (not hidden yet — that happens in phase 2)
+    expect(wrappers.length).toBe(3);
+  });
+
+  // 41. Wipe cover on hide: bars not in filtered set get wipe cover 100% and pointer-events none
+  it('applyVisibilityFilter sets wipe cover height 100% and pointer-events none on hidden bars', () => {
+    renderer.mount(container);
+
+    const entries = [
+      makeEntry({ artistId: 'a1', artistName: 'Stays', rank: 1, cumulativeValue: 1000 }),
+      makeEntry({ artistId: 'a2', artistName: 'Hidden A', rank: 2, cumulativeValue: 800 }),
+      makeEntry({ artistId: 'a3', artistName: 'Hidden B', rank: 3, cumulativeValue: 600 }),
+    ];
+    renderer.update(makeSnapshot(entries), 10, makeDataStoreForEntries(entries));
+
+    // Apply filter: only a1 stays
+    renderer.applyVisibilityFilter(new Set(['a1']), 50);
+
+    const allWrappers = Array.from(container.querySelectorAll('.chart-race__bar-wrapper'));
+    for (const w of allWrappers) {
+      const name = w.querySelector('.bar__name')?.textContent;
+      const htmlW = w as HTMLElement;
+      const wipe = w.querySelector('.bar__wipe-cover') as HTMLElement;
+      if (name === 'Stays') {
+        // Visible bar: no wipe, pointer-events normal
+        expect(wipe.style.height).not.toBe('100%');
+        expect(htmlW.style.pointerEvents).not.toBe('none');
+      } else {
+        // Hidden bars: wipe cover at 100%, pointer-events none
+        expect(wipe.style.height).toBe('100%');
+        expect(htmlW.style.pointerEvents).toBe('none');
+      }
+    }
+  });
+
+  // 42. Phase 2 replacement bars: bars in filtered set that don't exist in DOM are created
+  it('phase 2 creates replacement bars for entries ranked beyond 10 that enter via backfill', () => {
+    vi.useFakeTimers();
+    try {
+      renderer.mount(container);
+
+      const MOCKED_HEIGHT = 500;
+      const barsContainer = container.querySelector('.chart-race__bars')!;
+      Object.defineProperty(barsContainer, 'clientHeight', { value: MOCKED_HEIGHT, configurable: true });
+
+      // Initial update: 3 bars (all active)
+      const entries1 = [
+        makeEntry({ artistId: 'a1', artistName: 'Artist 1', rank: 1, cumulativeValue: 1000 }),
+        makeEntry({ artistId: 'a2', artistName: 'Artist 2', rank: 2, cumulativeValue: 900 }),
+        makeEntry({ artistId: 'a3', artistName: 'Artist 3', rank: 3, cumulativeValue: 800 }),
+      ];
+      renderer.update(makeSnapshot(entries1), 10, makeDataStoreForEntries(entries1));
+      expect(container.querySelectorAll('.chart-race__bar-wrapper').length).toBe(3);
+
+      // Manually hide a2 via applyVisibilityFilter (simulating what phase 2 does)
+      renderer.applyVisibilityFilter(new Set(['a1', 'a3']), 50);
+
+      // a2 is now hidden with wipe cover
+      const a2Hidden = Array.from(container.querySelectorAll('.chart-race__bar-wrapper')).find(
+        w => w.querySelector('.bar__name')?.textContent === 'Artist 2'
+      ) as HTMLElement;
+      expect(a2Hidden.style.pointerEvents).toBe('none');
+
+      // Second update with a4 (new entry) in the filtered set.
+      // Phase 1 includes existing non-hidden bars (a1, a3) + filtered entries.
+      // a4 is new and in filtered set, so it gets created in phase 1.
+      const entries2 = [
+        makeEntry({ artistId: 'a1', artistName: 'Artist 1', rank: 1, cumulativeValue: 1100 }),
+        makeEntry({ artistId: 'a2', artistName: 'Artist 2', rank: 2, cumulativeValue: 900 }),
+        makeEntry({ artistId: 'a3', artistName: 'Artist 3', rank: 3, cumulativeValue: 850 }),
+        makeEntry({ artistId: 'a4', artistName: 'Newcomer', rank: 4, cumulativeValue: 700 }),
+      ];
+      const ds2 = makeDataStoreForEntries(entries2);
+      renderer.update(makeSnapshot(entries2), 10, ds2);
+
+      // Advance to phase 2
+      vi.advanceTimersByTime(2880);
+
+      // After phase 2: a4 (newcomer) should be in DOM
+      const allWrappers = Array.from(container.querySelectorAll('.chart-race__bar-wrapper'));
+      const newcomer = allWrappers.find(
+        w => w.querySelector('.bar__name')?.textContent === 'Newcomer'
+      );
+      expect(newcomer).not.toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  // 43. Scrub snap: after scrub:start all bars removed, after update bars have transition:none and values snapped
+  it('scrub snap: bars removed on scrub:start, re-created with transition:none and snapped values', () => {
+    renderer.mount(container);
+
+    const entries1 = [
+      makeEntry({ artistId: 'a1', rank: 1, cumulativeValue: 500 }),
+      makeEntry({ artistId: 'a2', rank: 2, cumulativeValue: 300 }),
+    ];
+    renderer.update(makeSnapshot(entries1), 10, makeDataStoreForEntries(entries1));
+    expect(container.querySelectorAll('.chart-race__bar-wrapper').length).toBe(2);
+
+    // scrub:start clears all bars
+    eventBus.emit('scrub:start');
+    expect(container.querySelectorAll('.chart-race__bar-wrapper').length).toBe(0);
+
+    // Update during scrub: bars re-created with transition:none
+    const entries2 = [
+      makeEntry({ artistId: 'a1', rank: 1, cumulativeValue: 2000, previousCumulativeValue: 500 }),
+      makeEntry({ artistId: 'a2', rank: 2, cumulativeValue: 1500, previousCumulativeValue: 300 }),
+    ];
+    renderer.update(makeSnapshot(entries2), 10, makeDataStoreForEntries(entries2));
+
+    const wrappers = container.querySelectorAll('.chart-race__bar-wrapper');
+    expect(wrappers.length).toBe(2);
+
+    // All wrappers have transition:none
+    for (const w of wrappers) {
+      expect((w as HTMLElement).style.transition).toBe('none');
+    }
+
+    // Values are snapped to final (not mid-tween)
+    const values = container.querySelectorAll('.bar__value');
+    expect(values[0].textContent).toBe('2,000');
+    expect(values[1].textContent).toBe('1,500');
+
+    eventBus.emit('scrub:end');
+  });
+
+  // 44. Wrap-around resets: after reset event, bars are cleared
+  it('reset event clears all bars and allows fresh start', () => {
+    renderer.mount(container);
+
+    const entries = [
+      makeEntry({ artistId: 'a1', rank: 1, cumulativeValue: 500 }),
+      makeEntry({ artistId: 'a2', rank: 2, cumulativeValue: 300 }),
+    ];
+    renderer.update(makeSnapshot(entries), 10, makeDataStoreForEntries(entries));
+    expect(container.querySelectorAll('.chart-race__bar-wrapper').length).toBe(2);
+
+    // Reset clears all bars
+    eventBus.emit('reset');
+    expect(container.querySelectorAll('.chart-race__bar-wrapper').length).toBe(0);
+
+    // New update after reset creates bars fresh (no two-phase since bars.size === 0)
+    const entries2 = [
+      makeEntry({ artistId: 'a3', rank: 1, cumulativeValue: 1000 }),
+    ];
+    renderer.update(makeSnapshot(entries2), 10, makeDataStoreForEntries(entries2));
+    expect(container.querySelectorAll('.chart-race__bar-wrapper').length).toBe(1);
+    expect(container.querySelector('.bar__name')!.textContent).toBe('Luna Park');
+  });
+
+  // 45. Progressive rank tracking: rank badges start at pre-update values
+  it('rank badges are initialized to pre-update values during playback', () => {
+    renderer.mount(container);
+
+    const MOCKED_HEIGHT = 500;
+    const barsContainer = container.querySelector('.chart-race__bars')!;
+    Object.defineProperty(barsContainer, 'clientHeight', { value: MOCKED_HEIGHT, configurable: true });
+
+    // First update: a1 at rank 1, a2 at rank 2
+    const entries1 = [
+      makeEntry({ artistId: 'a1', artistName: 'Artist A', rank: 1, cumulativeValue: 1000 }),
+      makeEntry({ artistId: 'a2', artistName: 'Artist B', rank: 2, cumulativeValue: 500 }),
+    ];
+    renderer.update(makeSnapshot(entries1), 10, makeDataStoreForEntries(entries1));
+
+    // Verify initial ranks
+    const allWrappers1 = Array.from(container.querySelectorAll('.chart-race__bar-wrapper'));
+    const a1Rank1 = allWrappers1.find(w => w.querySelector('.bar__name')?.textContent === 'Artist A')
+      ?.querySelector('.bar__rank');
+    const a2Rank1 = allWrappers1.find(w => w.querySelector('.bar__name')?.textContent === 'Artist B')
+      ?.querySelector('.bar__rank');
+    expect(a1Rank1?.textContent).toBe('#1');
+    expect(a2Rank1?.textContent).toBe('#2');
+
+    // Second update: ranks swap. In jsdom, rAF doesn't fire, so rank tracking
+    // initializes displayed ranks from pre-update values.
+    // After startRankTracking, the initial rank should be the pre-update value.
+    const entries2 = [
+      makeEntry({ artistId: 'a2', artistName: 'Artist B', rank: 1, cumulativeValue: 1200 }),
+      makeEntry({ artistId: 'a1', artistName: 'Artist A', rank: 2, cumulativeValue: 1000 }),
+    ];
+    renderer.update(makeSnapshot(entries2), 10, makeDataStoreForEntries(entries2));
+
+    // Since rAF doesn't fire in jsdom, the rank tracking loop never runs.
+    // The initial rank was set from preUpdateRanks in startRankTracking.
+    // a1 had rank 1 before, a2 had rank 2 before.
+    const allWrappers2 = Array.from(container.querySelectorAll('.chart-race__bar-wrapper'));
+    const a1Rank2 = allWrappers2.find(w => w.querySelector('.bar__name')?.textContent === 'Artist A')
+      ?.querySelector('.bar__rank');
+    const a2Rank2 = allWrappers2.find(w => w.querySelector('.bar__name')?.textContent === 'Artist B')
+      ?.querySelector('.bar__rank');
+    // Pre-update ranks: a1 was #1, a2 was #2
+    expect(a1Rank2?.textContent).toBe('#1');
+    expect(a2Rank2?.textContent).toBe('#2');
+  });
+
+  // ============================================================
+  // Task 2: Restore animation tests (5d)
+  // ============================================================
+
+  // 46. Restored bar in phase 2: wipe cover starts at 100% and transitions to 0%
+  it('restored bar in phase 2 starts with wipe cover at 100% then animates to 0%', () => {
+    vi.useFakeTimers();
+    try {
+      renderer.mount(container);
+
+      const MOCKED_HEIGHT = 500;
+      const barsContainer = container.querySelector('.chart-race__bars')!;
+      Object.defineProperty(barsContainer, 'clientHeight', { value: MOCKED_HEIGHT, configurable: true });
+
+      // Initial update: a1 and a2 both active
+      const entries1 = [
+        makeEntry({ artistId: 'a1', artistName: 'Artist 1', rank: 1, cumulativeValue: 1000 }),
+        makeEntry({ artistId: 'a2', artistName: 'Artist 2', rank: 2, cumulativeValue: 900 }),
+      ];
+      renderer.update(makeSnapshot(entries1), 10, makeDataStoreForEntries(entries1));
+      expect(container.querySelectorAll('.chart-race__bar-wrapper').length).toBe(2);
+
+      // Manually hide a2 via applyVisibilityFilter
+      renderer.applyVisibilityFilter(new Set(['a1']), 50);
+
+      // Verify a2 is hidden
+      const a2WrapperHidden = Array.from(container.querySelectorAll('.chart-race__bar-wrapper')).find(
+        w => w.querySelector('.bar__name')?.textContent === 'Artist 2'
+      ) as HTMLElement;
+      expect(a2WrapperHidden).not.toBeNull();
+      expect(a2WrapperHidden.style.pointerEvents).toBe('none');
+
+      // Update with both active — a2 should be restored in phase 2
+      const entries2 = [
+        makeEntry({ artistId: 'a1', artistName: 'Artist 1', rank: 1, cumulativeValue: 1200 }),
+        makeEntry({ artistId: 'a2', artistName: 'Artist 2', rank: 2, cumulativeValue: 1000 }),
+      ];
+      renderer.update(makeSnapshot(entries2), 10, makeDataStoreForEntries(entries2));
+
+      // Advance to phase 2
+      vi.advanceTimersByTime(2880);
+
+      // After phase 2: a2 should be restored with wipe cover at 0%
+      const a2WrapperRestored = Array.from(container.querySelectorAll('.chart-race__bar-wrapper')).find(
+        w => w.querySelector('.bar__name')?.textContent === 'Artist 2'
+      ) as HTMLElement;
+      expect(a2WrapperRestored).not.toBeNull();
+      expect(a2WrapperRestored.style.pointerEvents).toBe('');
+      const wipeCover = a2WrapperRestored.querySelector('.bar__wipe-cover') as HTMLElement;
+      expect(wipeCover.style.height).toBe('0px');
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  // 47. Restored bar is placed at target position (not bottom)
+  it('restored bar is placed at its target position, not at the bottom', () => {
+    vi.useFakeTimers();
+    try {
+      renderer.mount(container);
+
+      const MOCKED_HEIGHT = 500;
+      const barsContainer = container.querySelector('.chart-race__bars')!;
+      Object.defineProperty(barsContainer, 'clientHeight', { value: MOCKED_HEIGHT, configurable: true });
+      const barHeight = MOCKED_HEIGHT / 10;
+
+      // Initial: a1 and a2 active
+      const entries1 = [
+        makeEntry({ artistId: 'a1', artistName: 'Artist 1', rank: 1, cumulativeValue: 1000 }),
+        makeEntry({ artistId: 'a2', artistName: 'Artist 2', rank: 2, cumulativeValue: 900 }),
+      ];
+      renderer.update(makeSnapshot(entries1), 10, makeDataStoreForEntries(entries1));
+
+      // Manually hide a2
+      renderer.applyVisibilityFilter(new Set(['a1']), barHeight);
+
+      // Restore a2
+      const entries2 = [
+        makeEntry({ artistId: 'a1', artistName: 'Artist 1', rank: 1, cumulativeValue: 1200 }),
+        makeEntry({ artistId: 'a2', artistName: 'Artist 2', rank: 2, cumulativeValue: 1000 }),
+      ];
+      renderer.update(makeSnapshot(entries2), 10, makeDataStoreForEntries(entries2));
+      vi.advanceTimersByTime(2880);
+
+      // a2 should be at visual index 1 (rank 2 in the filtered set)
+      const a2Wrapper = Array.from(container.querySelectorAll('.chart-race__bar-wrapper')).find(
+        w => w.querySelector('.bar__name')?.textContent === 'Artist 2'
+      ) as HTMLElement;
+      expect(a2Wrapper).not.toBeNull();
+      expect(a2Wrapper.style.transform).toBe(`translateY(${1 * barHeight}px)`);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  // 48. Scrubbing: restored bars appear instantly (no wipe animation)
+  it('scrubbing restores hidden bars instantly without wipe animation', () => {
+    renderer.mount(container);
+
+    const MOCKED_HEIGHT = 500;
+    const barsContainer = container.querySelector('.chart-race__bars')!;
+    Object.defineProperty(barsContainer, 'clientHeight', { value: MOCKED_HEIGHT, configurable: true });
+
+    // Initial: a1 and a2 active
+    const entries1 = [
+      makeEntry({ artistId: 'a1', artistName: 'Artist 1', rank: 1, cumulativeValue: 1000 }),
+      makeEntry({ artistId: 'a2', artistName: 'Artist 2', rank: 2, cumulativeValue: 900 }),
+    ];
+    renderer.update(makeSnapshot(entries1), 10, makeDataStoreForEntries(entries1));
+
+    // Hide a2 via applyVisibilityFilter
+    renderer.applyVisibilityFilter(new Set(['a1']), 50);
+
+    // Enter scrub mode
+    eventBus.emit('scrub:start');
+
+    // Update with both active — a2 should be re-created instantly
+    const entries2 = [
+      makeEntry({ artistId: 'a1', artistName: 'Artist 1', rank: 1, cumulativeValue: 1100 }),
+      makeEntry({ artistId: 'a2', artistName: 'Artist 2', rank: 2, cumulativeValue: 1000 }),
+    ];
+    renderer.update(makeSnapshot(entries2), 10, makeDataStoreForEntries(entries2));
+
+    // Both bars should be in DOM
+    expect(container.querySelectorAll('.chart-race__bar-wrapper').length).toBe(2);
+
+    // All bars should have transition:none (scrub mode)
+    for (const w of container.querySelectorAll('.chart-race__bar-wrapper')) {
+      expect((w as HTMLElement).style.transition).toBe('none');
+    }
+
+    eventBus.emit('scrub:end');
+  });
+
+  // 49. Initial load: bars appear directly (no wipe)
+  it('initial load creates bars without wipe cover animation', () => {
+    renderer.mount(container);
+
+    const entries = [
+      makeEntry({ artistId: 'a1', rank: 1, cumulativeValue: 1000 }),
+      makeEntry({ artistId: 'a2', rank: 2, cumulativeValue: 800 }),
+    ];
+    renderer.update(makeSnapshot(entries), 10, makeDataStoreForEntries(entries));
+
+    // All wipe covers should be at 0% (no wipe on initial load)
+    const wipeCoverEls = container.querySelectorAll('.bar__wipe-cover');
+    for (const wc of wipeCoverEls) {
+      expect((wc as HTMLElement).style.height).not.toBe('100%');
+    }
+  });
+
+  // 50. Wipe cover CSS has transition property for height
+  it('wipe cover CSS has transition for height in the stylesheet', () => {
+    const fs = require('fs');
+    const path = require('path');
+    const cssPath = path.resolve(__dirname, '../../src/style.css');
+    const cssContent = fs.readFileSync(cssPath, 'utf-8');
+
+    const ruleMatch = cssContent.match(
+      /\.bar__wipe-cover\s*\{[^}]*transition:\s*height\s+[\d.]+s[^}]*\}/,
+    );
+    expect(ruleMatch).not.toBeNull();
+  });
+
+  // 51. Hidden bars excluded from phase 1 when they will be restored in phase 2
+  it('hidden-to-restore bars are excluded from phase 1 visible entries', () => {
+    vi.useFakeTimers();
+    try {
+      renderer.mount(container);
+
+      const MOCKED_HEIGHT = 500;
+      const barsContainer = container.querySelector('.chart-race__bars')!;
+      Object.defineProperty(barsContainer, 'clientHeight', { value: MOCKED_HEIGHT, configurable: true });
+
+      // Initial: a1 and a2 active
+      const entries1 = [
+        makeEntry({ artistId: 'a1', artistName: 'Artist 1', rank: 1, cumulativeValue: 1000 }),
+        makeEntry({ artistId: 'a2', artistName: 'Artist 2', rank: 2, cumulativeValue: 900 }),
+      ];
+      renderer.update(makeSnapshot(entries1), 10, makeDataStoreForEntries(entries1));
+
+      // Manually hide a2
+      renderer.applyVisibilityFilter(new Set(['a1']), 50);
+
+      // Verify a2 is hidden
+      const a2Hidden = Array.from(container.querySelectorAll('.chart-race__bar-wrapper')).find(
+        w => w.querySelector('.bar__name')?.textContent === 'Artist 2'
+      ) as HTMLElement;
+      expect(a2Hidden.style.pointerEvents).toBe('none');
+
+      // Restore a2 — during phase 1, a2 should still be hidden
+      const entries2 = [
+        makeEntry({ artistId: 'a1', artistName: 'Artist 1', rank: 1, cumulativeValue: 1200 }),
+        makeEntry({ artistId: 'a2', artistName: 'Artist 2', rank: 2, cumulativeValue: 1000 }),
+      ];
+      renderer.update(makeSnapshot(entries2), 10, makeDataStoreForEntries(entries2));
+
+      // During phase 1: a2 is still hidden (pointer-events none)
+      const a2StillHidden = Array.from(container.querySelectorAll('.chart-race__bar-wrapper')).find(
+        w => w.querySelector('.bar__name')?.textContent === 'Artist 2'
+      ) as HTMLElement;
+      expect(a2StillHidden.style.pointerEvents).toBe('none');
+
+      // After phase 2, a2 is restored
+      vi.advanceTimersByTime(2880);
+      const a2Restored = Array.from(container.querySelectorAll('.chart-race__bar-wrapper')).find(
+        w => w.querySelector('.bar__name')?.textContent === 'Artist 2'
+      ) as HTMLElement;
+      expect(a2Restored.style.pointerEvents).toBe('');
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
 

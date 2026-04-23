@@ -80,20 +80,17 @@ export class ChartRaceRenderer {
 
   constructor(private eventBus: EventBus) {
     this.eventBus.on("scrub:start", () => {
-      console.log("[DEBUG] scrub:start: bars before clear:", this.bars.size);
       this.scrubbing = true;
       this.cancelAllAnimations();
       for (const [, barEl] of this.bars) {
         barEl.wrapper.remove();
       }
       this.bars.clear();
-      console.log("[DEBUG] scrub:start: bars after clear:", this.bars.size);
       if (this.barsContainer) {
         this.barsContainer.classList.add("chart-race__bars--no-transition");
       }
     });
     this.eventBus.on("scrub:end", () => {
-      console.log("[DEBUG] scrub:end");
       this.scrubbing = false;
       if (this.barsContainer) {
         this.barsContainer.classList.remove("chart-race__bars--no-transition");
@@ -105,7 +102,6 @@ export class ChartRaceRenderer {
       }
     });
     this.eventBus.on("reset", () => {
-      console.log("[DEBUG] reset: clearing", this.bars.size, "bars");
       // Remove all bars from DOM so next update starts fresh
       for (const [, barEl] of this.bars) {
         if (barEl.animationFrameId !== null) {
@@ -242,7 +238,6 @@ export class ChartRaceRenderer {
    * Emits "update:complete" when the transition completes.
    */
   update(snapshot: ChartSnapshot, zoomLevel: ZoomLevel, dataStore: DataStore): void {
-    console.log("[DEBUG] update:", snapshot.date, "scrubbing:", this.scrubbing, "existing bars:", this.bars.size);
     if (!this.barsContainer || !this.dateDisplay) return;
 
     // Cancel any pending timeout from a previous update
@@ -264,12 +259,26 @@ export class ChartRaceRenderer {
     // but NOT bars that were hidden and are still not in the filtered set.
     const needsTwoPhase = !this.scrubbing && this.bars.size > 0 && zoomLevel === 10;
     let visibleEntries: RankedEntry[];
+    // Track which hidden bars will be restored in phase 2
+    const hiddenToRestore = new Set<string>();
     if (!needsTwoPhase) {
       visibleEntries = filteredEntries;
     } else {
       // Build phase 1 set: existing DOM bars + filtered entries, sorted by rank
       const existingIds = new Set(Array.from(this.bars.keys()).filter(id => !this.bars.get(id)!.hidden));
-      const phase1Ids = new Set([...existingIds, ...filteredIds]);
+      // Identify hidden bars that are coming back in the filtered set (for phase 2 restore)
+      for (const [id, barEl] of this.bars) {
+        if (barEl.hidden && filteredIds.has(id)) {
+          hiddenToRestore.add(id);
+          // Cancel pending fade-out removal so the bar survives until phase 2 restore
+          if (barEl.fadeOutTimeoutId !== null) {
+            clearTimeout(barEl.fadeOutTimeoutId);
+            barEl.fadeOutTimeoutId = null;
+          }
+        }
+      }
+      // Phase 1 excludes hidden-to-restore bars — they'll be restored in phase 2
+      const phase1Ids = new Set([...existingIds, ...Array.from(filteredIds).filter(id => !hiddenToRestore.has(id))]);
       // Look up entries from the FULL snapshot (not just top 10)
       visibleEntries = snapshot.entries.filter(e => phase1Ids.has(e.artistId));
     }
@@ -430,6 +439,42 @@ export class ChartRaceRenderer {
         for (const entry of filteredEntries) {
           let barEl = this.bars.get(entry.artistId);
           if (barEl && barEl.hidden) {
+            // Restore bar — was hidden but is back in the filtered set
+            // Cancel pending fade-out removal
+            if (barEl.fadeOutTimeoutId !== null) {
+              clearTimeout(barEl.fadeOutTimeoutId);
+              barEl.fadeOutTimeoutId = null;
+            }
+            if (barEl.animationFrameId !== null) {
+              cancelAnimationFrame(barEl.animationFrameId);
+              this.pendingFrames.delete(barEl.animationFrameId);
+              barEl.animationFrameId = null;
+            }
+            barEl.hidden = false;
+            barEl.wrapper.style.pointerEvents = "";
+            if (!barEl.wrapper.parentElement) {
+              this.barsContainer!.appendChild(barEl.wrapper);
+            }
+            // Place at target position with wipe cover at 100% (fully covered)
+            barEl.wrapper.style.transition = "none";
+            barEl.bar.style.transition = "none";
+            barEl.wipeCover.style.transition = "none";
+            const yPosition = idx * barHeight;
+            barEl.wrapper.style.transform = `translateY(${yPosition}px)`;
+            barEl.wrapper.style.height = `${barHeight}px`;
+            barEl.wrapper.style.opacity = "1";
+            barEl.wrapper.style.zIndex = String(1000 - entry.rank);
+            barEl.wipeCover.style.height = "100%";
+            barEl.wrapper.offsetHeight; // force reflow
+            // Enable transitions and animate wipe cover to 0% (reveal from top)
+            barEl.wrapper.style.transition = "";
+            barEl.bar.style.transition = "";
+            barEl.wipeCover.style.transition = "";
+            barEl.wipeCover.style.height = "0";
+            barEl.targetRank = entry.rank;
+            barEl.rankSpan.textContent = `#${entry.rank}`;
+            this.updateBarElement(barEl, entry, barHeight, maxCumulative, snapshot.date, dataStore, idx);
+            idx++;
             continue;
           }
           if (!barEl) {
@@ -470,7 +515,8 @@ export class ChartRaceRenderer {
         }
         // Wait for wipe/reposition/slide-up animation, then signal done
         const hasHides = Array.from(this.bars.values()).some(b => b.hidden);
-        if (hasHides) {
+        const hasRestores = hiddenToRestore.size > 0;
+        if (hasHides || hasRestores) {
           setTimeout(() => {
             this.eventBus.emit("update:complete");
           }, 2880);

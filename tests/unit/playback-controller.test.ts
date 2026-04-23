@@ -130,3 +130,28 @@ describe('PlaybackController', () => {
     expect(container.querySelector('.playback-controls')).toBeNull();
   });
 });
+
+describe('Scrubber date labels', () => {
+  let container: HTMLElement;
+  let eventBus: EventBus;
+
+  afterEach(() => {
+    container.remove();
+  });
+
+  it('shows first and last dates flanking the scrubber', () => {
+    container = document.createElement('div');
+    document.body.appendChild(container);
+    eventBus = new EventBus();
+    const dates = ['2024-01-01', '2024-01-02', '2024-06-15'];
+    const controller = new PlaybackController(eventBus, dates);
+    controller.mount(container);
+
+    const labels = container.querySelectorAll('.playback-controls__date-label');
+    expect(labels.length).toBe(2);
+    expect(labels[0].textContent).toBe('2024-01-01');
+    expect(labels[1].textContent).toBe('2024-06-15');
+
+    controller.destroy();
+  });
+});

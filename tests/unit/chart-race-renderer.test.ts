@@ -1577,3 +1577,49 @@ describe('Zoom transitions', () => {
     vi.useRealTimers();
   });
 });
+
+// ═══════════════════════════════════════════════════════════════════
+// Zoom change value snapping
+// ═══════════════════════════════════════════════════════════════════
+
+describe('Zoom change behavior', () => {
+  let container: HTMLElement;
+  let renderer: ChartRaceRenderer;
+  let eventBus: EventBus;
+
+  beforeEach(() => {
+    container = document.createElement('div');
+    document.body.appendChild(container);
+    eventBus = new EventBus();
+    renderer = new ChartRaceRenderer(eventBus);
+  });
+
+  afterEach(() => {
+    renderer.destroy();
+    container.remove();
+  });
+
+  it('zoom change snaps values immediately (no tweening)', () => {
+    vi.useFakeTimers();
+    renderer.mount(container);
+    const barsContainer = container.querySelector('.chart-race__bars')!;
+    Object.defineProperty(barsContainer, 'clientHeight', { value: 500, configurable: true });
+
+    // Render at zoom "all"
+    const entries = [
+      makeEntry({ artistId: 'a1', artistName: 'Test', rank: 1, cumulativeValue: 1000, previousCumulativeValue: 900 }),
+    ];
+    renderer.update(makeSnapshot(entries), 'all', emptyDataStore);
+    vi.advanceTimersByTime(5000);
+
+    // Switch to zoom 10 (same data, different zoom)
+    renderer.update(makeSnapshot(entries), 10, emptyDataStore);
+
+    // Value should be snapped immediately, not tweening
+    const valueSpan = container.querySelector('.bar__value') as HTMLElement;
+    expect(valueSpan.textContent).toBe('1,000');
+
+    vi.advanceTimersByTime(5000);
+    vi.useRealTimers();
+  });
+});

@@ -38,7 +38,7 @@ const PLACEHOLDER_SVG = `data:image/svg+xml,${encodeURIComponent(
 const BAR_HEIGHT_ALL = 40;
 
 /** Duration for tween animation in ms — matches the 1s playback interval */
-const TWEEN_DURATION = 2850;
+const TWEEN_DURATION = 950;
 
 interface BarElement {
   wrapper: HTMLDivElement;
@@ -81,6 +81,8 @@ export class ChartRaceRenderer {
   private lastKnownY: Map<string, number> = new Map();
   /** Previous zoom level for detecting zoom changes */
   private previousZoom: ZoomLevel | null = null;
+  /** Whether the current update is a zoom change */
+  private isZoomChange = false;
   /** rAF ID for the rank tracking loop during phase 1 */
   private rankTrackingFrameId: number | null = null;
 
@@ -257,6 +259,7 @@ export class ChartRaceRenderer {
     // Detect zoom change for faster transition
     const isZoomChange = this.previousZoom !== null && this.previousZoom !== zoomLevel;
     this.previousZoom = zoomLevel;
+    this.isZoomChange = isZoomChange;
     const ZOOM_TRANSITION_MS = 400; // fast transition for zoom toggles
 
     // Update date display
@@ -268,7 +271,7 @@ export class ChartRaceRenderer {
 
     // Compute bar heights: goalposts get a fixed small height, regular bars share the rest
     const GOALPOST_HEIGHT = 16;
-    const PHASE2_DURATION = 1440; // half of phase 1
+    const PHASE2_DURATION = 480; // half of phase 1
 
     // Detect goalpost state changes (bars switching between regular and goalpost)
     const becomingGoalpost: Set<string> = new Set();
@@ -484,7 +487,7 @@ export class ChartRaceRenderer {
     }
 
     // 8. Emit update:complete after transition duration (or immediately if scrubbing)
-    const phase1Duration = isZoomChange ? ZOOM_TRANSITION_MS : 2880;
+    const phase1Duration = isZoomChange ? ZOOM_TRANSITION_MS : 960;
     if (this.scrubbing) {
       this.eventBus.emit("update:complete");
     } else if (hasPhase2Work && !isZoomChange) {
@@ -578,7 +581,7 @@ export class ChartRaceRenderer {
           }
           this.eventBus.emit("update:complete");
         }, PHASE2_DURATION);
-      }, 2880);
+      }, 960);
     } else {
       // No phase 2 needed — just wait for phase 1
       this.phase2TimeoutId = setTimeout(() => {
@@ -829,6 +832,10 @@ export class ChartRaceRenderer {
       }
     };
     wrapper.addEventListener('click', clickHandler);
+    // Direct click handler on goalpost label (may extend beyond wrapper bounds)
+    goalpostLabel.addEventListener('click', () => {
+      this.eventBus.emit('bar:click', entry.artistId);
+    });
 
     return {
       wrapper,
@@ -1002,12 +1009,12 @@ export class ChartRaceRenderer {
             barEl.bar.offsetHeight;
           }
           this.checkBarOverflow(barEl);
-        }, 2880);
+        }, 960);
       }
     }
 
-    // Numeric value tweening (snap in scrub mode or goalpost mode)
-    if (this.scrubbing || isGoalpost) {
+    // Numeric value tweening (snap in scrub mode, goalpost mode, or zoom change)
+    if (this.scrubbing || isGoalpost || this.isZoomChange) {
       barEl.valueSpan.textContent = Math.round(entry.cumulativeValue).toLocaleString();
       barEl.currentDisplayValue = entry.cumulativeValue;
       // Cancel any running tween

@@ -17,7 +17,8 @@ export class PlaybackController {
   private playBtn: HTMLButtonElement | null = null;
   private scrubber: HTMLInputElement | null = null;
   private scrubberTooltip: HTMLDivElement | null = null;
-  private dateLabel: HTMLSpanElement | null = null;
+  private startDateLabel: HTMLSpanElement | null = null;
+  private endDateLabel: HTMLSpanElement | null = null;
   private updateCompleteHandler: (() => void) | null = null;
   private playing = false;
 
@@ -68,14 +69,19 @@ export class PlaybackController {
     this.scrubber.addEventListener("mousemove", this.handleScrubberHover);
     this.scrubber.addEventListener("mouseleave", this.handleScrubberLeave);
 
-    // Date label
-    this.dateLabel = document.createElement("span");
-    this.dateLabel.className = "playback-controls__date-label";
-    this.dateLabel.textContent = initialDate;
+    // Date labels — first and last dates flanking the scrubber
+    this.startDateLabel = document.createElement("span");
+    this.startDateLabel.className = "playback-controls__date-label";
+    this.startDateLabel.textContent = this.dates[0] ?? "";
+
+    this.endDateLabel = document.createElement("span");
+    this.endDateLabel.className = "playback-controls__date-label";
+    this.endDateLabel.textContent = this.dates[this.dates.length - 1] ?? "";
 
     this.wrapper.appendChild(this.playBtn);
+    this.wrapper.appendChild(this.startDateLabel);
     this.wrapper.appendChild(scrubberContainer);
-    this.wrapper.appendChild(this.dateLabel);
+    this.wrapper.appendChild(this.endDateLabel);
     container.appendChild(this.wrapper);
   }
 
@@ -192,7 +198,8 @@ export class PlaybackController {
     this.playBtn = null;
     this.scrubber = null;
     this.scrubberTooltip = null;
-    this.dateLabel = null;
+    this.startDateLabel = null;
+    this.endDateLabel = null;
   }
 
   private handlePlayPauseClick = (): void => {
@@ -224,7 +231,6 @@ export class PlaybackController {
       const position = parseInt(this.scrubber.value, 10);
       const date = positionToDate(position, this.dates);
       this.currentIndex = position;
-      this.updateDateLabel(date);
       this.scrubber.setAttribute("aria-valuenow", date);
       // Update tooltip during drag
       if (this.scrubberTooltip) {
@@ -287,18 +293,11 @@ export class PlaybackController {
   };
 
   private updateScrubberAndLabel(): void {
-    if (!this.scrubber || !this.dateLabel) return;
+    if (!this.scrubber) return;
 
     const date = this.dates[this.currentIndex];
     this.scrubber.value = String(this.currentIndex);
     this.scrubber.setAttribute("aria-valuenow", date);
-    this.dateLabel.textContent = date;
-  }
-
-  private updateDateLabel(date: string): void {
-    if (this.dateLabel) {
-      this.dateLabel.textContent = date;
-    }
   }
 
   private updateButtonToPause(): void {

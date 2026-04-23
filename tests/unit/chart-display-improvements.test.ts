@@ -459,6 +459,32 @@ describe('filterByActivity — goalpost logic', () => {
       expect(result[i].rank).toBeGreaterThanOrEqual(result[i - 1].rank);
     }
   });
+
+  it('no goalpost appears after the last regular bar', () => {
+    // 12 entries: ranks 1-9 active, 10 inactive (goalpost candidate for 11), 11 active, 12 inactive
+    // The 10th regular bar is rank 11. Rank 12 would be a goalpost for nothing — should not appear.
+    const entries = makeRankedEntries(12);
+    const ds = makeActivityDataStore(
+      entries.map(e => {
+        const rankNum = parseInt(e.artistId.replace('a', ''));
+        const isActive = rankNum <= 9 || rankNum === 11;
+        return { id: e.artistId, activityDate: isActive ? recentDate : oldDate };
+      }),
+    );
+    const result = filterByActivity(entries, snapshotDate, ds, 10);
+
+    // Last entry in result should be a regular bar, not a goalpost
+    const lastEntry = result[result.length - 1];
+    expect(lastEntry.isGoalpost).toBe(false);
+
+    // No goalpost should have a rank higher than the last regular bar
+    const regulars = result.filter(r => !r.isGoalpost);
+    const lastRegularRank = regulars[regulars.length - 1].rank;
+    const goalposts = result.filter(r => r.isGoalpost);
+    for (const gp of goalposts) {
+      expect(gp.rank).toBeLessThan(lastRegularRank);
+    }
+  });
 });
 
 // ============================================================

@@ -672,7 +672,7 @@ export class ChartRaceRenderer {
 
     const clickHandler = (e: Event) => {
       const target = e.target as HTMLElement;
-      if (target.closest('.chart-race__bar') || target.classList.contains('bar__value') || target.classList.contains('bar__release') || target.classList.contains('bar__name') || target.classList.contains('bar__gen') || target.classList.contains('bar__type-indicator') || target.classList.contains('bar__wins') || target.classList.contains('bar__rank')) {
+      if (target.closest('.chart-race__bar') || target.classList.contains('bar__value') || target.classList.contains('bar__release') || target.classList.contains('bar__name') || target.classList.contains('bar__gen') || target.classList.contains('bar__type-indicator') || target.classList.contains('bar__wins') || target.classList.contains('bar__rank') || target.classList.contains('bar__goalpost-label')) {
         this.eventBus.emit('bar:click', entry.artistId);
       }
     };

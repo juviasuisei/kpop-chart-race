@@ -333,22 +333,6 @@ export class ChartRaceRenderer {
 
     this.barsContainer.style.overflowY = zoomLevel === "all" ? "auto" : "hidden";
 
-    // For "all" view, ensure the container has enough scroll height for all bars.
-    // Absolutely-positioned bars don't contribute to scroll height, so we use
-    // a spacer element or set the container's internal height.
-    let spacer = this.barsContainer.querySelector('.chart-race__bars-spacer') as HTMLElement;
-    if (zoomLevel === "all") {
-      if (!spacer) {
-        spacer = document.createElement("div");
-        spacer.className = "chart-race__bars-spacer";
-        spacer.style.pointerEvents = "none";
-        this.barsContainer.appendChild(spacer);
-      }
-      spacer.style.height = `${yAccum}px`;
-    } else if (spacer) {
-      spacer.style.height = "0";
-    }
-
     const visibleIds = new Set(visibleEntries.map(e => e.artistId));
     const maxCumulative = visibleEntries.reduce(
       (max, e) => Math.max(max, e.cumulativeValue), 0);
@@ -992,7 +976,7 @@ export class ChartRaceRenderer {
     barEl.wrapper.style.transform = `translateY(${yPosition}px)`;
     barEl.wrapper.style.height = `${height}px`;
     barEl.wrapper.style.opacity = "1";
-    barEl.wrapper.style.zIndex = String(1000 - Math.round(yPosition));
+    barEl.wrapper.style.zIndex = String(Math.max(1, 1000 - Math.round(yPosition)));
 
     // Smart overflow: skip for goalposts (their elements are hidden)
     if (barEl.overflowTimeoutId !== null) {

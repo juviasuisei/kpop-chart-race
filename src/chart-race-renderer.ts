@@ -727,7 +727,9 @@ export class ChartRaceRenderer {
 
     if (isGoalpost) {
       // Goalpost mode: hide normal elements, show compact label
-      barEl.rankSpan.style.display = "none";
+      // Keep rank span taking space but invisible (so dashed line aligns with regular bars)
+      barEl.rankSpan.style.display = "";
+      barEl.rankSpan.style.visibility = "hidden";
       barEl.logo.style.display = "none";
       barEl.nameSpan.style.display = "none";
       barEl.genSpan.style.display = "none";
@@ -744,6 +746,7 @@ export class ChartRaceRenderer {
     } else {
       // Normal mode: show normal elements, hide goalpost label
       barEl.rankSpan.style.display = "";
+      barEl.rankSpan.style.visibility = "";
       barEl.logo.style.display = "";
       barEl.nameSpan.style.display = "";
       barEl.genSpan.style.display = "";

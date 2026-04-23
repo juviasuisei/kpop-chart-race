@@ -1151,10 +1151,10 @@ describe('Bugfix 0007: Bug Condition — Missing Pointer Cursor', () => {
     const secondZ2 = parseInt(getBar('Second').style.zIndex);
     const thirdZ2 = parseInt(getBar('Third').style.zIndex);
 
-    // Rising bar (Bottom) should have lower z-index than stationary bar (Third)
-    expect(bottomZ2).toBeLessThan(thirdZ2);
-    // Falling bar (Second) should have higher z-index than stationary bar (Third)
-    expect(secondZ2).toBeGreaterThan(thirdZ2);
+    // Rising bar (Bottom, was at high Y) should have HIGHER z-index (on top)
+    expect(bottomZ2).toBeGreaterThan(thirdZ2);
+    // Falling bar (Second, was at low Y) should have LOWER z-index (behind)
+    expect(secondZ2).toBeLessThan(thirdZ2);
 
     vi.advanceTimersByTime(3000);
     vi.useRealTimers();

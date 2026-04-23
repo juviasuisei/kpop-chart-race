@@ -1667,3 +1667,93 @@ describe('Z-index safety', () => {
     }
   });
 });
+
+describe('Goalpost phase 1 animation', () => {
+  let container: HTMLElement;
+  let renderer: ChartRaceRenderer;
+  let eventBus: EventBus;
+
+  beforeEach(() => {
+    container = document.createElement('div');
+    document.body.appendChild(container);
+    eventBus = new EventBus();
+    renderer = new ChartRaceRenderer(eventBus);
+  });
+
+  afterEach(() => {
+    renderer.destroy();
+    container.remove();
+  });
+
+  it('goalpost bars have CSS transitions during phase 1 (not transition:none)', () => {
+    vi.useFakeTimers();
+    renderer.mount(container);
+    const barsContainer = container.querySelector('.chart-race__bars')!;
+    Object.defineProperty(barsContainer, 'clientHeight', { value: 500, configurable: true });
+
+    // Day 1: goalpost exists
+    const day1 = [
+      makeEntry({ artistId: 'a1', artistName: 'Active', rank: 1, cumulativeValue: 1000, previousCumulativeValue: 900 }),
+      makeEntry({ artistId: 'a2', artistName: 'GP', rank: 2, cumulativeValue: 800, previousCumulativeValue: 700, isGoalpost: true }),
+      makeEntry({ artistId: 'a3', artistName: 'Active 2', rank: 3, cumulativeValue: 600, previousCumulativeValue: 500 }),
+    ];
+    renderer.update(makeSnapshot(day1), 'all', emptyDataStore);
+    vi.advanceTimersByTime(5000);
+
+    // Day 2: goalpost moves (values change, position changes)
+    const day2 = [
+      makeEntry({ artistId: 'a1', artistName: 'Active', rank: 1, cumulativeValue: 1100, previousCumulativeValue: 1000 }),
+      makeEntry({ artistId: 'a3', artistName: 'Active 2', rank: 2, cumulativeValue: 900, previousCumulativeValue: 600 }),
+      makeEntry({ artistId: 'a2', artistName: 'GP', rank: 3, cumulativeValue: 850, previousCumulativeValue: 800, isGoalpost: true }),
+    ];
+    renderer.update(makeSnapshot(day2), 'all', emptyDataStore);
+
+    // During phase 1: goalpost wrapper should have a transition (not "none")
+    const gpWrapper = Array.from(container.querySelectorAll('.chart-race__bar-wrapper'))
+      .find(w => w.classList.contains('chart-race__bar-wrapper--goalpost')) as HTMLElement;
+    expect(gpWrapper).toBeTruthy();
+    expect(gpWrapper.style.transition).not.toBe('none');
+
+    vi.advanceTimersByTime(5000);
+    vi.useRealTimers();
+  });
+
+  it('goalpost label rank updates after transition settles', () => {
+    vi.useFakeTimers();
+    renderer.mount(container);
+    const barsContainer = container.querySelector('.chart-race__bars')!;
+    Object.defineProperty(barsContainer, 'clientHeight', { value: 500, configurable: true });
+
+    // Day 1: goalpost at rank 2
+    const day1 = [
+      makeEntry({ artistId: 'a1', artistName: 'Active', rank: 1, cumulativeValue: 1000, previousCumulativeValue: 900 }),
+      makeEntry({ artistId: 'a2', artistName: 'GP Artist', rank: 2, cumulativeValue: 800, previousCumulativeValue: 700, isGoalpost: true }),
+      makeEntry({ artistId: 'a3', artistName: 'Active 2', rank: 3, cumulativeValue: 600, previousCumulativeValue: 500 }),
+    ];
+    renderer.update(makeSnapshot(day1), 'all', emptyDataStore);
+    vi.advanceTimersByTime(5000);
+
+    // Verify initial label has rank 2
+    let gpWrapper = Array.from(container.querySelectorAll('.chart-race__bar-wrapper'))
+      .find(w => w.classList.contains('chart-race__bar-wrapper--goalpost')) as HTMLElement;
+    let label = gpWrapper.querySelector('.bar__goalpost-label') as HTMLElement;
+    expect(label.textContent).toContain('#2');
+
+    // Day 2: goalpost moves to rank 3
+    const day2 = [
+      makeEntry({ artistId: 'a1', artistName: 'Active', rank: 1, cumulativeValue: 1100, previousCumulativeValue: 1000 }),
+      makeEntry({ artistId: 'a3', artistName: 'Active 2', rank: 2, cumulativeValue: 900, previousCumulativeValue: 600 }),
+      makeEntry({ artistId: 'a2', artistName: 'GP Artist', rank: 3, cumulativeValue: 850, previousCumulativeValue: 800, isGoalpost: true }),
+    ];
+    renderer.update(makeSnapshot(day2), 'all', emptyDataStore);
+
+    // After transition settles, label should show rank 3
+    vi.advanceTimersByTime(5000);
+    gpWrapper = Array.from(container.querySelectorAll('.chart-race__bar-wrapper'))
+      .find(w => w.classList.contains('chart-race__bar-wrapper--goalpost')) as HTMLElement;
+    label = gpWrapper.querySelector('.bar__goalpost-label') as HTMLElement;
+    expect(label.textContent).toContain('#3');
+
+    vi.useRealTimers();
+  });
+});

@@ -424,8 +424,8 @@ export class ChartRaceRenderer {
         barEl.wrapper.style.transition = `transform ${ZOOM_TRANSITION_MS}ms ease-in-out, height ${ZOOM_TRANSITION_MS}ms ease-in-out`;
         barEl.bar.style.transition = `width ${ZOOM_TRANSITION_MS}ms ease-in-out`;
       } else if (entry.isGoalpost && !becomingGoalpost.has(entry.artistId)) {
-        // Stable goalposts: no transition
-        barEl.wrapper.style.transition = "none";
+        // Stable goalposts: animate position, but not height/width
+        barEl.wrapper.style.transition = "transform 1.2s ease-in-out";
         barEl.bar.style.transition = "none";
       } else {
         // Normal transition speed
@@ -605,11 +605,10 @@ export class ChartRaceRenderer {
       this.rankTrackingFrameId = null;
     }
 
-    // Collect tracked bars (exclude hidden and goalpost bars)
+    // Collect tracked bars (exclude hidden, include goalposts)
     const trackedBars: BarElement[] = [];
     for (const [artistId, barEl] of this.bars) {
       if (!visibleArtistIds.has(artistId) || barEl.hidden) continue;
-      if (barEl.wrapper.classList.contains("chart-race__bar-wrapper--goalpost")) continue;
       trackedBars.push(barEl);
     }
 
@@ -632,9 +631,23 @@ export class ChartRaceRenderer {
       // Assign ranks based on visual order
       for (let i = 0; i < barPositions.length; i++) {
         const rank = allRanks[i] ?? (i + 1);
-        const label = `#${rank}`;
-        if (barPositions[i].barEl.rankSpan.textContent !== label) {
-          barPositions[i].barEl.rankSpan.textContent = label;
+        const { barEl } = barPositions[i];
+        const isGoalpost = barEl.wrapper.classList.contains("chart-race__bar-wrapper--goalpost");
+
+        if (isGoalpost) {
+          // Update rank inside goalpost label: replace #N at the start
+          const label = barEl.goalpostLabel;
+          const currentText = label.textContent ?? "";
+          const newPrefix = `#${rank}`;
+          const oldPrefixMatch = currentText.match(/^#\d+/);
+          if (oldPrefixMatch && oldPrefixMatch[0] !== newPrefix) {
+            label.textContent = currentText.replace(/^#\d+/, newPrefix);
+          }
+        } else {
+          const label = `#${rank}`;
+          if (barEl.rankSpan.textContent !== label) {
+            barEl.rankSpan.textContent = label;
+          }
         }
       }
 
@@ -650,9 +663,16 @@ export class ChartRaceRenderer {
       cancelAnimationFrame(this.rankTrackingFrameId);
       this.rankTrackingFrameId = null;
     }
-    // Set final rank values (skip goalpost bars — they show rank in the label)
+    // Set final rank values
     for (const [, barEl] of this.bars) {
-      if (!barEl.hidden && !barEl.wrapper.classList.contains("chart-race__bar-wrapper--goalpost")) {
+      if (barEl.hidden) continue;
+      const isGoalpost = barEl.wrapper.classList.contains("chart-race__bar-wrapper--goalpost");
+      if (isGoalpost) {
+        // Update rank in goalpost label
+        const currentText = barEl.goalpostLabel.textContent ?? "";
+        const newPrefix = `#${barEl.targetRank}`;
+        barEl.goalpostLabel.textContent = currentText.replace(/^#\d+/, newPrefix);
+      } else {
         barEl.rankSpan.textContent = `#${barEl.targetRank}`;
       }
     }
@@ -903,10 +923,6 @@ export class ChartRaceRenderer {
       barEl.goalpostLabel.textContent = `#${entry.rank} · ${entry.artistName} · ${Math.round(entry.cumulativeValue).toLocaleString()}${winsText}`;
       barEl.goalpostLabel.style.display = "inline";
       barEl.goalpostLabel.style.color = ARTIST_TYPE_COLORS[entry.artistType];
-
-      // Goalposts have no animations — snap to position instantly
-      barEl.wrapper.style.transition = "none";
-      barEl.bar.style.transition = "none";
     } else {
       // Normal mode: show normal elements, hide goalpost label
       barEl.rankSpan.style.display = "";

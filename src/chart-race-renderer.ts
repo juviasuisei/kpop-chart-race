@@ -349,10 +349,10 @@ export class ChartRaceRenderer {
       }
 
       // Set scrubbing transitions
-      if (this.scrubbing) {
+      if (this.scrubbing || entry.isGoalpost) {
         barEl.wrapper.style.transition = "none";
         barEl.bar.style.transition = "none";
-        barEl.wrapper.offsetHeight; // force reflow
+        if (this.scrubbing) barEl.wrapper.offsetHeight; // force reflow
       } else {
         // Ensure transitions are enabled (clears any leftover inline overrides)
         barEl.wrapper.style.transition = "";
@@ -725,6 +725,10 @@ export class ChartRaceRenderer {
       barEl.goalpostLabel.textContent = `#${entry.rank} · ${entry.artistName} · ${Math.round(entry.cumulativeValue).toLocaleString()}${winsText}`;
       barEl.goalpostLabel.style.display = "inline";
       barEl.goalpostLabel.style.color = ARTIST_TYPE_COLORS[entry.artistType];
+
+      // Goalposts have no animations — snap to position instantly
+      barEl.wrapper.style.transition = "none";
+      barEl.bar.style.transition = "none";
     } else {
       // Normal mode: show normal elements, hide goalpost label
       barEl.rankSpan.style.display = "";
@@ -820,8 +824,8 @@ export class ChartRaceRenderer {
       }
     }
 
-    // Numeric value tweening (snap in scrub mode)
-    if (this.scrubbing) {
+    // Numeric value tweening (snap in scrub mode or goalpost mode)
+    if (this.scrubbing || isGoalpost) {
       barEl.valueSpan.textContent = Math.round(entry.cumulativeValue).toLocaleString();
       barEl.currentDisplayValue = entry.cumulativeValue;
       // Cancel any running tween

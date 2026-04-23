@@ -181,6 +181,7 @@ export function computeSnapshot(
       rank: 0, // will be assigned after sorting
       previousRank,
       featuredRelease,
+      isGoalpost: false,
     });
   }
 

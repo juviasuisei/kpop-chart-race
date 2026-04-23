@@ -141,9 +141,11 @@ export function filterByActivity(
 
   // Goalpost: for each included entry, if the entry immediately above is
   // inactive and not yet included, include it as a goalpost (one per active)
+  const goalpostIndices = new Set<number>();
   for (let i = 1; i < entries.length; i++) {
     if (include[i] && !include[i - 1] && !isActive(entries[i - 1])) {
       include[i - 1] = true;
+      goalpostIndices.add(i - 1);
     }
   }
 
@@ -152,7 +154,10 @@ export function filterByActivity(
   for (let i = 0; i < entries.length; i++) {
     if (result.length >= 10) break;
     if (include[i]) {
-      result.push(entries[i]);
+      result.push({
+        ...entries[i],
+        isGoalpost: goalpostIndices.has(i),
+      });
     }
   }
 
@@ -161,7 +166,7 @@ export function filterByActivity(
     for (let i = 0; i < entries.length; i++) {
       if (result.length >= 10) break;
       if (!include[i]) {
-        result.push(entries[i]);
+        result.push({ ...entries[i], isGoalpost: false });
       }
     }
   }

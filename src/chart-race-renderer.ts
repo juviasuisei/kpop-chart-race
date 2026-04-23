@@ -52,6 +52,8 @@ interface BarElement {
   valueSpan: HTMLSpanElement;
   releaseSpan: HTMLSpanElement;
   winsSpan: HTMLSpanElement;
+  /** Compact label shown when bar is in goalpost mode */
+  goalpostLabel: HTMLSpanElement;
   currentDisplayValue: number;
   animationFrameId: number | null;
   overflowTimeoutId: ReturnType<typeof setTimeout> | null;
@@ -257,10 +259,28 @@ export class ChartRaceRenderer {
     // 1. Get visible entries
     const visibleEntries = filterByActivity(snapshot.entries, snapshot.date, dataStore, zoomLevel);
     const containerHeight = this.barsContainer.clientHeight || this.barsContainer.offsetHeight;
-    const barHeight =
+
+    // Compute bar heights: goalposts get a fixed small height, regular bars share the rest
+    // In zoom 10, always divide by 10 slots (some may be empty) minus goalpost slots
+    const GOALPOST_HEIGHT = 16;
+    const goalpostCount = zoomLevel === 10 ? visibleEntries.filter(e => e.isGoalpost).length : 0;
+    const regularSlots = 10 - goalpostCount;
+    const remainingHeight = containerHeight - (goalpostCount * GOALPOST_HEIGHT);
+    const regularBarHeight =
       zoomLevel === 10
-        ? (containerHeight > 0 ? containerHeight / 10 : 50)
+        ? (regularSlots > 0 && remainingHeight > 0 ? remainingHeight / regularSlots : 50)
         : BAR_HEIGHT_ALL;
+
+    // Build a Y-offset map: each entry gets a cumulative Y position
+    const yOffsets: number[] = [];
+    const heights: number[] = [];
+    let yAccum = 0;
+    for (const entry of visibleEntries) {
+      const h = (zoomLevel === 10 && entry.isGoalpost) ? GOALPOST_HEIGHT : regularBarHeight;
+      yOffsets.push(yAccum);
+      heights.push(h);
+      yAccum += h;
+    }
 
     this.barsContainer.style.overflowY = zoomLevel === "all" ? "auto" : "hidden";
 
@@ -285,7 +305,7 @@ export class ChartRaceRenderer {
         barEl.bar.style.transition = "none";
         const bottomY = containerHeight > 0 ? containerHeight : 500;
         barEl.wrapper.style.transform = `translateY(${bottomY}px)`;
-        barEl.wrapper.style.height = `${barHeight}px`;
+        barEl.wrapper.style.height = `${heights[visIdx]}px`;
         barEl.wrapper.style.opacity = "1";
         barEl.bar.style.width = "0%";
         barEl.wrapper.offsetHeight; // force reflow
@@ -320,8 +340,8 @@ export class ChartRaceRenderer {
         } else {
           barEl.wrapper.style.transition = "none";
           barEl.bar.style.transition = "none";
-          barEl.wrapper.style.transform = `translateY(${visIdx * barHeight}px)`;
-          barEl.wrapper.style.height = `${barHeight}px`;
+          barEl.wrapper.style.transform = `translateY(${yOffsets[visIdx]}px)`;
+          barEl.wrapper.style.height = `${heights[visIdx]}px`;
           barEl.wrapper.style.opacity = "1";
           barEl.wrapper.offsetHeight; // force reflow
           barEl.wrapper.style.transition = "";
@@ -341,7 +361,7 @@ export class ChartRaceRenderer {
       }
 
       // 5. Update bar element (position, width, value, etc.)
-      this.updateBarElement(barEl, entry, barHeight, maxCumulative, snapshot.date, dataStore, visIdx);
+      this.updateBarElement(barEl, entry, yOffsets[visIdx], heights[visIdx], maxCumulative, snapshot.date, dataStore);
       visIdx++;
     }
 
@@ -638,10 +658,15 @@ export class ChartRaceRenderer {
     const wipeCover = document.createElement("div");
     wipeCover.className = "bar__wipe-cover";
 
+    // Goalpost label — compact summary shown when bar is in goalpost mode
+    const goalpostLabel = document.createElement("span");
+    goalpostLabel.className = "bar__goalpost-label";
+
     wrapper.appendChild(rankSpan);
     wrapper.appendChild(bar);
     wrapper.appendChild(valueSpan);
     wrapper.appendChild(winsSpan);
+    wrapper.appendChild(goalpostLabel);
     wrapper.appendChild(wipeCover);
 
     const clickHandler = (e: Event) => {
@@ -664,6 +689,7 @@ export class ChartRaceRenderer {
       valueSpan,
       releaseSpan,
       winsSpan,
+      goalpostLabel,
       currentDisplayValue: entry.previousCumulativeValue,
       animationFrameId: null,
       overflowTimeoutId: null,
@@ -678,11 +704,11 @@ export class ChartRaceRenderer {
   private updateBarElement(
     barEl: BarElement,
     entry: RankedEntry,
-    barHeight: number,
+    yPosition: number,
+    height: number,
     maxCumulative: number,
     snapshotDate: string,
     dataStore: DataStore,
-    visualIndex: number,
   ): void {
     // Store target rank — actual rank text is updated by the rank tracking loop
     barEl.targetRank = entry.rank;
@@ -691,6 +717,41 @@ export class ChartRaceRenderer {
     barEl.genSpan.textContent = toRomanNumeral(entry.generation);
     barEl.typeIndicator.textContent = ARTIST_TYPE_INDICATORS[entry.artistType];
     barEl.bar.style.backgroundColor = ARTIST_TYPE_COLORS[entry.artistType];
+
+    // Toggle goalpost mode
+    const isGoalpost = !!entry.isGoalpost;
+    barEl.wrapper.classList.toggle("chart-race__bar-wrapper--goalpost", isGoalpost);
+    barEl.bar.classList.toggle("chart-race__bar--goalpost", isGoalpost);
+
+    if (isGoalpost) {
+      // Goalpost mode: hide normal elements, show compact label
+      barEl.rankSpan.style.display = "none";
+      barEl.logo.style.display = "none";
+      barEl.nameSpan.style.display = "none";
+      barEl.genSpan.style.display = "none";
+      barEl.typeIndicator.style.display = "none";
+      barEl.releaseSpan.style.display = "none";
+      barEl.valueSpan.style.display = "none";
+      barEl.winsSpan.style.display = "none";
+
+      // Build compact label: #X · Artist · Points · N wins
+      const totalWins = computeTotalWins(entry.artistId, snapshotDate, dataStore);
+      const winsText = totalWins > 0 ? ` · ${totalWins} ${totalWins === 1 ? "win" : "wins"}` : "";
+      barEl.goalpostLabel.textContent = `#${entry.rank} · ${entry.artistName} · ${Math.round(entry.cumulativeValue).toLocaleString()}${winsText}`;
+      barEl.goalpostLabel.style.display = "";
+      barEl.goalpostLabel.style.color = ARTIST_TYPE_COLORS[entry.artistType];
+    } else {
+      // Normal mode: show normal elements, hide goalpost label
+      barEl.rankSpan.style.display = "";
+      barEl.logo.style.display = "";
+      barEl.nameSpan.style.display = "";
+      barEl.genSpan.style.display = "";
+      barEl.typeIndicator.style.display = "";
+      barEl.releaseSpan.style.display = "";
+      barEl.valueSpan.style.display = "";
+      barEl.winsSpan.style.display = "";
+      barEl.goalpostLabel.style.display = "none";
+    }
 
     // Update logo if changed
     if (barEl.logo.src !== entry.logoUrl && !barEl.logo.src.startsWith("data:")) {
@@ -728,10 +789,9 @@ export class ChartRaceRenderer {
     const oldWidth = barEl.bar.style.width;
     barEl.bar.style.width = `${widthPercent}%`;
 
-    // Bar position via translateY (use visual index for contiguous positioning)
-    const yPosition = visualIndex * barHeight;
+    // Bar position via translateY
     barEl.wrapper.style.transform = `translateY(${yPosition}px)`;
-    barEl.wrapper.style.height = `${barHeight}px`;
+    barEl.wrapper.style.height = `${height}px`;
     barEl.wrapper.style.opacity = "1";
     // Higher rank (lower number) = higher z-index so rising bars overlap falling ones
     barEl.wrapper.style.zIndex = String(1000 - entry.rank);

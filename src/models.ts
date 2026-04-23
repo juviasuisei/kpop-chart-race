@@ -60,6 +60,8 @@ export interface RankedEntry {
   rank: number;
   previousRank: number;
   featuredRelease: FeaturedReleaseInfo;
+  /** True if this entry is included only as a goalpost (inactive target above an active artist) */
+  isGoalpost: boolean;
 }
 
 /** A snapshot of the chart state for a given date */

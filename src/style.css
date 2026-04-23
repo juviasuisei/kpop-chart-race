@@ -75,6 +75,33 @@ body {
   pointer-events: none;
 }
 
+/* ===== Goalpost Bar ===== */
+
+.chart-race__bar-wrapper--goalpost {
+  align-items: center;
+  padding: 0;
+}
+
+.chart-race__bar--goalpost {
+  height: 2px !important;
+  border-radius: 0;
+  padding: 0;
+  border: none;
+  background: transparent !important;
+  border-top: 2px dashed;
+  overflow: visible;
+}
+
+.bar__goalpost-label {
+  font-size: 0.7rem;
+  font-weight: 400;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-left: 0.5rem;
+  display: none;
+}
+
 .chart-race__bar {
   position: relative;
   display: flex;

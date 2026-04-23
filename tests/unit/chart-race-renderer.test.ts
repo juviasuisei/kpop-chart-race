@@ -25,6 +25,7 @@ function makeEntry(overrides: Partial<RankedEntry> = {}): RankedEntry {
     rank: 1,
     previousRank: 1,
     featuredRelease: { title: 'Starlight', releaseId: 'starlight' },
+    isGoalpost: false,
     ...overrides,
   };
 }

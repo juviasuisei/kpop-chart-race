@@ -79,6 +79,8 @@ export class ChartRaceRenderer {
   private seenArtists: Set<string> = new Set();
   /** Last known Y positions for bars removed from DOM (for smooth reappearance) */
   private lastKnownY: Map<string, number> = new Map();
+  /** Previous zoom level for detecting zoom changes */
+  private previousZoom: ZoomLevel | null = null;
   /** rAF ID for the rank tracking loop during phase 1 */
   private rankTrackingFrameId: number | null = null;
 
@@ -252,6 +254,11 @@ export class ChartRaceRenderer {
       this.phase2TimeoutId = null;
     }
 
+    // Detect zoom change for faster transition
+    const isZoomChange = this.previousZoom !== null && this.previousZoom !== zoomLevel;
+    this.previousZoom = zoomLevel;
+    const ZOOM_TRANSITION_MS = 400; // fast transition for zoom toggles
+
     // Update date display
     this.dateDisplay.textContent = snapshot.date;
 
@@ -359,8 +366,13 @@ export class ChartRaceRenderer {
 
         // Enable transitions (unless scrubbing)
         if (!this.scrubbing) {
-          barEl.wrapper.style.transition = "";
-          barEl.bar.style.transition = "";
+          if (isZoomChange) {
+            barEl.wrapper.style.transition = `transform ${ZOOM_TRANSITION_MS}ms ease-in-out, height ${ZOOM_TRANSITION_MS}ms ease-in-out`;
+            barEl.bar.style.transition = `width ${ZOOM_TRANSITION_MS}ms ease-in-out`;
+          } else {
+            barEl.wrapper.style.transition = "";
+            barEl.bar.style.transition = "";
+          }
         }
       } else if (barEl.hidden) {
         // 4. Restore hidden bar: cancel timeouts, re-attach, place at target
@@ -396,13 +408,17 @@ export class ChartRaceRenderer {
         }
       }
 
-      // Set scrubbing transitions
+      // Set transitions
       if (this.scrubbing || entry.isGoalpost) {
         barEl.wrapper.style.transition = "none";
         barEl.bar.style.transition = "none";
         if (this.scrubbing) barEl.wrapper.offsetHeight; // force reflow
+      } else if (isZoomChange) {
+        // Fast transition for zoom toggles
+        barEl.wrapper.style.transition = `transform ${ZOOM_TRANSITION_MS}ms ease-in-out, height ${ZOOM_TRANSITION_MS}ms ease-in-out`;
+        barEl.bar.style.transition = `width ${ZOOM_TRANSITION_MS}ms ease-in-out`;
       } else {
-        // Ensure transitions are enabled (clears any leftover inline overrides)
+        // Normal transition speed
         barEl.wrapper.style.transition = "";
         barEl.bar.style.transition = "";
       }
@@ -460,9 +476,10 @@ export class ChartRaceRenderer {
     }
 
     // 8. Emit update:complete after transition duration (or immediately if scrubbing)
+    const phase1Duration = isZoomChange ? ZOOM_TRANSITION_MS : 2880;
     if (this.scrubbing) {
       this.eventBus.emit("update:complete");
-    } else if (hasPhase2Work) {
+    } else if (hasPhase2Work && !isZoomChange) {
       // Phase 1 complete → execute phase 2 (goalpost state changes)
       this.phase2TimeoutId = setTimeout(() => {
         this.phase2TimeoutId = null;
@@ -560,7 +577,7 @@ export class ChartRaceRenderer {
         this.phase2TimeoutId = null;
         this.stopRankTracking();
         this.eventBus.emit("update:complete");
-      }, 2880);
+      }, phase1Duration);
     }
   }
 

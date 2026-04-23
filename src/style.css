@@ -94,6 +94,7 @@ body {
   display: none;
   flex-shrink: 1;
   min-width: 0;
+  cursor: pointer;
 }
 
 .chart-race__bar {

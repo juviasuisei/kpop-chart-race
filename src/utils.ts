@@ -140,13 +140,17 @@ export function filterByActivity(
   }
 
   // Goalpost: for each included entry, if the entry immediately above is
-  // inactive and not yet included, mark it as a goalpost candidate
+  // inactive and not yet included, mark it as a goalpost candidate.
+  // Only apply goalpost logic when there are more than 10 entries —
+  // if everyone fits in 10 regular slots, no goalposts are needed.
   const goalpostIndices = new Set<number>();
-  for (let i = 1; i < entries.length; i++) {
-    if (include[i] && !include[i - 1] && !isActive(entries[i - 1])) {
-      goalpostIndices.add(i - 1);
-      // Also include the goalpost so it chains (goalpost of goalpost)
-      include[i - 1] = true;
+  if (entries.length > 10) {
+    for (let i = 1; i < entries.length; i++) {
+      if (include[i] && !include[i - 1] && !isActive(entries[i - 1])) {
+        goalpostIndices.add(i - 1);
+        // Also include the goalpost so it chains (goalpost of goalpost)
+        include[i - 1] = true;
+      }
     }
   }
 

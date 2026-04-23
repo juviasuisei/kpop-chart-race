@@ -485,6 +485,46 @@ describe('filterByActivity — goalpost logic', () => {
       expect(gp.rank).toBeLessThan(lastRegularRank);
     }
   });
+
+  it('no goalposts when total entries fit within 10 regular slots', () => {
+    // 7 entries: ranks 1, 3, 5 active; rest inactive
+    // Only 7 artists total — all fit as regular bars, no goalposts needed
+    const entries = makeRankedEntries(7);
+    const ds = makeActivityDataStore(
+      entries.map(e => {
+        const rankNum = parseInt(e.artistId.replace('a', ''));
+        const isActive = rankNum === 1 || rankNum === 3 || rankNum === 5;
+        return { id: e.artistId, activityDate: isActive ? recentDate : oldDate };
+      }),
+    );
+    const result = filterByActivity(entries, snapshotDate, ds, 10);
+
+    // All entries should be regular bars — no goalposts
+    const goalposts = result.filter(r => r.isGoalpost);
+    expect(goalposts.length).toBe(0);
+
+    // All 7 should be included as regulars
+    const regulars = result.filter(r => !r.isGoalpost);
+    expect(regulars.length).toBe(7);
+  });
+
+  it('no goalposts when exactly 10 entries exist', () => {
+    // 10 entries: ranks 1, 5 active; rest inactive
+    // Exactly 10 artists — all fit as regular bars, no goalposts needed
+    const entries = makeRankedEntries(10);
+    const ds = makeActivityDataStore(
+      entries.map(e => {
+        const rankNum = parseInt(e.artistId.replace('a', ''));
+        const isActive = rankNum === 1 || rankNum === 5;
+        return { id: e.artistId, activityDate: isActive ? recentDate : oldDate };
+      }),
+    );
+    const result = filterByActivity(entries, snapshotDate, ds, 10);
+
+    const goalposts = result.filter(r => r.isGoalpost);
+    expect(goalposts.length).toBe(0);
+    expect(result.length).toBe(10);
+  });
 });
 
 // ============================================================

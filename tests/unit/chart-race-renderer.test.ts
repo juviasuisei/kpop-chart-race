@@ -1757,3 +1757,103 @@ describe('Goalpost phase 1 animation', () => {
     vi.useRealTimers();
   });
 });
+
+// ═══════════════════════════════════════════════════════════════════
+// Whitespace click should NOT emit bar:click
+// ═══════════════════════════════════════════════════════════════════
+
+describe('Whitespace click does not select a bar row', () => {
+  let container: HTMLElement;
+  let renderer: ChartRaceRenderer;
+  let eventBus: EventBus;
+
+  beforeEach(() => {
+    container = document.createElement('div');
+    document.body.appendChild(container);
+    eventBus = new EventBus();
+    renderer = new ChartRaceRenderer(eventBus);
+  });
+
+  afterEach(() => {
+    renderer.destroy();
+    container.remove();
+  });
+
+  it('clicking directly on the bar wrapper (whitespace) does NOT emit bar:click', () => {
+    renderer.mount(container);
+    const barsContainer = container.querySelector('.chart-race__bars')!;
+    Object.defineProperty(barsContainer, 'clientHeight', { value: 500, configurable: true });
+
+    const snapshot = makeSnapshot([
+      makeEntry({ artistId: 'artist-a', artistName: 'Artist A', rank: 1, cumulativeValue: 600 }),
+    ]);
+    renderer.update(snapshot, 10, emptyDataStore);
+
+    const emitted: string[] = [];
+    eventBus.on('bar:click', (artistId: string) => emitted.push(artistId));
+
+    // Click the wrapper element itself (simulates clicking whitespace in the row)
+    const wrapper = container.querySelector('.chart-race__bar-wrapper') as HTMLElement;
+    wrapper.click();
+
+    expect(emitted).toEqual([]);
+  });
+
+  it('clicking a child element inside the bar wrapper DOES emit bar:click', () => {
+    renderer.mount(container);
+    const barsContainer = container.querySelector('.chart-race__bars')!;
+    Object.defineProperty(barsContainer, 'clientHeight', { value: 500, configurable: true });
+
+    const snapshot = makeSnapshot([
+      makeEntry({ artistId: 'artist-a', artistName: 'Artist A', rank: 1, cumulativeValue: 600 }),
+    ]);
+    renderer.update(snapshot, 10, emptyDataStore);
+
+    const emitted: string[] = [];
+    eventBus.on('bar:click', (artistId: string) => emitted.push(artistId));
+
+    // Click the colored bar (a child of the wrapper)
+    const bar = container.querySelector('.chart-race__bar') as HTMLElement;
+    bar.click();
+
+    expect(emitted).toEqual(['artist-a']);
+  });
+
+  it('clicking the value span emits bar:click (child of wrapper)', () => {
+    renderer.mount(container);
+    const barsContainer = container.querySelector('.chart-race__bars')!;
+    Object.defineProperty(barsContainer, 'clientHeight', { value: 500, configurable: true });
+
+    const snapshot = makeSnapshot([
+      makeEntry({ artistId: 'artist-b', artistName: 'Artist B', rank: 1, cumulativeValue: 800 }),
+    ]);
+    renderer.update(snapshot, 10, emptyDataStore);
+
+    const emitted: string[] = [];
+    eventBus.on('bar:click', (artistId: string) => emitted.push(artistId));
+
+    const valueSpan = container.querySelector('.bar__value') as HTMLElement;
+    valueSpan.click();
+
+    expect(emitted).toEqual(['artist-b']);
+  });
+
+  it('clicking the rank span emits bar:click (child of wrapper)', () => {
+    renderer.mount(container);
+    const barsContainer = container.querySelector('.chart-race__bars')!;
+    Object.defineProperty(barsContainer, 'clientHeight', { value: 500, configurable: true });
+
+    const snapshot = makeSnapshot([
+      makeEntry({ artistId: 'artist-c', artistName: 'Artist C', rank: 1, cumulativeValue: 500 }),
+    ]);
+    renderer.update(snapshot, 10, emptyDataStore);
+
+    const emitted: string[] = [];
+    eventBus.on('bar:click', (artistId: string) => emitted.push(artistId));
+
+    const rankSpan = container.querySelector('.bar__rank') as HTMLElement;
+    rankSpan.click();
+
+    expect(emitted).toEqual(['artist-c']);
+  });
+});

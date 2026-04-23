@@ -840,7 +840,13 @@ export class ChartRaceRenderer {
     wrapper.appendChild(goalpostLabel);
     wrapper.appendChild(wipeCover);
 
-    const clickHandler = () => {
+    const clickHandler = (e: Event) => {
+      const target = e.target as HTMLElement;
+      // Only emit bar:click when clicking actual bar content, not empty
+      // wrapper whitespace. The wrapper spans the full row width, so
+      // clicks on the blank area to the right of the bar should close
+      // the detail panel instead of selecting this row.
+      if (target === wrapper) return;
       this.eventBus.emit('bar:click', entry.artistId);
     };
     wrapper.addEventListener('click', clickHandler);

@@ -163,8 +163,10 @@ async function main(): Promise<void> {
   if (chartRaceEl) {
     chartRaceEl.addEventListener("click", (event) => {
       const target = event.target as HTMLElement;
-      // Only skip if clicking the colored bar, value text, or release text
-      if (target.closest(".chart-race__bar-wrapper")) return;
+      // Skip if clicking actual bar content (not the wrapper itself — the
+      // wrapper spans the full row, so direct clicks on it are whitespace).
+      const wrapper = target.closest(".chart-race__bar-wrapper");
+      if (wrapper && target !== wrapper) return;
       if (target.closest(".detail-panel")) return;
       if (detailPanel.isOpen()) {
         detailPanel.close();

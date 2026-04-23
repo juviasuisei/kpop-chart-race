@@ -301,14 +301,17 @@ export class ChartRaceRenderer {
         ? (phase1RemainingHeight > 0 ? phase1RemainingHeight / 10 : 50)
         : BAR_HEIGHT_ALL;
 
-    // Phase 1 Y-offsets: use current state for transitioning bars
+    // Phase 1 Y-offsets: use current state for transitioning bars (unless zoom change)
     const yOffsets: number[] = [];
     const heights: number[] = [];
     let yAccum = 0;
     for (const entry of visibleEntries) {
       let h: number;
       if (zoomLevel !== "all") {
-        if (becomingGoalpost.has(entry.artistId)) {
+        if (isZoomChange) {
+          // During zoom change, use target heights directly (no deferral)
+          h = entry.isGoalpost ? GOALPOST_HEIGHT : phase1RegularBarHeight;
+        } else if (becomingGoalpost.has(entry.artistId)) {
           h = phase1RegularBarHeight; // stays full during phase 1
         } else if (leavingGoalpost.has(entry.artistId)) {
           h = GOALPOST_HEIGHT; // stays small during phase 1
@@ -409,14 +412,18 @@ export class ChartRaceRenderer {
       }
 
       // Set transitions
-      if (this.scrubbing || entry.isGoalpost) {
+      if (this.scrubbing) {
         barEl.wrapper.style.transition = "none";
         barEl.bar.style.transition = "none";
-        if (this.scrubbing) barEl.wrapper.offsetHeight; // force reflow
+        barEl.wrapper.offsetHeight; // force reflow
       } else if (isZoomChange) {
-        // Fast transition for zoom toggles
+        // Fast transition for zoom toggles (including goalposts changing state)
         barEl.wrapper.style.transition = `transform ${ZOOM_TRANSITION_MS}ms ease-in-out, height ${ZOOM_TRANSITION_MS}ms ease-in-out`;
         barEl.bar.style.transition = `width ${ZOOM_TRANSITION_MS}ms ease-in-out`;
+      } else if (entry.isGoalpost && !becomingGoalpost.has(entry.artistId)) {
+        // Stable goalposts: no transition
+        barEl.wrapper.style.transition = "none";
+        barEl.bar.style.transition = "none";
       } else {
         // Normal transition speed
         barEl.wrapper.style.transition = "";
@@ -424,8 +431,9 @@ export class ChartRaceRenderer {
       }
 
       // 5. Update bar element (position, width, value, etc.)
-      // For bars changing goalpost state, keep current appearance during phase 1
-      const phase1GoalpostOverride = becomingGoalpost.has(entry.artistId) ? false
+      // For bars changing goalpost state: defer during normal playback, apply immediately during zoom change
+      const phase1GoalpostOverride = isZoomChange ? undefined
+        : becomingGoalpost.has(entry.artistId) ? false
         : leavingGoalpost.has(entry.artistId) ? true
         : undefined;
       this.updateBarElement(barEl, entry, yOffsets[visIdx], heights[visIdx], maxCumulative, snapshot.date, dataStore, phase1GoalpostOverride);
@@ -811,6 +819,11 @@ export class ChartRaceRenderer {
 
     const clickHandler = (e: Event) => {
       const target = e.target as HTMLElement;
+      // For goalpost bars, any click on the wrapper triggers the detail panel
+      if (wrapper.classList.contains('chart-race__bar-wrapper--goalpost')) {
+        this.eventBus.emit('bar:click', entry.artistId);
+        return;
+      }
       if (target.closest('.chart-race__bar') || target.classList.contains('bar__value') || target.classList.contains('bar__release') || target.classList.contains('bar__name') || target.classList.contains('bar__gen') || target.classList.contains('bar__type-indicator') || target.classList.contains('bar__wins') || target.classList.contains('bar__rank') || target.classList.contains('bar__goalpost-label')) {
         this.eventBus.emit('bar:click', entry.artistId);
       }

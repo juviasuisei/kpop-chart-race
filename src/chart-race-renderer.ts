@@ -831,12 +831,18 @@ export class ChartRaceRenderer {
       barEl.bar.style.width = `${widthPercent}%`;
     }
 
+    // Read STARTING Y position BEFORE setting the new transform
+    // so z-index reflects where the bar IS, not where it's going.
+    // Rising bars go behind stationary bars, falling bars stay on top.
+    const prevTransform = barEl.wrapper.style.transform;
+    const prevYMatch = prevTransform.match(/translateY\(([0-9.]+)px\)/);
+    const startingY = prevYMatch ? parseFloat(prevYMatch[1]) : yPosition;
+
     // Bar position via translateY
     barEl.wrapper.style.transform = `translateY(${yPosition}px)`;
     barEl.wrapper.style.height = `${height}px`;
     barEl.wrapper.style.opacity = "1";
-    // Higher rank (lower number) = higher z-index so rising bars overlap falling ones
-    barEl.wrapper.style.zIndex = String(1000 - entry.rank);
+    barEl.wrapper.style.zIndex = String(1000 - Math.round(startingY));
 
     // Smart overflow: skip for goalposts (their elements are hidden)
     if (barEl.overflowTimeoutId !== null) {

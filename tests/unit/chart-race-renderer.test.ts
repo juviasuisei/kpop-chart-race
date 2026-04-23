@@ -1115,6 +1115,51 @@ describe('Bugfix 0007: Bug Condition — Missing Pointer Cursor', () => {
   // Rank tracking during transitions
   // ═══════════════════════════════════════════════════════════════════
 
+  it('z-index based on starting position so rising bars go behind falling bars', () => {
+    vi.useFakeTimers();
+    renderer.mount(container);
+    const barsContainer = container.querySelector('.chart-race__bars')!;
+    Object.defineProperty(barsContainer, 'clientHeight', { value: 500, configurable: true });
+
+    const getBar = (name: string) =>
+      Array.from(container.querySelectorAll('.chart-race__bar-wrapper'))
+        .find(w => w.querySelector('.bar__name')?.textContent === name) as HTMLElement;
+
+    // Day 1: a1=#1 (top), a2=#2, a3=#3, a4=#4 (bottom)
+    const day1 = [
+      makeEntry({ artistId: 'a1', artistName: 'Top', rank: 1, cumulativeValue: 1000, previousCumulativeValue: 900 }),
+      makeEntry({ artistId: 'a2', artistName: 'Second', rank: 2, cumulativeValue: 800, previousCumulativeValue: 700 }),
+      makeEntry({ artistId: 'a3', artistName: 'Third', rank: 3, cumulativeValue: 600, previousCumulativeValue: 500 }),
+      makeEntry({ artistId: 'a4', artistName: 'Bottom', rank: 4, cumulativeValue: 400, previousCumulativeValue: 300 }),
+    ];
+    renderer.update(makeSnapshot(day1), 'all', emptyDataStore);
+    vi.advanceTimersByTime(3000);
+
+    // Day 2: Bottom rises to #2, Second drops to #4
+    const day2 = [
+      makeEntry({ artistId: 'a1', artistName: 'Top', rank: 1, cumulativeValue: 1100, previousCumulativeValue: 1000 }),
+      makeEntry({ artistId: 'a4', artistName: 'Bottom', rank: 2, cumulativeValue: 1050, previousCumulativeValue: 400 }),
+      makeEntry({ artistId: 'a3', artistName: 'Third', rank: 3, cumulativeValue: 700, previousCumulativeValue: 600 }),
+      makeEntry({ artistId: 'a2', artistName: 'Second', rank: 4, cumulativeValue: 650, previousCumulativeValue: 800 }),
+    ];
+    renderer.update(makeSnapshot(day2), 'all', emptyDataStore);
+
+    // IMMEDIATELY after update (during transition):
+    // Bottom was at position 4 (high Y) → should have LOW z-index (goes behind others)
+    // Second was at position 2 (low Y) → should have HIGH z-index (stays on top)
+    const bottomZ2 = parseInt(getBar('Bottom').style.zIndex);
+    const secondZ2 = parseInt(getBar('Second').style.zIndex);
+    const thirdZ2 = parseInt(getBar('Third').style.zIndex);
+
+    // Rising bar (Bottom) should have lower z-index than stationary bar (Third)
+    expect(bottomZ2).toBeLessThan(thirdZ2);
+    // Falling bar (Second) should have higher z-index than stationary bar (Third)
+    expect(secondZ2).toBeGreaterThan(thirdZ2);
+
+    vi.advanceTimersByTime(3000);
+    vi.useRealTimers();
+  });
+
   it('rank display starts from previous rank, not target rank, when bars reorder', () => {
     vi.useFakeTimers();
     renderer.mount(container);

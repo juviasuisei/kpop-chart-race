@@ -261,14 +261,13 @@ export class ChartRaceRenderer {
     const containerHeight = this.barsContainer.clientHeight || this.barsContainer.offsetHeight;
 
     // Compute bar heights: goalposts get a fixed small height, regular bars share the rest
-    // In zoom 10, always divide by 10 slots (some may be empty) minus goalpost slots
+    // Regular bars always divide by 10 (the fixed slot count for zoom 10)
     const GOALPOST_HEIGHT = 16;
     const goalpostCount = zoomLevel === 10 ? visibleEntries.filter(e => e.isGoalpost).length : 0;
-    const regularSlots = 10 - goalpostCount;
     const remainingHeight = containerHeight - (goalpostCount * GOALPOST_HEIGHT);
     const regularBarHeight =
       zoomLevel === 10
-        ? (regularSlots > 0 && remainingHeight > 0 ? remainingHeight / regularSlots : 50)
+        ? (remainingHeight > 0 ? remainingHeight / 10 : 50)
         : BAR_HEIGHT_ALL;
 
     // Build a Y-offset map: each entry gets a cumulative Y position
@@ -718,6 +717,9 @@ export class ChartRaceRenderer {
     barEl.typeIndicator.textContent = ARTIST_TYPE_INDICATORS[entry.artistType];
     barEl.bar.style.backgroundColor = ARTIST_TYPE_COLORS[entry.artistType];
 
+    // Compute total wins (used by both goalpost label and normal display)
+    const totalWins = computeTotalWins(entry.artistId, snapshotDate, dataStore);
+
     // Toggle goalpost mode
     const isGoalpost = !!entry.isGoalpost;
     barEl.wrapper.classList.toggle("chart-race__bar-wrapper--goalpost", isGoalpost);
@@ -735,7 +737,6 @@ export class ChartRaceRenderer {
       barEl.winsSpan.style.display = "none";
 
       // Build compact label: #X · Artist · Points · N wins
-      const totalWins = computeTotalWins(entry.artistId, snapshotDate, dataStore);
       const winsText = totalWins > 0 ? ` · ${totalWins} ${totalWins === 1 ? "win" : "wins"}` : "";
       barEl.goalpostLabel.textContent = `#${entry.rank} · ${entry.artistName} · ${Math.round(entry.cumulativeValue).toLocaleString()}${winsText}`;
       barEl.goalpostLabel.style.display = "";
@@ -749,7 +750,8 @@ export class ChartRaceRenderer {
       barEl.typeIndicator.style.display = "";
       barEl.releaseSpan.style.display = "";
       barEl.valueSpan.style.display = "";
-      barEl.winsSpan.style.display = "";
+      barEl.winsSpan.textContent = totalWins > 0 ? `${totalWins} ${totalWins === 1 ? "win" : "wins"}` : "";
+      barEl.winsSpan.style.display = totalWins > 0 ? "" : "none";
       barEl.goalpostLabel.style.display = "none";
     }
 
@@ -759,30 +761,28 @@ export class ChartRaceRenderer {
     }
 
     // Featured release with per-song count if artist has multiple releases
-    const artist = dataStore.artists.get(entry.artistId);
-    const hasMultipleReleases = artist ? artist.releases.filter(r => {
-      for (const d of dataStore.dates) {
-        if (d > snapshotDate) break;
-        if (r.dailyValues.has(d)) return true;
-      }
-      return false;
-    }).length > 1 : false;
+    // Skip for goalposts (release span is hidden)
+    if (!isGoalpost) {
+      const artist = dataStore.artists.get(entry.artistId);
+      const hasMultipleReleases = artist ? artist.releases.filter(r => {
+        for (const d of dataStore.dates) {
+          if (d > snapshotDate) break;
+          if (r.dailyValues.has(d)) return true;
+        }
+        return false;
+      }).length > 1 : false;
 
-    if (entry.featuredRelease.title) {
-      if (hasMultipleReleases && artist) {
-        const songPts = computeReleaseCumulativeValue(artist, entry.featuredRelease.releaseId, snapshotDate, dataStore.dates);
-        barEl.releaseSpan.textContent = `♪ ${entry.featuredRelease.title} (${songPts.toLocaleString()})`;
+      if (entry.featuredRelease.title) {
+        if (hasMultipleReleases && artist) {
+          const songPts = computeReleaseCumulativeValue(artist, entry.featuredRelease.releaseId, snapshotDate, dataStore.dates);
+          barEl.releaseSpan.textContent = `♪ ${entry.featuredRelease.title} (${songPts.toLocaleString()})`;
+        } else {
+          barEl.releaseSpan.textContent = `♪ ${entry.featuredRelease.title}`;
+        }
       } else {
-        barEl.releaseSpan.textContent = `♪ ${entry.featuredRelease.title}`;
+        barEl.releaseSpan.textContent = "";
       }
-    } else {
-      barEl.releaseSpan.textContent = "";
     }
-
-    // Total wins count
-    const totalWins = computeTotalWins(entry.artistId, snapshotDate, dataStore);
-    barEl.winsSpan.textContent = totalWins > 0 ? `${totalWins} ${totalWins === 1 ? "win" : "wins"}` : "";
-    barEl.winsSpan.style.display = totalWins > 0 ? "" : "none";
 
     // Bar width as percentage
     const widthPercent = computeBarWidth(entry.cumulativeValue, maxCumulative);
@@ -796,30 +796,28 @@ export class ChartRaceRenderer {
     // Higher rank (lower number) = higher z-index so rising bars overlap falling ones
     barEl.wrapper.style.zIndex = String(1000 - entry.rank);
 
-    // Smart overflow: never reset inside during the update to avoid flicker.
-    // Only check after the transition completes.
-    const newWidthNum = widthPercent;
-    const oldWidthNum = parseFloat(oldWidth || "0");
-    const barGrew = newWidthNum > oldWidthNum + 1; // significant growth only
-    // Cancel any pending overflow check from the previous update
+    // Smart overflow: skip for goalposts (their elements are hidden)
     if (barEl.overflowTimeoutId !== null) {
       clearTimeout(barEl.overflowTimeoutId);
     }
-    if (this.scrubbing) {
-      // Snap: check overflow immediately
-      this.moveAllInside(barEl);
-      barEl.bar.offsetHeight;
-      this.checkBarOverflow(barEl);
-    } else {
-      // After transition completes, check what fits.
-      barEl.overflowTimeoutId = setTimeout(() => {
-        barEl.overflowTimeoutId = null;
-        if (barGrew) {
-          this.moveAllInside(barEl);
-          barEl.bar.offsetHeight; // force layout
-        }
+    if (!isGoalpost) {
+      const newWidthNum = widthPercent;
+      const oldWidthNum = parseFloat(oldWidth || "0");
+      const barGrew = newWidthNum > oldWidthNum + 1;
+      if (this.scrubbing) {
+        this.moveAllInside(barEl);
+        barEl.bar.offsetHeight;
         this.checkBarOverflow(barEl);
-      }, 2880);
+      } else {
+        barEl.overflowTimeoutId = setTimeout(() => {
+          barEl.overflowTimeoutId = null;
+          if (barGrew) {
+            this.moveAllInside(barEl);
+            barEl.bar.offsetHeight;
+          }
+          this.checkBarOverflow(barEl);
+        }, 2880);
+      }
     }
 
     // Numeric value tweening (snap in scrub mode)

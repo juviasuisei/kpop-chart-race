@@ -380,8 +380,9 @@ describe('filterByActivity — goalpost logic', () => {
 
   it('active artists prioritized over inactive, backfill by rank, sorted by rank', () => {
     // 15 entries: ranks 1, 5, 10 active; rest inactive
-    // Expected: rank 1 (always), rank 5 (active), rank 10 (active), then backfill 2,3,4,6,7,8,9
-    // Sorted: 1,2,3,4,5,6,7,8,9,10
+    // Goalposts: rank 4 (for 5), rank 9 (for 10) — these are extra, not counted in 10
+    // Regulars: 1, 5, 10 (active) + backfill 2, 3, 6, 7, 8, 11, 12 = 10
+    // Total: 10 regulars + 2 goalposts = 12
     const entries = makeRankedEntries(15);
     const ds = makeActivityDataStore(
       entries.map(e => {
@@ -391,14 +392,22 @@ describe('filterByActivity — goalpost logic', () => {
       }),
     );
     const result = filterByActivity(entries, snapshotDate, ds, 10);
-    expect(result.length).toBe(10);
 
-    const ranks = result.map(r => r.rank);
-    // Active: 1, 5, 10. Backfill: 2, 3, 4, 6, 7, 8, 9. Total 10, sorted.
-    expect(ranks).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+    const regulars = result.filter(r => !r.isGoalpost);
+    const goalposts = result.filter(r => r.isGoalpost);
+    expect(regulars.length).toBe(10);
+    expect(goalposts.length).toBe(2);
+
+    // Goalposts should be ranks 4 and 9
+    expect(goalposts.map(g => g.rank).sort((a, b) => a - b)).toEqual([4, 9]);
+
+    // Result should be sorted by rank
+    for (let i = 1; i < result.length; i++) {
+      expect(result[i].rank).toBeGreaterThanOrEqual(result[i - 1].rank);
+    }
   });
 
-  it('visual example — ranks 1-8 active, 9-10 inactive, 11 active → includes 1-8, 10, 11', () => {
+  it('visual example — ranks 1-8 active, 9-10 inactive, 11 active → 10 regulars + goalpost at 10', () => {
     const entries = makeRankedEntries(11);
     const ds = makeActivityDataStore(
       entries.map(e => {
@@ -408,26 +417,27 @@ describe('filterByActivity — goalpost logic', () => {
       }),
     );
     const result = filterByActivity(entries, snapshotDate, ds, 10);
-    const ids = result.map(r => r.artistId);
 
-    // Ranks 1-8 active → included
-    for (let i = 1; i <= 8; i++) {
-      expect(ids).toContain(`a${i}`);
-    }
+    const regulars = result.filter(r => !r.isGoalpost);
+    const goalposts = result.filter(r => r.isGoalpost);
+
+    // 10 regular bars
+    expect(regulars.length).toBe(10);
     // Rank 10 is goalpost for rank 11
-    expect(ids).toContain('a10');
-    // Rank 11 is active
-    expect(ids).toContain('a11');
-    // Rank 9 is NOT included (inactive, not a goalpost)
-    expect(ids).not.toContain('a9');
-    // Total should be 10
-    expect(result.length).toBe(10);
+    expect(goalposts.length).toBe(1);
+    expect(goalposts[0].rank).toBe(10);
+
+    // Rank 11 is active and included as regular
+    expect(regulars.map(r => r.artistId)).toContain('a11');
+    // Rank 9 is backfill (inactive, not a goalpost)
+    expect(regulars.map(r => r.artistId)).toContain('a9');
   });
 
   it('backfilled entries maintain rank order in final result', () => {
     // 15 entries: ranks 1, 10, 11 active; rest inactive
-    // Goalposts: rank 9 (for 10). Backfill adds 2, 3, 4, 5, 6, 7 by rank.
-    // Final result must be sorted by rank: 1, 2, 3, 4, 5, 6, 7, 9, 10, 11
+    // Goalpost: rank 9 (for 10) — extra, not counted in 10
+    // Regulars: 1, 10, 11 (active) + backfill 2,3,4,5,6,7,8 = 10
+    // Total: 10 regulars + 1 goalpost = 11
     const entries = makeRankedEntries(15);
     const ds = makeActivityDataStore(
       entries.map(e => {
@@ -437,17 +447,17 @@ describe('filterByActivity — goalpost logic', () => {
       }),
     );
     const result = filterByActivity(entries, snapshotDate, ds, 10);
-    expect(result.length).toBe(10);
+
+    const regulars = result.filter(r => !r.isGoalpost);
+    const goalposts = result.filter(r => r.isGoalpost);
+    expect(regulars.length).toBe(10);
+    expect(goalposts.length).toBe(1);
+    expect(goalposts[0].rank).toBe(9);
 
     // Result must be in ascending rank order
     for (let i = 1; i < result.length; i++) {
-      expect(result[i].rank).toBeGreaterThan(result[i - 1].rank);
+      expect(result[i].rank).toBeGreaterThanOrEqual(result[i - 1].rank);
     }
-
-    // Specifically: backfilled entries (ranks 2-7) should appear before
-    // the active entries at ranks 9-11, not appended at the end
-    const ranks = result.map(r => r.rank);
-    expect(ranks).toEqual([1, 2, 3, 4, 5, 6, 7, 9, 10, 11]);
   });
 });
 

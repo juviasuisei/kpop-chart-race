@@ -140,39 +140,56 @@ export function filterByActivity(
   }
 
   // Goalpost: for each included entry, if the entry immediately above is
-  // inactive and not yet included, include it as a goalpost (one per active)
+  // inactive and not yet included, mark it as a goalpost candidate
   const goalpostIndices = new Set<number>();
   for (let i = 1; i < entries.length; i++) {
     if (include[i] && !include[i - 1] && !isActive(entries[i - 1])) {
-      include[i - 1] = true;
       goalpostIndices.add(i - 1);
+      // Also include the goalpost so it chains (goalpost of goalpost)
+      include[i - 1] = true;
     }
   }
 
-  // Build result from included entries
-  const result: RankedEntry[] = [];
+  // Build the 10 regular (non-goalpost) entries first
+  const regulars: RankedEntry[] = [];
   for (let i = 0; i < entries.length; i++) {
-    if (result.length >= 10) break;
-    if (include[i]) {
-      result.push({
-        ...entries[i],
-        isGoalpost: goalpostIndices.has(i),
-      });
+    if (regulars.length >= 10) break;
+    if (include[i] && !goalpostIndices.has(i)) {
+      regulars.push({ ...entries[i], isGoalpost: false });
     }
   }
 
-  // Backfill with inactive by rank
-  if (result.length < 10) {
+  // Backfill with inactive by rank if fewer than 10 regulars
+  if (regulars.length < 10) {
     for (let i = 0; i < entries.length; i++) {
-      if (result.length >= 10) break;
-      if (!include[i]) {
-        result.push({ ...entries[i], isGoalpost: false });
+      if (regulars.length >= 10) break;
+      if (!include[i] && !goalpostIndices.has(i)) {
+        regulars.push({ ...entries[i], isGoalpost: false });
       }
     }
   }
 
-  // Sort by rank to maintain visual order
-  result.sort((a, b) => a.rank - b.rank);
+  // Sort regulars by rank
+  regulars.sort((a, b) => a.rank - b.rank);
 
-  return result.slice(0, 10);
+  // Now insert goalposts between regular entries (not after the last one)
+  const regularRanks = new Set(regulars.map(r => r.rank));
+  const result: RankedEntry[] = [];
+  for (let ri = 0; ri < regulars.length; ri++) {
+    const reg = regulars[ri];
+    // Check if there's a goalpost that sits immediately above this regular entry
+    // (i.e., the entry at rank reg.rank - 1 is a goalpost, and it's between this
+    // regular and the previous regular)
+    const regIdx = entries.findIndex(e => e.artistId === reg.artistId);
+    if (regIdx > 0 && goalpostIndices.has(regIdx - 1)) {
+      const gpEntry = entries[regIdx - 1];
+      // Only insert if the goalpost isn't already a regular entry
+      if (!regularRanks.has(gpEntry.rank)) {
+        result.push({ ...gpEntry, isGoalpost: true });
+      }
+    }
+    result.push(reg);
+  }
+
+  return result;
 }

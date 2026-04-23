@@ -90,7 +90,7 @@ body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  margin-left: 0.25rem;
+  margin-left: 0.75rem;
   display: none;
   flex-shrink: 1;
   min-width: 0;

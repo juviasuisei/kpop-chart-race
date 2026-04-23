@@ -809,8 +809,8 @@ export class ChartRaceRenderer {
     const widthPercent = computeBarWidth(entry.cumulativeValue, maxCumulative);
     const oldWidth = barEl.bar.style.width;
     if (isGoalpost) {
-      // Add rank badge width so dashed line visually matches regular bar alignment
-      barEl.bar.style.width = `calc(${widthPercent}% + 2.5em)`;
+      // Add rank badge pixel width so dashed line visually matches regular bar alignment
+      barEl.bar.style.width = `calc(${widthPercent}% + 30px)`;
     } else {
       barEl.bar.style.width = `${widthPercent}%`;
     }

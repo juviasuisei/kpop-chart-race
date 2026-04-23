@@ -727,11 +727,15 @@ export class ChartRaceRenderer {
 
     if (isGoalpost) {
       // Goalpost mode: hide normal elements, show compact label
-      // Keep rank span taking space but style it as part of the dashed line
+      // Keep rank span taking space and showing dashed line
       barEl.rankSpan.style.display = "";
-      barEl.rankSpan.style.visibility = "hidden";
+      barEl.rankSpan.style.visibility = "";
+      barEl.rankSpan.textContent = "";
+      barEl.rankSpan.style.backgroundColor = "transparent";
       barEl.rankSpan.style.borderTop = `2px dashed ${ARTIST_TYPE_COLORS[entry.artistType]}`;
-      barEl.rankSpan.style.height = "2px";
+      barEl.rankSpan.style.borderBottom = "none";
+      barEl.rankSpan.style.height = "0";
+      barEl.rankSpan.style.padding = "0";
       barEl.rankSpan.style.alignSelf = "center";
       barEl.logo.style.display = "none";
       barEl.nameSpan.style.display = "none";
@@ -753,8 +757,11 @@ export class ChartRaceRenderer {
       // Normal mode: show normal elements, hide goalpost label
       barEl.rankSpan.style.display = "";
       barEl.rankSpan.style.visibility = "";
+      barEl.rankSpan.style.backgroundColor = "";
       barEl.rankSpan.style.borderTop = "";
+      barEl.rankSpan.style.borderBottom = "";
       barEl.rankSpan.style.height = "";
+      barEl.rankSpan.style.padding = "";
       barEl.rankSpan.style.alignSelf = "";
       barEl.logo.style.display = "";
       barEl.nameSpan.style.display = "";

@@ -1488,3 +1488,95 @@ describe('Bugfix 0007: Bug Condition — Missing Pointer Cursor', () => {
     vi.useRealTimers();
   });
 });
+
+// ═══════════════════════════════════════════════════════════════════
+// Zoom transition bugs
+// ═══════════════════════════════════════════════════════════════════
+
+describe('Zoom transitions', () => {
+  let container: HTMLElement;
+  let renderer: ChartRaceRenderer;
+  let eventBus: EventBus;
+
+  beforeEach(() => {
+    container = document.createElement('div');
+    document.body.appendChild(container);
+    eventBus = new EventBus();
+    renderer = new ChartRaceRenderer(eventBus);
+  });
+
+  afterEach(() => {
+    renderer.destroy();
+    container.remove();
+  });
+
+  it('10→all: bars not in zoom-10 set appear at rank position, not from bottom', () => {
+    vi.useFakeTimers();
+    renderer.mount(container);
+    const barsContainer = container.querySelector('.chart-race__bars')!;
+    Object.defineProperty(barsContainer, 'clientHeight', { value: 500, configurable: true });
+
+    // Start with 3 bars visible
+    const entries3 = [
+      makeEntry({ artistId: 'a1', artistName: 'First', rank: 1, cumulativeValue: 1000, previousCumulativeValue: 900 }),
+      makeEntry({ artistId: 'a2', artistName: 'Second', rank: 2, cumulativeValue: 800, previousCumulativeValue: 700 }),
+      makeEntry({ artistId: 'a3', artistName: 'Third', rank: 3, cumulativeValue: 600, previousCumulativeValue: 500 }),
+    ];
+    renderer.update(makeSnapshot(entries3), 'all', emptyDataStore);
+    vi.advanceTimersByTime(5000);
+
+    // Now add more entries (simulating switch to "all" showing more bars)
+    const allEntries = [
+      ...entries3,
+      makeEntry({ artistId: 'a4', artistName: 'Fourth', rank: 4, cumulativeValue: 400, previousCumulativeValue: 300 }),
+      makeEntry({ artistId: 'a5', artistName: 'Fifth', rank: 5, cumulativeValue: 200, previousCumulativeValue: 100 }),
+    ];
+    renderer.update(makeSnapshot(allEntries), 'all', emptyDataStore);
+
+    // New bars should NOT start at the container bottom (500px)
+    const fourth = Array.from(container.querySelectorAll('.chart-race__bar-wrapper'))
+      .find(w => w.querySelector('.bar__name')?.textContent === 'Fourth') as HTMLElement;
+    const fifthEl = Array.from(container.querySelectorAll('.chart-race__bar-wrapper'))
+      .find(w => w.querySelector('.bar__name')?.textContent === 'Fifth') as HTMLElement;
+
+    const fourthY = parseFloat(fourth?.style.transform.match(/translateY\((\d+)/)?.[1] ?? '999');
+    const fifthY = parseFloat(fifthEl?.style.transform.match(/translateY\((\d+)/)?.[1] ?? '999');
+    expect(fourthY).toBeLessThan(500);
+    expect(fifthY).toBeLessThan(500);
+
+    vi.advanceTimersByTime(5000);
+    vi.useRealTimers();
+  });
+
+  it('10→all: former goalpost bars show rank badge after switching to all view', () => {
+    vi.useFakeTimers();
+    renderer.mount(container);
+    const barsContainer = container.querySelector('.chart-race__bars')!;
+    Object.defineProperty(barsContainer, 'clientHeight', { value: 500, configurable: true });
+
+    // Render with a goalpost
+    const entries1 = [
+      makeEntry({ artistId: 'a1', artistName: 'Active', rank: 1, cumulativeValue: 1000, previousCumulativeValue: 900 }),
+      makeEntry({ artistId: 'a2', artistName: 'GP', rank: 2, cumulativeValue: 800, previousCumulativeValue: 700, isGoalpost: true }),
+    ];
+    renderer.update(makeSnapshot(entries1), 'all', emptyDataStore);
+    vi.advanceTimersByTime(5000);
+
+    // Now update with isGoalpost: false (simulating "all" view)
+    const entries2 = [
+      makeEntry({ artistId: 'a1', artistName: 'Active', rank: 1, cumulativeValue: 1100, previousCumulativeValue: 1000 }),
+      makeEntry({ artistId: 'a2', artistName: 'GP', rank: 2, cumulativeValue: 900, previousCumulativeValue: 800, isGoalpost: false }),
+    ];
+    renderer.update(makeSnapshot(entries2), 'all', emptyDataStore);
+    vi.advanceTimersByTime(5000);
+
+    // Rank badge should be visible and show correct rank
+    const wrapper = Array.from(container.querySelectorAll('.chart-race__bar-wrapper'))
+      .find(w => w.querySelector('.bar__name')?.textContent === 'GP') as HTMLElement;
+    expect(wrapper.classList.contains('chart-race__bar-wrapper--goalpost')).toBe(false);
+    const rankSpan = wrapper.querySelector('.bar__rank') as HTMLElement;
+    expect(rankSpan.style.display).not.toBe('none');
+
+    vi.useRealTimers();
+  });
+});

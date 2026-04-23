@@ -1856,4 +1856,19 @@ describe('Whitespace click does not select a bar row', () => {
 
     expect(emitted).toEqual(['artist-c']);
   });
+
+  it('bar wrapper does not have cursor:pointer (whitespace should show default cursor)', () => {
+    renderer.mount(container);
+    const barsContainer = container.querySelector('.chart-race__bars')!;
+    Object.defineProperty(barsContainer, 'clientHeight', { value: 500, configurable: true });
+
+    const snapshot = makeSnapshot([
+      makeEntry({ artistId: 'artist-a', artistName: 'Artist A', rank: 1, cumulativeValue: 600 }),
+    ]);
+    renderer.update(snapshot, 10, emptyDataStore);
+
+    const wrapper = container.querySelector('.chart-race__bar-wrapper') as HTMLElement;
+    // Wrapper should NOT have inline cursor:pointer since its whitespace isn't clickable
+    expect(wrapper.style.cursor).not.toBe('pointer');
+  });
 });

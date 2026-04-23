@@ -850,7 +850,6 @@ export class ChartRaceRenderer {
       this.eventBus.emit('bar:click', entry.artistId);
     };
     wrapper.addEventListener('click', clickHandler);
-    wrapper.style.cursor = "pointer";
 
     return {
       wrapper,

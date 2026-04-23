@@ -288,9 +288,7 @@ export class ChartRaceRenderer {
       (max, e) => Math.max(max, e.cumulativeValue), 0);
 
     // 2–5. For each visible entry: create bar if needed, restore if hidden, update
-    const hasExistingBars = this.bars.size > 0;
     let visIdx = 0;
-    let newBarCount = 0;
     for (const entry of visibleEntries) {
       let barEl = this.bars.get(entry.artistId);
 
@@ -300,14 +298,6 @@ export class ChartRaceRenderer {
         this.bars.set(entry.artistId, barEl);
         this.barsContainer.appendChild(barEl.wrapper);
         this.seenArtists.add(entry.artistId);
-
-        // New bar starts at the bottom — set rank to avoid conflicts with
-        // existing bars' displayed ranks. Assign from the bottom up.
-        // Only do this when there are existing bars — on initial load, use actual rank.
-        if (hasExistingBars) {
-          newBarCount++;
-          barEl.rankSpan.textContent = `#${visibleEntries.length - newBarCount + 1}`;
-        }
 
         // New bar: start at bottom with 0 width, then animate to target
         barEl.wrapper.style.transition = "none";
@@ -427,81 +417,46 @@ export class ChartRaceRenderer {
   /**
    * Start a rAF loop that reads each visible bar's current visual Y position,
    * sorts them by position, and assigns rank numbers based on visual order.
-   * This makes rank badges update progressively as bars pass each other.
+   * Sorts bars by current visual Y position each frame and assigns ranks
+   * 1, 2, 3, ... based on that order. Deterministic and handles all cases.
    */
   private startRankTracking(visibleArtistIds: Set<string>): void {
-    // Cancel any existing rank tracking loop WITHOUT overwriting rank text
-    // (stopRankTracking writes target ranks, which would erase the previous ranks
-    // that we need as the starting point for crossing detection)
+    // Cancel any existing rank tracking loop
     if (this.rankTrackingFrameId !== null) {
       cancelAnimationFrame(this.rankTrackingFrameId);
       this.rankTrackingFrameId = null;
     }
 
-    // Initialize displayed ranks from current rankSpan text (preserves previous ranks)
-    const displayedRanks = new Map<BarElement, number>();
+    // Collect tracked bars (exclude hidden and goalpost bars)
     const trackedBars: BarElement[] = [];
     for (const [artistId, barEl] of this.bars) {
       if (!visibleArtistIds.has(artistId) || barEl.hidden) continue;
-      // Skip goalpost bars — they don't participate in rank tracking
       if (barEl.wrapper.classList.contains("chart-race__bar-wrapper--goalpost")) continue;
-      const current = parseInt(barEl.rankSpan.textContent?.replace('#', '') || '0', 10);
-      displayedRanks.set(barEl, current || barEl.targetRank);
       trackedBars.push(barEl);
     }
 
-    // Track previous Y positions for crossing detection
-    const prevY = new Map<BarElement, number>();
-    for (const barEl of trackedBars) {
-      if (!barEl.wrapper.parentElement) continue;
-      const rect = barEl.wrapper.getBoundingClientRect();
-      prevY.set(barEl, rect.top);
-    }
+    // Collect all ranks that are in play (from targetRank of tracked bars)
+    // Sort them so we can assign rank 1 to topmost, rank 2 to next, etc.
+    const allRanks = trackedBars.map(b => b.targetRank).sort((a, b) => a - b);
 
     const track = () => {
-      // Get current Y positions
-      const currentY = new Map<BarElement, number>();
+      // Get current Y positions via getBoundingClientRect
+      const barPositions: Array<{ barEl: BarElement; y: number }> = [];
       for (const barEl of trackedBars) {
         if (barEl.hidden || !barEl.wrapper.parentElement) continue;
         const rect = barEl.wrapper.getBoundingClientRect();
-        currentY.set(barEl, rect.top);
+        barPositions.push({ barEl, y: rect.top });
       }
 
-      // Detect crossings: if bar A was above bar B but is now below (or vice versa),
-      // swap their displayed ranks
-      const activeBars = trackedBars.filter(b => currentY.has(b));
-      for (let i = 0; i < activeBars.length; i++) {
-        for (let j = i + 1; j < activeBars.length; j++) {
-          const a = activeBars[i];
-          const b = activeBars[j];
-          const prevA = prevY.get(a) ?? 0;
-          const prevB = prevY.get(b) ?? 0;
-          const currA = currentY.get(a) ?? 0;
-          const currB = currentY.get(b) ?? 0;
+      // Sort by Y position (topmost first)
+      barPositions.sort((a, b) => a.y - b.y);
 
-          const wasAAbove = prevA < prevB;
-          const isAAbove = currA < currB;
-
-          if (wasAAbove !== isAAbove) {
-            const rankA = displayedRanks.get(a) ?? 0;
-            const rankB = displayedRanks.get(b) ?? 0;
-            displayedRanks.set(a, rankB);
-            displayedRanks.set(b, rankA);
-          }
-        }
-      }
-
-      // Update previous positions
-      for (const [barEl, y] of currentY) {
-        prevY.set(barEl, y);
-      }
-
-      // Apply displayed ranks
-      for (const barEl of activeBars) {
-        const rank = displayedRanks.get(barEl) ?? barEl.targetRank;
+      // Assign ranks based on visual order
+      for (let i = 0; i < barPositions.length; i++) {
+        const rank = allRanks[i] ?? (i + 1);
         const label = `#${rank}`;
-        if (barEl.rankSpan.textContent !== label) {
-          barEl.rankSpan.textContent = label;
+        if (barPositions[i].barEl.rankSpan.textContent !== label) {
+          barPositions[i].barEl.rankSpan.textContent = label;
         }
       }
 

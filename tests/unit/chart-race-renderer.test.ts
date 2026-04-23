@@ -1623,3 +1623,47 @@ describe('Zoom change behavior', () => {
     vi.useRealTimers();
   });
 });
+
+describe('Z-index safety', () => {
+  let container: HTMLElement;
+  let renderer: ChartRaceRenderer;
+  let eventBus: EventBus;
+
+  beforeEach(() => {
+    container = document.createElement('div');
+    document.body.appendChild(container);
+    eventBus = new EventBus();
+    renderer = new ChartRaceRenderer(eventBus);
+  });
+
+  afterEach(() => {
+    renderer.destroy();
+    container.remove();
+  });
+
+  it('bars at high Y positions still have positive z-index (never negative)', () => {
+    renderer.mount(container);
+    const barsContainer = container.querySelector('.chart-race__bars')!;
+    Object.defineProperty(barsContainer, 'clientHeight', { value: 500, configurable: true });
+
+    // Create 30 bars — at 40px each, the last bar is at Y=1160 which would
+    // give z-index = 1000 - 1160 = -160 without the Math.max fix
+    const entries: RankedEntry[] = [];
+    for (let i = 0; i < 30; i++) {
+      entries.push(makeEntry({
+        artistId: `a${i}`,
+        artistName: `Artist ${i}`,
+        rank: i + 1,
+        cumulativeValue: 3000 - i * 100,
+        previousCumulativeValue: 2900 - i * 100,
+      }));
+    }
+    renderer.update(makeSnapshot(entries), 'all', emptyDataStore);
+
+    const wrappers = container.querySelectorAll('.chart-race__bar-wrapper');
+    for (const w of wrappers) {
+      const zIndex = parseInt((w as HTMLElement).style.zIndex);
+      expect(zIndex).toBeGreaterThanOrEqual(1);
+    }
+  });
+});

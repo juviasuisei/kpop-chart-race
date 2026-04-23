@@ -77,25 +77,25 @@ export class ChartRaceRenderer {
   private scrubbing = false;
   /** Artist IDs that have been seen before (for distinguishing new vs returning) */
   private seenArtists: Set<string> = new Set();
+  /** Last known Y positions for bars removed from DOM (for smooth reappearance) */
+  private lastKnownY: Map<string, number> = new Map();
   /** rAF ID for the rank tracking loop during phase 1 */
   private rankTrackingFrameId: number | null = null;
 
   constructor(private eventBus: EventBus) {
     this.eventBus.on("scrub:start", () => {
-      console.log("[DEBUG] scrub:start: bars before clear:", this.bars.size);
       this.scrubbing = true;
       this.cancelAllAnimations();
       for (const [, barEl] of this.bars) {
         barEl.wrapper.remove();
       }
       this.bars.clear();
-      console.log("[DEBUG] scrub:start: bars after clear:", this.bars.size);
+      this.lastKnownY.clear();
       if (this.barsContainer) {
         this.barsContainer.classList.add("chart-race__bars--no-transition");
       }
     });
     this.eventBus.on("scrub:end", () => {
-      console.log("[DEBUG] scrub:end");
       this.scrubbing = false;
       if (this.barsContainer) {
         this.barsContainer.classList.remove("chart-race__bars--no-transition");
@@ -107,7 +107,6 @@ export class ChartRaceRenderer {
       }
     });
     this.eventBus.on("reset", () => {
-      console.log("[DEBUG] reset: clearing", this.bars.size, "bars");
       // Remove all bars from DOM so next update starts fresh
       for (const [, barEl] of this.bars) {
         if (barEl.animationFrameId !== null) {
@@ -119,6 +118,7 @@ export class ChartRaceRenderer {
         barEl.wrapper.remove();
       }
       this.bars.clear();
+      this.lastKnownY.clear();
     });
   }
 
@@ -244,7 +244,6 @@ export class ChartRaceRenderer {
    * Emits "update:complete" when the transition completes.
    */
   update(snapshot: ChartSnapshot, zoomLevel: ZoomLevel, dataStore: DataStore): void {
-    console.log("[DEBUG] update:", snapshot.date, "scrubbing:", this.scrubbing, "existing bars:", this.bars.size);
     if (!this.barsContainer || !this.dateDisplay) return;
 
     // Cancel any pending timeout from a previous update
@@ -337,11 +336,22 @@ export class ChartRaceRenderer {
         this.barsContainer.appendChild(barEl.wrapper);
         this.seenArtists.add(entry.artistId);
 
-        // New bar: start at bottom with 0 width, then animate to target
+        // Position new bar: use last known Y if returning, otherwise rise from bottom
         barEl.wrapper.style.transition = "none";
         barEl.bar.style.transition = "none";
-        const bottomY = containerHeight > 0 ? containerHeight : 500;
-        barEl.wrapper.style.transform = `translateY(${bottomY}px)`;
+        const lastY = this.lastKnownY.get(entry.artistId);
+        if (lastY !== undefined) {
+          // Returning bar: start at last known position with current width
+          barEl.wrapper.style.transform = `translateY(${lastY}px)`;
+          const widthPercent = computeBarWidth(entry.cumulativeValue, maxCumulative);
+          barEl.bar.style.width = `${widthPercent}%`;
+          this.lastKnownY.delete(entry.artistId);
+        } else {
+          // Truly new bar: start at bottom with 0 width
+          const bottomY = containerHeight > 0 ? containerHeight : 500;
+          barEl.wrapper.style.transform = `translateY(${bottomY}px)`;
+          barEl.bar.style.width = "0%";
+        }
         barEl.wrapper.style.height = `${heights[visIdx]}px`;
         barEl.wrapper.style.opacity = "1";
         barEl.bar.style.width = "0%";
@@ -406,9 +416,14 @@ export class ChartRaceRenderer {
       visIdx++;
     }
 
-    // 6. Remove bars no longer visible — immediately, no animation
+    // 6. Remove bars no longer visible — save positions first, then remove
     for (const [artistId, barEl] of this.bars) {
       if (visibleIds.has(artistId)) continue;
+      // Save last known Y position for smooth reappearance
+      const yMatch = barEl.wrapper.style.transform.match(/translateY\(([0-9.]+)px\)/);
+      if (yMatch) {
+        this.lastKnownY.set(artistId, parseFloat(yMatch[1]));
+      }
       // Cancel any pending animations/timeouts
       if (barEl.animationFrameId !== null) {
         cancelAnimationFrame(barEl.animationFrameId);
@@ -666,6 +681,7 @@ export class ChartRaceRenderer {
     }
     this.bars.clear();
     this.seenArtists.clear();
+    this.lastKnownY.clear();
 
     if (this.wrapper && this.wrapper.parentNode) {
       this.wrapper.parentNode.removeChild(this.wrapper);

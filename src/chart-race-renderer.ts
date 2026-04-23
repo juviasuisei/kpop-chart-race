@@ -288,7 +288,9 @@ export class ChartRaceRenderer {
       (max, e) => Math.max(max, e.cumulativeValue), 0);
 
     // 2–5. For each visible entry: create bar if needed, restore if hidden, update
+    const hasExistingBars = this.bars.size > 0;
     let visIdx = 0;
+    let newBarCount = 0;
     for (const entry of visibleEntries) {
       let barEl = this.bars.get(entry.artistId);
 
@@ -298,6 +300,14 @@ export class ChartRaceRenderer {
         this.bars.set(entry.artistId, barEl);
         this.barsContainer.appendChild(barEl.wrapper);
         this.seenArtists.add(entry.artistId);
+
+        // New bar starts at the bottom — set rank to avoid conflicts with
+        // existing bars' displayed ranks. Assign from the bottom up.
+        // Only do this when there are existing bars — on initial load, use actual rank.
+        if (hasExistingBars) {
+          newBarCount++;
+          barEl.rankSpan.textContent = `#${visibleEntries.length - newBarCount + 1}`;
+        }
 
         // New bar: start at bottom with 0 width, then animate to target
         barEl.wrapper.style.transition = "none";

@@ -1165,4 +1165,58 @@ describe('Bugfix 0007: Bug Condition — Missing Pointer Cursor', () => {
 
     vi.useRealTimers();
   });
+
+  it('new bars entering the chart show sequential ranks, not target ranks', () => {
+    vi.useFakeTimers();
+    renderer.mount(container);
+    const barsContainer = container.querySelector('.chart-race__bars')!;
+    Object.defineProperty(barsContainer, 'clientHeight', { value: 500, configurable: true });
+
+    const getRank = (name: string) => {
+      const w = Array.from(container.querySelectorAll('.chart-race__bar-wrapper'))
+        .find(w => w.querySelector('.bar__name')?.textContent === name) as HTMLElement;
+      return w?.querySelector('.bar__rank')?.textContent;
+    };
+
+    // Day 1: 2 bars exist at ranks 1 and 2
+    const day1 = [
+      makeEntry({ artistId: 'a1', artistName: 'First', rank: 1, cumulativeValue: 1000, previousCumulativeValue: 0 }),
+      makeEntry({ artistId: 'a2', artistName: 'Second', rank: 2, cumulativeValue: 800, previousCumulativeValue: 0 }),
+    ];
+    renderer.update(makeSnapshot(day1), 'all', emptyDataStore);
+    vi.advanceTimersByTime(3000);
+
+    expect(getRank('First')).toBe('#1');
+    expect(getRank('Second')).toBe('#2');
+
+    // Day 2: a new bar enters at rank 2 (pushing Second to rank 3)
+    // The new bar starts at the bottom and rises — it should NOT immediately show #2
+    const day2 = [
+      makeEntry({ artistId: 'a1', artistName: 'First', rank: 1, cumulativeValue: 1100, previousCumulativeValue: 1000 }),
+      makeEntry({ artistId: 'a3', artistName: 'New Entry', rank: 2, cumulativeValue: 900, previousCumulativeValue: 0 }),
+      makeEntry({ artistId: 'a2', artistName: 'Second', rank: 3, cumulativeValue: 850, previousCumulativeValue: 800 }),
+    ];
+    renderer.update(makeSnapshot(day2), 'all', emptyDataStore);
+
+    // Immediately after update: no duplicate ranks
+    const ranks = [getRank('First'), getRank('Second'), getRank('New Entry')];
+    const uniqueRanks = new Set(ranks);
+    expect(uniqueRanks.size).toBe(3);
+
+    // Existing bars keep their previous ranks until crossings happen
+    expect(getRank('First')).toBe('#1');
+    expect(getRank('Second')).toBe('#2');
+
+    // New bar should NOT show #2 (would duplicate Second's rank)
+    // It starts at the bottom, so it should show #3
+    expect(getRank('New Entry')).toBe('#3');
+
+    // After transition, all ranks should be correct
+    vi.advanceTimersByTime(3000);
+    expect(getRank('First')).toBe('#1');
+    expect(getRank('New Entry')).toBe('#2');
+    expect(getRank('Second')).toBe('#3');
+
+    vi.useRealTimers();
+  });
 });

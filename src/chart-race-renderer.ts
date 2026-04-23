@@ -427,6 +427,8 @@ export class ChartRaceRenderer {
     const trackedBars: BarElement[] = [];
     for (const [artistId, barEl] of this.bars) {
       if (!visibleArtistIds.has(artistId) || barEl.hidden) continue;
+      // Skip goalpost bars — they don't participate in rank tracking
+      if (barEl.wrapper.classList.contains("chart-race__bar-wrapper--goalpost")) continue;
       const current = parseInt(barEl.rankSpan.textContent?.replace('#', '') || '0', 10);
       displayedRanks.set(barEl, current || barEl.targetRank);
       trackedBars.push(barEl);

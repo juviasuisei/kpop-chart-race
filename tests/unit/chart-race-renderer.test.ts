@@ -871,4 +871,66 @@ describe('Bugfix 0007: Bug Condition — Missing Pointer Cursor', () => {
     // EXPECTED after fix: the rule should include cursor: pointer
     expect(ruleMatch).not.toBeNull();
   });
+
+  // ═══════════════════════════════════════════════════════════════════
+  // Goalpost bar rendering
+  // ═══════════════════════════════════════════════════════════════════
+
+  it('goalpost bar has empty rank badge text and shows goalpost label', () => {
+    renderer.mount(container);
+    const barsContainer = container.querySelector('.chart-race__bars')!;
+    Object.defineProperty(barsContainer, 'clientHeight', { value: 500, configurable: true });
+
+    // Use zoom "all" to bypass filterByActivity, but set isGoalpost manually
+    // Note: goalpost visual treatment applies regardless of zoom level
+    const entries = [
+      makeEntry({ artistId: 'a1', artistName: 'Active', rank: 1, cumulativeValue: 1000, previousCumulativeValue: 900 }),
+      makeEntry({ artistId: 'a2', artistName: 'Goalpost Artist', rank: 2, cumulativeValue: 800, previousCumulativeValue: 700, isGoalpost: true }),
+      makeEntry({ artistId: 'a3', artistName: 'Active 2', rank: 3, cumulativeValue: 600, previousCumulativeValue: 500 }),
+    ];
+    const snapshot = makeSnapshot(entries);
+    // Use zoom "all" so filterByActivity returns entries unchanged (preserving isGoalpost)
+    renderer.update(snapshot, 'all', emptyDataStore);
+
+    // Find the goalpost bar
+    const wrappers = container.querySelectorAll('.chart-race__bar-wrapper');
+    const goalpostWrapper = Array.from(wrappers).find(
+      w => w.classList.contains('chart-race__bar-wrapper--goalpost')
+    ) as HTMLElement;
+    expect(goalpostWrapper).toBeTruthy();
+
+    // Rank badge should have empty text
+    const rankSpan = goalpostWrapper.querySelector('.bar__rank') as HTMLElement;
+    expect(rankSpan.textContent).toBe('');
+
+    // Goalpost label should be visible with artist info
+    const label = goalpostWrapper.querySelector('.bar__goalpost-label') as HTMLElement;
+    expect(label.style.display).toBe('inline');
+    expect(label.textContent).toContain('#2');
+    expect(label.textContent).toContain('Goalpost Artist');
+    expect(label.textContent).toContain('800');
+  });
+
+  it('goalpost rank badge stays empty after stopRankTracking', () => {
+    vi.useFakeTimers();
+    renderer.mount(container);
+    const barsContainer = container.querySelector('.chart-race__bars')!;
+    Object.defineProperty(barsContainer, 'clientHeight', { value: 500, configurable: true });
+
+    const entries = [
+      makeEntry({ artistId: 'a1', artistName: 'Active', rank: 1, cumulativeValue: 1000, previousCumulativeValue: 900 }),
+      makeEntry({ artistId: 'a2', artistName: 'Goalpost', rank: 2, cumulativeValue: 800, previousCumulativeValue: 700, isGoalpost: true }),
+    ];
+    renderer.update(makeSnapshot(entries), 'all', emptyDataStore);
+
+    // Advance past the phase timeout which calls stopRankTracking
+    vi.advanceTimersByTime(3000);
+
+    const goalpostWrapper = Array.from(container.querySelectorAll('.chart-race__bar-wrapper'))
+      .find(w => w.classList.contains('chart-race__bar-wrapper--goalpost')) as HTMLElement;
+    const rankSpan = goalpostWrapper.querySelector('.bar__rank') as HTMLElement;
+    expect(rankSpan.textContent).toBe('');
+
+    vi.useRealTimers();
+  });
 });

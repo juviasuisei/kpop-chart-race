@@ -728,17 +728,10 @@ export class ChartRaceRenderer {
     barEl.bar.classList.toggle("chart-race__bar--goalpost", isGoalpost);
 
     if (isGoalpost) {
-      // Goalpost mode: hide normal elements, show compact label
-      // Keep rank span taking space and showing dashed line
-      barEl.rankSpan.style.display = "";
-      barEl.rankSpan.style.visibility = "";
+      // Goalpost mode: hide all normal elements, use wrapper border as single dashed line
+      barEl.rankSpan.style.display = "none";
       barEl.rankSpan.textContent = "";
-      barEl.rankSpan.style.backgroundColor = "transparent";
-      barEl.rankSpan.style.borderTop = `2px dashed ${ARTIST_TYPE_COLORS[entry.artistType]}`;
-      barEl.rankSpan.style.borderBottom = "none";
-      barEl.rankSpan.style.height = "0";
-      barEl.rankSpan.style.padding = "0";
-      barEl.rankSpan.style.alignSelf = "center";
+      barEl.bar.style.display = "none";
       barEl.logo.style.display = "none";
       barEl.nameSpan.style.display = "none";
       barEl.genSpan.style.display = "none";
@@ -747,8 +740,8 @@ export class ChartRaceRenderer {
       barEl.valueSpan.style.display = "none";
       barEl.winsSpan.style.display = "none";
 
-      // Set dashed line color on the bar element
-      barEl.bar.style.borderTopColor = ARTIST_TYPE_COLORS[entry.artistType];
+      // Single dashed line via wrapper border-bottom (spans full width)
+      barEl.wrapper.style.borderBottom = `2px dashed ${ARTIST_TYPE_COLORS[entry.artistType]}`;
 
       // Build compact label: #X · Artist · Points · N wins
       const winsText = totalWins > 0 ? ` · ${totalWins} ${totalWins === 1 ? "win" : "wins"}` : "";
@@ -758,13 +751,7 @@ export class ChartRaceRenderer {
     } else {
       // Normal mode: show normal elements, hide goalpost label
       barEl.rankSpan.style.display = "";
-      barEl.rankSpan.style.visibility = "";
-      // Don't reset backgroundColor — it's set at the top of updateBarElement
-      barEl.rankSpan.style.borderTop = "";
-      barEl.rankSpan.style.borderBottom = "";
-      barEl.rankSpan.style.height = "";
-      barEl.rankSpan.style.padding = "";
-      barEl.rankSpan.style.alignSelf = "";
+      barEl.bar.style.display = "";
       barEl.logo.style.display = "";
       barEl.nameSpan.style.display = "";
       barEl.genSpan.style.display = "";
@@ -774,7 +761,7 @@ export class ChartRaceRenderer {
       barEl.winsSpan.textContent = totalWins > 0 ? `${totalWins} ${totalWins === 1 ? "win" : "wins"}` : "";
       barEl.winsSpan.style.display = totalWins > 0 ? "" : "none";
       barEl.goalpostLabel.style.display = "none";
-      barEl.bar.style.borderTopColor = "";
+      barEl.wrapper.style.borderBottom = "";
     }
 
     // Update logo if changed

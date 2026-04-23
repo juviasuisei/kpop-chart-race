@@ -78,18 +78,8 @@ body {
 /* ===== Goalpost Bar ===== */
 
 .chart-race__bar-wrapper--goalpost {
-  align-items: center;
+  align-items: flex-end;
   padding: 0;
-  overflow: visible;
-}
-
-.chart-race__bar--goalpost {
-  height: 2px !important;
-  border-radius: 0;
-  padding: 0;
-  border: none;
-  background: transparent !important;
-  border-top: 2px dashed;
   overflow: visible;
 }
 
@@ -100,10 +90,11 @@ body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  margin-left: 0.5rem;
+  margin-left: 0.25rem;
   display: none;
   flex-shrink: 1;
   min-width: 0;
+  padding-bottom: 2px;
 }
 
 .chart-race__bar {

@@ -831,19 +831,15 @@ export class ChartRaceRenderer {
       barEl.bar.style.width = `${widthPercent}%`;
     }
 
-    // Read STARTING Y position BEFORE setting the new transform
-    // so z-index reflects where the bar IS, not where it's going.
-    // Rising bars (starting lower, higher Y) get HIGHER z-index → on top.
-    // Falling bars (starting higher, lower Y) get LOWER z-index → behind.
-    const prevTransform = barEl.wrapper.style.transform;
-    const prevYMatch = prevTransform.match(/translateY\(([0-9.]+)px\)/);
-    const startingY = prevYMatch ? parseFloat(prevYMatch[1]) : yPosition;
+    // Z-index based on TARGET position: bars heading to higher positions
+    // (lower Y) get higher z-index so they're visually on top as they rise.
+    // This makes the rising bar's rank badge visible as it crosses others.
 
     // Bar position via translateY
     barEl.wrapper.style.transform = `translateY(${yPosition}px)`;
     barEl.wrapper.style.height = `${height}px`;
     barEl.wrapper.style.opacity = "1";
-    barEl.wrapper.style.zIndex = String(Math.round(startingY));
+    barEl.wrapper.style.zIndex = String(1000 - Math.round(yPosition));
 
     // Smart overflow: skip for goalposts (their elements are hidden)
     if (barEl.overflowTimeoutId !== null) {

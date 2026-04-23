@@ -1115,7 +1115,7 @@ describe('Bugfix 0007: Bug Condition — Missing Pointer Cursor', () => {
   // Rank tracking during transitions
   // ═══════════════════════════════════════════════════════════════════
 
-  it('z-index based on starting position so rising bars go behind falling bars', () => {
+  it('z-index based on target position so rising bars are on top', () => {
     vi.useFakeTimers();
     renderer.mount(container);
     const barsContainer = container.querySelector('.chart-race__bars')!;
@@ -1144,16 +1144,12 @@ describe('Bugfix 0007: Bug Condition — Missing Pointer Cursor', () => {
     ];
     renderer.update(makeSnapshot(day2), 'all', emptyDataStore);
 
-    // IMMEDIATELY after update (during transition):
-    // Bottom was at position 4 (high Y) → should have LOW z-index (goes behind others)
-    // Second was at position 2 (low Y) → should have HIGH z-index (stays on top)
+    // Rising bar (Bottom, target Y is low) should have HIGHER z-index (on top)
     const bottomZ2 = parseInt(getBar('Bottom').style.zIndex);
     const secondZ2 = parseInt(getBar('Second').style.zIndex);
     const thirdZ2 = parseInt(getBar('Third').style.zIndex);
 
-    // Rising bar (Bottom, was at high Y) should have HIGHER z-index (on top)
     expect(bottomZ2).toBeGreaterThan(thirdZ2);
-    // Falling bar (Second, was at low Y) should have LOWER z-index (behind)
     expect(secondZ2).toBeLessThan(thirdZ2);
 
     vi.advanceTimersByTime(3000);

@@ -155,3 +155,53 @@ describe('Scrubber date labels', () => {
     controller.destroy();
   });
 });
+
+describe('Scrubber date label clicks', () => {
+  let container: HTMLElement;
+  let eventBus: EventBus;
+
+  afterEach(() => {
+    container.remove();
+    vi.useRealTimers();
+  });
+
+  it('clicking start date label seeks to the first date', () => {
+    vi.useFakeTimers();
+    container = document.createElement('div');
+    document.body.appendChild(container);
+    eventBus = new EventBus();
+    const dates = ['2024-01-01', '2024-01-02', '2024-06-15'];
+    const controller = new PlaybackController(eventBus, dates);
+    controller.mount(container);
+
+    const emitted: string[] = [];
+    eventBus.on('date:change', (d: string) => emitted.push(d));
+
+    const labels = container.querySelectorAll('.playback-controls__date-label');
+    (labels[0] as HTMLElement).click();
+
+    expect(emitted).toContain('2024-01-01');
+
+    controller.destroy();
+  });
+
+  it('clicking end date label seeks to the last date', () => {
+    vi.useFakeTimers();
+    container = document.createElement('div');
+    document.body.appendChild(container);
+    eventBus = new EventBus();
+    const dates = ['2024-01-01', '2024-01-02', '2024-06-15'];
+    const controller = new PlaybackController(eventBus, dates);
+    controller.mount(container);
+
+    const emitted: string[] = [];
+    eventBus.on('date:change', (d: string) => emitted.push(d));
+
+    const labels = container.querySelectorAll('.playback-controls__date-label');
+    (labels[1] as HTMLElement).click();
+
+    expect(emitted).toContain('2024-06-15');
+
+    controller.destroy();
+  });
+});

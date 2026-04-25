@@ -292,11 +292,15 @@ export class ChartRaceRenderer {
 
     // For phase 1 height calculation, bars changing state keep their CURRENT height
     // becomingGoalpost bars stay full height; leavingGoalpost bars stay at 16px
+    // Exception: during a zoom change, use the TARGET goalpost count directly
+    // because all state changes apply immediately (no phase 2 deferral).
     const phase1GoalpostCount = zoomLevel === 10
-      ? visibleEntries.filter(e =>
-          (e.isGoalpost && !becomingGoalpost.has(e.artistId)) ||
-          leavingGoalpost.has(e.artistId)
-        ).length
+      ? (isZoomChange
+          ? visibleEntries.filter(e => e.isGoalpost).length
+          : visibleEntries.filter(e =>
+              (e.isGoalpost && !becomingGoalpost.has(e.artistId)) ||
+              leavingGoalpost.has(e.artistId)
+            ).length)
       : 0;
     const phase1RemainingHeight = containerHeight - (phase1GoalpostCount * GOALPOST_HEIGHT);
     const phase1RegularBarHeight =

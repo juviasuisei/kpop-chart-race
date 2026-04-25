@@ -1648,6 +1648,48 @@ describe('Zoom change behavior', () => {
     vi.advanceTimersByTime(5000);
     vi.useRealTimers();
   });
+
+  it('all→10 with goalposts: total bar heights fit within container', () => {
+    vi.useFakeTimers();
+    renderer.mount(container);
+    const barsContainer = container.querySelector('.chart-race__bars') as HTMLElement;
+    Object.defineProperty(barsContainer, 'clientHeight', { value: 500, configurable: true });
+
+    // First render in "all" mode (no goalposts in "all")
+    const allEntries = Array.from({ length: 15 }, (_, i) =>
+      makeEntry({ artistId: `a${i}`, artistName: `Artist ${i}`, rank: i + 1, cumulativeValue: 1500 - i * 100, previousCumulativeValue: 1400 - i * 100 }),
+    );
+    renderer.update(makeSnapshot(allEntries), 'all', emptyDataStore);
+    vi.advanceTimersByTime(5000);
+
+    // Switch to zoom 10 with 10 regular bars + 2 goalposts
+    const zoom10Entries = [
+      makeEntry({ artistId: 'a0', rank: 1, cumulativeValue: 1500, previousCumulativeValue: 1400 }),
+      makeEntry({ artistId: 'gp1', rank: 2, cumulativeValue: 1400, previousCumulativeValue: 1300, isGoalpost: true }),
+      makeEntry({ artistId: 'a2', rank: 3, cumulativeValue: 1300, previousCumulativeValue: 1200 }),
+      makeEntry({ artistId: 'a3', rank: 4, cumulativeValue: 1200, previousCumulativeValue: 1100 }),
+      makeEntry({ artistId: 'gp2', rank: 5, cumulativeValue: 1100, previousCumulativeValue: 1000, isGoalpost: true }),
+      makeEntry({ artistId: 'a5', rank: 6, cumulativeValue: 1000, previousCumulativeValue: 900 }),
+      makeEntry({ artistId: 'a6', rank: 7, cumulativeValue: 900, previousCumulativeValue: 800 }),
+      makeEntry({ artistId: 'a7', rank: 8, cumulativeValue: 800, previousCumulativeValue: 700 }),
+      makeEntry({ artistId: 'a8', rank: 9, cumulativeValue: 700, previousCumulativeValue: 600 }),
+      makeEntry({ artistId: 'a9', rank: 10, cumulativeValue: 600, previousCumulativeValue: 500 }),
+      makeEntry({ artistId: 'a10', rank: 11, cumulativeValue: 500, previousCumulativeValue: 400 }),
+      makeEntry({ artistId: 'a11', rank: 12, cumulativeValue: 400, previousCumulativeValue: 300 }),
+    ];
+    renderer.update(makeSnapshot(zoom10Entries), 10, emptyDataStore);
+
+    // Verify total height of all bars fits within container (500px)
+    const wrappers = container.querySelectorAll('.chart-race__bar-wrapper');
+    let totalHeight = 0;
+    for (const w of wrappers) {
+      totalHeight += parseFloat((w as HTMLElement).style.height);
+    }
+    expect(totalHeight).toBeLessThanOrEqual(500);
+
+    vi.advanceTimersByTime(5000);
+    vi.useRealTimers();
+  });
 });
 
 describe('Z-index safety', () => {

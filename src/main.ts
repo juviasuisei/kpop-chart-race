@@ -62,7 +62,17 @@ async function main(): Promise<void> {
   // --- Mount UI components ---
   const renderer = new ChartRaceRenderer(eventBus);
   renderer.mount(app);
-  renderer.setDataNote(dataStore.startDate);
+
+  // Compute total points across all artists and all dates
+  let totalPoints = 0;
+  for (const artist of dataStore.artists.values()) {
+    for (const release of artist.releases) {
+      for (const entry of release.dailyValues.values()) {
+        totalPoints += entry.value;
+      }
+    }
+  }
+  renderer.setDataNote(dataStore.startDate, totalPoints);
 
   const playbackController = new PlaybackController(eventBus, dataStore.dates);
   playbackController.mount(app);

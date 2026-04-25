@@ -342,12 +342,12 @@ describe('ChartRaceRenderer', () => {
   });
 
   // 22. setDataNote sets correct text
-  it('setDataNote("2024-01-15") sets correct text', () => {
+  it('setDataNote("2024-01-15", 12345) sets correct text', () => {
     renderer.mount(container);
-    renderer.setDataNote('2024-01-15');
+    renderer.setDataNote('2024-01-15', 12345);
     const note = container.querySelector('.chart-race__data-note');
     expect(note).not.toBeNull();
-    expect(note!.textContent).toBe('Points from 2024-01-15 forward. Inactive artists may be hidden — switch to All to see full rankings.');
+    expect(note!.textContent).toBe('12,345 total points earned from 2024-01-15 forward. Inactive artists may be hidden — switch to All to see full rankings.');
   });
 
   // 23. setDataNote("") leaves note empty

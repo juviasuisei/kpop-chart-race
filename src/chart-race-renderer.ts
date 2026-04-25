@@ -681,10 +681,10 @@ export class ChartRaceRenderer {
   /**
    * Set the data note text showing the earliest data date.
    */
-  setDataNote(startDate: string): void {
+  setDataNote(startDate: string, totalPoints?: number): void {
     if (!this.dataNote) return;
     this.dataNote.textContent = startDate
-      ? `Points from ${startDate} forward. Inactive artists may be hidden — switch to All to see full rankings.`
+      ? `${totalPoints !== undefined ? totalPoints.toLocaleString() : "?"} total points earned from ${startDate} forward. Inactive artists may be hidden — switch to All to see full rankings.`
       : "";
   }
 

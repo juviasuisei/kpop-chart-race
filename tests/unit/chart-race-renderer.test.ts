@@ -1622,6 +1622,32 @@ describe('Zoom change behavior', () => {
     vi.advanceTimersByTime(5000);
     vi.useRealTimers();
   });
+
+  it('all→10: scrollTop resets to 0 so all bars are visible', () => {
+    vi.useFakeTimers();
+    renderer.mount(container);
+    const barsContainer = container.querySelector('.chart-race__bars') as HTMLElement;
+    Object.defineProperty(barsContainer, 'clientHeight', { value: 500, configurable: true });
+
+    // Render many bars in "all" mode
+    const entries = Array.from({ length: 20 }, (_, i) =>
+      makeEntry({ artistId: `a${i}`, artistName: `Artist ${i}`, rank: i + 1, cumulativeValue: 2000 - i * 100, previousCumulativeValue: 1900 - i * 100 }),
+    );
+    renderer.update(makeSnapshot(entries), 'all', emptyDataStore);
+    vi.advanceTimersByTime(5000);
+
+    // Simulate user scrolling down in "all" mode
+    barsContainer.scrollTop = 300;
+
+    // Switch to zoom 10
+    renderer.update(makeSnapshot(entries.slice(0, 10)), 10, emptyDataStore);
+
+    // scrollTop should be reset to 0
+    expect(barsContainer.scrollTop).toBe(0);
+
+    vi.advanceTimersByTime(5000);
+    vi.useRealTimers();
+  });
 });
 
 describe('Z-index safety', () => {

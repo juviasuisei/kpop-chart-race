@@ -332,6 +332,9 @@ export class ChartRaceRenderer {
     }
 
     this.barsContainer.style.overflowY = zoomLevel === "all" ? "auto" : "hidden";
+    if (zoomLevel !== "all") {
+      this.barsContainer.scrollTop = 0;
+    }
 
     const visibleIds = new Set(visibleEntries.map(e => e.artistId));
     const maxCumulative = visibleEntries.reduce(

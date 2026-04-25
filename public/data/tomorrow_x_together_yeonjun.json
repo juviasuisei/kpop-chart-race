@@ -1,0 +1,31 @@
+{
+  "name": "YEONJUN [TOMORROW X TOGETHER]",
+  "korean_name": "최연준",
+  "artistType": "solo_male",
+  "generation": 4,
+  "debut": "2025-11-07",
+  "releases": [
+    {
+      "title": "Talk to You",
+      "dailyValues": {
+        "2025-11-12": { "value": 3780, "source": "show_champion", "episode": 577 }
+      },
+      "embeds": {
+        "2025-11-07": [
+          {
+            "eventType": "release_date",
+            "links": [
+              { "url": "https://music.apple.com/us/album/no-labels-part-01-ep/1846790579" }
+            ]
+          },
+          {
+            "eventType": "mv",
+            "links": [
+              { "url": "https://youtu.be/2GPFLanHujM?si=Ljy4xAgQnSrE7O0Q" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

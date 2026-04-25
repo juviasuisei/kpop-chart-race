@@ -1,0 +1,39 @@
+{
+  "name": "ARrC",
+  "korean_name": "아크",
+  "artistType": "boy_group",
+  "generation": 5,
+  "debut": "2024-08-19",
+  "releases": [
+    {
+      "title": "SKIID",
+      "dailyValues": {
+        "2025-11-11": { "value": 2328, "source": "the_show", "episode": 393 }
+      },
+      "embeds": {
+        "2025-11-11": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://youtu.be/VhTfIWyw4P8?si=tv-L18Pb-r_MrGde" }
+            ]
+          }
+        ],
+        "2025-11-03": [
+          {
+            "eventType": "release_date",
+            "links": [
+              { "url": "https://music.apple.com/us/album/ctrl-alt-skiid-single/1849851073" }
+            ]
+          },
+          {
+            "eventType": "mv",
+            "links": [
+              { "url": "https://youtu.be/LU06eFKen9k?si=3moWY46eKVD-bCwu" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "name": "xikers",
+  "korean_name": "싸이커스",
+  "artistType": "boy_group",
+  "generation": 5,
+  "debut": "2023-03-30",
+  "releases": [
+    {
+      "title": "SUPERPOWER",
+      "dailyValues": {
+        "2025-11-11": { "value": 4767, "source": "the_show", "episode": 393 }
+      },
+      "embeds": {
+        "2025-11-11": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://youtu.be/4QSIF9fcoZs?si=kyBbZoRmUc5iZXWH" }
+            ]
+          }
+        ],
+        "2025-10-31": [
+          {
+            "eventType": "release_date",
+            "links": [
+              { "url": "https://music.apple.com/us/album/house-of-tricky-wrecking-the-house-ep/1846738618" }
+            ]
+          },
+          {
+            "eventType": "mv",
+            "links": [
+              { "url": "https://youtu.be/26TTuFQXEW4?si=JQ_XVtS2BAWrLLyb" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -6,10 +6,12 @@
   "debut": "2022-02-22",
   "releases": [
     {
-      "title": "Love Me More",
+      "title": "Blue Valentine",
       "dailyValues": {
         "2026-01-02": { "value": 3918, "source": "music_bank", "episode": 1274 },
-        "2025-11-22": { "value": 6143, "source": "show_music_core", "episode": 925 }
+        "2025-11-22": { "value": 6143, "source": "show_music_core", "episode": 925 },
+        "2025-11-16": { "value": 5044, "source": "inkigayo", "episode": 1291 },
+        "2025-11-15": { "value": 6805, "source": "show_music_core", "episode": 924 }
       },
       "embeds": {
         "2025-10-13": [
@@ -22,7 +24,7 @@
           {
             "eventType": "mv",
             "links": [
-              { "url": "https://youtu.be/y2os26sMjOg?si=E3JECbXD15KEY2-f" }
+              { "url": "https://youtu.be/EmeW6li6bbo?si=eoFWzGqmTfqXClF_" }
             ]
           }
         ]

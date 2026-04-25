@@ -17,7 +17,10 @@
         "2025-12-20": { "value": 4536, "source": "show_music_core", "episode": 929 },
         "2025-11-30": { "value": 4985, "source": "inkigayo", "episode": 1293 },
         "2025-11-23": { "value": 4907, "source": "inkigayo", "episode": 1292 },
-        "2025-11-19": { "value": 3934, "source": "show_champion", "episode": 578 }
+        "2025-11-19": { "value": 3934, "source": "show_champion", "episode": 578 },
+        "2025-11-16": { "value": 4275, "source": "inkigayo", "episode": 1291 },
+        "2025-11-15": { "value": 4619, "source": "show_music_core", "episode": 924 },
+        "2025-11-12": { "value": 2947, "source": "show_champion", "episode": 577 }
       },
       "embeds": {
         "2025-10-24": [

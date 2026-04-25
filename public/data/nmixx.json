@@ -8,7 +8,8 @@
     {
       "title": "Love Me More",
       "dailyValues": {
-        "2026-01-02": { "value": 3918, "source": "music_bank", "episode": 1274 }
+        "2026-01-02": { "value": 3918, "source": "music_bank", "episode": 1274 },
+        "2025-11-22": { "value": 6143, "source": "show_music_core", "episode": 925 }
       },
       "embeds": {
         "2025-10-13": [

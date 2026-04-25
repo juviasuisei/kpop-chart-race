@@ -8,10 +8,19 @@
     {
       "title": "Stick With You",
       "dailyValues": {
+        "2026-04-24": { "value": 10515, "source": "music_bank", "episode": 1290 },
         "2026-04-23": { "value": 10700, "source": "m_countdown", "episode": 925 },
         "2026-04-22": { "value": 6102, "source": "show_champion", "episode": 594 }
       },
-      "embeds": { 
+      "embeds": {
+        "2026-04-24": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://youtu.be/_l2Q3cEvJRA?si=PnyqmNluLjIgpXvs" }
+            ]
+          }
+        ],
         "2026-04-23": [
           {
             "eventType": "live_performance",

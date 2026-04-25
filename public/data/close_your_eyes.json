@@ -1,0 +1,40 @@
+{
+  "name": "CLOSE YOUR EYES",
+  "korean_name": "클로즈 유어 아이즈",
+  "artistType": "boy_group",
+  "generation": 5,
+  "debut": "2025-04-02",
+  "releases": [
+    {
+      "title": "X",
+      "dailyValues": {
+        "2025-11-21": { "value": 7584, "source": "music_bank", "episode": 1268 },
+        "2025-11-19": { "value": 5919, "source": "show_champion", "episode": 578 }
+      },
+      "embeds": {
+        "2025-11-21": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://youtu.be/SW6CwD4bwrg?si=1Na0PRhMQ-9FzLuH" }
+            ]
+          }
+        ],
+        "2025-11-11": [
+          {
+            "eventType": "release_date",
+            "links": [
+              { "url": "https://music.apple.com/us/album/blackout-ep/1850358021" }
+            ]
+          },
+          {
+            "eventType": "mv",
+            "links": [
+              { "url": "https://youtu.be/D5ljl9pNAmc?si=EQ-52RIqRiv5X95F" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

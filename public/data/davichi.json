@@ -1,0 +1,32 @@
+{
+  "name": "DAVICHI",
+  "korean_name": "다비치",
+  "artistType": "girl_group",
+  "generation": 2,
+  "debut": "2008-02-22",
+  "releases": [
+    {
+      "title": "TIME CAPSULE",
+      "dailyValues": {
+        "2025-11-23": { "value": 3759, "source": "inkigayo", "episode": 1292 },
+        "2025-11-22": { "value": 4431, "source": "show_music_core", "episode": 925 }
+      },
+      "embeds": {
+        "2025-10-16": [
+          {
+            "eventType": "release_date",
+            "links": [
+              { "url": "https://music.apple.com/us/album/time-capsule-single/1845310196" }
+            ]
+          },
+          {
+            "eventType": "mv",
+            "links": [
+              { "url": "https://youtu.be/qE35JN1ogeI?si=r7UHGH0QVfyB7Qcs" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

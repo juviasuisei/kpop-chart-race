@@ -1,0 +1,31 @@
+{
+  "name": "Roy Kim",
+  "korean_name": "김상우",
+  "artistType": "solo_male",
+  "generation": 3,
+  "debut": "2013-04-22",
+  "releases": [
+    {
+      "title": "No Words Can Say",
+      "dailyValues": {
+        "2025-11-19": { "value": 3351, "source": "show_champion", "episode": 578 }
+      },
+      "embeds": {
+        "2025-10-27": [
+          {
+            "eventType": "release_date",
+            "links": [
+              { "url": "https://music.apple.com/us/album/no-words-can-say-single/1848023873" }
+            ]
+          },
+          {
+            "eventType": "mv",
+            "links": [
+              { "url": "https://youtu.be/mR-kkHE0-tU?si=kWjkf-U6lAsgT04m" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

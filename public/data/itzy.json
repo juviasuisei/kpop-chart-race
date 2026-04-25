@@ -1,0 +1,40 @@
+{
+  "name": "ITZY",
+  "korean_name": "있지",
+  "artistType": "girl_group",
+  "generation": 4,
+  "debut": "2019-02-12",
+  "releases": [
+    {
+      "title": "TUNNEL VISION",
+      "dailyValues": {
+        "2025-11-21": { "value": 8019, "source": "music_bank", "episode": 1268 },
+        "2025-11-19": { "value": 2005, "source": "show_champion", "episode": 578 }
+      },
+      "embeds": {
+        "2025-11-21": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://youtu.be/ufgwBv0uHQ4?si=fZG8n7CbU8SvUrj1" }
+            ]
+          }
+        ],
+        "2025-11-10": [
+          {
+            "eventType": "release_date",
+            "links": [
+              { "url": "https://music.apple.com/us/album/tunnel-vision-ep/1846236584" }
+            ]
+          },
+          {
+            "eventType": "mv",
+            "links": [
+              { "url": "https://youtu.be/piSq8IioghU?si=j3tuOmsT8VDHUhpj" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

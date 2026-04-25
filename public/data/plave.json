@@ -8,6 +8,7 @@
     {
       "title": "Born Savage",
       "dailyValues": {
+        "2026-04-24": { "value": 3486, "source": "music_bank", "episode": 1290 },
         "2026-04-22": { "value": 3390, "source": "show_champion", "episode": 594 }
       },
       "embeds": {
@@ -31,9 +32,19 @@
       "title": "BBUU!",
       "dailyValues": {
         "2025-12-03": { "value": 2429, "source": "show_champion", "episode": 580 },
-        "2025-11-26": { "value": 3096, "source": "show_champion", "episode": 579 }
+        "2025-11-26": { "value": 3096, "source": "show_champion", "episode": 579 },
+        "2025-11-22": { "value": 5416, "source": "show_music_core", "episode": 925 },
+        "2025-11-19": { "value": 4794, "source": "show_champion", "episode": 578 }
       },
       "embeds": {
+        "2025-11-22": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://youtu.be/-mu45LJZ8o8?si=tVbCVUcUmj1Ek_ps" }
+            ]
+          }
+        ],
         "2025-11-10": [
           {
             "eventType": "release_date",

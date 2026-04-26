@@ -8,10 +8,19 @@
     {
       "title": "Born Savage",
       "dailyValues": {
+        "2026-04-25": { "value": 5695, "source": "show_music_core", "episode": 942 },
         "2026-04-24": { "value": 3486, "source": "music_bank", "episode": 1290 },
         "2026-04-22": { "value": 3390, "source": "show_champion", "episode": 594 }
       },
       "embeds": {
+        "2026-04-25": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://youtu.be/3zvHS4-C4uo?si=iNoVP4xuAAW4Ksqh" }
+            ]
+          }
+        ],
         "2026-04-13": [
           {
             "eventType": "release_date",

@@ -12,7 +12,8 @@
         "2025-11-22": { "value": 4431, "source": "show_music_core", "episode": 925 },
         "2025-11-16": { "value": 3176, "source": "inkigayo", "episode": 1291 },
         "2025-11-15": { "value": 4145, "source": "show_music_core", "episode": 924 },
-        "2025-11-12": { "value": 3507, "source": "show_champion", "episode": 577 }
+        "2025-11-12": { "value": 3507, "source": "show_champion", "episode": 577 },
+        "2025-11-05": { "value": 2564, "source": "show_champion", "episode": 576 }
       },
       "embeds": {
         "2025-10-16": [

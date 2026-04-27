@@ -1,0 +1,39 @@
+{
+  "name": "TEMPEST",
+  "korean_name": "템페스트",
+  "artistType": "boy_group",
+  "generation": 4,
+  "debut": "2022-03-02",
+  "releases": [
+    {
+      "title": "In The Dark",
+      "dailyValues": {
+        "2025-11-04": { "value": 3059, "source": "the_show", "episode": 392 }
+      },
+      "embeds": {
+        "2025-11-04": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://youtu.be/YjsZFnf0Fz8?si=0bGs0ACHKY18ignv" }
+            ]
+          }
+        ],
+        "2025-10-27": [
+          {
+            "eventType": "release_date",
+            "links": [
+              { "url": "https://music.apple.com/us/album/as-i-am-ep/1847853875" }
+            ]
+          },
+          {
+            "eventType": "mv",
+            "links": [
+              { "url": "https://youtu.be/Hk2u4zlJ4HE?si=Cq-WS01ksWBn8Xd5" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

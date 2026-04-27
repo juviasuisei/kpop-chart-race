@@ -1,0 +1,48 @@
+{
+  "name": "NEXZ",
+  "korean_name": "넥스지",
+  "artistType": "boy_group",
+  "generation": 5,
+  "debut": "2024-05-20",
+  "releases": [
+    {
+      "title": "Beat-Boxer",
+      "dailyValues": {
+        "2025-11-07": { "value": 5757, "source": "music_bank", "episode": 1266 },
+        "2025-11-05": { "value": 4943, "source": "show_champion", "episode": 576 }
+      },
+      "embeds": {
+        "2025-11-07": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://youtu.be/IobTOMLHK5M?si=l2EGflsLKrh3t4XI" }
+            ]
+          }
+        ],
+        "2025-11-05": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://youtu.be/crwsioKKiuo?si=h60RmBnu5nQgVJ1J" }
+            ]
+          }
+        ],
+        "2025-10-27": [
+          {
+            "eventType": "release_date",
+            "links": [
+              { "url": "https://music.apple.com/us/album/beat-boxer-ep/1840923109" }
+            ]
+          },
+          {
+            "eventType": "mv",
+            "links": [
+              { "url": "https://youtu.be/d4tHKtG9xFo?si=95oQd-zYW-0vhQAi" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

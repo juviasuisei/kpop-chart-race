@@ -1,0 +1,39 @@
+{
+  "name": "WEi",
+  "korean_name": "위아이",
+  "artistType": "boy_group",
+  "generation": 4,
+  "debut": "2020-10-05",
+  "releases": [
+    {
+      "title": "HOME",
+      "dailyValues": {
+        "2025-11-04": { "value": 1961, "source": "the_show", "episode": 392 }
+      },
+      "embeds": {
+        "2025-11-04": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://youtu.be/XvI8sp3thvk?si=SPo3sy323hS_8Z6I" }
+            ]
+          }
+        ],
+        "2025-10-29": [
+          {
+            "eventType": "release_date",
+            "links": [
+              { "url": "https://music.apple.com/us/album/wonderland-ep/1847772518" }
+            ]
+          },
+          {
+            "eventType": "mv",
+            "links": [
+              { "url": "https://youtu.be/V9iN-Yj0VTI?si=21pPoK58jKawT3jj" }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

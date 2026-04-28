@@ -18,6 +18,14 @@
         "2026-01-21": { "value": 5347, "source": "show_champion", "episode": 583 }
       },
       "embeds": {
+        "2026-01-23": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://youtu.be/zNLoJlQBhh0?si=cFpTp13JJj-Buw86" }
+            ]
+          }
+        ],
         "2026-01-22": [
           {
             "eventType": "live_performance",

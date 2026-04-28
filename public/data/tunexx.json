@@ -11,6 +11,14 @@
         "2026-03-11": { "value": 3007, "source": "show_champion", "episode": 588 }
       },
       "embeds": {
+        "2026-03-11": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://youtu.be/Mxx6e-otZnA?si=vkFru5rWmerj69df" }
+            ]
+          }
+        ],
         "2026-03-03": [
           {
             "eventType": "release_date",

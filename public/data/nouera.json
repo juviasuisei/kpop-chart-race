@@ -22,6 +22,14 @@
         ],
         "2026-03-18": [
           {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://youtu.be/KAEW-tEnTco?si=46YUodOaf-EB7Tnd" }
+            ]
+          }
+        ],
+        "2026-03-18": [
+          {
             "eventType": "release_date",
             "links": [
               { "url": "https://music.apple.com/us/album/pop-it-like-ep/1886270616" }

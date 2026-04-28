@@ -11,6 +11,14 @@
         "2026-04-01": { "value": 2167, "source": "show_champion", "episode": 591 }
       },
       "embeds": {
+        "2026-04-01": [
+          {
+            "eventType": "live_performance",
+            "links": [
+              { "url": "https://youtu.be/6rDM-PelVEo?si=JK9EBOi_iI0QuiXc" }
+            ]
+          }
+        ],
         "2026-03-24": [
           {
             "eventType": "release_date",

@@ -36,16 +36,10 @@ export type EventType =
 /** Zoom level for the chart race display */
 export type ZoomLevel = 10 | "all";
 
-/** A single embed link with a URL and optional description */
-export interface EmbedLink {
-  url: string;
-  description?: string;
-}
-
-/** A collection of embeds for a specific event type on a given date */
+/** A single embed entry for a specific event type on a given date */
 export interface EmbedDateEntry {
-  eventType: EventType;
-  links: EmbedLink[];
+  type: EventType;
+  url: string;
 }
 
 /** A daily performance value entry with source and episode info */

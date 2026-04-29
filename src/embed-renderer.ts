@@ -4,7 +4,6 @@
  * Falls back to a plain anchor link for unrecognized or rejected URLs.
  */
 
-import type { EmbedLink } from "./types.ts";
 
 /** Supported embed types detected from URL patterns */
 export type EmbedType = "youtube" | "apple_music" | "instagram" | "tiktok";
@@ -101,15 +100,14 @@ export function sanitizeUrl(url: string): string | null {
 
 
 /**
- * Main render function — renders an embed link into the given container.
+ * Main render function — renders an embed URL into the given container.
  * Sanitizes the URL, detects embed type, and creates the appropriate DOM element.
  */
-export function render(link: EmbedLink, container: HTMLElement): void {
-  const safeUrl = sanitizeUrl(link.url);
+export function render(url: string, container: HTMLElement): void {
+  const safeUrl = sanitizeUrl(url);
 
   if (!safeUrl) {
     renderRejected(container);
-    appendCaption(link.description, container);
     return;
   }
 
@@ -132,8 +130,6 @@ export function render(link: EmbedLink, container: HTMLElement): void {
       renderFallback(safeUrl, container);
       break;
   }
-
-  appendCaption(link.description, container);
 }
 
 /** Render a YouTube embed iframe */
@@ -219,19 +215,6 @@ function renderRejected(container: HTMLElement): void {
   const span = document.createElement("span");
   span.textContent = "Invalid link";
   container.appendChild(span);
-}
-
-/** Append a caption paragraph if a description is provided */
-function appendCaption(
-  description: string | undefined,
-  container: HTMLElement
-): void {
-  if (description) {
-    const caption = document.createElement("p");
-    caption.className = "embed-caption";
-    caption.textContent = description;
-    container.appendChild(caption);
-  }
 }
 
 /** Load an external embed script if not already present */

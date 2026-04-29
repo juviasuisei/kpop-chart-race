@@ -64,10 +64,10 @@ function arbRelease(dates: string[]): fc.Arbitrary<ParsedRelease> {
 
     // Optionally add embeds on some dates
     const arbEmbeds = fc.subarray(dates, { minLength: 0, maxLength: 2 }).map((selectedDates) => {
-      const embedMap = new Map<string, Array<{ eventType: string; links: Array<{ url: string; description?: string }> }>>();
+      const embedMap = new Map<string, Array<{ type: string; url: string }>>();
       for (const date of selectedDates) {
         embedMap.set(date, [
-          { eventType: 'mv', links: [{ url: `https://youtube.com/watch?v=${date}`, description: 'MV' }] },
+          { type: 'mv', url: `https://youtube.com/watch?v=${date}` },
         ]);
       }
       return embedMap;

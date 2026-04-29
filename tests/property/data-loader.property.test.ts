@@ -9,7 +9,6 @@ import type {
   ChartSource,
   EventType,
   DailyValueEntry,
-  EmbedLink,
   EmbedDateEntry,
   ReleaseEntry,
 } from '../../src/types.ts';
@@ -68,14 +67,9 @@ const arbDailyValueEntry: fc.Arbitrary<DailyValueEntry> = fc.record({
   episode: fc.integer({ min: 1, max: 2000 }),
 });
 
-const arbEmbedLink: fc.Arbitrary<EmbedLink> = fc.record({
-  url: fc.webUrl(),
-  description: fc.option(fc.string({ minLength: 1, maxLength: 50 }), { nil: undefined }),
-});
-
 const arbEmbedDateEntry: fc.Arbitrary<EmbedDateEntry> = fc.record({
-  eventType: arbEventType,
-  links: fc.array(arbEmbedLink, { minLength: 1, maxLength: 3 }),
+  type: arbEventType,
+  url: fc.webUrl(),
 });
 
 const arbDailyValuesRecord: fc.Arbitrary<Record<string, DailyValueEntry>> = fc

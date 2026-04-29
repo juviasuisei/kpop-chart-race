@@ -249,9 +249,8 @@ export class DetailPanel {
           if (entry.isIntersecting) {
             const placeholder = entry.target as HTMLElement;
             const linkData = placeholder.dataset.embedUrl;
-            const linkDesc = placeholder.dataset.embedDescription;
             if (linkData) {
-              renderEmbed({ url: linkData, description: linkDesc || undefined }, placeholder);
+              renderEmbed(linkData, placeholder);
               placeholder.classList.remove("detail-panel__embed-placeholder");
               this.observer?.unobserve(placeholder);
             }
@@ -637,7 +636,7 @@ export class DetailPanel {
         variety_show: 8,
         fan_event: 9,
       };
-      return (order[a.eventType] ?? 10) - (order[b.eventType] ?? 10);
+      return (order[a.type] ?? 10) - (order[b.type] ?? 10);
     });
     for (const group of sortedEmbeds) {
       const groupEl = document.createElement("div");
@@ -646,22 +645,17 @@ export class DetailPanel {
       // Event type label
       const labelEl = document.createElement("div");
       labelEl.className = "timeline-entry__event-type";
-      labelEl.textContent = EVENT_TYPE_LABELS[group.eventType] ?? group.eventType;
+      labelEl.textContent = EVENT_TYPE_LABELS[group.type] ?? group.type;
       groupEl.appendChild(labelEl);
 
-      // Embed links — lazy-loaded via IntersectionObserver
-      for (const link of group.links) {
-        const placeholder = document.createElement("div");
-        placeholder.className = "detail-panel__embed-placeholder";
-        placeholder.dataset.embedUrl = link.url;
-        if (link.description) {
-          placeholder.dataset.embedDescription = link.description;
-        }
-        groupEl.appendChild(placeholder);
+      // Embed — lazy-loaded via IntersectionObserver
+      const placeholder = document.createElement("div");
+      placeholder.className = "detail-panel__embed-placeholder";
+      placeholder.dataset.embedUrl = group.url;
+      groupEl.appendChild(placeholder);
 
-        if (this.observer) {
-          this.observer.observe(placeholder);
-        }
+      if (this.observer) {
+        this.observer.observe(placeholder);
       }
 
       entry.appendChild(groupEl);
@@ -681,7 +675,7 @@ export class DetailPanel {
           trailer: 4, dance_practice: 5, promotion: 6, behind_the_scenes: 7,
           variety_show: 8, fan_event: 9,
         };
-        return (order[a.eventType] ?? 10) - (order[b.eventType] ?? 10);
+        return (order[a.type] ?? 10) - (order[b.type] ?? 10);
       });
 
       for (const group of sortedMerged) {
@@ -690,20 +684,15 @@ export class DetailPanel {
 
         const labelEl = document.createElement("div");
         labelEl.className = "timeline-entry__event-type";
-        labelEl.textContent = EVENT_TYPE_LABELS[group.eventType] ?? group.eventType;
+        labelEl.textContent = EVENT_TYPE_LABELS[group.type] ?? group.type;
         groupEl.appendChild(labelEl);
 
-        for (const link of group.links) {
-          const placeholder = document.createElement("div");
-          placeholder.className = "detail-panel__embed-placeholder";
-          placeholder.dataset.embedUrl = link.url;
-          if (link.description) {
-            placeholder.dataset.embedDescription = link.description;
-          }
-          groupEl.appendChild(placeholder);
-          if (this.observer) {
-            this.observer.observe(placeholder);
-          }
+        const placeholder = document.createElement("div");
+        placeholder.className = "detail-panel__embed-placeholder";
+        placeholder.dataset.embedUrl = group.url;
+        groupEl.appendChild(placeholder);
+        if (this.observer) {
+          this.observer.observe(placeholder);
         }
 
         entry.appendChild(groupEl);

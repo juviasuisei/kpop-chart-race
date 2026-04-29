@@ -33,10 +33,8 @@ function createTestDataStore(): DataStore {
         '2024-05-13',
         [
           {
-            eventType: 'mv',
-            links: [
-              { url: 'https://www.youtube.com/watch?v=abc123', description: 'Official MV' },
-            ],
+            type: 'mv',
+            url: 'https://www.youtube.com/watch?v=abc123',
           },
         ],
       ],
@@ -44,17 +42,12 @@ function createTestDataStore(): DataStore {
         '2024-05-14',
         [
           {
-            eventType: 'live_performance',
-            links: [
-              { url: 'https://www.youtube.com/watch?v=def456', description: 'Comeback stage' },
-              { url: 'https://www.instagram.com/p/example1/' },
-            ],
+            type: 'live_performance',
+            url: 'https://www.youtube.com/watch?v=def456',
           },
           {
-            eventType: 'promotion',
-            links: [
-              { url: 'https://www.instagram.com/p/example2/', description: 'Behind the scenes' },
-            ],
+            type: 'promotion',
+            url: 'https://www.instagram.com/p/example2/',
           },
         ],
       ],
@@ -249,8 +242,8 @@ describe('DetailPanel', () => {
   it('creates embed placeholders for lazy loading', () => {
     panel.open('test-artist', dataStore);
     const placeholders = document.body.querySelectorAll('.detail-panel__embed-placeholder');
-    // We have embeds on 2024-05-13 (1 link) and 2024-05-14 (3 links across 2 groups)
-    expect(placeholders.length).toBe(4);
+    // We have embeds on 2024-05-13 (1 entry) and 2024-05-14 (2 entries)
+    expect(placeholders.length).toBe(3);
 
     // Verify data attributes are set for lazy loading
     const firstPlaceholder = placeholders[0] as HTMLElement;
@@ -435,7 +428,7 @@ describe('DetailPanel — same-date card merging', () => {
       dailyValues: new Map(),
       embeds: new Map([
         ['2024-05-13', [
-          { eventType: 'mv', links: [{ url: 'https://www.youtube.com/watch?v=test1', description: 'MV' }] },
+          { type: 'mv', url: 'https://www.youtube.com/watch?v=test1' },
         ]],
       ]),
     };
@@ -490,7 +483,7 @@ describe('DetailPanel — same-date card merging', () => {
       dailyValues: new Map(),
       embeds: new Map([
         ['2024-05-13', [
-          { eventType: 'live_performance', links: [{ url: 'https://www.youtube.com/watch?v=lp1', description: 'Live' }] },
+          { type: 'live_performance', url: 'https://www.youtube.com/watch?v=lp1' },
         ]],
       ]),
     };

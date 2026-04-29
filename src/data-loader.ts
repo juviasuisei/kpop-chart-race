@@ -13,7 +13,6 @@ import type {
   ParsedArtist,
   ParsedRelease,
   ParsedEmbedDateEntry,
-  ParsedEmbedLink,
 } from "./models.ts";
 
 /** The set of valid ArtistType values */
@@ -133,15 +132,10 @@ export function toParseArtist(entry: ArtistEntry, filename: string): ParsedArtis
 
     const embeds = new Map<string, ParsedEmbedDateEntry[]>();
     for (const [date, entries] of Object.entries(rel.embeds ?? {})) {
-      const parsed: ParsedEmbedDateEntry[] = (entries as Array<{ eventType: string; links: Array<{ url: string; description?: string }> }>).map(
+      const parsed: ParsedEmbedDateEntry[] = (entries as Array<{ type: string; url: string }>).map(
         (e) => ({
-          eventType: e.eventType as ParsedEmbedDateEntry["eventType"],
-          links: (e.links ?? []).map(
-            (l): ParsedEmbedLink => ({
-              url: l.url,
-              ...(l.description != null ? { description: l.description } : {}),
-            }),
-          ),
+          type: e.type as ParsedEmbedDateEntry["type"],
+          url: e.url,
         }),
       );
       embeds.set(date, parsed);

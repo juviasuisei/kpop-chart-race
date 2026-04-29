@@ -4,7 +4,6 @@
 
 import fc from 'fast-check';
 import { detectEmbedType, extractVideoId, sanitizeUrl, render } from '../../src/embed-renderer.ts';
-import type { EmbedLink } from '../../src/types.ts';
 
 // ============================================================
 // Property 13: Embed URL Transformation
@@ -178,8 +177,8 @@ describe('Property 14: Malformed URL Fallback', () => {
     fc.assert(
       fc.property(arbNonEmbedUrl, (input) => {
         const container = document.createElement('div');
-        const link: EmbedLink = { url: input };
-        render(link, container);
+        
+        render(input, container);
 
         // Should contain an anchor element as fallback
         const anchor = container.querySelector('a');
@@ -202,8 +201,8 @@ describe('Property 14: Malformed URL Fallback', () => {
     fc.assert(
       fc.property(arbInvalidString, (input) => {
         const container = document.createElement('div');
-        const link: EmbedLink = { url: input };
-        render(link, container);
+        
+        render(input, container);
 
         // Should produce some output (either anchor or span) without dangerous content
         expect(container.innerHTML.length).toBeGreaterThan(0);
@@ -260,8 +259,8 @@ describe('Property 15: Permalink Sanitization', () => {
     fc.assert(
       fc.property(arbXssPayload, (payload) => {
         const container = document.createElement('div');
-        const link: EmbedLink = { url: payload };
-        render(link, container);
+        
+        render(payload, container);
 
         const html = container.innerHTML.toLowerCase();
         // No script tags
@@ -284,8 +283,8 @@ describe('Property 15: Permalink Sanitization', () => {
     fc.assert(
       fc.property(arbUrlWithXssQuery, (payload) => {
         const container = document.createElement('div');
-        const link: EmbedLink = { url: payload };
-        render(link, container);
+        
+        render(payload, container);
 
         // The DOM should not contain any actual <img> or <script> elements injected via the URL
         expect(container.querySelector('img')).toBeNull();

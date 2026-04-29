@@ -1,0 +1,33 @@
+{
+  "name": "Lee Chanwon",
+  "korean_name": "이찬원",
+  "artistType": "solo_male",
+  "generation": 4,
+  "debut": "2020-03-14",
+  "releases": [
+    {
+      "title": "Maybe today",
+      "dailyValues": {
+        "2025-11-01": { "value": 7021, "source": "show_music_core", "episode": 923 }
+      },
+      "embeds": {
+        "2025-11-01": [
+          {
+            "type": "live_performance",
+            "url": "https://youtu.be/PcPrq9DYpmg?si=zku8XbeV6fxw1uJT"
+          }
+        ],
+        "2025-10-20": [
+          {
+            "type": "release_date",
+            "url": "https://music.apple.com/us/album/%EC%B0%AC%EB%9E%80-%E7%87%A6%E7%88%9B/1846255727"
+          },
+          {
+            "type": "mv",
+            "url": "https://youtu.be/AIh7UA7UoYI?si=SHw6GHYJBq0ysVeH"
+          }
+        ]
+      }
+    }
+  ]
+}

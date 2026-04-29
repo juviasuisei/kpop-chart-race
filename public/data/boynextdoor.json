@@ -1,0 +1,40 @@
+{
+  "name": "BOYNEXTDOOR",
+  "korean_name": "보이넥스트도어",
+  "artistType": "boy_group",
+  "generation": 5,
+  "debut": "2023-05-30",
+  "releases": [
+    {
+      "title": "Hollywood Action",
+      "dailyValues": {
+        "2025-11-02": { "value": 6473, "source": "inkigayo", "episode": 1289 },
+        "2025-11-01": { "value": 6407, "source": "show_music_core", "episode": 923 }
+      },
+      "embeds": {
+        "2025-11-02": [
+          {
+            "type": "live_performance",
+            "url": "https://youtu.be/q4veokVSjtY?si=s3kNIM3-utVXaTzu"
+          }
+        ],
+        "2025-11-01": [
+          {
+            "type": "live_performance",
+            "url": "https://youtu.be/PwADD8Mk3-I?si=R-hfYaae_Vkd2ONl"
+          }
+        ],
+        "2025-10-20": [
+          {
+            "type": "release_date",
+            "url": "https://music.apple.com/us/album/the-action-ep/1844393312"
+          },
+          {
+            "type": "mv",
+            "url": "https://youtu.be/yAtew9dZX_E?si=gG73sDDq3cNNYyeu"
+          }
+        ]
+      }
+    }
+  ]
+}

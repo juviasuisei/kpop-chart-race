@@ -9,16 +9,10 @@ import type {
   EventType,
 } from "./types.ts";
 
-/** A parsed embed link (mirrors EmbedLink but used in runtime context) */
-export interface ParsedEmbedLink {
-  url: string;
-  description?: string;
-}
-
-/** A parsed embed date entry with event type and links */
+/** A parsed embed date entry with event type and url */
 export interface ParsedEmbedDateEntry {
-  eventType: EventType;
-  links: ParsedEmbedLink[];
+  type: EventType;
+  url: string;
 }
 
 /** A parsed release with Maps instead of Records for efficient lookup */

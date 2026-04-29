@@ -11,21 +11,10 @@
         "2025-11-04": { "value": 1961, "source": "the_show", "episode": 392 }
       },
       "embeds": {
-        "2025-11-04": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/XvI8sp3thvk?si=SPo3sy323hS_8Z6I"
-          }
-        ],
+        "2025-11-04": [{ "type": "live_performance", "url": "https://youtu.be/XvI8sp3thvk?si=SPo3sy323hS_8Z6I" }],
         "2025-10-29": [
-          {
-            "type": "release_date",
-            "url": "https://music.apple.com/us/album/wonderland-ep/1847772518"
-          },
-          {
-            "type": "mv",
-            "url": "https://youtu.be/V9iN-Yj0VTI?si=21pPoK58jKawT3jj"
-          }
+          { "type": "release_date", "url": "https://music.apple.com/us/album/wonderland-ep/1847772518" },
+          { "type": "mv", "url": "https://youtu.be/V9iN-Yj0VTI?si=21pPoK58jKawT3jj" }
         ]
       }
     }

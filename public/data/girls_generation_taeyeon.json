@@ -13,14 +13,8 @@
       },
       "embeds": {
         "2025-12-01": [
-          {
-            "type": "release_date",
-            "url": "https://music.apple.com/us/album/panorama-the-best-of-taeyeon/1854676984"
-          },
-          {
-            "type": "mv",
-            "url": "https://youtu.be/xGhaNqnjgr4?si=IdsR2V5OfFuf9VtQ"
-          }
+          { "type": "release_date", "url": "https://music.apple.com/us/album/panorama-the-best-of-taeyeon/1854676984" },
+          { "type": "mv", "url": "https://youtu.be/xGhaNqnjgr4?si=IdsR2V5OfFuf9VtQ" }
         ]
       }
     }

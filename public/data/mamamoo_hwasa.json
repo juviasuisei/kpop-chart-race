@@ -23,14 +23,8 @@
       },
       "embeds": {
         "2025-10-15": [
-          {
-            "type": "release_date",
-            "url": "https://music.apple.com/us/album/good-goodbye-single/1843518967"
-          },
-          {
-            "type": "mv",
-            "url": "https://youtu.be/Qe8fa4b5xNU?si=P-JHr4Q3zCrlJiec"
-          }
+          { "type": "release_date", "url": "https://music.apple.com/us/album/good-goodbye-single/1843518967" },
+          { "type": "mv", "url": "https://youtu.be/Qe8fa4b5xNU?si=P-JHr4Q3zCrlJiec" }
         ]
       }
     }

@@ -12,27 +12,11 @@
         "2025-10-31": { "value": 7802, "source": "music_bank", "episode": 1265 }
       },
       "embeds": {
-        "2025-11-01": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/PcPrq9DYpmg?si=zku8XbeV6fxw1uJT"
-          }
-        ],
-        "2025-10-31": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/05O9jF2vlQU?si=rDp_4sjY8R8zijQm"
-          }
-        ],
+        "2025-11-01": [{ "type": "live_performance", "url": "https://youtu.be/PcPrq9DYpmg?si=zku8XbeV6fxw1uJT" }],
+        "2025-10-31": [{ "type": "live_performance", "url": "https://youtu.be/05O9jF2vlQU?si=rDp_4sjY8R8zijQm" }],
         "2025-10-20": [
-          {
-            "type": "release_date",
-            "url": "https://music.apple.com/us/album/%EC%B0%AC%EB%9E%80-%E7%87%A6%E7%88%9B/1846255727"
-          },
-          {
-            "type": "mv",
-            "url": "https://youtu.be/AIh7UA7UoYI?si=SHw6GHYJBq0ysVeH"
-          }
+          { "type": "release_date", "url": "https://music.apple.com/us/album/%EC%B0%AC%EB%9E%80-%E7%87%A6%E7%88%9B/1846255727" },
+          { "type": "mv", "url": "https://youtu.be/AIh7UA7UoYI?si=SHw6GHYJBq0ysVeH" }
         ]
       }
     }

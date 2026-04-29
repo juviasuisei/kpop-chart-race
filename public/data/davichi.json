@@ -17,14 +17,8 @@
       },
       "embeds": {
         "2025-10-16": [
-          {
-            "type": "release_date",
-            "url": "https://music.apple.com/us/album/time-capsule-single/1845310196"
-          },
-          {
-            "type": "mv",
-            "url": "https://youtu.be/qE35JN1ogeI?si=r7UHGH0QVfyB7Qcs"
-          }
+          { "type": "release_date", "url": "https://music.apple.com/us/album/time-capsule-single/1845310196" },
+          { "type": "mv", "url": "https://youtu.be/qE35JN1ogeI?si=r7UHGH0QVfyB7Qcs" }
         ]
       }
     }

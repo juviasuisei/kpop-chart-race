@@ -16,39 +16,13 @@
         "2026-02-04": { "value": 2910, "source": "show_champion", "episode": 585 }
       },
       "embeds": {
-        "2026-02-08": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/bu4x0QoApYQ?si=HJPZVdUy5_KQZdyl"
-          }
-        ],
-        "2026-02-07": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/DjHfNJ3Fs_U?si=6txBX1OsP3xAMN35"
-          }
-        ],
-        "2026-02-06": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/4qpzU0ofqFM?si=ZEQ5Rv-I0QfW0ShU"
-          }
-        ],
-        "2026-02-05": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/-_YjFFoXZag?si=BafyPhfZgd-nW0TT"
-          }
-        ],
+        "2026-02-08": [{ "type": "live_performance", "url": "https://youtu.be/bu4x0QoApYQ?si=HJPZVdUy5_KQZdyl" }],
+        "2026-02-07": [{ "type": "live_performance", "url": "https://youtu.be/DjHfNJ3Fs_U?si=6txBX1OsP3xAMN35" }],
+        "2026-02-06": [{ "type": "live_performance", "url": "https://youtu.be/4qpzU0ofqFM?si=ZEQ5Rv-I0QfW0ShU" }],
+        "2026-02-05": [{ "type": "live_performance", "url": "https://youtu.be/-_YjFFoXZag?si=BafyPhfZgd-nW0TT" }],
         "2026-01-27": [
-          {
-            "type": "release_date",
-            "url": "https://music.apple.com/us/album/mono-feat-skaiwater-single/1869130801"
-          },
-          {
-            "type": "mv",
-            "url": "https://youtu.be/DYgE3SGPEqk?si=CoZ4UZfyD9PROtGt"
-          }
+          { "type": "release_date", "url": "https://music.apple.com/us/album/mono-feat-skaiwater-single/1869130801" },
+          { "type": "mv", "url": "https://youtu.be/DYgE3SGPEqk?si=CoZ4UZfyD9PROtGt" }
         ]
       }
     }

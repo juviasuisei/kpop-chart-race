@@ -11,21 +11,10 @@
         "2026-01-16": { "value": 10600, "source": "music_bank", "episode": 1276 }
       },
       "embeds": {
-        "2026-01-16": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/vWU_b8iFxP4?si=dRMiEm0hVRZojhN_"
-          }
-        ],
+        "2026-01-16": [{ "type": "live_performance", "url": "https://youtu.be/vWU_b8iFxP4?si=dRMiEm0hVRZojhN_" }],
         "2026-01-05": [
-          {
-            "type": "release_date",
-            "url": "https://music.apple.com/us/album/yesweare-ep/1862743787"
-          },
-          {
-            "type": "mv",
-            "url": "https://youtu.be/rhFJhijAfII?si=J-InRY8P5Nk-Sq5g"
-          }
+          { "type": "release_date", "url": "https://music.apple.com/us/album/yesweare-ep/1862743787" },
+          { "type": "mv", "url": "https://youtu.be/rhFJhijAfII?si=J-InRY8P5Nk-Sq5g" }
         ]
       }
     }

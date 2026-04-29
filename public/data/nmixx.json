@@ -20,14 +20,8 @@
       },
       "embeds": {
         "2025-10-13": [
-          {
-            "type": "release_date",
-            "url": "https://music.apple.com/us/album/blue-valentine/1839523838"
-          },
-          {
-            "type": "mv",
-            "url": "https://youtu.be/EmeW6li6bbo?si=eoFWzGqmTfqXClF_"
-          }
+          { "type": "release_date", "url": "https://music.apple.com/us/album/blue-valentine/1839523838" },
+          { "type": "mv", "url": "https://youtu.be/EmeW6li6bbo?si=eoFWzGqmTfqXClF_" }
         ]
       }
     }

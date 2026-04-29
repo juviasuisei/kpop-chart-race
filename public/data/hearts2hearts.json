@@ -28,45 +28,14 @@
         "2026-02-28": { "value": 3735, "source": "show_music_core", "episode": 935 }
       },
       "embeds": {
-        "2026-03-14": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/ejMG94x2YUY?si=ULJCD_XHGRq_F_AO"
-          }
-        ],
-        "2026-03-12": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/o_cBHoHY3mw?si=oXInfcIeohZ6Qs-4"
-          }
-        ],
-        "2026-03-08": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/Ai6FLQmajaI?si=ePTbUBIOiSSDSjwt"
-          }
-        ],
-        "2026-03-07": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/37VtoDg5O2o?si=MIGDQT6cMSP86897"
-          }
-        ],
-        "2026-02-28": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/QtdZsoIKDyo?si=vTOk2oCkeHbp_RgH"
-          }
-        ],
+        "2026-03-14": [{ "type": "live_performance", "url": "https://youtu.be/ejMG94x2YUY?si=ULJCD_XHGRq_F_AO" }],
+        "2026-03-12": [{ "type": "live_performance", "url": "https://youtu.be/o_cBHoHY3mw?si=oXInfcIeohZ6Qs-4" }],
+        "2026-03-08": [{ "type": "live_performance", "url": "https://youtu.be/Ai6FLQmajaI?si=ePTbUBIOiSSDSjwt" }],
+        "2026-03-07": [{ "type": "live_performance", "url": "https://youtu.be/37VtoDg5O2o?si=MIGDQT6cMSP86897" }],
+        "2026-02-28": [{ "type": "live_performance", "url": "https://youtu.be/QtdZsoIKDyo?si=vTOk2oCkeHbp_RgH" }],
         "2026-02-20": [
-          {
-            "type": "release_date",
-            "url": "https://music.apple.com/us/album/rude-single/1875146814"
-          },
-          {
-            "type": "mv",
-            "url": "https://youtu.be/F7sGJVUrkjQ?si=WHyVws8UltEajlZr"
-          }
+          { "type": "release_date", "url": "https://music.apple.com/us/album/rude-single/1875146814" },
+          { "type": "mv", "url": "https://youtu.be/F7sGJVUrkjQ?si=WHyVws8UltEajlZr" }
         ]
       }
     },
@@ -77,27 +46,11 @@
         "2025-10-28": { "value": 8743, "source": "the_show", "episode": 391 }
       },
       "embeds": {
-        "2025-10-29": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/ea5OsYhdLIs?si=P-CewSuErsreYIK-"
-          }
-        ],
-        "2025-10-28": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/82WKTlJMJiY?si=zefXyp1JC_t3c9QU"
-          }
-        ],
+        "2025-10-29": [{ "type": "live_performance", "url": "https://youtu.be/ea5OsYhdLIs?si=P-CewSuErsreYIK-" }],
+        "2025-10-28": [{ "type": "live_performance", "url": "https://youtu.be/82WKTlJMJiY?si=zefXyp1JC_t3c9QU" }],
         "2025-10-20": [
-          {
-            "type": "release_date",
-            "url": "https://music.apple.com/us/album/focus-the-1st-mini-album-ep/1841828519"
-          },
-          {
-            "type": "mv",
-            "url": "https://youtu.be/Ur7aK4FvK-U?si=2sobk7C9frHRQfy1"
-          }
+          { "type": "release_date", "url": "https://music.apple.com/us/album/focus-the-1st-mini-album-ep/1841828519" },
+          { "type": "mv", "url": "https://youtu.be/Ur7aK4FvK-U?si=2sobk7C9frHRQfy1" }
         ]
       }
     }

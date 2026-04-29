@@ -15,14 +15,8 @@
       },
       "embeds": {
         "2025-11-21": [
-          {
-            "type": "release_date",
-            "url": "https://music.apple.com/us/album/do-it-ep/1846266203"
-          },
-          {
-            "type": "mv",
-            "url": "https://youtu.be/NED7nev2ywQ?si=RND3XAVsHAH1n6DQ"
-          }
+          { "type": "release_date", "url": "https://music.apple.com/us/album/do-it-ep/1846266203" },
+          { "type": "mv", "url": "https://youtu.be/NED7nev2ywQ?si=RND3XAVsHAH1n6DQ" }
         ]
       }
     }

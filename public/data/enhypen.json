@@ -18,27 +18,11 @@
         "2026-01-21": { "value": 5347, "source": "show_champion", "episode": 583 }
       },
       "embeds": {
-        "2026-01-23": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/zNLoJlQBhh0?si=cFpTp13JJj-Buw86"
-          }
-        ],
-        "2026-01-22": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/8K_CHBw1EuI?si=5CfugbdZZlYFATAd"
-          }
-        ],
+        "2026-01-23": [{ "type": "live_performance", "url": "https://youtu.be/zNLoJlQBhh0?si=cFpTp13JJj-Buw86" }],
+        "2026-01-22": [{ "type": "live_performance", "url": "https://youtu.be/8K_CHBw1EuI?si=5CfugbdZZlYFATAd" }],
         "2026-01-16": [
-          {
-            "type": "release_date",
-            "url": "https://music.apple.com/us/album/the-sin-vanish/1862720020"
-          },
-          {
-            "type": "mv",
-            "url": "https://youtu.be/R6e4tBWxIxE?si=CGTRPf03W80a0GJ_"
-          }
+          { "type": "release_date", "url": "https://music.apple.com/us/album/the-sin-vanish/1862720020" },
+          { "type": "mv", "url": "https://youtu.be/R6e4tBWxIxE?si=CGTRPf03W80a0GJ_" }
         ]
       }
     }

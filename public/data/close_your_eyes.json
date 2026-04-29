@@ -12,27 +12,11 @@
         "2025-11-19": { "value": 5919, "source": "show_champion", "episode": 578 }
       },
       "embeds": {
-        "2025-11-21": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/SW6CwD4bwrg?si=1Na0PRhMQ-9FzLuH"
-          }
-        ],
-        "2025-11-19": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/MB62NC7yi_Q?si=RzVOPQup7QmzixFT"
-          }
-        ],
+        "2025-11-21": [{ "type": "live_performance", "url": "https://youtu.be/SW6CwD4bwrg?si=1Na0PRhMQ-9FzLuH" }],
+        "2025-11-19": [{ "type": "live_performance", "url": "https://youtu.be/MB62NC7yi_Q?si=RzVOPQup7QmzixFT" }],
         "2025-11-11": [
-          {
-            "type": "release_date",
-            "url": "https://music.apple.com/us/album/blackout-ep/1850358021"
-          },
-          {
-            "type": "mv",
-            "url": "https://youtu.be/D5ljl9pNAmc?si=EQ-52RIqRiv5X95F"
-          }
+          { "type": "release_date", "url": "https://music.apple.com/us/album/blackout-ep/1850358021" },
+          { "type": "mv", "url": "https://youtu.be/D5ljl9pNAmc?si=EQ-52RIqRiv5X95F" }
         ]
       }
     }

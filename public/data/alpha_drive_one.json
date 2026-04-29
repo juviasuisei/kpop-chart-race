@@ -16,51 +16,15 @@
         "2026-01-21": { "value": 9498, "source": "show_champion", "episode": 583 }
       },
       "embeds": {
-        "2026-01-28": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/8svyuuFd5U8?si=OA-ySkTTlXdkLgjE"
-          }
-        ],
-        "2026-01-25": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/BAVRXNZHXi4?si=6LHteqknOX_Tdge4"
-          }
-        ],
-        "2026-01-24": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/FdV9P5TduEM?si=ea7UTUTyY6gHy8-n"
-          }
-        ],
-        "2026-01-23": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/7r3en_fhZ5o?si=cbdozuIXl03EaJdu"
-          }
-        ],
-        "2026-01-22": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/p1wsdXGg86I?si=RuqMp1XcZPhL51Xy"
-          }
-        ],
-        "2026-01-21": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/JIkllU56fKI?si=zRpQwN6YUl2anR7J"
-          }
-        ],
+        "2026-01-28": [{ "type": "live_performance", "url": "https://youtu.be/8svyuuFd5U8?si=OA-ySkTTlXdkLgjE" }],
+        "2026-01-25": [{ "type": "live_performance", "url": "https://youtu.be/BAVRXNZHXi4?si=6LHteqknOX_Tdge4" }],
+        "2026-01-24": [{ "type": "live_performance", "url": "https://youtu.be/FdV9P5TduEM?si=ea7UTUTyY6gHy8-n" }],
+        "2026-01-23": [{ "type": "live_performance", "url": "https://youtu.be/7r3en_fhZ5o?si=cbdozuIXl03EaJdu" }],
+        "2026-01-22": [{ "type": "live_performance", "url": "https://youtu.be/p1wsdXGg86I?si=RuqMp1XcZPhL51Xy" }],
+        "2026-01-21": [{ "type": "live_performance", "url": "https://youtu.be/JIkllU56fKI?si=zRpQwN6YUl2anR7J" }],
         "2026-01-12": [
-          {
-            "type": "release_date",
-            "url": "https://music.apple.com/us/album/euphoria-ep/1863635181"
-          },
-          {
-            "type": "mv",
-            "url": "https://youtu.be/P8VVnopM610?si=iTewX2-m7UqyW_7i"
-          }
+          { "type": "release_date", "url": "https://music.apple.com/us/album/euphoria-ep/1863635181" },
+          { "type": "mv", "url": "https://youtu.be/P8VVnopM610?si=iTewX2-m7UqyW_7i" }
         ]
       }
     }

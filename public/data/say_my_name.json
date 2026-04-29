@@ -12,27 +12,11 @@
         "2026-01-09": { "value": 11912, "source": "music_bank", "episode": 1275 }
       },
       "embeds": {
-        "2026-01-21": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/hTdypzeZoTM?si=cbV-VniTdR_6Rreg"
-          }
-        ],
-        "2026-01-09": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/lfkQP0jwzwM?si=dlZ-R6JdOotS6pLQ"
-          }
-        ],
+        "2026-01-21": [{ "type": "live_performance", "url": "https://youtu.be/hTdypzeZoTM?si=cbV-VniTdR_6Rreg" }],
+        "2026-01-09": [{ "type": "live_performance", "url": "https://youtu.be/lfkQP0jwzwM?si=dlZ-R6JdOotS6pLQ" }],
         "2025-12-29": [
-          {
-            "type": "release_date",
-            "url": "https://music.apple.com/us/album/our-vibe-ep/1861370118"
-          },
-          {
-            "type": "mv",
-            "url": "https://youtu.be/-fPz0KoVwog?si=8ASsSirPXnikS1my"
-          }
+          { "type": "release_date", "url": "https://music.apple.com/us/album/our-vibe-ep/1861370118" },
+          { "type": "mv", "url": "https://youtu.be/-fPz0KoVwog?si=8ASsSirPXnikS1my" }
         ]
       }
     }

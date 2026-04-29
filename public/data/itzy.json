@@ -12,21 +12,10 @@
         "2025-11-19": { "value": 2005, "source": "show_champion", "episode": 578 }
       },
       "embeds": {
-        "2025-11-21": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/ufgwBv0uHQ4?si=fZG8n7CbU8SvUrj1"
-          }
-        ],
+        "2025-11-21": [{ "type": "live_performance", "url": "https://youtu.be/ufgwBv0uHQ4?si=fZG8n7CbU8SvUrj1" }],
         "2025-11-10": [
-          {
-            "type": "release_date",
-            "url": "https://music.apple.com/us/album/tunnel-vision-ep/1846236584"
-          },
-          {
-            "type": "mv",
-            "url": "https://youtu.be/piSq8IioghU?si=j3tuOmsT8VDHUhpj"
-          }
+          { "type": "release_date", "url": "https://music.apple.com/us/album/tunnel-vision-ep/1846236584" },
+          { "type": "mv", "url": "https://youtu.be/piSq8IioghU?si=j3tuOmsT8VDHUhpj" }
         ]
       }
     }

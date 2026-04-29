@@ -12,14 +12,8 @@
       },
       "embeds": {
         "2025-11-20": [
-          {
-            "type": "release_date",
-            "url": "https://music.apple.com/us/album/the-classic-ep/1852969119"
-          },
-          {
-            "type": "mv",
-            "url": "https://youtu.be/FWo48Kb_mxE?si=F_qoNsKMPXR2J0vn"
-          }
+          { "type": "release_date", "url": "https://music.apple.com/us/album/the-classic-ep/1852969119" },
+          { "type": "mv", "url": "https://youtu.be/FWo48Kb_mxE?si=F_qoNsKMPXR2J0vn" }
         ]
       }
     }

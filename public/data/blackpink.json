@@ -21,14 +21,8 @@
       },
       "embeds": {
         "2026-02-27": [
-          {
-            "type": "release_date",
-            "url": "https://music.apple.com/us/album/deadline-ep/1870046940"
-          },
-          {
-            "type": "mv",
-            "url": "https://youtu.be/2GJfWMYCWY0?si=wRzEfNcb91NKkG0P"
-          }
+          { "type": "release_date", "url": "https://music.apple.com/us/album/deadline-ep/1870046940" },
+          { "type": "mv", "url": "https://youtu.be/2GJfWMYCWY0?si=wRzEfNcb91NKkG0P" }
         ]
       }
     }

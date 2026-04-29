@@ -13,14 +13,8 @@
       },
       "embeds": {
         "2025-11-17": [
-          {
-            "type": "release_date",
-            "url": "https://music.apple.com/us/album/allday-project-ep/1856093363"
-          },
-          {
-            "type": "mv",
-            "url": "https://youtu.be/9nOrPNxjvck?si=7NOoLbLLiT2JAzAB"
-          }
+          { "type": "release_date", "url": "https://music.apple.com/us/album/allday-project-ep/1856093363" },
+          { "type": "mv", "url": "https://youtu.be/9nOrPNxjvck?si=7NOoLbLLiT2JAzAB" }
         ]
       }
     },
@@ -38,14 +32,8 @@
       },
       "embeds": {
         "2025-11-17": [
-          {
-            "type": "release_date",
-            "url": "https://music.apple.com/us/album/one-more-time-single/1850392562"
-          },
-          {
-            "type": "mv",
-            "url": "https://youtu.be/OgEwJ8a1OoY?si=UI05BxSKGrAXpVDx"
-          }
+          { "type": "release_date", "url": "https://music.apple.com/us/album/one-more-time-single/1850392562" },
+          { "type": "mv", "url": "https://youtu.be/OgEwJ8a1OoY?si=UI05BxSKGrAXpVDx" }
         ]
       }
     }

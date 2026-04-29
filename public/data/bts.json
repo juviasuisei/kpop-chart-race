@@ -11,12 +11,7 @@
         "2026-04-19": { "value": 4701, "source": "inkigayo", "episode": 1307 }
       },
       "embeds": {
-        "2026-04-01": [
-          {
-            "type": "mv",
-            "url": "https://youtu.be/_gyultVTesk?si=ZN9hZd6-1Uj3Mjuf"
-          }
-        ]
+        "2026-04-01": [{ "type": "mv", "url": "https://youtu.be/_gyultVTesk?si=ZN9hZd6-1Uj3Mjuf" }]
       }
     },
     {
@@ -25,12 +20,7 @@
         "2026-04-05": { "value": 4250, "source": "inkigayo", "episode": 1305 }
       },
       "embeds": {
-        "2026-03-22": [
-          {
-            "type": "mv",
-            "url": "https://youtu.be/3PHs-o5JPHM?si=fgDC_K3e5BtwcTM4"
-          }
-        ]
+        "2026-03-22": [{ "type": "mv", "url": "https://youtu.be/3PHs-o5JPHM?si=fgDC_K3e5BtwcTM4" }]
       }
     },
     {
@@ -54,14 +44,8 @@
       },
       "embeds": {
         "2026-03-20": [
-          {
-            "type": "release_date",
-            "url": "https://music.apple.com/us/album/arirang/1868481904"
-          },
-          {
-            "type": "mv",
-            "url": "https://youtu.be/b4iVv91Z6lY?si=NTtHoNhMcayxxjXL"
-          }
+          { "type": "release_date", "url": "https://music.apple.com/us/album/arirang/1868481904" },
+          { "type": "mv", "url": "https://youtu.be/b4iVv91Z6lY?si=NTtHoNhMcayxxjXL" }
         ]
       }
     }

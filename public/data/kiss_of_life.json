@@ -14,33 +14,12 @@
         "2026-04-15": { "value": 2961, "source": "show_champion", "episode": 593 }
       },
       "embeds": {
-        "2026-04-22": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/LR-sSsO8Fu4?si=eBnlNZ909bVs69Aj"
-          }
-        ],
-        "2026-04-17": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/NqZhDNOiQRM?si=MzlSfqiaWuEeIwHv"
-          }
-        ],
-        "2026-04-16": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/SnU6VNElgSY?si=hGhQSbOMQ5Q_s3ut"
-          }
-        ],
+        "2026-04-22": [{ "type": "live_performance", "url": "https://youtu.be/LR-sSsO8Fu4?si=eBnlNZ909bVs69Aj" }],
+        "2026-04-17": [{ "type": "live_performance", "url": "https://youtu.be/NqZhDNOiQRM?si=MzlSfqiaWuEeIwHv" }],
+        "2026-04-16": [{ "type": "live_performance", "url": "https://youtu.be/SnU6VNElgSY?si=hGhQSbOMQ5Q_s3ut" }],
         "2026-04-08": [
-          {
-            "type": "release_date",
-            "url": "https://music.apple.com/us/album/who-is-she-single/1886385269"
-          },
-          {
-            "type": "mv",
-            "url": "https://youtu.be/ygYPwsjyCzQ?si=GwlAvcSwXibWJLEt"
-          }
+          { "type": "release_date", "url": "https://music.apple.com/us/album/who-is-she-single/1886385269" },
+          { "type": "mv", "url": "https://youtu.be/ygYPwsjyCzQ?si=GwlAvcSwXibWJLEt" }
         ]
       }
     }

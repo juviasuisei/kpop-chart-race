@@ -12,14 +12,8 @@
       },
       "embeds": {
         "2025-12-09": [
-          {
-            "type": "release_date",
-            "url": "https://music.apple.com/us/album/promise-single/1852427558"
-          },
-          {
-            "type": "mv",
-            "url": "https://youtu.be/zpPFHclAOoM?si=8d3k4K3tBS0BmJHy"
-          }
+          { "type": "release_date", "url": "https://music.apple.com/us/album/promise-single/1852427558" },
+          { "type": "mv", "url": "https://youtu.be/zpPFHclAOoM?si=8d3k4K3tBS0BmJHy" }
         ]
       }
     }

@@ -16,14 +16,8 @@
       },
       "embeds": {
         "2025-11-24": [
-          {
-            "type": "release_date",
-            "url": "https://music.apple.com/us/album/fame-single/1854164004"
-          },
-          {
-            "type": "mv",
-            "url": "https://youtu.be/TVqEwvbZP30?si=nbz64kuZy7nn9meb"
-          }
+          { "type": "release_date", "url": "https://music.apple.com/us/album/fame-single/1854164004" },
+          { "type": "mv", "url": "https://youtu.be/TVqEwvbZP30?si=nbz64kuZy7nn9meb" }
         ]
       }
     }

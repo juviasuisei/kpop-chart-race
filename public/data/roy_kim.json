@@ -12,14 +12,8 @@
       },
       "embeds": {
         "2025-10-27": [
-          {
-            "type": "release_date",
-            "url": "https://music.apple.com/us/album/no-words-can-say-single/1848023873"
-          },
-          {
-            "type": "mv",
-            "url": "https://youtu.be/mR-kkHE0-tU?si=kWjkf-U6lAsgT04m"
-          }
+          { "type": "release_date", "url": "https://music.apple.com/us/album/no-words-can-say-single/1848023873" },
+          { "type": "mv", "url": "https://youtu.be/mR-kkHE0-tU?si=kWjkf-U6lAsgT04m" }
         ]
       }
     }

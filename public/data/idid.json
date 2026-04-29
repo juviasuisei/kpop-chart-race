@@ -12,14 +12,8 @@
       },
       "embeds": {
         "2025-11-20": [
-          {
-            "type": "release_date",
-            "url": "https://music.apple.com/us/album/push-back-single/1853021340"
-          },
-          {
-            "type": "mv",
-            "url": "https://youtu.be/dWZCMV5ZEFk?si=0z5QxdI3qeNWT5wN"
-          }
+          { "type": "release_date", "url": "https://music.apple.com/us/album/push-back-single/1853021340" },
+          { "type": "mv", "url": "https://youtu.be/dWZCMV5ZEFk?si=0z5QxdI3qeNWT5wN" }
         ]
       }
     }

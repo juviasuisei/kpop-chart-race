@@ -13,27 +13,11 @@
         "2025-11-26": { "value": 6554, "source": "show_champion", "episode": 579 }
       },
       "embeds": {
-        "2025-11-29": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/B0wAJcQo5xs?si=kn0krSw8Qdba7WKK"
-          }
-        ],
-        "2025-11-28": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/qx5nNKClveo?si=hpEJf2B2lcyfdfYZ"
-          }
-        ],
+        "2025-11-29": [{ "type": "live_performance", "url": "https://youtu.be/B0wAJcQo5xs?si=kn0krSw8Qdba7WKK" }],
+        "2025-11-28": [{ "type": "live_performance", "url": "https://youtu.be/qx5nNKClveo?si=hpEJf2B2lcyfdfYZ" }],
         "2025-11-17": [
-          {
-            "type": "release_date",
-            "url": "https://music.apple.com/us/album/beat-it-up-ep/1849135853"
-          },
-          {
-            "type": "mv",
-            "url": "https://youtu.be/wvtNmMmcAYw?si=931_LskQfkVsI47k"
-          }
+          { "type": "release_date", "url": "https://music.apple.com/us/album/beat-it-up-ep/1849135853" },
+          { "type": "mv", "url": "https://youtu.be/wvtNmMmcAYw?si=931_LskQfkVsI47k" }
         ]
       }
     }

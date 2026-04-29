@@ -18,14 +18,8 @@
       },
       "embeds": {
         "2026-04-07": [
-          {
-            "type": "release_date",
-            "url": "https://music.apple.com/us/album/flowering/1887773334"
-          },
-          {
-            "type": "mv",
-            "url": "https://youtu.be/SNn_H_Q2moo?si=JJ_h8qk4tKlZk0TK"
-          }
+          { "type": "release_date", "url": "https://music.apple.com/us/album/flowering/1887773334" },
+          { "type": "mv", "url": "https://youtu.be/SNn_H_Q2moo?si=JJ_h8qk4tKlZk0TK" }
         ]
       }
     },
@@ -35,12 +29,7 @@
         "2026-04-26": { "value": 3682, "source": "inkigayo", "episode": 1308 }
       },
       "embeds": {
-        "2026-04-02": [
-          {
-            "type": "mv",
-            "url": "https://youtu.be/D54StAZFUrc?si=IP_rZfJsft9TKvJt"
-          }
-        ]
+        "2026-04-02": [{ "type": "mv", "url": "https://youtu.be/D54StAZFUrc?si=IP_rZfJsft9TKvJt" }]
       }
     }
   ]

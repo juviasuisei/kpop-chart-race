@@ -13,27 +13,11 @@
         "2026-04-01": { "value": 1750, "source": "show_champion", "episode": 591 }
       },
       "embeds": {
-        "2026-04-03": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/WBa9KHXKhZ0?si=Fla_tDtNE2KCE6LP"
-          }
-        ],
-        "2026-04-02": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/dZ1RUf4NYlY?si=VrOdo3l9NrEn5d-O"
-          }
-        ],
+        "2026-04-03": [{ "type": "live_performance", "url": "https://youtu.be/WBa9KHXKhZ0?si=Fla_tDtNE2KCE6LP" }],
+        "2026-04-02": [{ "type": "live_performance", "url": "https://youtu.be/dZ1RUf4NYlY?si=VrOdo3l9NrEn5d-O" }],
         "2026-03-23": [
-          {
-            "type": "release_date",
-            "url": "https://music.apple.com/us/album/ice-cream-ep/1880407965"
-          },
-          {
-            "type": "mv",
-            "url": "https://youtu.be/x0FwbTiD3iA?si=PH1IBP8pWbkiwdu7"
-          }
+          { "type": "release_date", "url": "https://music.apple.com/us/album/ice-cream-ep/1880407965" },
+          { "type": "mv", "url": "https://youtu.be/x0FwbTiD3iA?si=PH1IBP8pWbkiwdu7" }
         ]
       }
     }

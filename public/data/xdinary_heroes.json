@@ -11,21 +11,10 @@
         "2025-10-29": { "value": 2586, "source": "show_champion", "episode": 575 }
       },
       "embeds": {
-        "2025-10-29": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/BFZY51yWeaI?si=j6Jb5tgaehvAVkja"
-          }
-        ],
+        "2025-10-29": [{ "type": "live_performance", "url": "https://youtu.be/BFZY51yWeaI?si=j6Jb5tgaehvAVkja" }],
         "2025-10-24": [
-          {
-            "type": "release_date",
-            "url": "https://music.apple.com/us/album/lxve-to-death/1842468337"
-          },
-          {
-            "type": "mv",
-            "url": "https://youtu.be/L4rOBdjcwLc?si=AoFFV3qgE2mWdqtS"
-          }
+          { "type": "release_date", "url": "https://music.apple.com/us/album/lxve-to-death/1842468337" },
+          { "type": "mv", "url": "https://youtu.be/L4rOBdjcwLc?si=AoFFV3qgE2mWdqtS" }
         ]
       }
     }

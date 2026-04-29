@@ -18,14 +18,8 @@
       },
       "embeds": {
         "2025-12-02": [
-          {
-            "type": "release_date",
-            "url": "https://music.apple.com/us/album/white-memories-single/1856551390"
-          },
-          {
-            "type": "mv",
-            "url": "https://youtu.be/5ZB9JLfIw_Q?si=1lWUHwc4kdwyac2h"
-          }
+          { "type": "release_date", "url": "https://music.apple.com/us/album/white-memories-single/1856551390" },
+          { "type": "mv", "url": "https://youtu.be/5ZB9JLfIw_Q?si=1lWUHwc4kdwyac2h" }
         ]
       }
     }

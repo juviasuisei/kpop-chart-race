@@ -24,21 +24,10 @@
         "2025-11-09": { "value": 3656, "source": "inkigayo", "episode": 1290 }
       },
       "embeds": {
-        "2025-11-09": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/rJHd-yJodyE?si=lmomkTb9iwwjIXmO"
-          }
-        ],
+        "2025-11-09": [{ "type": "live_performance", "url": "https://youtu.be/rJHd-yJodyE?si=lmomkTb9iwwjIXmO" }],
         "2025-10-24": [
-          {
-            "type": "release_date",
-            "url": "https://music.apple.com/us/album/spaghetti/1846119152"
-          },
-          {
-            "type": "mv",
-            "url": "https://youtu.be/TvVtYaqCni8?si=TwOZPP6vpvQzK-JM"
-          }
+          { "type": "release_date", "url": "https://music.apple.com/us/album/spaghetti/1846119152" },
+          { "type": "mv", "url": "https://youtu.be/TvVtYaqCni8?si=TwOZPP6vpvQzK-JM" }
         ]
       }
     }

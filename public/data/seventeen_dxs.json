@@ -12,14 +12,8 @@
       },
       "embeds": {
         "2026-01-12": [
-          {
-            "type": "release_date",
-            "url": "https://music.apple.com/us/album/dxs-1st-mini-album-serenade-ep/1860810936"
-          },
-          {
-            "type": "mv",
-            "url": "https://youtu.be/N9X1o0q4aIc?si=1LPG3r-jTQ-oKT4N"
-          }
+          { "type": "release_date", "url": "https://music.apple.com/us/album/dxs-1st-mini-album-serenade-ep/1860810936" },
+          { "type": "mv", "url": "https://youtu.be/N9X1o0q4aIc?si=1LPG3r-jTQ-oKT4N" }
         ]
       }
     }

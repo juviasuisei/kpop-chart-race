@@ -11,21 +11,10 @@
         "2026-04-08": { "value": 1846, "source": "show_champion", "episode": 592 }
       },
       "embeds": {
-        "2026-04-08": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/dy79Xj9Dfpc?si=JKiE8C8mj26C2m74"
-          }
-        ],
+        "2026-04-08": [{ "type": "live_performance", "url": "https://youtu.be/dy79Xj9Dfpc?si=JKiE8C8mj26C2m74" }],
         "2026-03-30": [
-          {
-            "type": "release_date",
-            "url": "https://music.apple.com/us/album/daydream/1888138163"
-          },
-          {
-            "type": "mv",
-            "url": "https://youtu.be/Gk3sKhxTN74?si=M1KjueJBK3iQxBkB"
-          }
+          { "type": "release_date", "url": "https://music.apple.com/us/album/daydream/1888138163" },
+          { "type": "mv", "url": "https://youtu.be/Gk3sKhxTN74?si=M1KjueJBK3iQxBkB" }
         ]
       }
     }

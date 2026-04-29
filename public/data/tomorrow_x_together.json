@@ -15,39 +15,13 @@
         "2026-04-22": { "value": 6102, "source": "show_champion", "episode": 594 }
       },
       "embeds": {
-        "2026-04-26": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/39NaNnHkdoU?si=MeZDEsffhR6BX6mu"
-          }
-        ],
-        "2026-04-25": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/jHF6YjFx2-A?si=dfg-m9W65UFPfbs1"
-          }
-        ],
-        "2026-04-24": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/_l2Q3cEvJRA?si=PnyqmNluLjIgpXvs"
-          }
-        ],
-        "2026-04-23": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/nm21uDOAJDk?si=PpE_IKyKG9y14d6X"
-          }
-        ],
+        "2026-04-26": [{ "type": "live_performance", "url": "https://youtu.be/39NaNnHkdoU?si=MeZDEsffhR6BX6mu" }],
+        "2026-04-25": [{ "type": "live_performance", "url": "https://youtu.be/jHF6YjFx2-A?si=dfg-m9W65UFPfbs1" }],
+        "2026-04-24": [{ "type": "live_performance", "url": "https://youtu.be/_l2Q3cEvJRA?si=PnyqmNluLjIgpXvs" }],
+        "2026-04-23": [{ "type": "live_performance", "url": "https://youtu.be/nm21uDOAJDk?si=PpE_IKyKG9y14d6X" }],
         "2026-04-13": [
-          {
-            "type": "release_date",
-            "url": "https://music.apple.com/us/album/7th-year-a-moment-of-stillness-in-the-thorns-ep/1886536327"
-          },
-          {
-            "type": "mv",
-            "url": "https://youtu.be/jOnLqqDRfY4?si=4k9jh8w_2i_XJwxQ"
-          }
+          { "type": "release_date", "url": "https://music.apple.com/us/album/7th-year-a-moment-of-stillness-in-the-thorns-ep/1886536327" },
+          { "type": "mv", "url": "https://youtu.be/jOnLqqDRfY4?si=4k9jh8w_2i_XJwxQ" }
         ]
       }
     }

@@ -12,28 +12,12 @@
         "2026-03-18": { "value": 5100, "source": "show_champion", "episode": 589 }
       },
       "embeds": {
-        "2026-03-20": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/G2aofQho8Oc?si=bWJItkdB1IY0kBq0"
-          }
-        ],
+        "2026-03-20": [{ "type": "live_performance", "url": "https://youtu.be/G2aofQho8Oc?si=bWJItkdB1IY0kBq0" }],
         "2026-03-18": [
-          {
-            "type": "release_date",
-            "url": "https://music.apple.com/us/album/pop-it-like-ep/1886270616"
-          },
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/KAEW-tEnTco?si=cPXHN2mpWpbBkDkd"
-          }
+          { "type": "release_date", "url": "https://music.apple.com/us/album/pop-it-like-ep/1886270616" },
+          { "type": "live_performance", "url": "https://youtu.be/KAEW-tEnTco?si=cPXHN2mpWpbBkDkd" }
         ],
-        "2026-03-09": [
-          {
-            "type": "mv",
-            "url": "https://youtu.be/FeU8m9YEVSY?si=LrBimmHQxbIb77Px"
-          }
-        ]
+        "2026-03-09": [{ "type": "mv", "url": "https://youtu.be/FeU8m9YEVSY?si=LrBimmHQxbIb77Px" }]
       }
     }
   ]

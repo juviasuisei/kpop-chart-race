@@ -14,39 +14,13 @@
         "2025-11-04": { "value": 9340, "source": "the_show", "episode": 392 }
       },
       "embeds": {
-        "2025-11-09": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/tqTlkh_J2gw?si=PA61j0Zi4p6EQo3b"
-          }
-        ],
-        "2025-11-07": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/fjUT5hF632w?si=zHeOH_QMyPcKOTqG"
-          }
-        ],
-        "2025-11-05": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/KkW1kiCQbRQ?si=WHVoIrttmuhNyHMy"
-          }
-        ],
-        "2025-11-04": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/L_-gGvyXUnU?si=D_fOIwNcM2BC-pYp"
-          }
-        ],
+        "2025-11-09": [{ "type": "live_performance", "url": "https://youtu.be/tqTlkh_J2gw?si=PA61j0Zi4p6EQo3b" }],
+        "2025-11-07": [{ "type": "live_performance", "url": "https://youtu.be/fjUT5hF632w?si=zHeOH_QMyPcKOTqG" }],
+        "2025-11-05": [{ "type": "live_performance", "url": "https://youtu.be/KkW1kiCQbRQ?si=WHVoIrttmuhNyHMy" }],
+        "2025-11-04": [{ "type": "live_performance", "url": "https://youtu.be/L_-gGvyXUnU?si=D_fOIwNcM2BC-pYp" }],
         "2025-10-28": [
-          {
-            "type": "release_date",
-            "url": "https://music.apple.com/us/album/back-to-life-ep/1845801736"
-          },
-          {
-            "type": "mv",
-            "url": "https://youtu.be/KqE0P1qMtQg?si=8qEcm8nTA0vjgznh"
-          }
+          { "type": "release_date", "url": "https://music.apple.com/us/album/back-to-life-ep/1845801736" },
+          { "type": "mv", "url": "https://youtu.be/KqE0P1qMtQg?si=8qEcm8nTA0vjgznh" }
         ]
       }
     }

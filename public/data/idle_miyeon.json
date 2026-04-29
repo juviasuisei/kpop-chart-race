@@ -11,21 +11,10 @@
         "2025-11-14": { "value": 6360, "source": "music_bank", "episode": 1267 }
       },
       "embeds": {
-        "2025-11-14": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/CvBGI2bw-Rw?si=HymVCxrMYH5_9uu3"
-          }
-        ],
+        "2025-11-14": [{ "type": "live_performance", "url": "https://youtu.be/CvBGI2bw-Rw?si=HymVCxrMYH5_9uu3" }],
         "2025-11-03": [
-          {
-            "type": "release_date",
-            "url": "https://music.apple.com/us/album/my-lover/1847505472"
-          },
-          {
-            "type": "mv",
-            "url": "https://youtu.be/9g9NClV1z_w?si=WPH_qDW6aiPyK308"
-          }
+          { "type": "release_date", "url": "https://music.apple.com/us/album/my-lover/1847505472" },
+          { "type": "mv", "url": "https://youtu.be/9g9NClV1z_w?si=WPH_qDW6aiPyK308" }
         ]
       }
     }

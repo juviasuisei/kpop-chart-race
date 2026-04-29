@@ -17,33 +17,12 @@
         "2026-02-11": { "value": 5658, "source": "show_champion", "episode": 586 }
       },
       "embeds": {
-        "2026-02-15": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/NAEGzlsKr3A?si=7-7BLRNjfMjG9tG9"
-          }
-        ],
-        "2026-02-14": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/R9WTsxs6BPc?si=5hWd6TIsj46tQmNW"
-          }
-        ],
-        "2026-02-13": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/Sve8GuGSvYA?si=q42xhimUOvCJRMqM"
-          }
-        ],
+        "2026-02-15": [{ "type": "live_performance", "url": "https://youtu.be/NAEGzlsKr3A?si=7-7BLRNjfMjG9tG9" }],
+        "2026-02-14": [{ "type": "live_performance", "url": "https://youtu.be/R9WTsxs6BPc?si=5hWd6TIsj46tQmNW" }],
+        "2026-02-13": [{ "type": "live_performance", "url": "https://youtu.be/Sve8GuGSvYA?si=q42xhimUOvCJRMqM" }],
         "2026-02-06": [
-          {
-            "type": "release_date",
-            "url": "https://music.apple.com/us/album/golden-hour-part-4-ep/1867153027"
-          },
-          {
-            "type": "mv",
-            "url": "https://youtu.be/vqkfEUqjl6Y?si=1oD4o64cv41HgB0b"
-          }
+          { "type": "release_date", "url": "https://music.apple.com/us/album/golden-hour-part-4-ep/1867153027" },
+          { "type": "mv", "url": "https://youtu.be/vqkfEUqjl6Y?si=1oD4o64cv41HgB0b" }
         ]
       }
     }

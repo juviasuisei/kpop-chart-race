@@ -13,14 +13,8 @@
       },
       "embeds": {
         "2026-02-02": [
-          {
-            "type": "release_date",
-            "url": "https://music.apple.com/us/album/re-flow-single/1872047338"
-          },
-          {
-            "type": "mv",
-            "url": "https://youtu.be/nYueShCPYUY?si=AGVluY0AkixK0g5M"
-          }
+          { "type": "release_date", "url": "https://music.apple.com/us/album/re-flow-single/1872047338" },
+          { "type": "mv", "url": "https://youtu.be/nYueShCPYUY?si=AGVluY0AkixK0g5M" }
         ]
       }
     }

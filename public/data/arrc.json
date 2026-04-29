@@ -11,21 +11,10 @@
         "2025-11-11": { "value": 2328, "source": "the_show", "episode": 393 }
       },
       "embeds": {
-        "2025-11-11": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/VhTfIWyw4P8?si=tv-L18Pb-r_MrGde"
-          }
-        ],
+        "2025-11-11": [{ "type": "live_performance", "url": "https://youtu.be/VhTfIWyw4P8?si=tv-L18Pb-r_MrGde" }],
         "2025-11-03": [
-          {
-            "type": "release_date",
-            "url": "https://music.apple.com/us/album/ctrl-alt-skiid-single/1849851073"
-          },
-          {
-            "type": "mv",
-            "url": "https://youtu.be/LU06eFKen9k?si=3moWY46eKVD-bCwu"
-          }
+          { "type": "release_date", "url": "https://music.apple.com/us/album/ctrl-alt-skiid-single/1849851073" },
+          { "type": "mv", "url": "https://youtu.be/LU06eFKen9k?si=3moWY46eKVD-bCwu" }
         ]
       }
     }

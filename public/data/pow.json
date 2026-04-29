@@ -12,27 +12,11 @@
         "2026-02-04": { "value": 4622, "source": "show_champion", "episode": 585 }
       },
       "embeds": {
-        "2026-02-11": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/M2jTTgVcicU?si=r3EqbM5xfMAf8MQC"
-          }
-        ],
-        "2026-02-04": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/RnZkqSruPzU?si=Cv76zBpvw2Ekm3HG"
-          }
-        ],
+        "2026-02-11": [{ "type": "live_performance", "url": "https://youtu.be/M2jTTgVcicU?si=r3EqbM5xfMAf8MQC" }],
+        "2026-02-04": [{ "type": "live_performance", "url": "https://youtu.be/RnZkqSruPzU?si=Cv76zBpvw2Ekm3HG" }],
         "2026-01-28": [
-          {
-            "type": "release_date",
-            "url": "https://music.apple.com/us/album/come-true-single/1871129420"
-          },
-          {
-            "type": "mv",
-            "url": "https://youtu.be/kI9YD61ehIw?si=UeNBLmLnsEJl4DyT"
-          }
+          { "type": "release_date", "url": "https://music.apple.com/us/album/come-true-single/1871129420" },
+          { "type": "mv", "url": "https://youtu.be/kI9YD61ehIw?si=UeNBLmLnsEJl4DyT" }
         ]
       }
     }

@@ -14,14 +14,8 @@
       },
       "embeds": {
         "2026-02-23": [
-          {
-            "type": "release_date",
-            "url": "https://music.apple.com/us/album/revive/1873882195"
-          },
-          {
-            "type": "mv",
-            "url": "https://youtu.be/1Lmy7qwmSMc?si=asuite8BXjEv2RLk"
-          }
+          { "type": "release_date", "url": "https://music.apple.com/us/album/revive/1873882195" },
+          { "type": "mv", "url": "https://youtu.be/1Lmy7qwmSMc?si=asuite8BXjEv2RLk" }
         ]
       }
     },
@@ -49,27 +43,11 @@
         "2026-02-20": { "value": 4198, "source": "music_bank", "episode": 1281 }
       },
       "embeds": {
-        "2026-03-08": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/iVQz6J0mSY8?si=7vH4z0qkA-f2HQkE"
-          }
-        ],
-        "2026-03-07": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/eZjGoXOD82w?si=JIIQQF-n9WoLQI6j"
-          }
-        ],
+        "2026-03-08": [{ "type": "live_performance", "url": "https://youtu.be/iVQz6J0mSY8?si=7vH4z0qkA-f2HQkE" }],
+        "2026-03-07": [{ "type": "live_performance", "url": "https://youtu.be/eZjGoXOD82w?si=JIIQQF-n9WoLQI6j" }],
         "2026-02-09": [
-          {
-            "type": "release_date",
-            "url": "https://music.apple.com/us/album/bang-bang-single/1872627662"
-          },
-          {
-            "type": "mv",
-            "url": "https://youtu.be/9qkpcLK422o?si=ywAmpK2pRFzT_hAB"
-          }
+          { "type": "release_date", "url": "https://music.apple.com/us/album/bang-bang-single/1872627662" },
+          { "type": "mv", "url": "https://youtu.be/9qkpcLK422o?si=ywAmpK2pRFzT_hAB" }
         ]
       }
     }

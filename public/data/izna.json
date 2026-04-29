@@ -11,21 +11,10 @@
         "2025-10-28": { "value": 4997, "source": "the_show", "episode": 391 }
       },
       "embeds": {
-        "2025-10-28": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/fo9Rv4WD3Hc?si=qXZd2msigJDTs9hK"
-          }
-        ],
+        "2025-10-28": [{ "type": "live_performance", "url": "https://youtu.be/fo9Rv4WD3Hc?si=qXZd2msigJDTs9hK" }],
         "2025-09-30": [
-          {
-            "type": "release_date",
-            "url": "https://music.apple.com/us/album/not-just-pretty-ep/1840860810"
-          },
-          {
-            "type": "mv",
-            "url": "https://youtu.be/2fyFx2u5fbU?si=BiIWrhErfH8WgVQr"
-          }
+          { "type": "release_date", "url": "https://music.apple.com/us/album/not-just-pretty-ep/1840860810" },
+          { "type": "mv", "url": "https://youtu.be/2fyFx2u5fbU?si=BiIWrhErfH8WgVQr" }
         ]
       }
     }

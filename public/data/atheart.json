@@ -11,21 +11,10 @@
         "2026-03-25": { "value": 2097, "source": "show_champion", "episode": 590 }
       },
       "embeds": {
-        "2026-03-25": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/50PLuZJjqcU?si=STWORyn1rPP94llB"
-          }
-        ],
+        "2026-03-25": [{ "type": "live_performance", "url": "https://youtu.be/50PLuZJjqcU?si=STWORyn1rPP94llB" }],
         "2026-03-11": [
-          {
-            "type": "release_date",
-            "url": "https://music.apple.com/us/album/butterfly-doors-single/1878765428"
-          },
-          {
-            "type": "mv",
-            "url": "https://youtu.be/ioK78YucIjc?si=FwxzYr_w35DHffqd"
-          }
+          { "type": "release_date", "url": "https://music.apple.com/us/album/butterfly-doors-single/1878765428" },
+          { "type": "mv", "url": "https://youtu.be/ioK78YucIjc?si=FwxzYr_w35DHffqd" }
         ]
       }
     }

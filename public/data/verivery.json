@@ -13,14 +13,8 @@
       },
       "embeds": {
         "2025-12-01": [
-          {
-            "type": "release_date",
-            "url": "https://music.apple.com/us/album/lost-and-found-single/1856079148"
-          },
-          {
-            "type": "mv",
-            "url": "https://youtu.be/-gzqfjzqG6U?si=ccAqMmIsVEssJ20DCan "
-          }
+          { "type": "release_date", "url": "https://music.apple.com/us/album/lost-and-found-single/1856079148" },
+          { "type": "mv", "url": "https://youtu.be/-gzqfjzqG6U?si=ccAqMmIsVEssJ20DCan " }
         ]
       }
     }

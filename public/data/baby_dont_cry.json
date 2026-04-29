@@ -11,21 +11,10 @@
         "2026-04-01": { "value": 2167, "source": "show_champion", "episode": 591 }
       },
       "embeds": {
-        "2026-04-01": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/6rDM-PelVEo?si=JK9EBOi_iI0QuiXc"
-          }
-        ],
+        "2026-04-01": [{ "type": "live_performance", "url": "https://youtu.be/6rDM-PelVEo?si=JK9EBOi_iI0QuiXc" }],
         "2026-03-24": [
-          {
-            "type": "release_date",
-            "url": "https://music.apple.com/us/album/the-1st-mini-album-after-cry-ep/1886088507"
-          },
-          {
-            "type": "mv",
-            "url": "https://youtu.be/P9q7NoOQHIo?si=jRSEur4rrMXykdve"
-          }
+          { "type": "release_date", "url": "https://music.apple.com/us/album/the-1st-mini-album-after-cry-ep/1886088507" },
+          { "type": "mv", "url": "https://youtu.be/P9q7NoOQHIo?si=jRSEur4rrMXykdve" }
         ]
       }
     }

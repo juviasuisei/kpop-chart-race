@@ -12,21 +12,10 @@
         "2026-04-08": { "value": 2126, "source": "show_champion", "episode": 592 }
       },
       "embeds": {
-        "2026-04-10": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/CmCgT113JNg?si=yD5Vm8vBe5mC-MBq"
-          }
-        ],
+        "2026-04-10": [{ "type": "live_performance", "url": "https://youtu.be/CmCgT113JNg?si=yD5Vm8vBe5mC-MBq" }],
         "2026-03-30": [
-          {
-            "type": "release_date",
-            "url": "https://music.apple.com/us/album/biggest-fan-the-1st-album/1887564140"
-          },
-          {
-            "type": "mv",
-            "url": "https://youtu.be/x7wLlK9MMN4?si=x9djnr8jcn-EIfDe"
-          }
+          { "type": "release_date", "url": "https://music.apple.com/us/album/biggest-fan-the-1st-album/1887564140" },
+          { "type": "mv", "url": "https://youtu.be/x7wLlK9MMN4?si=x9djnr8jcn-EIfDe" }
         ]
       }
     }

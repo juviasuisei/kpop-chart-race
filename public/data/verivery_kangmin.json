@@ -11,21 +11,10 @@
         "2026-04-01": { "value": 3318, "source": "show_champion", "episode": 591 }
       },
       "embeds": {
-        "2026-04-01": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/Knminq8hV68?si=hyfVJFOAI-jLk37B"
-          }
-        ],
+        "2026-04-01": [{ "type": "live_performance", "url": "https://youtu.be/Knminq8hV68?si=hyfVJFOAI-jLk37B" }],
         "2026-03-26": [
-          {
-            "type": "release_date",
-            "url": "https://music.apple.com/us/album/free-falling-single/1885707481"
-          },
-          {
-            "type": "mv",
-            "url": "https://youtu.be/VS5tx9LrLo0?si=sx4rH_BBB8_vDn1P"
-          }
+          { "type": "release_date", "url": "https://music.apple.com/us/album/free-falling-single/1885707481" },
+          { "type": "mv", "url": "https://youtu.be/VS5tx9LrLo0?si=sx4rH_BBB8_vDn1P" }
         ]
       }
     }

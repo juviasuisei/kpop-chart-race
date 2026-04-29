@@ -12,27 +12,11 @@
         "2026-04-15": { "value": 6351, "source": "show_champion", "episode": 593 }
       },
       "embeds": {
-        "2026-04-17": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/tgOuEC8o718?si=7hAikBfqS2u_IE61"
-          }
-        ],
-        "2026-04-15": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/vmpAw4jqQ3o?si=NSJYGjzeEPH74-ey"
-          }
-        ],
+        "2026-04-17": [{ "type": "live_performance", "url": "https://youtu.be/tgOuEC8o718?si=7hAikBfqS2u_IE61" }],
+        "2026-04-15": [{ "type": "live_performance", "url": "https://youtu.be/vmpAw4jqQ3o?si=NSJYGjzeEPH74-ey" }],
         "2026-04-06": [
-          {
-            "type": "release_date",
-            "url": "https://music.apple.com/us/album/my-first-kick/1887433170"
-          },
-          {
-            "type": "mv",
-            "url": "https://youtu.be/i5S7DBQnqP0?si=qEG9IJsFBbBmwmhI"
-          }
+          { "type": "release_date", "url": "https://music.apple.com/us/album/my-first-kick/1887433170" },
+          { "type": "mv", "url": "https://youtu.be/i5S7DBQnqP0?si=qEG9IJsFBbBmwmhI" }
         ]
       }
     }

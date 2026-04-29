@@ -11,21 +11,10 @@
         "2026-03-25": { "value": 2178, "source": "show_champion", "episode": 590 }
       },
       "embeds": {
-        "2026-03-25": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/SoDdfe1JCIg?si=Y3AnD-s-TX-MVi5b"
-          }
-        ],
+        "2026-03-25": [{ "type": "live_performance", "url": "https://youtu.be/SoDdfe1JCIg?si=Y3AnD-s-TX-MVi5b" }],
         "2026-03-11": [
-          {
-            "type": "release_date",
-            "url": "https://music.apple.com/us/album/love-catcher-ep/1882581635"
-          },
-          {
-            "type": "mv",
-            "url": "https://youtu.be/NOiyDlWl534?si=RSJQj3ilv6pDA1iZ"
-          }
+          { "type": "release_date", "url": "https://music.apple.com/us/album/love-catcher-ep/1882581635" },
+          { "type": "mv", "url": "https://youtu.be/NOiyDlWl534?si=RSJQj3ilv6pDA1iZ" }
         ]
       }
     }

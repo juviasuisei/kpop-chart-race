@@ -11,21 +11,10 @@
         "2026-01-28": { "value": 3076, "source": "show_champion", "episode": 584 }
       },
       "embeds": {
-        "2026-01-28": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/q0gzb6KcuBU?si=1gdNl4J8lB_qik8h"
-          }
-        ],
+        "2026-01-28": [{ "type": "live_performance", "url": "https://youtu.be/q0gzb6KcuBU?si=1gdNl4J8lB_qik8h" }],
         "2026-01-20": [
-          {
-            "type": "release_date",
-            "url": "https://music.apple.com/us/album/%E5%8E%9F-single/1868336540"
-          },
-          {
-            "type": "mv",
-            "url": "https://youtu.be/_UQCWEp-8BQ?si=brlUMU7oXZ9gu_Pg"
-          }
+          { "type": "release_date", "url": "https://music.apple.com/us/album/%E5%8E%9F-single/1868336540" },
+          { "type": "mv", "url": "https://youtu.be/_UQCWEp-8BQ?si=brlUMU7oXZ9gu_Pg" }
         ]
       }
     }

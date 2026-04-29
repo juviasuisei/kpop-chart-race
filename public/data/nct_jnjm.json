@@ -13,21 +13,10 @@
         "2026-03-04": { "value": 3799, "source": "show_champion", "episode": 587 }
       },
       "embeds": {
-        "2026-03-06": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/2pYCkdu1WCw?si=VCg6TaZeZrnh11XH"
-          }
-        ],
+        "2026-03-06": [{ "type": "live_performance", "url": "https://youtu.be/2pYCkdu1WCw?si=VCg6TaZeZrnh11XH" }],
         "2026-02-23": [
-          {
-            "type": "release_date",
-            "url": "https://music.apple.com/us/album/both-sides-the-1st-mini-album-ep/1875871527"
-          },
-          {
-            "type": "mv",
-            "url": "https://youtu.be/QWFIz75ad6I?si=SP1DpEIEPysNFHj8"
-          }
+          { "type": "release_date", "url": "https://music.apple.com/us/album/both-sides-the-1st-mini-album-ep/1875871527" },
+          { "type": "mv", "url": "https://youtu.be/QWFIz75ad6I?si=SP1DpEIEPysNFHj8" }
         ]
       }
     }

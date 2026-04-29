@@ -11,21 +11,10 @@
         "2026-04-15": { "value": 2573, "source": "show_champion", "episode": 593 }
       },
       "embeds": {
-        "2026-04-15": [
-          {
-            "type": "live_performance",
-            "url": "https://youtu.be/pUzFS3CHKcY?si=cnx8xNBL7Cw1-Ah1"
-          }
-        ],
+        "2026-04-15": [{ "type": "live_performance", "url": "https://youtu.be/pUzFS3CHKcY?si=cnx8xNBL7Cw1-Ah1" }],
         "2026-04-08": [
-          {
-            "type": "release_date",
-            "url": "https://music.apple.com/us/album/definition-ep/1889815594"
-          },
-          {
-            "type": "mv",
-            "url": "https://youtu.be/wRZ1MdBoUq0?si=volt814_xfIPOoYj"
-          }
+          { "type": "release_date", "url": "https://music.apple.com/us/album/definition-ep/1889815594" },
+          { "type": "mv", "url": "https://youtu.be/wRZ1MdBoUq0?si=volt814_xfIPOoYj" }
         ]
       }
     }

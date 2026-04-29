@@ -14,32 +14,24 @@
       "embeds": {
         "2026-02-11": [
           {
-            "eventType": "live_performance",
-            "links": [
-              { "url": "https://youtu.be/M2jTTgVcicU?si=r3EqbM5xfMAf8MQC" }
-            ]
+            "type": "live_performance",
+            "url": "https://youtu.be/M2jTTgVcicU?si=r3EqbM5xfMAf8MQC"
           }
         ],
         "2026-02-04": [
           {
-            "eventType": "live_performance",
-            "links": [
-              { "url": "https://youtu.be/RnZkqSruPzU?si=Cv76zBpvw2Ekm3HG" }
-            ]
+            "type": "live_performance",
+            "url": "https://youtu.be/RnZkqSruPzU?si=Cv76zBpvw2Ekm3HG"
           }
         ],
         "2026-01-28": [
           {
-            "eventType": "release_date",
-            "links": [
-              { "url": "https://music.apple.com/us/album/come-true-single/1871129420" }
-            ]
+            "type": "release_date",
+            "url": "https://music.apple.com/us/album/come-true-single/1871129420"
           },
           {
-            "eventType": "mv",
-            "links": [
-              { "url": "https://youtu.be/kI9YD61ehIw?si=UeNBLmLnsEJl4DyT" }
-            ]
+            "type": "mv",
+            "url": "https://youtu.be/kI9YD61ehIw?si=UeNBLmLnsEJl4DyT"
           }
         ]
       }

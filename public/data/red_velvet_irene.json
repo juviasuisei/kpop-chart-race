@@ -14,24 +14,18 @@
       "embeds": {
         "2026-04-10": [
           {
-            "eventType": "live_performance",
-            "links": [
-              { "url": "https://youtu.be/CmCgT113JNg?si=yD5Vm8vBe5mC-MBq" }
-            ]
+            "type": "live_performance",
+            "url": "https://youtu.be/CmCgT113JNg?si=yD5Vm8vBe5mC-MBq"
           }
         ],
         "2026-03-30": [
           {
-            "eventType": "release_date",
-            "links": [
-              { "url": "https://music.apple.com/us/album/biggest-fan-the-1st-album/1887564140" }
-            ]
+            "type": "release_date",
+            "url": "https://music.apple.com/us/album/biggest-fan-the-1st-album/1887564140"
           },
           {
-            "eventType": "mv",
-            "links": [
-              { "url": "https://youtu.be/x7wLlK9MMN4?si=x9djnr8jcn-EIfDe" }
-            ]
+            "type": "mv",
+            "url": "https://youtu.be/x7wLlK9MMN4?si=x9djnr8jcn-EIfDe"
           }
         ]
       }

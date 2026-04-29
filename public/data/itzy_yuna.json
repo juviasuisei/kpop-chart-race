@@ -15,32 +15,24 @@
       "embeds": {
         "2026-04-03": [
           {
-            "eventType": "live_performance",
-            "links": [
-              { "url": "https://youtu.be/WBa9KHXKhZ0?si=Fla_tDtNE2KCE6LP" }
-            ]
+            "type": "live_performance",
+            "url": "https://youtu.be/WBa9KHXKhZ0?si=Fla_tDtNE2KCE6LP"
           }
         ],
         "2026-04-02": [
           {
-            "eventType": "live_performance",
-            "links": [
-              { "url": "https://youtu.be/dZ1RUf4NYlY?si=VrOdo3l9NrEn5d-O" }
-            ]
+            "type": "live_performance",
+            "url": "https://youtu.be/dZ1RUf4NYlY?si=VrOdo3l9NrEn5d-O"
           }
         ],
         "2026-03-23": [
           {
-            "eventType": "release_date",
-            "links": [
-              { "url": "https://music.apple.com/us/album/ice-cream-ep/1880407965" }
-            ]
+            "type": "release_date",
+            "url": "https://music.apple.com/us/album/ice-cream-ep/1880407965"
           },
           {
-            "eventType": "mv",
-            "links": [
-              { "url": "https://youtu.be/x0FwbTiD3iA?si=PH1IBP8pWbkiwdu7" }
-            ]
+            "type": "mv",
+            "url": "https://youtu.be/x0FwbTiD3iA?si=PH1IBP8pWbkiwdu7"
           }
         ]
       }

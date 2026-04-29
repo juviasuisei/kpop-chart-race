@@ -13,16 +13,12 @@
       "embeds": {
         "2026-03-30": [
           {
-            "eventType": "release_date",
-            "links": [
-              { "url": "https://music.apple.com/us/album/unpiltered/1884783988" }
-            ]
+            "type": "release_date",
+            "url": "https://music.apple.com/us/album/unpiltered/1884783988"
           },
           {
-            "eventType": "mv",
-            "links": [
-              { "url": "https://youtu.be/yiPTOpGWaeM?si=VEnq4AOgxiw18g5e" }
-            ]
+            "type": "mv",
+            "url": "https://youtu.be/yiPTOpGWaeM?si=VEnq4AOgxiw18g5e"
           }
         ]
       }

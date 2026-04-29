@@ -19,40 +19,30 @@
       "embeds": {
         "2026-02-15": [
           {
-            "eventType": "live_performance",
-            "links": [
-              { "url": "https://youtu.be/NAEGzlsKr3A?si=7-7BLRNjfMjG9tG9" }
-            ]
+            "type": "live_performance",
+            "url": "https://youtu.be/NAEGzlsKr3A?si=7-7BLRNjfMjG9tG9"
           }
         ],
         "2026-02-14": [
           {
-            "eventType": "live_performance",
-            "links": [
-              { "url": "https://youtu.be/R9WTsxs6BPc?si=5hWd6TIsj46tQmNW" }
-            ]
+            "type": "live_performance",
+            "url": "https://youtu.be/R9WTsxs6BPc?si=5hWd6TIsj46tQmNW"
           }
         ],
         "2026-02-13": [
           {
-            "eventType": "live_performance",
-            "links": [
-              { "url": "https://youtu.be/Sve8GuGSvYA?si=q42xhimUOvCJRMqM" }
-            ]
+            "type": "live_performance",
+            "url": "https://youtu.be/Sve8GuGSvYA?si=q42xhimUOvCJRMqM"
           }
         ],
         "2026-02-06": [
           {
-            "eventType": "release_date",
-            "links": [
-              { "url": "https://music.apple.com/us/album/golden-hour-part-4-ep/1867153027" }
-            ]
+            "type": "release_date",
+            "url": "https://music.apple.com/us/album/golden-hour-part-4-ep/1867153027"
           },
           {
-            "eventType": "mv",
-            "links": [
-              { "url": "https://youtu.be/vqkfEUqjl6Y?si=1oD4o64cv41HgB0b" }
-            ]
+            "type": "mv",
+            "url": "https://youtu.be/vqkfEUqjl6Y?si=1oD4o64cv41HgB0b"
           }
         ]
       }

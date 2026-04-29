@@ -9,7 +9,9 @@
       "title": "Hollywood Action",
       "dailyValues": {
         "2025-11-02": { "value": 6473, "source": "inkigayo", "episode": 1289 },
-        "2025-11-01": { "value": 6407, "source": "show_music_core", "episode": 923 }
+        "2025-11-01": { "value": 6407, "source": "show_music_core", "episode": 923 },
+        "2025-10-31": { "value": 10012, "source": "music_bank", "episode": 1265 },
+        "2025-10-29": { "value": 5713, "source": "show_champion", "episode": 575 }
       },
       "embeds": {
         "2025-11-02": [
@@ -22,6 +24,12 @@
           {
             "type": "live_performance",
             "url": "https://youtu.be/PwADD8Mk3-I?si=R-hfYaae_Vkd2ONl"
+          }
+        ],
+        "2025-10-31": [
+          {
+            "type": "live_performance",
+            "url": "https://youtu.be/xIlMGpW9OSo?si=Y0wzxtp5YnI5cjGw"
           }
         ],
         "2025-10-20": [

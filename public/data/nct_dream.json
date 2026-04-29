@@ -15,32 +15,24 @@
       "embeds": {
         "2025-11-29": [
           {
-            "eventType": "live_performance",
-            "links": [
-              { "url": "https://youtu.be/B0wAJcQo5xs?si=kn0krSw8Qdba7WKK" }
-            ]
+            "type": "live_performance",
+            "url": "https://youtu.be/B0wAJcQo5xs?si=kn0krSw8Qdba7WKK"
           }
         ],
         "2025-11-28": [
           {
-            "eventType": "live_performance",
-            "links": [
-              { "url": "https://youtu.be/qx5nNKClveo?si=hpEJf2B2lcyfdfYZ" }
-            ]
+            "type": "live_performance",
+            "url": "https://youtu.be/qx5nNKClveo?si=hpEJf2B2lcyfdfYZ"
           }
         ],
         "2025-11-17": [
           {
-            "eventType": "release_date",
-            "links": [
-              { "url": "https://music.apple.com/us/album/beat-it-up-ep/1849135853" }
-            ]
+            "type": "release_date",
+            "url": "https://music.apple.com/us/album/beat-it-up-ep/1849135853"
           },
           {
-            "eventType": "mv",
-            "links": [
-              { "url": "https://youtu.be/wvtNmMmcAYw?si=931_LskQfkVsI47k" }
-            ]
+            "type": "mv",
+            "url": "https://youtu.be/wvtNmMmcAYw?si=931_LskQfkVsI47k"
           }
         ]
       }

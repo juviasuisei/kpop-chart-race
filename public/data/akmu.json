@@ -19,16 +19,12 @@
       "embeds": {
         "2026-04-07": [
           {
-            "eventType": "release_date",
-            "links": [
-              { "url": "https://music.apple.com/us/album/flowering/1887773334" }
-            ]
+            "type": "release_date",
+            "url": "https://music.apple.com/us/album/flowering/1887773334"
           },
           {
-            "eventType": "mv",
-            "links": [
-              { "url": "https://youtu.be/SNn_H_Q2moo?si=JJ_h8qk4tKlZk0TK" }
-            ]
+            "type": "mv",
+            "url": "https://youtu.be/SNn_H_Q2moo?si=JJ_h8qk4tKlZk0TK"
           }
         ]
       }
@@ -41,10 +37,8 @@
       "embeds": {
         "2026-04-02": [
           {
-            "eventType": "mv",
-            "links": [
-              { "url": "https://youtu.be/D54StAZFUrc?si=IP_rZfJsft9TKvJt" }
-            ]
+            "type": "mv",
+            "url": "https://youtu.be/D54StAZFUrc?si=IP_rZfJsft9TKvJt"
           }
         ]
       }

@@ -14,32 +14,24 @@
       "embeds": {
         "2026-03-20": [
           {
-            "eventType": "live_performance",
-            "links": [
-              { "url": "https://youtu.be/G2aofQho8Oc?si=bWJItkdB1IY0kBq0" }
-            ]
+            "type": "live_performance",
+            "url": "https://youtu.be/G2aofQho8Oc?si=bWJItkdB1IY0kBq0"
           }
         ],
         "2026-03-18": [
           {
-            "eventType": "release_date",
-            "links": [
-              { "url": "https://music.apple.com/us/album/pop-it-like-ep/1886270616" }
-            ]
+            "type": "release_date",
+            "url": "https://music.apple.com/us/album/pop-it-like-ep/1886270616"
           },
           {
-            "eventType": "live_performance",
-            "links": [
-              { "url": "https://youtu.be/KAEW-tEnTco?si=cPXHN2mpWpbBkDkd" }
-            ]
+            "type": "live_performance",
+            "url": "https://youtu.be/KAEW-tEnTco?si=cPXHN2mpWpbBkDkd"
           }
         ],
         "2026-03-09": [
           {
-            "eventType": "mv",
-            "links": [
-              { "url": "https://youtu.be/FeU8m9YEVSY?si=LrBimmHQxbIb77Px" }
-            ]
+            "type": "mv",
+            "url": "https://youtu.be/FeU8m9YEVSY?si=LrBimmHQxbIb77Px"
           }
         ]
       }

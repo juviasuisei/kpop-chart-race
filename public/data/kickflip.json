@@ -14,32 +14,24 @@
       "embeds": {
         "2026-04-17": [
           {
-            "eventType": "live_performance",
-            "links": [
-              { "url": "https://youtu.be/tgOuEC8o718?si=7hAikBfqS2u_IE61" }
-            ]
+            "type": "live_performance",
+            "url": "https://youtu.be/tgOuEC8o718?si=7hAikBfqS2u_IE61"
           }
         ],
         "2026-04-15": [
           {
-            "eventType": "live_performance",
-            "links": [
-              { "url": "https://youtu.be/vmpAw4jqQ3o?si=NSJYGjzeEPH74-ey" }
-            ]
+            "type": "live_performance",
+            "url": "https://youtu.be/vmpAw4jqQ3o?si=NSJYGjzeEPH74-ey"
           }
         ],
         "2026-04-06": [
           {
-            "eventType": "release_date",
-            "links": [
-              { "url": "https://music.apple.com/us/album/my-first-kick/1887433170" }
-            ]
+            "type": "release_date",
+            "url": "https://music.apple.com/us/album/my-first-kick/1887433170"
           },
           {
-            "eventType": "mv",
-            "links": [
-              { "url": "https://youtu.be/i5S7DBQnqP0?si=qEG9IJsFBbBmwmhI" }
-            ]
+            "type": "mv",
+            "url": "https://youtu.be/i5S7DBQnqP0?si=qEG9IJsFBbBmwmhI"
           }
         ]
       }

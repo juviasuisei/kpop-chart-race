@@ -17,40 +17,30 @@
       "embeds": {
         "2026-01-18": [
           {
-            "eventType": "live_performance",
-            "links": [
-              { "url": "https://youtu.be/Wk_9d2XSyvk?si=KYKWnGLU-5q87R7G" }
-            ]
+            "type": "live_performance",
+            "url": "https://youtu.be/Wk_9d2XSyvk?si=KYKWnGLU-5q87R7G"
           }
         ],
         "2026-01-16": [
           {
-            "eventType": "live_performance",
-            "links": [
-              { "url": "https://youtu.be/VDH265vPjOc?si=sQP8obHtQk0gxjNw" }
-            ]
+            "type": "live_performance",
+            "url": "https://youtu.be/VDH265vPjOc?si=sQP8obHtQk0gxjNw"
           }
         ],
         "2026-01-15": [
           {
-            "eventType": "live_performance",
-            "links": [
-              { "url": "https://youtu.be/gPNM1KzoN_4?si=1hRaafaE3X9CCZjT" }
-            ]
+            "type": "live_performance",
+            "url": "https://youtu.be/gPNM1KzoN_4?si=1hRaafaE3X9CCZjT"
           }
         ],
         "2026-01-05": [
           {
-            "eventType": "release_date",
-            "links": [
-              { "url": "https://music.apple.com/us/album/re-love-ep/1862911444" }
-            ]
+            "type": "release_date",
+            "url": "https://music.apple.com/us/album/re-love-ep/1862911444"
           },
           {
-            "eventType": "mv",
-            "links": [
-              { "url": "https://youtu.be/y2os26sMjOg?si=E3JECbXD15KEY2-f" }
-            ]
+            "type": "mv",
+            "url": "https://youtu.be/y2os26sMjOg?si=E3JECbXD15KEY2-f"
           }
         ]
       }

@@ -15,16 +15,12 @@
       "embeds": {
         "2025-12-18": [
           {
-            "eventType": "release_date",
-            "links": [
-              { "url": "https://music.apple.com/us/album/duet-single/1859542278" }
-            ]
+            "type": "release_date",
+            "url": "https://music.apple.com/us/album/duet-single/1859542278"
           },
           {
-            "eventType": "mv",
-            "links": [
-              { "url": "https://youtu.be/sssoyDLFPWE?si=WrDYNTiy0Dve6KFe" }
-            ]
+            "type": "mv",
+            "url": "https://youtu.be/sssoyDLFPWE?si=WrDYNTiy0Dve6KFe"
           }
         ]
       }

@@ -13,16 +13,12 @@
       "embeds": {
         "2026-03-09": [
           {
-            "eventType": "release_date",
-            "links": [
-              { "url": "https://music.apple.com/us/album/tough-love-ep/1879738920" }
-            ]
+            "type": "release_date",
+            "url": "https://music.apple.com/us/album/tough-love-ep/1879738920"
           },
           {
-            "eventType": "mv",
-            "links": [
-              { "url": "https://youtu.be/geONm_InNZA?si=uuLzlsP41OKBRlkM" }
-            ]
+            "type": "mv",
+            "url": "https://youtu.be/geONm_InNZA?si=uuLzlsP41OKBRlkM"
           }
         ]
       }

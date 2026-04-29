@@ -18,21 +18,18 @@
         "2025-11-29": { "value": 5576, "source": "show_music_core", "episode": 926 },
         "2025-11-12": { "value": 3102, "source": "show_champion", "episode": 577 },
         "2025-11-05": { "value": 2458, "source": "show_champion", "episode": 576 },
-        "2025-11-02": { "value": 4158, "source": "inkigayo", "episode": 1289 }
+        "2025-11-02": { "value": 4158, "source": "inkigayo", "episode": 1289 },
+        "2025-10-29": { "value": 3033, "source": "show_champion", "episode": 575 }
       },
       "embeds": {
         "2025-10-15": [
           {
-            "eventType": "release_date",
-            "links": [
-              { "url": "https://music.apple.com/us/album/good-goodbye-single/1843518967" }
-            ]
+            "type": "release_date",
+            "url": "https://music.apple.com/us/album/good-goodbye-single/1843518967"
           },
           {
-            "eventType": "mv",
-            "links": [
-              { "url": "https://youtu.be/Qe8fa4b5xNU?si=P-JHr4Q3zCrlJiec" }
-            ]
+            "type": "mv",
+            "url": "https://youtu.be/Qe8fa4b5xNU?si=P-JHr4Q3zCrlJiec"
           }
         ]
       }

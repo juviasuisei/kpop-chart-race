@@ -13,24 +13,18 @@
       "embeds": {
         "2026-02-04": [
           {
-            "eventType": "live_performance",
-            "links": [
-              { "url": "https://youtu.be/Yd88DNu6v7w?si=MrpFM1weMJzTLvww" }
-            ]
+            "type": "live_performance",
+            "url": "https://youtu.be/Yd88DNu6v7w?si=MrpFM1weMJzTLvww"
           }
         ],
         "2026-01-19": [
           {
-            "eventType": "release_date",
-            "links": [
-              { "url": "https://music.apple.com/us/album/rock-the-nation-ep/1871092829" }
-            ]
+            "type": "release_date",
+            "url": "https://music.apple.com/us/album/rock-the-nation-ep/1871092829"
           },
           {
-            "eventType": "mv",
-            "links": [
-              { "url": "https://youtu.be/uRnl1Lj7GqM?si=VMPfjf2OGBkIPa5P" }
-            ]
+            "type": "mv",
+            "url": "https://youtu.be/uRnl1Lj7GqM?si=VMPfjf2OGBkIPa5P"
           }
         ]
       }

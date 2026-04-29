@@ -13,24 +13,18 @@
       "embeds": {
         "2025-11-04": [
           {
-            "eventType": "live_performance",
-            "links": [
-              { "url": "https://youtu.be/XvI8sp3thvk?si=SPo3sy323hS_8Z6I" }
-            ]
+            "type": "live_performance",
+            "url": "https://youtu.be/XvI8sp3thvk?si=SPo3sy323hS_8Z6I"
           }
         ],
         "2025-10-29": [
           {
-            "eventType": "release_date",
-            "links": [
-              { "url": "https://music.apple.com/us/album/wonderland-ep/1847772518" }
-            ]
+            "type": "release_date",
+            "url": "https://music.apple.com/us/album/wonderland-ep/1847772518"
           },
           {
-            "eventType": "mv",
-            "links": [
-              { "url": "https://youtu.be/V9iN-Yj0VTI?si=21pPoK58jKawT3jj" }
-            ]
+            "type": "mv",
+            "url": "https://youtu.be/V9iN-Yj0VTI?si=21pPoK58jKawT3jj"
           }
         ]
       }

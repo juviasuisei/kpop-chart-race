@@ -13,24 +13,18 @@
       "embeds": {
         "2025-11-11": [
           {
-            "eventType": "live_performance",
-            "links": [
-              { "url": "https://youtu.be/4QSIF9fcoZs?si=kyBbZoRmUc5iZXWH" }
-            ]
+            "type": "live_performance",
+            "url": "https://youtu.be/4QSIF9fcoZs?si=kyBbZoRmUc5iZXWH"
           }
         ],
         "2025-10-31": [
           {
-            "eventType": "release_date",
-            "links": [
-              { "url": "https://music.apple.com/us/album/house-of-tricky-wrecking-the-house-ep/1846738618" }
-            ]
+            "type": "release_date",
+            "url": "https://music.apple.com/us/album/house-of-tricky-wrecking-the-house-ep/1846738618"
           },
           {
-            "eventType": "mv",
-            "links": [
-              { "url": "https://youtu.be/26TTuFQXEW4?si=JQ_XVtS2BAWrLLyb" }
-            ]
+            "type": "mv",
+            "url": "https://youtu.be/26TTuFQXEW4?si=JQ_XVtS2BAWrLLyb"
           }
         ]
       }

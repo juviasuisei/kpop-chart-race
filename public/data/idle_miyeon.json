@@ -13,24 +13,18 @@
       "embeds": {
         "2025-11-14": [
           {
-            "eventType": "live_performance",
-            "links": [
-              { "url": "https://youtu.be/CvBGI2bw-Rw?si=HymVCxrMYH5_9uu3" }
-            ]
+            "type": "live_performance",
+            "url": "https://youtu.be/CvBGI2bw-Rw?si=HymVCxrMYH5_9uu3"
           }
         ],
         "2025-11-03": [
           {
-            "eventType": "release_date",
-            "links": [
-              { "url": "https://music.apple.com/us/album/my-lover/1847505472" }
-            ]
+            "type": "release_date",
+            "url": "https://music.apple.com/us/album/my-lover/1847505472"
           },
           {
-            "eventType": "mv",
-            "links": [
-              { "url": "https://youtu.be/9g9NClV1z_w?si=WPH_qDW6aiPyK308" }
-            ]
+            "type": "mv",
+            "url": "https://youtu.be/9g9NClV1z_w?si=WPH_qDW6aiPyK308"
           }
         ]
       }

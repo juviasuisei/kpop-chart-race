@@ -15,24 +15,18 @@
       "embeds": {
         "2026-04-25": [
           {
-            "eventType": "live_performance",
-            "links": [
-              { "url": "https://youtu.be/3zvHS4-C4uo?si=iNoVP4xuAAW4Ksqh" }
-            ]
+            "type": "live_performance",
+            "url": "https://youtu.be/3zvHS4-C4uo?si=iNoVP4xuAAW4Ksqh"
           }
         ],
         "2026-04-13": [
           {
-            "eventType": "release_date",
-            "links": [
-              { "url": "https://music.apple.com/us/album/caligo-pt-2-ep/1891527164" }
-            ]
+            "type": "release_date",
+            "url": "https://music.apple.com/us/album/caligo-pt-2-ep/1891527164"
           },
           {
-            "eventType": "mv",
-            "links": [
-              { "url": "https://youtu.be/XukB7ZG8CDQ?si=cd-zP4ZhyX-4VZBR" }
-            ]
+            "type": "mv",
+            "url": "https://youtu.be/XukB7ZG8CDQ?si=cd-zP4ZhyX-4VZBR"
           }
         ]
       }
@@ -48,24 +42,18 @@
       "embeds": {
         "2025-11-22": [
           {
-            "eventType": "live_performance",
-            "links": [
-              { "url": "https://youtu.be/-mu45LJZ8o8?si=tVbCVUcUmj1Ek_ps" }
-            ]
+            "type": "live_performance",
+            "url": "https://youtu.be/-mu45LJZ8o8?si=tVbCVUcUmj1Ek_ps"
           }
         ],
         "2025-11-10": [
           {
-            "eventType": "release_date",
-            "links": [
-              { "url": "https://music.apple.com/us/album/plbbuu-single/1850637062" }
-            ]
+            "type": "release_date",
+            "url": "https://music.apple.com/us/album/plbbuu-single/1850637062"
           },
           {
-            "eventType": "mv",
-            "links": [
-              { "url": "https://youtu.be/8L001YT4k6k?si=ceN9yaKwJwM9FX5Z" }
-            ]
+            "type": "mv",
+            "url": "https://youtu.be/8L001YT4k6k?si=ceN9yaKwJwM9FX5Z"
           }
         ]
       }

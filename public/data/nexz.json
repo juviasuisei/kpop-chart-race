@@ -14,32 +14,24 @@
       "embeds": {
         "2025-11-07": [
           {
-            "eventType": "live_performance",
-            "links": [
-              { "url": "https://youtu.be/IobTOMLHK5M?si=l2EGflsLKrh3t4XI" }
-            ]
+            "type": "live_performance",
+            "url": "https://youtu.be/IobTOMLHK5M?si=l2EGflsLKrh3t4XI"
           }
         ],
         "2025-11-05": [
           {
-            "eventType": "live_performance",
-            "links": [
-              { "url": "https://youtu.be/crwsioKKiuo?si=h60RmBnu5nQgVJ1J" }
-            ]
+            "type": "live_performance",
+            "url": "https://youtu.be/crwsioKKiuo?si=h60RmBnu5nQgVJ1J"
           }
         ],
         "2025-10-27": [
           {
-            "eventType": "release_date",
-            "links": [
-              { "url": "https://music.apple.com/us/album/beat-boxer-ep/1840923109" }
-            ]
+            "type": "release_date",
+            "url": "https://music.apple.com/us/album/beat-boxer-ep/1840923109"
           },
           {
-            "eventType": "mv",
-            "links": [
-              { "url": "https://youtu.be/d4tHKtG9xFo?si=95oQd-zYW-0vhQAi" }
-            ]
+            "type": "mv",
+            "url": "https://youtu.be/d4tHKtG9xFo?si=95oQd-zYW-0vhQAi"
           }
         ]
       }

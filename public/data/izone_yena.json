@@ -13,24 +13,18 @@
       "embeds": {
         "2026-03-25": [
           {
-            "eventType": "live_performance",
-            "links": [
-              { "url": "https://youtu.be/SoDdfe1JCIg?si=Y3AnD-s-TX-MVi5b" }
-            ]
+            "type": "live_performance",
+            "url": "https://youtu.be/SoDdfe1JCIg?si=Y3AnD-s-TX-MVi5b"
           }
         ],
         "2026-03-11": [
           {
-            "eventType": "release_date",
-            "links": [
-              { "url": "https://music.apple.com/us/album/love-catcher-ep/1882581635" }
-            ]
+            "type": "release_date",
+            "url": "https://music.apple.com/us/album/love-catcher-ep/1882581635"
           },
           {
-            "eventType": "mv",
-            "links": [
-              { "url": "https://youtu.be/NOiyDlWl534?si=RSJQj3ilv6pDA1iZ" }
-            ]
+            "type": "mv",
+            "url": "https://youtu.be/NOiyDlWl534?si=RSJQj3ilv6pDA1iZ"
           }
         ]
       }

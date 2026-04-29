@@ -13,24 +13,18 @@
       "embeds": {
         "2026-04-15": [
           {
-            "eventType": "live_performance",
-            "links": [
-              { "url": "https://youtu.be/pUzFS3CHKcY?si=cnx8xNBL7Cw1-Ah1" }
-            ]
+            "type": "live_performance",
+            "url": "https://youtu.be/pUzFS3CHKcY?si=cnx8xNBL7Cw1-Ah1"
           }
         ],
         "2026-04-08": [
           {
-            "eventType": "release_date",
-            "links": [
-              { "url": "https://music.apple.com/us/album/definition-ep/1889815594" }
-            ]
+            "type": "release_date",
+            "url": "https://music.apple.com/us/album/definition-ep/1889815594"
           },
           {
-            "eventType": "mv",
-            "links": [
-              { "url": "https://youtu.be/wRZ1MdBoUq0?si=volt814_xfIPOoYj" }
-            ]
+            "type": "mv",
+            "url": "https://youtu.be/wRZ1MdBoUq0?si=volt814_xfIPOoYj"
           }
         ]
       }

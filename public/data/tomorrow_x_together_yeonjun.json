@@ -13,16 +13,12 @@
       "embeds": {
         "2025-11-07": [
           {
-            "eventType": "release_date",
-            "links": [
-              { "url": "https://music.apple.com/us/album/no-labels-part-01-ep/1846790579" }
-            ]
+            "type": "release_date",
+            "url": "https://music.apple.com/us/album/no-labels-part-01-ep/1846790579"
           },
           {
-            "eventType": "mv",
-            "links": [
-              { "url": "https://youtu.be/2GPFLanHujM?si=Ljy4xAgQnSrE7O0Q" }
-            ]
+            "type": "mv",
+            "url": "https://youtu.be/2GPFLanHujM?si=Ljy4xAgQnSrE7O0Q"
           }
         ]
       }

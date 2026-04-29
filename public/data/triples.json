@@ -13,24 +13,18 @@
       "embeds": {
         "2025-12-03": [
           {
-            "eventType": "live_performance",
-            "links": [
-              { "url": "https://youtu.be/jgvmCJRm6DE?si=L0PbnVHET2GtBzM8" }
-            ]
+            "type": "live_performance",
+            "url": "https://youtu.be/jgvmCJRm6DE?si=L0PbnVHET2GtBzM8"
           }
         ],
         "2025-11-24": [
           {
-            "eventType": "release_date",
-            "links": [
-              { "url": "https://music.apple.com/us/album/msnz-beyond-beauty-ep/1852753248" }
-            ]
+            "type": "release_date",
+            "url": "https://music.apple.com/us/album/msnz-beyond-beauty-ep/1852753248"
           },
           {
-            "eventType": "mv",
-            "links": [
-              { "url": "https://youtu.be/28mVLa2S9yw?si=oURhsFn1tZqnLChN" }
-            ]
+            "type": "mv",
+            "url": "https://youtu.be/28mVLa2S9yw?si=oURhsFn1tZqnLChN"
           }
         ]
       }

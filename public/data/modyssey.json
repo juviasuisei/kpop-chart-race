@@ -13,24 +13,18 @@
       "embeds": {
         "2026-04-22": [
           {
-            "eventType": "live_performance",
-            "links": [
-              { "url": "https://youtu.be/ORbNR9mnujI?si=wkvrP6Ypb5Qw9YiX" }
-            ]
+            "type": "live_performance",
+            "url": "https://youtu.be/ORbNR9mnujI?si=wkvrP6Ypb5Qw9YiX"
           }
         ],
         "2026-04-13": [
           {
-            "eventType": "release_date",
-            "links": [
-              { "url": "https://music.apple.com/us/album/1-got-hooked-an-addictive-symphony-ep/1891607788" }
-            ]
+            "type": "release_date",
+            "url": "https://music.apple.com/us/album/1-got-hooked-an-addictive-symphony-ep/1891607788"
           },
           {
-            "eventType": "mv",
-            "links": [
-              { "url": "https://youtu.be/kK4kGeB5mQs?si=Ds9T5o209-GA8Ulq" }
-            ]
+            "type": "mv",
+            "url": "https://youtu.be/kK4kGeB5mQs?si=Ds9T5o209-GA8Ulq"
           }
         ]
       }

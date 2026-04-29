@@ -15,10 +15,8 @@
       "embeds": {
         "2023-04-26": [
           {
-            "eventType": "release_date",
-            "links": [
-              { "url": "https://music.apple.com/us/album/oo-li/1683448653" }
-            ]
+            "type": "release_date",
+            "url": "https://music.apple.com/us/album/oo-li/1683448653"
           }
         ]
       }

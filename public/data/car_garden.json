@@ -14,10 +14,8 @@
       "embeds": {
         "2021-01-28": [
           {
-            "eventType": "release_date",
-            "links": [
-              { "url": "https://music.apple.com/us/album/absence-ep/1661608701" }
-            ]
+            "type": "release_date",
+            "url": "https://music.apple.com/us/album/absence-ep/1661608701"
           }
         ]
       }

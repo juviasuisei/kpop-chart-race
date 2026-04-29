@@ -15,24 +15,18 @@
       "embeds": {
         "2026-03-06": [
           {
-            "eventType": "live_performance",
-            "links": [
-              { "url": "https://youtu.be/2pYCkdu1WCw?si=VCg6TaZeZrnh11XH" }
-            ]
+            "type": "live_performance",
+            "url": "https://youtu.be/2pYCkdu1WCw?si=VCg6TaZeZrnh11XH"
           }
         ],
         "2026-02-23": [
           {
-            "eventType": "release_date",
-            "links": [
-              { "url": "https://music.apple.com/us/album/both-sides-the-1st-mini-album-ep/1875871527" }
-            ]
+            "type": "release_date",
+            "url": "https://music.apple.com/us/album/both-sides-the-1st-mini-album-ep/1875871527"
           },
           {
-            "eventType": "mv",
-            "links": [
-              { "url": "https://youtu.be/QWFIz75ad6I?si=SP1DpEIEPysNFHj8" }
-            ]
+            "type": "mv",
+            "url": "https://youtu.be/QWFIz75ad6I?si=SP1DpEIEPysNFHj8"
           }
         ]
       }

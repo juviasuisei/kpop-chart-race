@@ -13,16 +13,12 @@
       "embeds": {
         "2026-03-25": [
           {
-            "eventType": "release_date",
-            "links": [
-              { "url": "https://music.apple.com/us/album/rev-single/1886384531" }
-            ]
+            "type": "release_date",
+            "url": "https://music.apple.com/us/album/rev-single/1886384531"
           },
           {
-            "eventType": "mv",
-            "links": [
-              { "url": "https://youtu.be/pLKOEfMc09E?si=vHQoaHByVw5T6z2B" }
-            ]
+            "type": "mv",
+            "url": "https://youtu.be/pLKOEfMc09E?si=vHQoaHByVw5T6z2B"
           }
         ]
       }

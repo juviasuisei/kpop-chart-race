@@ -13,24 +13,18 @@
       "embeds": {
         "2026-04-01": [
           {
-            "eventType": "live_performance",
-            "links": [
-              { "url": "https://youtu.be/Knminq8hV68?si=hyfVJFOAI-jLk37B" }
-            ]
+            "type": "live_performance",
+            "url": "https://youtu.be/Knminq8hV68?si=hyfVJFOAI-jLk37B"
           }
         ],
         "2026-03-26": [
           {
-            "eventType": "release_date",
-            "links": [
-              { "url": "https://music.apple.com/us/album/free-falling-single/1885707481" }
-            ]
+            "type": "release_date",
+            "url": "https://music.apple.com/us/album/free-falling-single/1885707481"
           },
           {
-            "eventType": "mv",
-            "links": [
-              { "url": "https://youtu.be/VS5tx9LrLo0?si=sx4rH_BBB8_vDn1P" }
-            ]
+            "type": "mv",
+            "url": "https://youtu.be/VS5tx9LrLo0?si=sx4rH_BBB8_vDn1P"
           }
         ]
       }

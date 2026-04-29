@@ -28,80 +28,60 @@
       "embeds": {
         "2026-02-15": [
           {
-            "eventType": "live_performance",
-            "links": [
-              { "url": "https://youtu.be/tGOrwIk4cdk?si=p6COdfoya03Z_frY" }
-            ]
+            "type": "live_performance",
+            "url": "https://youtu.be/tGOrwIk4cdk?si=p6COdfoya03Z_frY"
           }
         ],
         "2026-02-14": [
           {
-            "eventType": "live_performance",
-            "links": [
-              { "url": "https://youtu.be/Tg7ZSpNhRSQ?si=ze5U_mqtgkuXjynk" }
-            ]
+            "type": "live_performance",
+            "url": "https://youtu.be/Tg7ZSpNhRSQ?si=ze5U_mqtgkuXjynk"
           }
         ],
         "2026-02-13": [
           {
-            "eventType": "live_performance",
-            "links": [
-              { "url": "https://youtu.be/qRunNFH8UGM?si=d6oiF0gp4s6j35y_" }
-            ]
+            "type": "live_performance",
+            "url": "https://youtu.be/qRunNFH8UGM?si=d6oiF0gp4s6j35y_"
           }
         ],
         "2026-02-12": [
           {
-            "eventType": "live_performance",
-            "links": [
-              { "url": "https://youtu.be/cUnq0UfEmGY?si=1MWJxmbTpbwT61I5" }
-            ]
+            "type": "live_performance",
+            "url": "https://youtu.be/cUnq0UfEmGY?si=1MWJxmbTpbwT61I5"
           }
         ],
         "2026-02-07": [
           {
-            "eventType": "live_performance",
-            "links": [
-              { "url": "https://youtu.be/uO8f-9F5dQA?si=6xUXjNuqzt4NXne-" }
-            ]
+            "type": "live_performance",
+            "url": "https://youtu.be/uO8f-9F5dQA?si=6xUXjNuqzt4NXne-"
           }
         ],
         "2026-02-06": [
           {
-            "eventType": "live_performance",
-            "links": [
-              { "url": "https://youtu.be/XcWMv2W1ABc?si=s7T8yN9MS0hYsFkj" }
-            ]
+            "type": "live_performance",
+            "url": "https://youtu.be/XcWMv2W1ABc?si=s7T8yN9MS0hYsFkj"
           }
         ],
         "2026-02-05": [
           {
-            "eventType": "live_performance",
-            "links": [
-              { "url": "https://youtu.be/QgiRK3_qPWk?si=quLvA1gopmiMUoM-" }
-            ]
+            "type": "live_performance",
+            "url": "https://youtu.be/QgiRK3_qPWk?si=quLvA1gopmiMUoM-"
           }
         ],
         "2026-02-04": [
           {
-            "eventType": "live_performance",
-            "links": [
-              { "url": "https://youtu.be/Rco4Iusnjug?si=M599IecAgRQoTllD" }
-            ]
+            "type": "live_performance",
+            "url": "https://youtu.be/Rco4Iusnjug?si=M599IecAgRQoTllD"
           }
         ],
         "2026-01-26": [
           {
-            "eventType": "release_date",
-            "links": [
-              { "url": "https://music.apple.com/us/album/delulu-pack-ep/1866860579" }
-            ]
+            "type": "release_date",
+            "url": "https://music.apple.com/us/album/delulu-pack-ep/1866860579"
           },
           {
-            "eventType": "mv",
-            "links": [
-              { "url": "https://youtu.be/zhHB4dZTChw?si=-5g1JiKoK_kwJkRe" }
-            ] 
+            "type": "mv",
+            "url": "https://youtu.be/zhHB4dZTChw?si=-5g1JiKoK_kwJkRe"
           }
         ]
       }

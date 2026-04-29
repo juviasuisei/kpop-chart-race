@@ -19,16 +19,12 @@
       "embeds": {
         "2026-01-19": [
           {
-            "eventType": "release_date",
-            "links": [
-              { "url": "https://music.apple.com/us/album/reverxe-the-8th-album/1868596000" }
-            ]
+            "type": "release_date",
+            "url": "https://music.apple.com/us/album/reverxe-the-8th-album/1868596000"
           },
           {
-            "eventType": "mv",
-            "links": [
-              { "url": "https://youtu.be/BWfKkqo1Mk8?si=WSjVfIwR5apoAkmQ" }
-            ]
+            "type": "mv",
+            "url": "https://youtu.be/BWfKkqo1Mk8?si=WSjVfIwR5apoAkmQ"
           }
         ]
       }

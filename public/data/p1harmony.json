@@ -14,32 +14,24 @@
       "embeds": {
         "2026-03-20": [
           {
-            "eventType": "live_performance",
-            "links": [
-              { "url": "https://youtu.be/VTnnR8YGXhc?si=oRAN3sw3mS8rG7dQ" }
-            ]
+            "type": "live_performance",
+            "url": "https://youtu.be/VTnnR8YGXhc?si=oRAN3sw3mS8rG7dQ"
           }
         ],
         "2026-03-18": [
           {
-            "eventType": "live_performance",
-            "links": [
-              { "url": "https://youtu.be/Bkb8p_XOgCg?si=JV1vp0HMrDBxeC00" }
-            ]
+            "type": "live_performance",
+            "url": "https://youtu.be/Bkb8p_XOgCg?si=JV1vp0HMrDBxeC00"
           }
         ],
         "2026-03-12": [
           {
-            "eventType": "release_date",
-            "links": [
-              { "url": "https://music.apple.com/us/album/unique-ep/1878335259" }
-            ]
+            "type": "release_date",
+            "url": "https://music.apple.com/us/album/unique-ep/1878335259"
           },
           {
-            "eventType": "mv",
-            "links": [
-              { "url": "https://youtu.be/m18dRRu9-V4?si=CYt7UhaoWT6R-Og3" }
-            ]
+            "type": "mv",
+            "url": "https://youtu.be/m18dRRu9-V4?si=CYt7UhaoWT6R-Og3"
           }
         ]
       }

@@ -13,24 +13,18 @@
       "embeds": {
         "2026-04-15": [
           {
-            "eventType": "live_performance",
-            "links": [
-              { "url": "https://youtu.be/ITJek6G36VU?si=iVnhad1Ae3QE-STG" }
-            ]
+            "type": "live_performance",
+            "url": "https://youtu.be/ITJek6G36VU?si=iVnhad1Ae3QE-STG"
           }
         ],
         "2026-04-08": [
           {
-            "eventType": "release_date",
-            "links": [
-              { "url": "https://music.apple.com/us/album/1st-ep-album-keyvitup-ep/1887166342" }
-            ]
+            "type": "release_date",
+            "url": "https://music.apple.com/us/album/1st-ep-album-keyvitup-ep/1887166342"
           },
           {
-            "eventType": "mv",
-            "links": [
-              { "url": "https://youtu.be/m6CCw2XJQpY?si=buzafvCUbt5965Wz" }
-            ]
+            "type": "mv",
+            "url": "https://youtu.be/m6CCw2XJQpY?si=buzafvCUbt5965Wz"
           }
         ]
       }

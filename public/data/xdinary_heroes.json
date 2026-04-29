@@ -1,0 +1,33 @@
+{
+  "name": "Xdinary Heroes",
+  "korean_name": "엑스디너리 히어로즈",
+  "artistType": "boy_group",
+  "generation": 4,
+  "debut": "2021-12-06",
+  "releases": [
+    {
+      "title": "ICU",
+      "dailyValues": {
+        "2025-10-29": { "value": 2586, "source": "show_champion", "episode": 575 }
+      },
+      "embeds": {
+        "2025-10-29": [
+          {
+            "type": "live_performance",
+            "url": "https://youtu.be/BFZY51yWeaI?si=j6Jb5tgaehvAVkja"
+          }
+        ],
+        "2025-10-24": [
+          {
+            "type": "release_date",
+            "url": "https://music.apple.com/us/album/lxve-to-death/1842468337"
+          },
+          {
+            "type": "mv",
+            "url": "https://youtu.be/L4rOBdjcwLc?si=AoFFV3qgE2mWdqtS"
+          }
+        ]
+      }
+    }
+  ]
+}

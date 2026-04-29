@@ -14,16 +14,12 @@
       "embeds": {
         "2025-12-03": [
           {
-            "eventType": "release_date",
-            "links": [
-              { "url": "https://music.apple.com/us/album/sweet-dream-single/1856542021" }
-            ]
+            "type": "release_date",
+            "url": "https://music.apple.com/us/album/sweet-dream-single/1856542021"
           },
           {
-            "eventType": "mv",
-            "links": [
-              { "url": "https://youtu.be/HjsyPgCO5Vk?si=3x1dGW4k_zjSSRFB" }
-            ]
+            "type": "mv",
+            "url": "https://youtu.be/HjsyPgCO5Vk?si=3x1dGW4k_zjSSRFB"
           }
         ]
       }

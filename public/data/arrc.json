@@ -13,24 +13,18 @@
       "embeds": {
         "2025-11-11": [
           {
-            "eventType": "live_performance",
-            "links": [
-              { "url": "https://youtu.be/VhTfIWyw4P8?si=tv-L18Pb-r_MrGde" }
-            ]
+            "type": "live_performance",
+            "url": "https://youtu.be/VhTfIWyw4P8?si=tv-L18Pb-r_MrGde"
           }
         ],
         "2025-11-03": [
           {
-            "eventType": "release_date",
-            "links": [
-              { "url": "https://music.apple.com/us/album/ctrl-alt-skiid-single/1849851073" }
-            ]
+            "type": "release_date",
+            "url": "https://music.apple.com/us/album/ctrl-alt-skiid-single/1849851073"
           },
           {
-            "eventType": "mv",
-            "links": [
-              { "url": "https://youtu.be/LU06eFKen9k?si=3moWY46eKVD-bCwu" }
-            ]
+            "type": "mv",
+            "url": "https://youtu.be/LU06eFKen9k?si=3moWY46eKVD-bCwu"
           }
         ]
       }

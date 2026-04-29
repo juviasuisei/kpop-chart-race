@@ -15,40 +15,30 @@
       "embeds": {
         "2025-11-14": [
           {
-            "eventType": "live_performance",
-            "links": [
-              { "url": "https://youtu.be/Py6JJgi1WjI?si=EwPbs0Vzd6jFDXaS" }
-            ]
+            "type": "live_performance",
+            "url": "https://youtu.be/Py6JJgi1WjI?si=EwPbs0Vzd6jFDXaS"
           }
         ],
         "2025-11-12": [
           {
-            "eventType": "live_performance",
-            "links": [
-              { "url": "https://youtu.be/J7qmOAStsko?si=DlvDOKmOBajctDzY" }
-            ]
+            "type": "live_performance",
+            "url": "https://youtu.be/J7qmOAStsko?si=DlvDOKmOBajctDzY"
           }
         ],
         "2025-11-11": [
           {
-            "eventType": "live_performance",
-            "links": [
-              { "url": "https://youtu.be/mija5fHZkq4?si=h4v_1CaXwyiMMiKF" }
-            ]
+            "type": "live_performance",
+            "url": "https://youtu.be/mija5fHZkq4?si=h4v_1CaXwyiMMiKF"
           }
         ],
         "2025-11-04": [
           {
-            "eventType": "release_date",
-            "links": [
-              { "url": "https://music.apple.com/us/album/the-passage-ep/1848022908" }
-            ]
+            "type": "release_date",
+            "url": "https://music.apple.com/us/album/the-passage-ep/1848022908"
           },
           {
-            "eventType": "mv",
-            "links": [
-              { "url": "https://youtu.be/2RKf0dEOWNk?si=mH_z-CcnJ0CGIEX5" }
-            ]
+            "type": "mv",
+            "url": "https://youtu.be/2RKf0dEOWNk?si=mH_z-CcnJ0CGIEX5"
           }
         ]
       }

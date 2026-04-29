@@ -26,24 +26,18 @@
       "embeds": {
         "2025-11-09": [
           {
-            "eventType": "live_performance",
-            "links": [
-              { "url": "https://youtu.be/rJHd-yJodyE?si=lmomkTb9iwwjIXmO" }
-            ]
+            "type": "live_performance",
+            "url": "https://youtu.be/rJHd-yJodyE?si=lmomkTb9iwwjIXmO"
           }
         ],
         "2025-10-24": [
           {
-            "eventType": "release_date",
-            "links": [
-              { "url": "https://music.apple.com/us/album/spaghetti/1846119152" }
-            ]
+            "type": "release_date",
+            "url": "https://music.apple.com/us/album/spaghetti/1846119152"
           },
           {
-            "eventType": "mv",
-            "links": [
-              { "url": "https://youtu.be/TvVtYaqCni8?si=TwOZPP6vpvQzK-JM" }
-            ]
+            "type": "mv",
+            "url": "https://youtu.be/TvVtYaqCni8?si=TwOZPP6vpvQzK-JM"
           }
         ]
       }

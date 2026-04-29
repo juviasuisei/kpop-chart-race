@@ -13,24 +13,18 @@
       "embeds": {
         "2026-03-11": [
           {
-            "eventType": "live_performance",
-            "links": [
-              { "url": "https://youtu.be/Mxx6e-otZnA?si=vkFru5rWmerj69df" }
-            ]
+            "type": "live_performance",
+            "url": "https://youtu.be/Mxx6e-otZnA?si=vkFru5rWmerj69df"
           }
         ],
         "2026-03-03": [
           {
-            "eventType": "release_date",
-            "links": [
-              { "url": "https://music.apple.com/us/album/set-by-us-only-ep/1879739715" }
-            ]
+            "type": "release_date",
+            "url": "https://music.apple.com/us/album/set-by-us-only-ep/1879739715"
           },
           {
-            "eventType": "mv",
-            "links": [
-              { "url": "https://youtu.be/cQESe4Jc0rE?si=2kM-OCCm7GVQ-A6J" }
-            ]
+            "type": "mv",
+            "url": "https://youtu.be/cQESe4Jc0rE?si=2kM-OCCm7GVQ-A6J"
           }
         ]
       }

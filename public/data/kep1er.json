@@ -14,32 +14,24 @@
       "embeds": {
         "2026-04-09": [
           {
-            "eventType": "live_performance",
-            "links": [
-              { "url": "https://youtu.be/ody4jFG2udQ?si=y42gG0hqzdOa5uj2" }
-            ]
+            "type": "live_performance",
+            "url": "https://youtu.be/ody4jFG2udQ?si=y42gG0hqzdOa5uj2"
           }
         ],
         "2026-04-08": [
           {
-            "eventType": "live_performance",
-            "links": [
-              { "url": "https://youtu.be/GwSBWwj10Jw?si=ACmx7TiFoW0zIagO" }
-            ]
+            "type": "live_performance",
+            "url": "https://youtu.be/GwSBWwj10Jw?si=ACmx7TiFoW0zIagO"
           }
         ],
         "2026-03-31": [
           {
-            "eventType": "release_date",
-            "links": [
-              { "url": "https://music.apple.com/us/album/crack-code-ep/1888358875" }
-            ]
+            "type": "release_date",
+            "url": "https://music.apple.com/us/album/crack-code-ep/1888358875"
           },
           {
-            "eventType": "mv",
-            "links": [
-              { "url": "https://youtu.be/AMwK8YGZGnU?si=XN_ppMbKWpMYvFr9" }
-            ]
+            "type": "mv",
+            "url": "https://youtu.be/AMwK8YGZGnU?si=XN_ppMbKWpMYvFr9"
           }
         ]
       }

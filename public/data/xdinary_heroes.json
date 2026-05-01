@@ -6,6 +6,19 @@
   "debut": "2021-12-06",
   "releases": [
     {
+      "title": "Voyager",
+      "dailyValues": {
+        "2026-04-29": { "value": 2363, "source": "show_champion", "episode": 595 }
+      },
+      "embeds": {
+        "2026-04-29": [{ "type": "live_performance", "url": "https://youtu.be/-NPuoBm1gUU?si=cCo0zpREz6C7kAK9" }],
+        "2026-04-17": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/dead-and/1884348004" },
+          { "type": "mv", "url": "https://youtu.be/ZeNOs_7kqaw?si=C9DnIUcqk29jP5Wb" }
+        ]
+      }
+    },
+    {
       "title": "ICU",
       "dailyValues": {
         "2025-10-29": { "value": 2586, "source": "show_champion", "episode": 575 }

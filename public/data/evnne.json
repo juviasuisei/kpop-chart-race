@@ -1,0 +1,22 @@
+{
+  "name": "EVNNE",
+  "korean_name": "이븐",
+  "artistType": "boy_group",
+  "generation": 5,
+  "debut": "2023-09-19",
+  "releases": [
+    {
+      "title": "Backtalk",
+      "dailyValues": {
+        "2026-04-29": { "value": 3470, "source": "show_champion", "episode": 595 }
+      },
+      "embeds": {
+        "2026-04-29": [{ "type": "live_performance", "url": "https://youtu.be/2KiWEkBk1Xw?si=E5rqkRYIaI9ePUaO" }],
+        "2026-04-20": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/backtalk-single/1893869223" },
+          { "type": "mv", "url": "https://youtu.be/sadl9Ujgnms?si=kfHd9_d62YkP2PKZ" }
+        ]
+      }
+    }
+  ]
+}

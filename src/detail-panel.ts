@@ -22,6 +22,16 @@ const SOURCE_LOGO_MAP: Record<string, string> = {
   show_music_core: "assets/sources/show_music_core.png",
 };
 
+/** Human-readable labels for chart sources */
+const SOURCE_LABELS: Record<string, string> = {
+  inkigayo: "SBS Inkigayo",
+  the_show: "SBS The Show",
+  show_champion: "MBC M Show Champion",
+  music_bank: "KBS Music Bank",
+  m_countdown: "Mnet M Countdown",
+  show_music_core: "MBC Show! Music Core",
+};
+
 /** Crown level visual configuration */
 interface CrownConfig {
   svgPath: string;
@@ -537,7 +547,8 @@ export class DetailPanel {
       if (SOURCE_LOGO_MAP[sourceName]) {
         const logo = document.createElement("img");
         logo.src = SOURCE_LOGO_MAP[sourceName];
-        logo.alt = sourceName;
+        logo.alt = SOURCE_LABELS[sourceName] ?? sourceName;
+        logo.title = SOURCE_LABELS[sourceName] ?? sourceName;
         logo.className = "timeline-entry__source-logo";
         logo.width = 80;
         sourceEl.appendChild(logo);

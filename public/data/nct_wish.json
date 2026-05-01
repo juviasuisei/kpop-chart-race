@@ -1,0 +1,23 @@
+{
+  "name": "NCT WISH",
+  "korean_name": "엔시티 위시",
+  "artistType": "boy_group",
+  "generation": 3,
+  "debut": "2024-02-21",
+  "releases": [
+    {
+      "title": "Ode to Love",
+      "dailyValues": {
+        "2026-04-29": { "value": 4911, "source": "show_champion", "episode": 595 },
+        "2026-04-30": { "value": 7265, "source": "m_countdown", "episode": 926 }
+      },
+      "embeds": {
+        "2026-04-30": [{ "type": "live_performance", "url": "https://youtu.be/E1XQGb1JG48?si=hFZWWgB9lFIQALcp" }],
+        "2026-04-20": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/ode-to-love-the-1st-album/1891040424" },
+          { "type": "mv", "url": "https://youtu.be/1o5O2YvV3HU?si=5UBtH-1v1KqkHdh3" }
+        ]
+      }
+    }
+  ]
+}

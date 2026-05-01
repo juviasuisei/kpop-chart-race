@@ -1,0 +1,20 @@
+{
+  "name": "CORTIS",
+  "korean_name": "코르티스",
+  "artistType": "boy_group",
+  "generation": 5,
+  "debut": "2025-08-18",
+  "releases": [
+    {
+      "title": "REDRED",
+      "dailyValues": {
+        "2026-04-30": { "value": 8902, "source": "m_countdown", "episode": 926 }
+      },
+      "embeds": {
+        "2026-04-30": [{ "type": "mv", "url": "https://youtu.be/goCplmFaNMI?si=Ec0yKqtFZCNq4tuj" }],
+        "2026-05-04": [{ "type": "release_date", "url": "https://music.apple.com/us/album/greengreen-ep/1887671065" }],
+        "2026-04-20": [{ "type": "mv", "url": "https://youtu.be/U6BDbXIah-Y?si=TIVkedbZQiyu3_q8" }]
+      }
+    }
+  ]
+}

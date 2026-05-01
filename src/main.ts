@@ -190,6 +190,19 @@ async function main(): Promise<void> {
   if (dataStore.dates.length > 0) {
     requestAnimationFrame(() => {
       eventBus.emit("date:change", dataStore.dates[dataStore.dates.length - 1]);
+
+      // On non-mobile, auto-open the detail panel for the #1 artist after animation completes
+      if (window.innerWidth >= 768) {
+        const onInitialComplete = () => {
+          eventBus.off("update:complete", onInitialComplete);
+          if (currentSnapshot && currentSnapshot.entries.length > 0) {
+            const topArtistId = currentSnapshot.entries[0].artistId;
+            detailPanel.open(topArtistId, dataStore, currentSnapshot.date, 1);
+            renderer.recheckOverflow();
+          }
+        };
+        eventBus.on("update:complete", onInitialComplete);
+      }
     });
   }
 }

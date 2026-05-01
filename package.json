@@ -1,7 +1,7 @@
 {
   "name": "kpop-chart-race",
   "private": true,
-  "version": "1.9.15",
+  "version": "1.9.16",
   "type": "module",
   "scripts": {
     "dev": "node scripts/generate-data-index.js && vite",

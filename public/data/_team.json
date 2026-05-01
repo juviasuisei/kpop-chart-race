@@ -6,6 +6,19 @@
   "debut": "2022-12-07",
   "releases": [
     {
+      "title": "We on Fire",
+      "dailyValues": {
+        "2026-04-29": { "value": 4918, "source": "show_champion", "episode": 595 }
+      },
+      "embeds": {
+        "2026-04-29": [{ "type": "live_performance", "url": "https://youtu.be/FVBFTIxuBrw?si=vVcoMpG32Fik_Ye9" }],
+        "2026-04-12": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/we-on-fire-ep/1890111301" },
+          { "type": "mv", "url": "https://youtu.be/8hU6P7MmRyk?si=8YUpcGEPAKXbr96J" }
+        ]
+      }
+    },
+    {
       "title": "Back to Life",
       "dailyValues": {
         "2025-11-09": { "value": 4542, "source": "inkigayo", "episode": 1290 },

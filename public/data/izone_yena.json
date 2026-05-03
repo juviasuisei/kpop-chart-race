@@ -8,6 +8,7 @@
     {
       "title": "Catch Catch",
       "dailyValues": {
+        "2026-05-02": { "value": 2785, "source": "show_music_core", "episode": 943 },
         "2026-03-25": { "value": 2178, "source": "show_champion", "episode": 590 }
       },
       "embeds": {

@@ -354,18 +354,21 @@ export class ChartRaceRenderer {
         barEl = this.createBarElement(entry);
         this.bars.set(entry.artistId, barEl);
         this.barsContainer.appendChild(barEl.wrapper);
-        this.seenArtists.add(entry.artistId);
 
         // Position new bar: use last known Y if returning, otherwise rise from bottom
         barEl.wrapper.style.transition = "none";
         barEl.bar.style.transition = "none";
         const lastY = this.lastKnownY.get(entry.artistId);
-        if (lastY !== undefined) {
-          // Returning bar: start at last known position with current width
-          barEl.wrapper.style.transform = `translateY(${lastY}px)`;
+        const isReturning = lastY !== undefined || this.seenArtists.has(entry.artistId);
+        this.seenArtists.add(entry.artistId);
+        if (isReturning) {
+          // Returning bar: snap directly to target position (no animation from stale position)
+          barEl.wrapper.style.transform = `translateY(${yOffsets[visIdx]}px)`;
           const widthPercent = computeBarWidth(entry.cumulativeValue, maxCumulative);
           barEl.bar.style.width = `${widthPercent}%`;
-          this.lastKnownY.delete(entry.artistId);
+          if (lastY !== undefined) {
+            this.lastKnownY.delete(entry.artistId);
+          }
         } else {
           // Truly new bar: start at bottom with 0 width
           const bottomY = containerHeight > 0 ? containerHeight : 500;
@@ -374,7 +377,9 @@ export class ChartRaceRenderer {
         }
         barEl.wrapper.style.height = `${heights[visIdx]}px`;
         barEl.wrapper.style.opacity = "1";
-        barEl.bar.style.width = "0%";
+        if (!isReturning) {
+          barEl.bar.style.width = "0%";
+        }
         barEl.wrapper.offsetHeight; // force reflow
 
         // Enable transitions (unless scrubbing)

@@ -1,0 +1,26 @@
+{
+  "name": "TWS",
+  "korean_name": "투어스",
+  "artistType": "boy_group",
+  "generation": 5,
+  "debut": "2024-01-22",
+  "releases": [
+    {
+      "title": "OVERDRIVE",
+      "dailyValues": {
+        "2025-10-24": { "value": 11549, "source": "music_bank", "episode": 1264 },
+        "2025-10-22": { "value": 6850, "source": "show_champion", "episode": 574 },
+        "2025-10-21": { "value": 8970, "source": "the_show", "episode": 390 }
+      },
+      "embeds": {
+        "2025-10-24": [{ "type": "live_performance", "url": "https://youtu.be/N9cs4KGieuA?si=Ovj4tRr4lCX_twNh" }],
+        "2025-10-22": [{ "type": "live_performance", "url": "https://youtu.be/Ln0C7IJLJUc?si=qhZHIO7PY7nIZsAt" }],
+        "2025-10-21": [{ "type": "live_performance", "url": "https://youtu.be/miwhpvkFxhA?si=h4o_Wz_1dh5Uxbp1" }],
+        "2025-10-13": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/tws-4th-mini-album-play-hard-ep/1841775048" },
+          { "type": "mv", "url": "https://youtu.be/TzbGBkEh9ms?si=DslLyLXpeeLLSdMJ" }
+        ]
+      }
+    }
+  ]
+}

@@ -16,9 +16,19 @@
         "2025-11-05": { "value": 3564, "source": "show_champion", "episode": 576 },
         "2025-11-02": { "value": 5200, "source": "inkigayo", "episode": 1289 },
         "2025-11-01": { "value": 6057, "source": "show_music_core", "episode": 923 },
-        "2025-10-29": { "value": 5610, "source": "show_champion", "episode": 575 }
+        "2025-10-29": { "value": 5610, "source": "show_champion", "episode": 575 },
+        "2025-10-26": { "value": 5454, "source": "inkigayo", "episode": 1288 },
+        "2025-10-25": { "value": 8377, "source": "show_music_core", "episode": 922 },
+        "2025-10-24": { "value": 11908, "source": "music_bank", "episode": 1264 },
+        "2025-10-23": { "value": 9958, "source": "m_countdown", "episode": 910 },
+        "2025-10-22": { "value": 8614, "source": "show_champion", "episode": 574 }
       },
       "embeds": {
+        "2025-10-26": [{ "type": "live_performance", "url": "https://youtu.be/BRYSlWRu708?si=C1lMKypm0bAnihEx" }],
+        "2025-10-25": [{ "type": "live_performance", "url": "https://youtu.be/QzImN_Bvulk?si=ttU5G_JwLxHn0fmG" }],
+        "2025-10-24": [{ "type": "live_performance", "url": "https://youtu.be/Qr_d1KRUl2U?si=00QvPqpOhq2Xe8px" }],
+        "2025-10-23": [{ "type": "live_performance", "url": "https://youtu.be/CAOYJFLFuL8?si=vMJtbu5Frv3EzGDW" }],
+        "2025-10-22": [{ "type": "live_performance", "url": "https://youtu.be/1QH321DFpo0?si=9EZczGxpYALOBfPj" }],
         "2025-10-13": [
           { "type": "release_date", "url": "https://music.apple.com/us/album/blue-valentine/1839523838" },
           { "type": "mv", "url": "https://youtu.be/EmeW6li6bbo?si=eoFWzGqmTfqXClF_" }

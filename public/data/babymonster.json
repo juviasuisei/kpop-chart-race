@@ -1,0 +1,25 @@
+{
+  "name": "BABYMONSTER",
+  "korean_name": "베이비몬스터",
+  "artistType": "girl_group",
+  "generation": 5,
+  "debut": "2024-01-01",
+  "releases": [
+    {
+      "title": "WE GO UP",
+      "dailyValues": {
+        "2025-10-26": { "value": 4034, "source": "inkigayo", "episode": 1288 },
+        "2025-10-23": { "value": 9013, "source": "m_countdown", "episode": 910 },
+        "2025-10-22": { "value": 2442, "source": "show_champion", "episode": 574 }
+      },
+      "embeds": {
+        "2025-10-26": [{ "type": "live_performance", "url": "https://youtu.be/lDP3Z-IkcSM?si=6xwhcsLkjvcnd0z-" }],
+        "2025-10-23": [{ "type": "live_performance", "url": "https://youtu.be/R_Zn4YqvQ1o?si=nRzClCCluM8jBDvH" }],
+        "2025-10-10": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/we-go-up-ep/1843247940" },
+          { "type": "mv", "url": "https://youtu.be/wlHwjkYpSr0?si=g-q87Meb2-Kw2i6T" }
+        ]
+      }
+    }
+  ]
+}

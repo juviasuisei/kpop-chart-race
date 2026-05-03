@@ -1,0 +1,22 @@
+{
+  "name": "Bae Jin Young [Wanna One / CIX]",
+  "korean_name": "배진영",
+  "artistType": "solo_male",
+  "generation": 3,
+  "debut": "2025-10-14",
+  "releases": [
+    {
+      "title": "Catch Catch",
+      "dailyValues": {
+        "2025-10-22": { "value": 1911, "source": "show_champion", "episode": 574 }
+      },
+      "embeds": {
+        "2025-10-22": [{ "type": "live_performance", "url": "https://youtu.be/xd31qfo-olQ?si=66MqmNhTU8l8dLG5" }],
+        "2025-10-14": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/still-young-ep/1842752141" },
+          { "type": "mv", "url": "https://youtu.be/YpPqIK4JpcI?si=85SWc0I-jO2PMjJC" }
+        ]
+      }
+    }
+  ]
+}

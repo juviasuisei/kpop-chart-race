@@ -8,10 +8,14 @@
     {
       "title": "Ode to Love",
       "dailyValues": {
+        "2026-05-02": { "value": 6333, "source": "show_music_core", "episode": 943 },
+        "2026-05-01": { "value": 11578, "source": "music_bank", "episode": 1291 },
         "2026-04-29": { "value": 4911, "source": "show_champion", "episode": 595 },
         "2026-04-30": { "value": 7265, "source": "m_countdown", "episode": 926 }
       },
       "embeds": {
+        "2026-05-02": [{ "type": "live_performance", "url": "https://youtu.be/LwxbNe29AmM?si=qFPZsAHIH43yj9uz" }],
+        "2026-05-01": [{ "type": "live_performance", "url": "https://youtu.be/8vlzG4HYNRA?si=xVUSZ-dHHSDwiWYd" }],
         "2026-04-30": [{ "type": "live_performance", "url": "https://youtu.be/E1XQGb1JG48?si=hFZWWgB9lFIQALcp" }],
         "2026-04-20": [
           { "type": "release_date", "url": "https://music.apple.com/us/album/ode-to-love-the-1st-album/1891040424" },

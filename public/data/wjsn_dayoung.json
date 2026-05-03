@@ -1,0 +1,21 @@
+{
+  "name": "DAYOUNG [WJSN]",
+  "korean_name": "임다영",
+  "artistType": "solo_female",
+  "generation": 3,
+  "debut": "2025-09-09",
+  "releases": [
+    {
+      "title": "body",
+      "dailyValues": {
+        "2025-10-25": { "value": 4899, "source": "show_music_core", "episode": 922 }
+      },
+      "embeds": {
+        "2025-09-09": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/gonna-love-me-right-single/1837850356" },
+          { "type": "mv", "url": "https://youtu.be/SJpmNMWboWg?si=5pibKNFtjbIJtVUG" }
+        ]
+      }
+    }
+  ]
+}

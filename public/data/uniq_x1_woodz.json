@@ -10,7 +10,8 @@
       "dailyValues": {
         "2026-02-01": { "value": 4054, "source": "inkigayo", "episode": 1298 },
         "2026-01-25": { "value": 4017, "source": "inkigayo", "episode": 1297 },
-        "2025-11-23": { "value": 3361, "source": "inkigayo", "episode": 1292 }
+        "2025-11-23": { "value": 3361, "source": "inkigayo", "episode": 1292 },
+        "2025-10-26": { "value": 3889, "source": "inkigayo", "episode": 1288 }
       },
       "embeds": {
         "2023-04-26": [

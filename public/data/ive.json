@@ -50,6 +50,18 @@
           { "type": "mv", "url": "https://youtu.be/9qkpcLK422o?si=ywAmpK2pRFzT_hAB" }
         ]
       }
+    },
+    {
+      "title": "XOXZ",
+      "dailyValues": {
+        "2025-10-25": { "value": 5323, "source": "show_music_core", "episode": 922 }
+      },
+      "embeds": {
+        "2025-08-25": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/ive-secret-ep/1831903462" },
+          { "type": "mv", "url": "https://youtu.be/B1ShLiq3EVc?si=CGkTp-5mvT3VUaFj" }
+        ]
+      }
     }
   ]
 }

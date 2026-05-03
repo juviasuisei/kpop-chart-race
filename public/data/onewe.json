@@ -1,0 +1,22 @@
+{
+  "name": "ONEWE",
+  "korean_name": "원위",
+  "artistType": "boy_group",
+  "generation": 4,
+  "debut": "2019-05-13",
+  "releases": [
+    {
+      "title": "Maze",
+      "dailyValues": {
+        "2025-10-21": { "value": 1314, "source": "the_show", "episode": 390 }
+      },
+      "embeds": {
+        "2025-10-21": [{ "type": "live_performance", "url": "https://youtu.be/O-_fBQRuIec?si=8syBqTPlylGpQYJ5" }],
+        "2025-10-07": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/maze-ad-astra/1841779635" },
+          { "type": "mv", "url": "https://youtu.be/9LPigw3hDAo?si=ZSTi5y-aLFjQc3jq" }
+        ]
+      }
+    }
+  ]
+}

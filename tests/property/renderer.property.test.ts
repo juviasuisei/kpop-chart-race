@@ -286,10 +286,10 @@ function makeDataStoreForSnapshot(snapshot: ChartSnapshot): DataStore {
       }],
     });
   }
-  return { artists, dates: [snapshot.date], startDate: snapshot.date, endDate: snapshot.date, chartWins: new Map() };
+  return { artists, dates: [snapshot.date], startDate: snapshot.date, endDate: snapshot.date, firstAppearance: new Map(), chartWins: new Map() };
 }
 
-const emptyDataStore: DataStore = { artists: new Map(), dates: [], startDate: '', endDate: '', chartWins: new Map() };
+const emptyDataStore: DataStore = { artists: new Map(), dates: [], startDate: '', endDate: '', firstAppearance: new Map(), chartWins: new Map() };
 
 /** Arbitrary for ArtistType values */
 const arbArtistType = fc.constantFrom(

@@ -53,10 +53,10 @@ function makeDataStoreForEntries(entries: RankedEntry[], date = '2024-06-01'): D
       }],
     });
   }
-  return { artists, dates: [date], startDate: date, endDate: date, chartWins: new Map() };
+  return { artists, dates: [date], startDate: date, endDate: date, firstAppearance: new Map(), chartWins: new Map() };
 }
 
-const emptyDataStore: DataStore = { artists: new Map(), dates: [], startDate: '', endDate: '', chartWins: new Map() };
+const emptyDataStore: DataStore = { artists: new Map(), dates: [], startDate: '', endDate: '', firstAppearance: new Map(), chartWins: new Map() };
 
 describe('ChartRaceRenderer', () => {
   let container: HTMLElement;
@@ -768,7 +768,7 @@ function createMockDataStore(artistId: string): DataStore {
     dates: ['2024-06-01'],
     startDate: '2024-06-01',
     endDate: '2024-06-01',
-    chartWins: new Map(),
+    firstAppearance: new Map(), chartWins: new Map(),
   };
 }
 

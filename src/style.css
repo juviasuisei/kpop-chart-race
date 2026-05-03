@@ -17,6 +17,7 @@
 
 body {
   min-height: 100vh;
+  min-height: 100dvh;
 }
 
 /* ===== Chart Race ===== */
@@ -565,6 +566,7 @@ body {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  height: 100dvh;
   overflow: hidden;
 }
 
@@ -582,6 +584,7 @@ body {
   justify-content: center;
   width: 100%;
   height: 100vh;
+  height: 100dvh;
   background: #1a1a2e;
   color: #ffffff;
 }

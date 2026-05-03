@@ -246,11 +246,28 @@ export async function loadAll(
 
   const dates = collectSortedDates(artists);
 
+  // Compute first appearance date for each artist
+  const firstAppearance = new Map<string, string>();
+  for (const [artistId, artist] of artists) {
+    let earliest: string | undefined;
+    for (const release of artist.releases) {
+      for (const date of release.dailyValues.keys()) {
+        if (!earliest || date < earliest) {
+          earliest = date;
+        }
+      }
+    }
+    if (earliest) {
+      firstAppearance.set(artistId, earliest);
+    }
+  }
+
   return {
     artists,
     dates,
     startDate: dates[0] ?? "",
     endDate: dates[dates.length - 1] ?? "",
+    firstAppearance,
     chartWins: new Map(),
   };
 }
@@ -276,6 +293,7 @@ function emptyDataStore(): DataStore {
     dates: [],
     startDate: "",
     endDate: "",
+    firstAppearance: new Map(),
     chartWins: new Map(),
   };
 }

@@ -70,6 +70,8 @@ export interface DataStore {
   dates: string[];
   startDate: string;
   endDate: string;
+  /** Maps artistId → earliest date the artist has any dailyValue data */
+  firstAppearance: Map<string, string>;
   chartWins: Map<
     string,
     Map<

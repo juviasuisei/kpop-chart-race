@@ -85,6 +85,10 @@ export class ChartRaceRenderer {
   private isZoomChange = false;
   /** rAF ID for the rank tracking loop during phase 1 */
   private rankTrackingFrameId: number | null = null;
+  /** Cached reference to the data store (set on first update) */
+  private dataStoreRef: DataStore | null = null;
+  /** Current snapshot date (for pruning seenArtists on scrub/reset) */
+  private currentDate = "";
 
   constructor(private eventBus: EventBus) {
     this.eventBus.on("scrub:start", () => {
@@ -101,6 +105,7 @@ export class ChartRaceRenderer {
     });
     this.eventBus.on("scrub:end", () => {
       this.scrubbing = false;
+      this.rebuildSeenArtists(this.currentDate);
       if (this.barsContainer) {
         this.barsContainer.classList.remove("chart-race__bars--no-transition");
       }
@@ -122,8 +127,23 @@ export class ChartRaceRenderer {
         barEl.wrapper.remove();
       }
       this.bars.clear();
+      this.seenArtists.clear();
       this.lastKnownY.clear();
     });
+  }
+
+  /**
+   * Rebuild seenArtists: any artist whose first appearance is on or before the given date
+   * is considered "seen" and will snap into place rather than animate in from the bottom.
+   */
+  private rebuildSeenArtists(date: string): void {
+    if (!this.dataStoreRef || !date) return;
+    this.seenArtists.clear();
+    for (const [artistId, firstDate] of this.dataStoreRef.firstAppearance) {
+      if (firstDate <= date) {
+        this.seenArtists.add(artistId);
+      }
+    }
   }
 
   /** Cancel all in-flight animations, timeouts, and pending phase 2 work */
@@ -249,6 +269,9 @@ export class ChartRaceRenderer {
    */
   update(snapshot: ChartSnapshot, zoomLevel: ZoomLevel, dataStore: DataStore): void {
     if (!this.barsContainer || !this.dateDisplay) return;
+
+    this.dataStoreRef = dataStore;
+    this.currentDate = snapshot.date;
 
     // Cancel any pending timeout from a previous update
     if (this.phase2TimeoutId !== null) {

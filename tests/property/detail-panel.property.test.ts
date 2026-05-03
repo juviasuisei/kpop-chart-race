@@ -89,7 +89,7 @@ function buildDataStore(artist: ParsedArtist, dates: string[]): DataStore {
     dates: [...dates].sort(),
     startDate: dates[0],
     endDate: dates[dates.length - 1],
-    chartWins: new Map(),
+    firstAppearance: new Map(), chartWins: new Map(),
   };
 }
 
@@ -119,6 +119,7 @@ function buildDataStoreWithWins(artist: ParsedArtist, dates: string[]): DataStor
     dates: sortedDates,
     startDate: sortedDates[0],
     endDate: sortedDates[sortedDates.length - 1],
+    firstAppearance: new Map(),
     chartWins,
   };
 }
@@ -577,7 +578,7 @@ function buildSimpleDataStore(artist: ParsedArtist): DataStore {
     dates: ['2024-05-13'],
     startDate: '2024-05-13',
     endDate: '2024-05-13',
-    chartWins: new Map(),
+    firstAppearance: new Map(), chartWins: new Map(),
   };
 }
 

@@ -118,7 +118,7 @@ function buildDataStore(artists: ParsedArtist[], dates: string[]): DataStore {
     dates,
     startDate: dates[0] ?? '',
     endDate: dates[dates.length - 1] ?? '',
-    chartWins: new Map(),
+    firstAppearance: new Map(), chartWins: new Map(),
   };
 }
 
@@ -767,7 +767,7 @@ describe('Feature 0014, Property 2: Activity Filter Correctness at Zoom 10', () 
             dates: [oldDate, recentDate, snapshotDate],
             startDate: oldDate,
             endDate: snapshotDate,
-            chartWins: new Map(),
+            firstAppearance: new Map(), chartWins: new Map(),
           };
 
           const result = filterByActivity(entries, snapshotDate, dataStore, 10);
@@ -823,7 +823,7 @@ describe('Feature 0014, Property 3: Activity Filter Is Identity at Zoom "all"', 
             dates: [],
             startDate: '',
             endDate: '',
-            chartWins: new Map(),
+            firstAppearance: new Map(), chartWins: new Map(),
           };
 
           const result = filterByActivity(entries, snapshotDate, emptyStore, 'all');

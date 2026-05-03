@@ -10,7 +10,7 @@ import { EventBus } from '../../src/event-bus.ts';
 import type { DataStore, ParsedArtist, RankedEntry, ChartSnapshot } from '../../src/models.ts';
 import type { DailyValueEntry } from '../../src/types.ts';
 
-const emptyDataStore: DataStore = { artists: new Map(), dates: [], startDate: '', endDate: '', chartWins: new Map() };
+const emptyDataStore: DataStore = { artists: new Map(), dates: [], startDate: '', endDate: '', firstAppearance: new Map(), chartWins: new Map() };
 
 function makeEntry(overrides: Partial<RankedEntry> = {}): RankedEntry {
   return {
@@ -48,7 +48,7 @@ function makeDataStoreForEntries(entries: RankedEntry[], date = '2024-06-01'): D
       }],
     });
   }
-  return { artists, dates: [date], startDate: date, endDate: date, chartWins: new Map() };
+  return { artists, dates: [date], startDate: date, endDate: date, firstAppearance: new Map(), chartWins: new Map() };
 }
 
 // ============================================================
@@ -87,7 +87,7 @@ describe('Dedup tie-breaking', () => {
       dates: [date],
       startDate: date,
       endDate: date,
-      chartWins: new Map(),
+      firstAppearance: new Map(), chartWins: new Map(),
     };
 
     const chartWins = computeChartWins(dataStore);
@@ -268,7 +268,7 @@ function makeActivityDataStore(
     });
   }
   const dates = Array.from(allDates).sort();
-  return { artists, dates, startDate: dates[0], endDate: dates[dates.length - 1], chartWins: new Map() };
+  return { artists, dates, startDate: dates[0], endDate: dates[dates.length - 1], firstAppearance: new Map(), chartWins: new Map() };
 }
 
 function makeRankedEntries(count: number): RankedEntry[] {

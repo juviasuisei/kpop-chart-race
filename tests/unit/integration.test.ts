@@ -98,7 +98,7 @@ function createTestDataStore(): DataStore {
     dates: ['2024-06-01', '2024-06-02', '2024-06-03'],
     startDate: '2024-06-01',
     endDate: '2024-06-03',
-    chartWins: new Map(),
+    firstAppearance: new Map(), chartWins: new Map(),
   };
 }
 

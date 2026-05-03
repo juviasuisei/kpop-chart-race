@@ -99,6 +99,7 @@ function createTestDataStore(): DataStore {
     dates: ['2024-05-13', '2024-05-14', '2024-05-15'],
     startDate: '2024-05-13',
     endDate: '2024-05-15',
+    firstAppearance: new Map(),
     chartWins,
   };
 }
@@ -393,7 +394,7 @@ describe('DetailPanel — same-date card merging', () => {
       dates: ['2024-05-13'],
       startDate: '2024-05-13',
       endDate: '2024-05-13',
-      chartWins: new Map(),
+      firstAppearance: new Map(), chartWins: new Map(),
     };
 
     panel.open('merge-artist', store);
@@ -447,7 +448,7 @@ describe('DetailPanel — same-date card merging', () => {
       dates: ['2024-05-13'],
       startDate: '2024-05-13',
       endDate: '2024-05-13',
-      chartWins: new Map(),
+      firstAppearance: new Map(), chartWins: new Map(),
     };
 
     panel.open('embed-merge-artist', store);
@@ -502,7 +503,7 @@ describe('DetailPanel — same-date card merging', () => {
       dates: ['2024-05-13'],
       startDate: '2024-05-13',
       endDate: '2024-05-13',
-      chartWins: new Map(),
+      firstAppearance: new Map(), chartWins: new Map(),
     };
 
     panel.open('heading-artist', store);
@@ -550,7 +551,7 @@ describe('DetailPanel — same-date card merging', () => {
       dates: ['2024-05-13'],
       startDate: '2024-05-13',
       endDate: '2024-05-13',
-      chartWins: new Map(),
+      firstAppearance: new Map(), chartWins: new Map(),
     };
 
     panel.open('source-diff-artist', store);
@@ -614,6 +615,7 @@ describe('DetailPanel — crown label simplification', () => {
       dates: ['2024-05-13'],
       startDate: '2024-05-13',
       endDate: '2024-05-13',
+      firstAppearance: new Map(),
       chartWins,
     };
   }

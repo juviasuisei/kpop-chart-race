@@ -19,6 +19,19 @@
           { "type": "mv", "url": "https://youtu.be/kI9YD61ehIw?si=UeNBLmLnsEJl4DyT" }
         ]
       }
+    },
+    {
+      "title": "Wall Flowers",
+      "dailyValues": {
+        "2025-10-15": { "value": 2363, "source": "show_champion", "episode": 573 }
+      },
+      "embeds": {
+        "2025-10-15": [{ "type": "live_performance", "url": "https://youtu.be/K_SoCXF5p_Q?si=BWEzbMG5ZXlSsDr1" }],
+        "2025-09-29": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/wall-flowers-single/1841422573" },
+          { "type": "mv", "url": "https://youtu.be/UpGEn4SkSY0?si=ZYdhbbesLJFjXihI" }
+        ]
+      }
     }
   ]
 }

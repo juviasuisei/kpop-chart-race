@@ -1,0 +1,21 @@
+{
+  "name": "CxM [SEVENTEEN]",
+  "korean_name": "최승철 / 김민규",
+  "artistType": "boy_group",
+  "generation": 3,
+  "debut": "2025-09-29",
+  "releases": [
+    {
+      "title": "5, 4, 3",
+      "dailyValues": {
+        "2025-10-16": { "value": 5535, "source": "m_countdown", "episode": 909 }
+      },
+      "embeds": {
+        "2025-09-29": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/cxm-1st-mini-album-hype-vibes-ep/1838656765" },
+          { "type": "mv", "url": "https://youtu.be/u89aNeJlyg0?si=oAmYEOoegPPqzfCV" }
+        ]
+      }
+    }
+  ]
+}

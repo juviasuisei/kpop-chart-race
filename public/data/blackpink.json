@@ -25,6 +25,18 @@
           { "type": "mv", "url": "https://youtu.be/2GJfWMYCWY0?si=wRzEfNcb91NKkG0P" }
         ]
       }
+    },
+    {
+      "title": "JUMP",
+      "dailyValues": {
+        "2025-10-17": { "value": 2732, "source": "music_bank", "episode": 1263 }
+      },
+      "embeds": {
+        "2025-07-11": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/jump-single/1824672650" },
+          { "type": "mv", "url": "https://youtu.be/CgCVZdcKcqY?si=3TPMs8npmgqMOyvo" }
+        ]
+      }
     }
   ]
 }

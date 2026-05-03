@@ -9,11 +9,14 @@
       "title": "Mamma Mia",
       "dailyValues": {
         "2025-10-28": { "value": 4997, "source": "the_show", "episode": 391 },
-        "2025-10-21": { "value": 5582, "source": "the_show", "episode": 390 }
+        "2025-10-21": { "value": 5582, "source": "the_show", "episode": 390 },
+        "2025-10-17": { "value": 4483, "source": "music_bank", "episode": 1263 },
+        "2025-10-15": { "value": 4364, "source": "show_champion", "episode": 573 }
       },
       "embeds": {
         "2025-10-28": [{ "type": "live_performance", "url": "https://youtu.be/fo9Rv4WD3Hc?si=qXZd2msigJDTs9hK" }],
         "2025-10-21": [{ "type": "live_performance", "url": "https://youtu.be/1X0c-tj_wJ4?si=Mi-vEpmSRKEOWAsl" }],
+        "2025-10-17": [{ "type": "live_performance", "url": "https://youtu.be/FX7iUWIXb2s?si=qj2okkVCiR6E_CKx" }],
         "2025-09-30": [
           { "type": "release_date", "url": "https://music.apple.com/us/album/not-just-pretty-ep/1840860810" },
           { "type": "mv", "url": "https://youtu.be/2fyFx2u5fbU?si=BiIWrhErfH8WgVQr" }

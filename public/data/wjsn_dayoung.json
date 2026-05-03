@@ -8,7 +8,8 @@
     {
       "title": "body",
       "dailyValues": {
-        "2025-10-25": { "value": 4899, "source": "show_music_core", "episode": 922 }
+        "2025-10-25": { "value": 4899, "source": "show_music_core", "episode": 922 },
+        "2025-10-18": { "value": 5242, "source": "show_music_core", "episode": 921 }
       },
       "embeds": {
         "2025-09-09": [

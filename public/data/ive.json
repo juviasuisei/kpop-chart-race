@@ -54,7 +54,9 @@
     {
       "title": "XOXZ",
       "dailyValues": {
-        "2025-10-25": { "value": 5323, "source": "show_music_core", "episode": 922 }
+        "2025-10-25": { "value": 5323, "source": "show_music_core", "episode": 922 },
+        "2025-10-19": { "value": 5498, "source": "inkigayo", "episode": 1287 },
+        "2025-10-18": { "value": 6774, "source": "show_music_core", "episode": 921 }
       },
       "embeds": {
         "2025-08-25": [

@@ -36,6 +36,18 @@
           { "type": "mv", "url": "https://youtu.be/OgEwJ8a1OoY?si=UI05BxSKGrAXpVDx" }
         ]
       }
+    },
+    {
+      "title": "FAMOUS",
+      "dailyValues": {
+        "2025-10-19": { "value": 3743, "source": "inkigayo", "episode": 1287 }
+      },
+      "embeds": {
+        "2025-06-23": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/famous-single/1819675760" },
+          { "type": "mv", "url": "https://youtu.be/VjvzYjU1mY0?si=-cbyVKufmQs7NMW4" }
+        ]
+      }
     }
   ]
 }

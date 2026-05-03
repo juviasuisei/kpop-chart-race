@@ -1,0 +1,21 @@
+{
+  "name": "BROWN EYED SOUL",
+  "korean_name": "브라운 아이드 소울",
+  "artistType": "boy_group",
+  "generation": 2,
+  "debut": "2003-09-17",
+  "releases": [
+    {
+      "title": "Moments Like This",
+      "dailyValues": {
+        "2025-10-15": { "value": 3533, "source": "show_champion", "episode": 573 }
+      },
+      "embeds": {
+        "2025-09-23": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/soul-tricycle/1838368858" },
+          { "type": "mv", "url": "https://youtu.be/bMyl7q233yY?si=0ZmfO_ls86QNKm4p" }
+        ]
+      }
+    }
+  ]
+}

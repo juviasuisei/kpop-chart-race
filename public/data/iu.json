@@ -1,0 +1,18 @@
+{
+  "name": "IU",
+  "korean_name": "이지은",
+  "artistType": "solo_female",
+  "generation": 2,
+  "debut": "2008-09-18",
+  "releases": [
+    {
+      "title": "Bye, Summer",
+      "dailyValues": {
+        "2025-10-18": { "value": 4004, "source": "show_music_core", "episode": 921 }
+      },
+      "embeds": {
+        "2025-09-10": [{ "type": "release_date", "url": "https://music.apple.com/us/album/bye-summer-single/1838383717" }]
+      }
+    }
+  ]
+}

@@ -8,7 +8,9 @@
     {
       "title": "5, 4, 3",
       "dailyValues": {
-        "2025-10-16": { "value": 5535, "source": "m_countdown", "episode": 909 }
+        "2025-10-16": { "value": 5535, "source": "m_countdown", "episode": 909 },
+        "2025-10-12": { "value": 4134, "source": "inkigayo", "episode": 1286 },
+        "2025-10-10": { "value": 7014, "source": "music_bank", "episode": 1262 }
       },
       "embeds": {
         "2025-09-29": [

@@ -1,0 +1,21 @@
+{
+  "name": "aespa",
+  "korean_name": "에스파",
+  "artistType": "girl_group",
+  "generation": 4,
+  "debut": "2020-11-17",
+  "releases": [
+    {
+      "title": "Rich Man",
+      "dailyValues": {
+        "2025-10-12": { "value": 4605, "source": "inkigayo", "episode": 1286 }
+      },
+      "embeds": {
+        "2025-09-05": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/rich-man-the-6th-mini-album-ep/1833163982" },
+          { "type": "mv", "url": "https://youtu.be/5oQVTnq-UKk?si=QIQtt53D2rt0LQYG" }
+        ]
+      }
+    }
+  ]
+}

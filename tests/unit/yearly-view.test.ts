@@ -204,7 +204,7 @@ describe('YearlyView', () => {
     expect(indicator?.textContent).toBe('●'); // girl_group indicator
   });
 
-  it('shows win count when artist has wins', () => {
+  it('shows win count when artist has wins (wins mode)', () => {
     const dataStore = createDataStore([
       createArtist('artist-a', 'Artist A', { '2025-06-01': { value: 5000, source: 'inkigayo', episode: 1 } }),
     ]);
@@ -213,12 +213,13 @@ describe('YearlyView', () => {
       ['inkigayo', { artistIds: ['artist-a'], crownLevels: new Map([['artist-a', 1]]) }],
     ]));
     view.mount(container, dataStore);
+    view.setMetric('wins');
 
     const stats = container.querySelector('.yearly-view__stats');
     expect(stats?.textContent).toContain('1 win');
   });
 
-  it('shows plural wins correctly', () => {
+  it('shows plural wins correctly (wins mode)', () => {
     const dataStore = createDataStore([
       createArtist('artist-a', 'Artist A', {
         '2025-06-01': { value: 5000, source: 'inkigayo', episode: 1 },
@@ -232,6 +233,7 @@ describe('YearlyView', () => {
       ['inkigayo', { artistIds: ['artist-a'], crownLevels: new Map([['artist-a', 2]]) }],
     ]));
     view.mount(container, dataStore);
+    view.setMetric('wins');
 
     const stats = container.querySelector('.yearly-view__stats');
     expect(stats?.textContent).toContain('2 wins');
@@ -285,5 +287,227 @@ describe('YearlyView', () => {
     // Should show 7000 total (3000 + 4000)
     const stats = container.querySelector('.yearly-view__stats');
     expect(stats?.textContent).toContain('7,000');
+  });
+});
+
+describe('YearlyView — Wins Mode', () => {
+  let container: HTMLElement;
+  let view: YearlyView;
+
+  beforeEach(() => {
+    container = document.createElement('div');
+    document.body.appendChild(container);
+    view = new YearlyView();
+  });
+
+  afterEach(() => {
+    view.unmount();
+    document.body.removeChild(container);
+  });
+
+  function createArtistWithWins(id: string, name: string, points: number, year: string): ParsedArtist {
+    return {
+      id,
+      name,
+      artistType: 'girl_group',
+      generation: 4,
+      logoUrl: `assets/logos/${id}.svg`,
+      releases: [{
+        id: `${id}-release`,
+        title: 'Test Song',
+        dailyValues: new Map([[`${year}-06-01`, { value: points, source: 'inkigayo', episode: 1 }]]),
+        embeds: new Map(),
+      }],
+    };
+  }
+
+  function createDataStoreWithWins(artists: ParsedArtist[], wins: Map<string, Map<string, { artistIds: string[]; crownLevels: Map<string, number> }>>): DataStore {
+    const artistMap = new Map(artists.map(a => [a.id, a]));
+    const allDates = new Set<string>();
+    for (const artist of artists) {
+      for (const release of artist.releases) {
+        for (const date of release.dailyValues.keys()) {
+          allDates.add(date);
+        }
+      }
+    }
+    const dates = Array.from(allDates).sort();
+    const firstAppearance = new Map<string, string>();
+    for (const artist of artists) {
+      let earliest: string | undefined;
+      for (const release of artist.releases) {
+        for (const date of release.dailyValues.keys()) {
+          if (!earliest || date < earliest) earliest = date;
+        }
+      }
+      if (earliest) firstAppearance.set(artist.id, earliest);
+    }
+    return {
+      artists: artistMap,
+      dates,
+      startDate: dates[0] ?? '',
+      endDate: dates[dates.length - 1] ?? '',
+      firstAppearance,
+      chartWins: wins,
+    };
+  }
+
+  it('setMetric switches to wins mode and re-renders', () => {
+    const artists = [
+      createArtistWithWins('a', 'Artist A', 10000, '2025'),
+      createArtistWithWins('b', 'Artist B', 5000, '2025'),
+    ];
+    const wins = new Map([
+      ['2025-06-01', new Map([
+        ['inkigayo', { artistIds: ['b'], crownLevels: new Map([['b', 1]]) }],
+      ])],
+    ]);
+    const dataStore = createDataStoreWithWins(artists, wins);
+    view.mount(container, dataStore);
+
+    // In points mode, Artist A is #1
+    let rows = container.querySelectorAll('.yearly-view__row');
+    let firstBar = rows[0].querySelector('.yearly-view__bar');
+    expect(firstBar?.textContent).toContain('Artist A');
+
+    // Switch to wins mode — Artist B should be #1 (has 1 win, A has 0)
+    view.setMetric('wins');
+    rows = container.querySelectorAll('.yearly-view__row');
+    firstBar = rows[0].querySelector('.yearly-view__bar');
+    expect(firstBar?.textContent).toContain('Artist B');
+  });
+
+  it('wins mode filters out artists with 0 wins', () => {
+    const artists = [
+      createArtistWithWins('a', 'Artist A', 10000, '2025'),
+      createArtistWithWins('b', 'Artist B', 5000, '2025'),
+      createArtistWithWins('c', 'Artist C', 3000, '2025'),
+    ];
+    const wins = new Map([
+      ['2025-06-01', new Map([
+        ['inkigayo', { artistIds: ['b'], crownLevels: new Map([['b', 1]]) }],
+      ])],
+    ]);
+    const dataStore = createDataStoreWithWins(artists, wins);
+    view.mount(container, dataStore);
+    view.setMetric('wins');
+
+    // Only Artist B has wins, so only 1 row should show
+    const rows = container.querySelectorAll('.yearly-view__row');
+    expect(rows.length).toBe(1);
+  });
+
+  it('wins mode breaks ties with points', () => {
+    const artists = [
+      createArtistWithWins('a', 'Artist A', 3000, '2025'),
+      createArtistWithWins('b', 'Artist B', 8000, '2025'),
+    ];
+    // Both have 1 win each
+    const wins = new Map([
+      ['2025-06-01', new Map([
+        ['inkigayo', { artistIds: ['a', 'b'], crownLevels: new Map([['a', 1], ['b', 1]]) }],
+      ])],
+    ]);
+    const dataStore = createDataStoreWithWins(artists, wins);
+    view.mount(container, dataStore);
+    view.setMetric('wins');
+
+    // Both have 1 win, but B has more points — B should be #1
+    const rows = container.querySelectorAll('.yearly-view__row');
+    const firstBar = rows[0].querySelector('.yearly-view__bar');
+    expect(firstBar?.textContent).toContain('Artist B');
+  });
+
+  it('wins mode scales bars by win count using global max', () => {
+    const artists = [
+      createArtistWithWins('a', 'Artist A', 10000, '2025'),
+      createArtistWithWins('b', 'Artist B', 5000, '2025'),
+    ];
+    // A has 3 wins, B has 1 win
+    const wins = new Map([
+      ['2025-06-01', new Map([
+        ['inkigayo', { artistIds: ['a', 'b'], crownLevels: new Map([['a', 1], ['b', 1]]) }],
+        ['music_bank', { artistIds: ['a'], crownLevels: new Map([['a', 2]]) }],
+        ['show_champion', { artistIds: ['a'], crownLevels: new Map([['a', 3]]) }],
+      ])],
+    ]);
+    const dataStore = createDataStoreWithWins(artists, wins);
+    view.mount(container, dataStore);
+    view.setMetric('wins');
+
+    const bars = container.querySelectorAll('.yearly-view__bar') as NodeListOf<HTMLElement>;
+    // A has 3 wins (100%), B has 1 win (~33.3%)
+    expect(bars[0].style.width).toBe('100%');
+    const bWidth = parseFloat(bars[1].style.width);
+    expect(bWidth).toBeCloseTo(33.33, 0);
+  });
+
+  it('wins mode shows only win count in stats', () => {
+    const artists = [
+      createArtistWithWins('a', 'Artist A', 10000, '2025'),
+    ];
+    const wins = new Map([
+      ['2025-06-01', new Map([
+        ['inkigayo', { artistIds: ['a'], crownLevels: new Map([['a', 1]]) }],
+      ])],
+    ]);
+    const dataStore = createDataStoreWithWins(artists, wins);
+    view.mount(container, dataStore);
+    view.setMetric('wins');
+
+    const stats = container.querySelector('.yearly-view__stats');
+    expect(stats?.textContent).toBe('1 win');
+    expect(stats?.textContent).not.toContain('10,000');
+  });
+
+  it('points mode shows only point total in stats', () => {
+    const artists = [
+      createArtistWithWins('a', 'Artist A', 10000, '2025'),
+    ];
+    const wins = new Map([
+      ['2025-06-01', new Map([
+        ['inkigayo', { artistIds: ['a'], crownLevels: new Map([['a', 1]]) }],
+      ])],
+    ]);
+    const dataStore = createDataStoreWithWins(artists, wins);
+    view.mount(container, dataStore);
+
+    const stats = container.querySelector('.yearly-view__stats');
+    expect(stats?.textContent).toBe('10,000');
+    expect(stats?.textContent).not.toContain('win');
+  });
+
+  it('getMetric returns the current metric', () => {
+    const dataStore = createDataStoreWithWins(
+      [createArtistWithWins('a', 'A', 1000, '2025')],
+      new Map(),
+    );
+    view.mount(container, dataStore);
+
+    expect(view.getMetric()).toBe('points');
+    view.setMetric('wins');
+    expect(view.getMetric()).toBe('wins');
+  });
+
+  it('switching back to points mode restores points-based ranking', () => {
+    const artists = [
+      createArtistWithWins('a', 'Artist A', 10000, '2025'),
+      createArtistWithWins('b', 'Artist B', 5000, '2025'),
+    ];
+    const wins = new Map([
+      ['2025-06-01', new Map([
+        ['inkigayo', { artistIds: ['b'], crownLevels: new Map([['b', 1]]) }],
+      ])],
+    ]);
+    const dataStore = createDataStoreWithWins(artists, wins);
+    view.mount(container, dataStore);
+
+    view.setMetric('wins');
+    view.setMetric('points');
+
+    const rows = container.querySelectorAll('.yearly-view__row');
+    const firstBar = rows[0].querySelector('.yearly-view__bar');
+    expect(firstBar?.textContent).toContain('Artist A');
+    expect(rows.length).toBe(2); // both artists show (even with 0 wins)
   });
 });

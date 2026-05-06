@@ -27,9 +27,12 @@ interface YearlyArtistEntry {
   wins: number;
 }
 
+export type YearlyMetric = "points" | "wins";
+
 export class YearlyView {
   private wrapper: HTMLDivElement | null = null;
   private dataStore: DataStore | null = null;
+  private metric: YearlyMetric = "points";
 
   mount(container: HTMLElement, dataStore: DataStore): void {
     this.dataStore = dataStore;
@@ -46,6 +49,16 @@ export class YearlyView {
     this.wrapper = null;
   }
 
+  setMetric(metric: YearlyMetric): void {
+    if (metric === this.metric) return;
+    this.metric = metric;
+    this.render();
+  }
+
+  getMetric(): YearlyMetric {
+    return this.metric;
+  }
+
   private render(): void {
     if (!this.wrapper || !this.dataStore) return;
     this.wrapper.innerHTML = "";
@@ -53,13 +66,18 @@ export class YearlyView {
     const years = this.getYears();
     const yearData = new Map<number, YearlyArtistEntry[]>();
 
-    // Compute data for all years and find global max
-    let globalMax = 0;
+    // Compute data for all years
     for (const year of years) {
       const entries = this.computeYearData(year);
       yearData.set(year, entries);
-      if (entries.length > 0 && entries[0].points > globalMax) {
-        globalMax = entries[0].points;
+    }
+
+    // Find global max based on current metric
+    let globalMax = 0;
+    for (const entries of yearData.values()) {
+      if (entries.length > 0) {
+        const topValue = this.metric === "wins" ? entries[0].wins : entries[0].points;
+        if (topValue > globalMax) globalMax = topValue;
       }
     }
 
@@ -125,7 +143,17 @@ export class YearlyView {
       });
     }
 
-    entries.sort((a, b) => b.points - a.points);
+    entries.sort((a, b) => {
+      if (this.metric === "wins") {
+        // Sort by wins descending, break ties with points
+        return b.wins - a.wins || b.points - a.points;
+      }
+      return b.points - a.points;
+    });
+    // In wins mode, filter out artists with 0 wins
+    if (this.metric === "wins") {
+      return entries.filter(e => e.wins > 0).slice(0, 10);
+    }
     return entries.slice(0, 10);
   }
 
@@ -165,11 +193,12 @@ export class YearlyView {
       const bar = document.createElement("div");
       bar.className = "yearly-view__bar";
       bar.style.backgroundColor = ARTIST_TYPE_COLORS[entry.artistType as keyof typeof ARTIST_TYPE_COLORS] ?? "#555";
-      const widthPct = (entry.points / globalMax) * 100;
+      const metricValue = this.metric === "wins" ? entry.wins : entry.points;
+      const widthPct = globalMax > 0 ? (metricValue / globalMax) * 100 : 0;
       bar.style.width = `${widthPct}%`;
 
-      const winsText = entry.wins > 0 ? ` · ${entry.wins} ${entry.wins === 1 ? "win" : "wins"}` : "";
-      const statsText = `${entry.points.toLocaleString()}${winsText}`;
+      const winsText = entry.wins > 0 ? `${entry.wins} ${entry.wins === 1 ? "win" : "wins"}` : "";
+      const statsText = this.metric === "wins" ? winsText : entry.points.toLocaleString();
 
       // Logo always goes inside the bar
       const logo = document.createElement("img");

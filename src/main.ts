@@ -18,6 +18,7 @@ import { DetailPanel } from "./detail-panel.ts";
 import { LiveRegionAnnouncer } from "./live-region.ts";
 import { ScreenReaderPacedMode } from "./screen-reader-paced-mode.ts";
 import { YearlyView } from "./yearly-view.ts";
+import type { YearlyMetric } from "./yearly-view.ts";
 import type { ChartSnapshot, DataStore } from "./models.ts";
 import type { ZoomLevel } from "./types.ts";
 
@@ -131,14 +132,58 @@ async function main(): Promise<void> {
   // Insert view switcher into the top bar, before the date (grouped on the right)
   const topBar = app.querySelector(".chart-race__top-bar");
   const dateDisplay2 = app.querySelector(".chart-race__date");
+
+  // --- Metric Toggle (Points/Wins) — only visible in yearly mode ---
+  const metricSwitcher = document.createElement("div");
+  metricSwitcher.className = "view-switcher";
+  metricSwitcher.setAttribute("role", "switch");
+  metricSwitcher.setAttribute("aria-label", "Yearly metric");
+  metricSwitcher.tabIndex = 0;
+  metricSwitcher.style.display = "none"; // hidden by default (race mode)
+
+  const pointsLabel = document.createElement("span");
+  pointsLabel.className = "view-switcher__label view-switcher__label--active";
+  pointsLabel.textContent = "Points";
+
+  const metricTrack = document.createElement("div");
+  metricTrack.className = "view-switcher__track";
+  const metricThumb = document.createElement("div");
+  metricThumb.className = "view-switcher__thumb";
+  metricTrack.appendChild(metricThumb);
+
+  const winsLabel = document.createElement("span");
+  winsLabel.className = "view-switcher__label";
+  winsLabel.textContent = "Wins";
+
+  metricSwitcher.appendChild(pointsLabel);
+  metricSwitcher.appendChild(metricTrack);
+  metricSwitcher.appendChild(winsLabel);
+
+  metricSwitcher.addEventListener("click", () => {
+    const newMetric: YearlyMetric = yearlyView.getMetric() === "points" ? "wins" : "points";
+    yearlyView.setMetric(newMetric);
+    const isPoints = newMetric === "points";
+    metricTrack.classList.toggle("view-switcher__track--on", !isPoints);
+    pointsLabel.classList.toggle("view-switcher__label--active", isPoints);
+    winsLabel.classList.toggle("view-switcher__label--active", !isPoints);
+  });
+  metricSwitcher.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      metricSwitcher.click();
+    }
+  });
+
   if (topBar && dateDisplay2) {
-    // Wrap toggle + date in a right-side group
+    // Wrap toggles + date in a right-side group
     const rightGroup = document.createElement("div");
     rightGroup.className = "chart-race__right-group";
+    rightGroup.appendChild(metricSwitcher);
     rightGroup.appendChild(viewSwitcher);
     rightGroup.appendChild(dateDisplay2);
     topBar.appendChild(rightGroup);
   } else if (topBar) {
+    topBar.appendChild(metricSwitcher);
     topBar.appendChild(viewSwitcher);
   }
 
@@ -152,6 +197,9 @@ async function main(): Promise<void> {
     raceLabel.classList.toggle("view-switcher__label--active", isRace);
     yearlyLabel.classList.toggle("view-switcher__label--active", !isRace);
     viewSwitcher.setAttribute("aria-checked", String(isRace));
+
+    // Show/hide metric toggle
+    metricSwitcher.style.display = isRace ? "none" : "";
 
     if (mode === "yearly") {
       // Pause playback if running

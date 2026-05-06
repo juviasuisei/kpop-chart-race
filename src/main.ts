@@ -17,6 +17,7 @@ import { ZoomSelector } from "./zoom-selector.ts";
 import { DetailPanel } from "./detail-panel.ts";
 import { LiveRegionAnnouncer } from "./live-region.ts";
 import { ScreenReaderPacedMode } from "./screen-reader-paced-mode.ts";
+import { YearlyView } from "./yearly-view.ts";
 import type { ChartSnapshot, DataStore } from "./models.ts";
 import type { ZoomLevel } from "./types.ts";
 
@@ -87,6 +88,114 @@ async function main(): Promise<void> {
 
   const pacedMode = new ScreenReaderPacedMode();
   pacedMode.mountControl(app);
+
+  // --- View Switcher ---
+  type ViewMode = "race" | "yearly";
+  let currentView: ViewMode = "race";
+  const yearlyView = new YearlyView();
+
+  const viewSwitcher = document.createElement("div");
+  viewSwitcher.className = "view-switcher";
+  viewSwitcher.setAttribute("role", "switch");
+  viewSwitcher.setAttribute("aria-label", "View mode");
+  viewSwitcher.tabIndex = 0;
+
+  const yearlyLabel = document.createElement("span");
+  yearlyLabel.className = "view-switcher__label";
+  yearlyLabel.textContent = "Yearly";
+
+  const track = document.createElement("div");
+  track.className = "view-switcher__track view-switcher__track--on";
+  const thumb = document.createElement("div");
+  thumb.className = "view-switcher__thumb";
+  track.appendChild(thumb);
+
+  const raceLabel = document.createElement("span");
+  raceLabel.className = "view-switcher__label view-switcher__label--active";
+  raceLabel.textContent = "Race";
+
+  viewSwitcher.appendChild(yearlyLabel);
+  viewSwitcher.appendChild(track);
+  viewSwitcher.appendChild(raceLabel);
+
+  viewSwitcher.addEventListener("click", () => {
+    switchView(currentView === "race" ? "yearly" : "race");
+  });
+  viewSwitcher.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      switchView(currentView === "race" ? "yearly" : "race");
+    }
+  });
+
+  // Insert view switcher into the top bar, before the date (grouped on the right)
+  const topBar = app.querySelector(".chart-race__top-bar");
+  const dateDisplay2 = app.querySelector(".chart-race__date");
+  if (topBar && dateDisplay2) {
+    // Wrap toggle + date in a right-side group
+    const rightGroup = document.createElement("div");
+    rightGroup.className = "chart-race__right-group";
+    rightGroup.appendChild(viewSwitcher);
+    rightGroup.appendChild(dateDisplay2);
+    topBar.appendChild(rightGroup);
+  } else if (topBar) {
+    topBar.appendChild(viewSwitcher);
+  }
+
+  function switchView(mode: ViewMode): void {
+    if (mode === currentView) return;
+    currentView = mode;
+
+    // Update toggle appearance
+    const isRace = mode === "race";
+    track.classList.toggle("view-switcher__track--on", isRace);
+    raceLabel.classList.toggle("view-switcher__label--active", isRace);
+    yearlyLabel.classList.toggle("view-switcher__label--active", !isRace);
+    viewSwitcher.setAttribute("aria-checked", String(isRace));
+
+    if (mode === "yearly") {
+      // Pause playback if running
+      if (playbackController.isPlaying()) {
+        playbackController.pause();
+      }
+      if (detailPanel.isOpen()) {
+        detailPanel.close();
+      }
+      // Update date display to show year range
+      const startYear = dataStore.startDate.substring(0, 4);
+      const endYear = dataStore.endDate.substring(0, 4);
+      if (dateDisplay2) {
+        (dateDisplay2 as HTMLElement).textContent = `${startYear} – ${endYear}`;
+      }
+      // Hide race-specific elements (keep top bar and legend visible)
+      const barsContainer = app!.querySelector(".chart-race__bars") as HTMLElement | null;
+      const playbackControls = app!.querySelector(".playback-controls") as HTMLElement | null;
+      const zoomEl = app!.querySelector(".zoom-selector") as HTMLElement | null;
+      if (barsContainer) barsContainer.style.display = "none";
+      if (playbackControls) playbackControls.style.display = "none";
+      if (zoomEl) zoomEl.style.display = "none";
+      // Mount yearly view inside the chart-race container
+      const chartRaceWrapper = app!.querySelector(".chart-race") as HTMLElement | null;
+      if (chartRaceWrapper) {
+        yearlyView.mount(chartRaceWrapper, dataStore);
+      }
+    } else {
+      // Unmount yearly view
+      yearlyView.unmount();
+      // Restore date display to current snapshot date
+      if (dateDisplay2 && currentSnapshot) {
+        (dateDisplay2 as HTMLElement).textContent = currentSnapshot.date;
+      }
+      // Show race elements
+      const barsContainer = app!.querySelector(".chart-race__bars") as HTMLElement | null;
+      const playbackControls = app!.querySelector(".playback-controls") as HTMLElement | null;
+      const zoomEl = app!.querySelector(".zoom-selector") as HTMLElement | null;
+      if (barsContainer) barsContainer.style.display = "";
+      if (playbackControls) playbackControls.style.display = "";
+      if (zoomEl) zoomEl.style.display = "";
+      renderer.recheckOverflow();
+    }
+  }
 
   // --- EventBus wiring ---
 

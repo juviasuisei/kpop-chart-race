@@ -1,0 +1,22 @@
+{
+  "name": "YUQI [i-dle]",
+  "korean_name": "宋雨琦",
+  "artistType": "solo_female",
+  "generation": 4,
+  "debut": "2024-04-23",
+  "releases": [
+    {
+      "title": "M.O.",
+      "dailyValues": {
+        "2025-09-26": { "value": 5732, "source": "music_bank", "episode": 1260 },
+        "2025-09-24": { "value": 4485, "source": "show_champion", "episode": 570 }
+      },
+      "embeds": {
+        "2025-09-16": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/motivation-single/1840696154" },
+          { "type": "mv", "url": "https://youtu.be/nZFH-gZa9R4?si=mYd-0VIDI_fFO5js" }
+        ]
+      }
+    }
+  ]
+}

@@ -9,9 +9,11 @@
       "title": "body",
       "dailyValues": {
         "2025-10-25": { "value": 4899, "source": "show_music_core", "episode": 922 },
-        "2025-10-18": { "value": 5242, "source": "show_music_core", "episode": 921 }
+        "2025-10-18": { "value": 5242, "source": "show_music_core", "episode": 921 },
+        "2025-09-23": { "value": 6590, "source": "the_show", "episode": 389 }
       },
       "embeds": {
+        "2025-09-23": [{ "type": "live_performance", "url": "https://youtu.be/DrkCq_rO7Kw?si=GqeSoa3bo6X7ACTu" }],
         "2025-09-09": [
           { "type": "release_date", "url": "https://music.apple.com/us/album/gonna-love-me-right-single/1837850356" },
           { "type": "mv", "url": "https://youtu.be/SJpmNMWboWg?si=5pibKNFtjbIJtVUG" }

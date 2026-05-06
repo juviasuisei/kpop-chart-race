@@ -1,0 +1,22 @@
+{
+  "name": "AxMxP",
+  "korean_name": "에이엠피",
+  "artistType": "boy_group",
+  "generation": 5,
+  "debut": "2025-09-10",
+  "releases": [
+    {
+      "title": "I Did It",
+      "dailyValues": {
+        "2025-09-23": { "value": 3072, "source": "the_show", "episode": 389 }
+      },
+      "embeds": {
+        "2025-09-23": [{ "type": "live_performance", "url": "https://youtu.be/hGiwExee1iE?si=jZ7LlDKD6HmgvOOH" }],
+        "2025-09-10": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/axmxp/1837316609" },
+          { "type": "mv", "url": "https://youtu.be/p1vNN9UzVvI?si=rm81XrwgAuPvmF-D" }
+        ]
+      }
+    }
+  ]
+}

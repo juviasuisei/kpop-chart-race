@@ -16,6 +16,23 @@
           { "type": "mv", "url": "https://youtu.be/dWZCMV5ZEFk?si=0z5QxdI3qeNWT5wN" }
         ]
       }
+    },
+    {
+      "title": "CHAN-RAN",
+      "dailyValues": {
+        "2025-09-26": { "value": 8096, "source": "music_bank", "episode": 1260 },
+        "2025-09-24": { "value": 2961, "source": "show_champion", "episode": 570 },
+        "2025-09-23": { "value": 4129, "source": "the_show", "episode": 389 }
+      },
+      "embeds": {
+        "2025-09-26": [{ "type": "live_performance", "url": "https://youtu.be/iA4Q6-JYaGM?si=1JcLIxCqJdM7hJZg" }],
+        "2025-09-24": [{ "type": "live_performance", "url": "https://youtu.be/glpCE1ZaZc0?si=wroup2iav6k-QOyn" }],
+        "2025-09-23": [{ "type": "live_performance", "url": "https://youtu.be/t9LD1UjnqHk?si=d7GVNeIU6ii51g4t" }],
+        "2025-09-15": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/i-did-it/1836593269" },
+          { "type": "mv", "url": "https://youtu.be/ddzl1LDe9Ec?si=K4w8Q_4Y0JGqYrne" }
+        ]
+      }
     }
   ]
 }

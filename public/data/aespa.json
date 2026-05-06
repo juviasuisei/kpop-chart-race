@@ -8,9 +8,17 @@
     {
       "title": "Rich Man",
       "dailyValues": {
-        "2025-10-12": { "value": 4605, "source": "inkigayo", "episode": 1286 }
+        "2025-10-12": { "value": 4605, "source": "inkigayo", "episode": 1286 },
+        "2025-10-04": { "value": 6782, "source": "show_music_core", "episode": 920 },
+        "2025-10-02": { "value": 8036, "source": "m_countdown", "episode": 908 },
+        "2025-10-01": { "value": 4238, "source": "show_champion", "episode": 571 },
+        "2025-09-28": { "value": 5851, "source": "inkigayo", "episode": 1285 },
+        "2025-09-27": { "value": 6807, "source": "show_music_core", "episode": 919 },
+        "2025-09-25": { "value": 7308, "source": "m_countdown", "episode": 907 },
+        "2025-09-24": { "value": 3718, "source": "show_champion", "episode": 570 }
       },
       "embeds": {
+        "2025-09-25": [{ "type": "live_performance", "url": "https://youtu.be/frMIiHOKw5A?si=VF0pNrQPX_tK5kBZ" }],
         "2025-09-05": [
           { "type": "release_date", "url": "https://music.apple.com/us/album/rich-man-the-6th-mini-album-ep/1833163982" },
           { "type": "mv", "url": "https://youtu.be/5oQVTnq-UKk?si=QIQtt53D2rt0LQYG" }

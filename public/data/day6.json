@@ -1,0 +1,21 @@
+{
+  "name": "Day6",
+  "korean_name": "데이식스",
+  "artistType": "boy_group",
+  "generation": 3,
+  "debut": "2015-09-07",
+  "releases": [
+    {
+      "title": "Dream Bus",
+      "dailyValues": {
+        "2025-10-01": { "value": 2074, "source": "show_champion", "episode": 571 }
+      },
+      "embeds": {
+        "2025-09-05": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/the-decade/1833827616" },
+          { "type": "mv", "url": "https://youtu.be/hZ6pts6e8dI?si=WAiBYxWO1Bj1IH59" }
+        ]
+      }
+    }
+  ]
+}

@@ -8,7 +8,11 @@
     {
       "title": "Bye, Summer",
       "dailyValues": {
-        "2025-10-18": { "value": 4004, "source": "show_music_core", "episode": 921 }
+        "2025-10-18": { "value": 4004, "source": "show_music_core", "episode": 921 },
+        "2025-10-04": { "value": 4162, "source": "show_music_core", "episode": 920 },
+        "2025-10-01": { "value": 2662, "source": "show_champion", "episode": 571 },
+        "2025-09-27": { "value": 4270, "source": "show_music_core", "episode": 919 },
+        "2025-09-24": { "value": 2690, "source": "show_champion", "episode": 570 }
       },
       "embeds": {
         "2025-09-10": [{ "type": "release_date", "url": "https://music.apple.com/us/album/bye-summer-single/1838383717" }]

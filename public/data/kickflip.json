@@ -19,6 +19,22 @@
           { "type": "mv", "url": "https://youtu.be/i5S7DBQnqP0?si=qEG9IJsFBbBmwmhI" }
         ]
       }
+    },
+    {
+      "title": "My First Love Song",
+      "dailyValues": {
+        "2025-10-03": { "value": 9856, "source": "music_bank", "episode": 1261 },
+        "2025-10-02": { "value": 4069, "source": "m_countdown", "episode": 908 },
+        "2025-10-01": { "value": 6880, "source": "show_champion", "episode": 571 }
+      },
+      "embeds": {
+        "2025-10-02": [{ "type": "live_performance", "url": "https://youtu.be/OOV4Fem_nw0?si=Or_qO-ZVRpt81OUG" }],
+        "2025-10-01": [{ "type": "live_performance", "url": "https://youtu.be/TqPga0ePkBk?si=t0hzf6or1ODv4_z-" }],
+        "2025-09-22": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/my-first-flip/1837618980" },
+          { "type": "mv", "url": "https://youtu.be/eebhl4lGv_Y?si=0biQhIxKml0bkP4p" }
+        ]
+      }
     }
   ]
 }

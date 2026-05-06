@@ -1,0 +1,22 @@
+{
+  "name": "LUN8",
+  "korean_name": "루네이트",
+  "artistType": "boy_group",
+  "generation": 5,
+  "debut": "2023-06-15",
+  "releases": [
+    {
+      "title": "Lost",
+      "dailyValues": {
+        "2025-10-01": { "value": 1999, "source": "show_champion", "episode": 571 }
+      },
+      "embeds": {
+        "2025-10-01": [{ "type": "live_performance", "url": "https://youtu.be/reZsnawsOdA?si=xljEmKkKivL9j4Ul" }],
+        "2025-09-17": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/lost-single/1839109333" },
+          { "type": "mv", "url": "https://youtu.be/APjtMcVKIc0?si=WutTAri4xtwIMSvs" }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "name": "TREASURE",
+  "korean_name": "트레저",
+  "artistType": "boy_group",
+  "generation": 4,
+  "debut": "2020-08-07",
+  "releases": [
+    {
+      "title": "PARADISE",
+      "dailyValues": {
+        "2025-09-24": { "value": 2292, "source": "show_champion", "episode": 570 }
+      },
+      "embeds": {
+        "2025-09-01": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/3rd-mini-album-love-pulse-ep/1835346741" },
+          { "type": "mv", "url": "https://youtu.be/gZNQs3jA7aE?si=FsocvPf-_EFVcJOS" }
+        ]
+      }
+    }
+  ]
+}

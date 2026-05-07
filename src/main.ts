@@ -141,29 +141,29 @@ async function main(): Promise<void> {
   metricSwitcher.tabIndex = 0;
   metricSwitcher.style.display = "none"; // hidden by default (race mode)
 
-  const pointsLabel = document.createElement("span");
-  pointsLabel.className = "view-switcher__label view-switcher__label--active";
-  pointsLabel.textContent = "Points";
-
-  const metricTrack = document.createElement("div");
-  metricTrack.className = "view-switcher__track";
-  const metricThumb = document.createElement("div");
-  metricThumb.className = "view-switcher__thumb";
-  metricTrack.appendChild(metricThumb);
-
   const winsLabel = document.createElement("span");
   winsLabel.className = "view-switcher__label";
   winsLabel.textContent = "Wins";
 
-  metricSwitcher.appendChild(pointsLabel);
-  metricSwitcher.appendChild(metricTrack);
+  const metricTrack = document.createElement("div");
+  metricTrack.className = "view-switcher__track view-switcher__track--on";
+  const metricThumb = document.createElement("div");
+  metricThumb.className = "view-switcher__thumb";
+  metricTrack.appendChild(metricThumb);
+
+  const pointsLabel = document.createElement("span");
+  pointsLabel.className = "view-switcher__label view-switcher__label--active";
+  pointsLabel.textContent = "Points";
+
   metricSwitcher.appendChild(winsLabel);
+  metricSwitcher.appendChild(metricTrack);
+  metricSwitcher.appendChild(pointsLabel);
 
   metricSwitcher.addEventListener("click", () => {
     const newMetric: YearlyMetric = yearlyView.getMetric() === "points" ? "wins" : "points";
     yearlyView.setMetric(newMetric);
     const isPoints = newMetric === "points";
-    metricTrack.classList.toggle("view-switcher__track--on", !isPoints);
+    metricTrack.classList.toggle("view-switcher__track--on", isPoints);
     pointsLabel.classList.toggle("view-switcher__label--active", isPoints);
     winsLabel.classList.toggle("view-switcher__label--active", !isPoints);
   });
@@ -174,15 +174,44 @@ async function main(): Promise<void> {
     }
   });
 
+  // --- Source Filter Dropdown — only visible in yearly mode ---
+  const sourceSelect = document.createElement("select");
+  sourceSelect.className = "yearly-source-filter";
+  sourceSelect.style.display = "none";
+  sourceSelect.setAttribute("aria-label", "Filter by chart source");
+
+  const sourceOptions: Array<{ value: string; label: string }> = [
+    { value: "all", label: "All Shows" },
+    { value: "inkigayo", label: "SBS Inkigayo" },
+    { value: "the_show", label: "SBS The Show" },
+    { value: "show_champion", label: "MBC M Show Champion" },
+    { value: "music_bank", label: "KBS Music Bank" },
+    { value: "m_countdown", label: "Mnet M Countdown" },
+    { value: "show_music_core", label: "MBC Show! Music Core" },
+  ];
+
+  for (const opt of sourceOptions) {
+    const option = document.createElement("option");
+    option.value = opt.value;
+    option.textContent = opt.label;
+    sourceSelect.appendChild(option);
+  }
+
+  sourceSelect.addEventListener("change", () => {
+    yearlyView.setSourceFilter(sourceSelect.value);
+  });
+
   if (topBar && dateDisplay2) {
     // Wrap toggles + date in a right-side group
     const rightGroup = document.createElement("div");
     rightGroup.className = "chart-race__right-group";
+    rightGroup.appendChild(sourceSelect);
     rightGroup.appendChild(metricSwitcher);
     rightGroup.appendChild(viewSwitcher);
     rightGroup.appendChild(dateDisplay2);
     topBar.appendChild(rightGroup);
   } else if (topBar) {
+    topBar.appendChild(sourceSelect);
     topBar.appendChild(metricSwitcher);
     topBar.appendChild(viewSwitcher);
   }
@@ -198,8 +227,9 @@ async function main(): Promise<void> {
     yearlyLabel.classList.toggle("view-switcher__label--active", !isRace);
     viewSwitcher.setAttribute("aria-checked", String(isRace));
 
-    // Show/hide metric toggle
+    // Show/hide metric toggle and source filter
     metricSwitcher.style.display = isRace ? "none" : "";
+    sourceSelect.style.display = isRace ? "none" : "";
 
     if (mode === "yearly") {
       // Pause playback if running

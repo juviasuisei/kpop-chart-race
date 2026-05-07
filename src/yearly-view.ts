@@ -33,6 +33,7 @@ export class YearlyView {
   private wrapper: HTMLDivElement | null = null;
   private dataStore: DataStore | null = null;
   private metric: YearlyMetric = "points";
+  private sourceFilter: string = "all";
 
   mount(container: HTMLElement, dataStore: DataStore): void {
     this.dataStore = dataStore;
@@ -57,6 +58,16 @@ export class YearlyView {
 
   getMetric(): YearlyMetric {
     return this.metric;
+  }
+
+  setSourceFilter(source: string): void {
+    if (source === this.sourceFilter) return;
+    this.sourceFilter = source;
+    this.render();
+  }
+
+  getSourceFilter(): string {
+    return this.sourceFilter;
   }
 
   private render(): void {
@@ -103,13 +114,15 @@ export class YearlyView {
     const artistPoints = new Map<string, number>();
     const artistWins = new Map<string, number>();
 
-    // Sum points per artist for this year
+    // Sum points per artist for this year (filtered by source if set)
     for (const [artistId, artist] of this.dataStore.artists) {
       let points = 0;
       for (const release of artist.releases) {
         for (const [date, entry] of release.dailyValues) {
           if (date.startsWith(yearStr)) {
-            points += entry.value;
+            if (this.sourceFilter === "all" || entry.source === this.sourceFilter) {
+              points += entry.value;
+            }
           }
         }
       }
@@ -118,10 +131,11 @@ export class YearlyView {
       }
     }
 
-    // Count wins per artist for this year
+    // Count wins per artist for this year (filtered by source if set)
     for (const [date, sourceMap] of this.dataStore.chartWins) {
       if (!date.startsWith(yearStr)) continue;
-      for (const [, winData] of sourceMap) {
+      for (const [source, winData] of sourceMap) {
+        if (this.sourceFilter !== "all" && source !== this.sourceFilter) continue;
         for (const artistId of winData.artistIds) {
           artistWins.set(artistId, (artistWins.get(artistId) ?? 0) + 1);
         }

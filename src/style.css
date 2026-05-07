@@ -1182,3 +1182,28 @@ body {
 .view-switcher__track--on .view-switcher__thumb {
   transform: translateX(14px);
 }
+
+
+/* ===== Source Filter Dropdown ===== */
+
+.yearly-source-filter {
+  appearance: none;
+  -webkit-appearance: none;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+  padding: 4px 24px 4px 8px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #213547;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23213547'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  flex-shrink: 0;
+}
+
+.yearly-source-filter:focus {
+  outline: 2px solid #0072B2;
+  outline-offset: 1px;
+}

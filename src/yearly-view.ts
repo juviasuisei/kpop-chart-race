@@ -179,8 +179,19 @@ export class YearlyView {
           tooltip.textContent = tooltipText;
           tooltip.style.display = "block";
           const rect = segment.getBoundingClientRect();
-          tooltip.style.left = `${rect.left + rect.width / 2}px`;
-          tooltip.style.top = `${rect.top - 6}px`;
+          // Position centered above the segment
+          let left = rect.left + rect.width / 2;
+          const top = rect.top - 6;
+          tooltip.style.left = `${left}px`;
+          tooltip.style.top = `${top}px`;
+          // Clamp to viewport edges
+          const tipRect = tooltip.getBoundingClientRect();
+          if (tipRect.right > window.innerWidth - 8) {
+            tooltip.style.left = `${window.innerWidth - 8 - tipRect.width / 2}px`;
+          }
+          if (tipRect.left < 8) {
+            tooltip.style.left = `${8 + tipRect.width / 2}px`;
+          }
         });
         segment.addEventListener("mouseleave", () => {
           const tooltip = document.querySelector(".yearly-stacked__tooltip") as HTMLElement | null;

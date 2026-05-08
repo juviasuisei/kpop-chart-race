@@ -1,0 +1,22 @@
+{
+  "name": "8TURN",
+  "korean_name": "에잇턴",
+  "artistType": "boy_group",
+  "generation": 5,
+  "debut": "2023-01-30",
+  "releases": [
+    {
+      "title": "Electric Heart",
+      "dailyValues": {
+        "2025-09-03": { "value": 2086, "source": "show_champion", "episode": 567 }
+      },
+      "embeds": {
+        "2025-09-03": [{ "type": "live_performance", "url": "https://youtu.be/bTZVvnnj8N8?si=_N5l5LqHst88umEU" }],
+        "2025-08-21": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/electric-heart-born-to-glow-single/1828856566" },
+          { "type": "mv", "url": "https://youtu.be/4TTI8UR7kTE?si=1LUOtxqNu4iuVIwH" }
+        ]
+      }
+    }
+  ]
+}

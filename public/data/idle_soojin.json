@@ -1,0 +1,22 @@
+{
+  "name": "SOOJIN [i-dle]",
+  "korean_name": "서수진  ",
+  "artistType": "solo_female",
+  "generation": 4,
+  "debut": "2023-11-08",
+  "releases": [
+    {
+      "title": "BADITUDE",
+      "dailyValues": {
+        "2025-09-03": { "value": 1169, "source": "show_champion", "episode": 567 }
+      },
+      "embeds": {
+        "2025-09-03": [{ "type": "live_performance", "url": "https://youtu.be/pfdiN0xK7Ik?si=mftBdzZdghIViIox" }],
+        "2025-08-27": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/baditude-single/1835606408" },
+          { "type": "mv", "url": "https://youtu.be/XBDll5HO9Rc?si=jN88FQD5MAvjVPyG" }
+        ]
+      }
+    }
+  ]
+}

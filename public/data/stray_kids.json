@@ -19,6 +19,22 @@
           { "type": "mv", "url": "https://youtu.be/NED7nev2ywQ?si=RND3XAVsHAH1n6DQ" }
         ]
       }
+    },
+    {
+      "title": "CEREMONY",
+      "dailyValues": {
+        "2025-09-07": { "value": 5527, "source": "inkigayo", "episode": 1282 },
+        "2025-09-06": { "value": 5851, "source": "show_music_core", "episode": 916 },
+        "2025-09-05": { "value": 7466, "source": "music_bank", "episode": 1257 },
+        "2025-09-04": { "value": 9659, "source": "m_countdown", "episode": 904 },
+        "2025-09-03": { "value": 6102, "source": "show_champion", "episode": 567 }
+      },
+      "embeds": {
+        "2025-08-22": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/karma/1827247172" },
+          { "type": "mv", "url": "https://youtu.be/P7vBoGWoReg?si=lbkBIdCEt8-G7sq4" }
+        ]
+      }
     }
   ]
 }

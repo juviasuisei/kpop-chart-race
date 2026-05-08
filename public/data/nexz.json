@@ -8,9 +8,11 @@
     {
       "title": "Mmchk",
       "dailyValues": {
+        "2026-05-08": { "value": 6960, "source": "music_bank", "episode": 1292 },
         "2026-05-06": { "value": 7762, "source": "show_champion", "episode": 596 }
       },
       "embeds": {
+        "2026-05-08": [{ "type": "live_performance", "url": "https://youtu.be/RhQ5cwpSqzU?si=fi5UmKCH0f9RU_VW" }],
         "2026-05-06": [{ "type": "live_performance", "url": "https://youtu.be/Z0tMyYoh0ps?si=WWj5_XvJHu-TyeQJ" }],
         "2026-04-27": [
           { "type": "release_date", "url": "https://music.apple.com/us/album/mmchk-single/1890355793" },

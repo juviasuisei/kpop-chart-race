@@ -125,7 +125,7 @@ body {
   font-weight: 700;
   color: #fff;
   flex-shrink: 0;
-  min-width: 2.5em;
+  min-width: 3.2em;
   text-align: right;
   padding-right: 0.25rem;
   height: 80%;
@@ -870,7 +870,7 @@ body {
 
   .bar__rank {
     font-size: 0.6rem;
-    min-width: 2em;
+    min-width: 2.8em;
   }
 
   .bar__name {
@@ -1035,7 +1035,7 @@ body {
 
 .yearly-view__rank {
   flex-shrink: 0;
-  width: 32px;
+  width: 38px;
   height: 36px;
   display: flex;
   align-items: center;
@@ -1281,6 +1281,23 @@ body {
 
 
 .yearly-stacked__tooltip {
+  display: none;
+  position: fixed;
+  transform: translate(-50%, -100%);
+  background: #213547;
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 500;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 9999;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+
+.custom-tooltip {
   display: none;
   position: fixed;
   transform: translate(-50%, -100%);

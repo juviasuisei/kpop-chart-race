@@ -548,9 +548,37 @@ export class DetailPanel {
         const logo = document.createElement("img");
         logo.src = SOURCE_LOGO_MAP[sourceName];
         logo.alt = SOURCE_LABELS[sourceName] ?? sourceName;
-        logo.title = SOURCE_LABELS[sourceName] ?? sourceName;
         logo.className = "timeline-entry__source-logo";
         logo.width = 80;
+
+        // Custom instant tooltip on hover
+        const tooltipText = SOURCE_LABELS[sourceName] ?? sourceName;
+        logo.addEventListener("mouseenter", () => {
+          let tooltip = document.querySelector(".custom-tooltip") as HTMLElement | null;
+          if (!tooltip) {
+            tooltip = document.createElement("div");
+            tooltip.className = "custom-tooltip";
+            document.body.appendChild(tooltip);
+          }
+          tooltip.textContent = tooltipText;
+          tooltip.style.display = "block";
+          const rect = logo.getBoundingClientRect();
+          let left = rect.left + rect.width / 2;
+          tooltip.style.left = `${left}px`;
+          tooltip.style.top = `${rect.top - 6}px`;
+          // Clamp to viewport
+          const tipRect = tooltip.getBoundingClientRect();
+          if (tipRect.right > window.innerWidth - 8) {
+            tooltip.style.left = `${window.innerWidth - 8 - tipRect.width / 2}px`;
+          }
+          if (tipRect.left < 8) {
+            tooltip.style.left = `${8 + tipRect.width / 2}px`;
+          }
+        });
+        logo.addEventListener("mouseleave", () => {
+          const tooltip = document.querySelector(".custom-tooltip") as HTMLElement | null;
+          if (tooltip) tooltip.style.display = "none";
+        });
         sourceEl.appendChild(logo);
       } else {
         const sourceText = document.createElement("span");

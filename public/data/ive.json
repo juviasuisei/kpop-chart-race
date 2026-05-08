@@ -68,9 +68,18 @@
         "2025-09-14": { "value": 4742, "source": "inkigayo", "episode": 1283 },
         "2025-09-13": { "value": 5471, "source": "show_music_core", "episode": 917 },
         "2025-09-11": { "value": 5557, "source": "m_countdown", "episode": 905 },
-        "2025-09-10": { "value": 3614, "source": "show_champion", "episode": 568 }
+        "2025-09-10": { "value": 3614, "source": "show_champion", "episode": 568 },
+        "2025-09-07": { "value": 6262, "source": "inkigayo", "episode": 1282 },
+        "2025-09-06": { "value": 6914, "source": "show_music_core", "episode": 916 },
+        "2025-09-05": { "value": 12342, "source": "music_bank", "episode": 1257 },
+        "2025-09-04": { "value": 9174, "source": "m_countdown", "episode": 904 },
+        "2025-09-03": { "value": 5747, "source": "show_champion", "episode": 567 }
       },
       "embeds": {
+        "2025-09-07": [{ "type": "live_performance", "url": "https://youtu.be/zAmcaBPCLOg?si=_pc4AzyghPgVKM4m" }],
+        "2025-09-06": [{ "type": "live_performance", "url": "https://youtu.be/art5_rjPIWI?si=nU3tI58kzAIlffJY" }],
+        "2025-09-05": [{ "type": "live_performance", "url": "https://youtu.be/hxsJlFTzJQc?si=s0KVmvwkoEBN1pe8" }],
+        "2025-09-04": [{ "type": "live_performance", "url": "https://youtu.be/Jx2PXhCzvVY?si=GV2NLCyiI0ofUcvT" }],
         "2025-08-25": [
           { "type": "release_date", "url": "https://music.apple.com/us/album/ive-secret-ep/1831903462" },
           { "type": "mv", "url": "https://youtu.be/B1ShLiq3EVc?si=CGkTp-5mvT3VUaFj" }

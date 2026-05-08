@@ -201,17 +201,64 @@ async function main(): Promise<void> {
     yearlyView.setSourceFilter(sourceSelect.value);
   });
 
+  // --- Yearly Zoom Toggle (synced copy of the playback controls zoom toggle) ---
+  const yearlyZoomToggle = document.createElement("div");
+  yearlyZoomToggle.className = "view-switcher";
+  yearlyZoomToggle.setAttribute("role", "switch");
+  yearlyZoomToggle.setAttribute("aria-label", "Toggle between 10 and All artists");
+  yearlyZoomToggle.tabIndex = 0;
+  yearlyZoomToggle.style.display = "none"; // hidden by default (race mode)
+
+  const yzAllLabel = document.createElement("span");
+  yzAllLabel.className = "view-switcher__label";
+  yzAllLabel.textContent = "All";
+
+  const yzTrack = document.createElement("div");
+  yzTrack.className = "view-switcher__track view-switcher__track--on";
+  const yzThumb = document.createElement("div");
+  yzThumb.className = "view-switcher__thumb";
+  yzTrack.appendChild(yzThumb);
+
+  const yz10Label = document.createElement("span");
+  yz10Label.className = "view-switcher__label view-switcher__label--active";
+  yz10Label.textContent = "10";
+
+  yearlyZoomToggle.appendChild(yzAllLabel);
+  yearlyZoomToggle.appendChild(yzTrack);
+  yearlyZoomToggle.appendChild(yz10Label);
+
+  function syncYearlyZoomVisual(): void {
+    const isTen = currentZoom === 10;
+    yzTrack.classList.toggle("view-switcher__track--on", isTen);
+    yz10Label.classList.toggle("view-switcher__label--active", isTen);
+    yzAllLabel.classList.toggle("view-switcher__label--active", !isTen);
+  }
+
+  yearlyZoomToggle.addEventListener("click", () => {
+    // Toggle zoom via the event bus (syncs both toggles)
+    const newLevel: ZoomLevel = currentZoom === 10 ? "all" : 10;
+    eventBus.emit("zoom:change", newLevel);
+  });
+  yearlyZoomToggle.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      yearlyZoomToggle.click();
+    }
+  });
+
   if (topBar && dateDisplay2) {
     // Wrap toggles + date in a right-side group
     const rightGroup = document.createElement("div");
     rightGroup.className = "chart-race__right-group";
     rightGroup.appendChild(sourceSelect);
+    rightGroup.appendChild(yearlyZoomToggle);
     rightGroup.appendChild(metricSwitcher);
     rightGroup.appendChild(viewSwitcher);
     rightGroup.appendChild(dateDisplay2);
     topBar.appendChild(rightGroup);
   } else if (topBar) {
     topBar.appendChild(sourceSelect);
+    topBar.appendChild(yearlyZoomToggle);
     topBar.appendChild(metricSwitcher);
     topBar.appendChild(viewSwitcher);
   }
@@ -248,11 +295,12 @@ async function main(): Promise<void> {
       // Hide race-specific elements (keep top bar and legend visible)
       const barsContainer = app!.querySelector(".chart-race__bars") as HTMLElement | null;
       const playbackControls = app!.querySelector(".playback-controls") as HTMLElement | null;
-      const zoomEl = app!.querySelector(".zoom-selector") as HTMLElement | null;
       if (barsContainer) barsContainer.style.display = "none";
       if (playbackControls) playbackControls.style.display = "none";
-      if (zoomEl) zoomEl.style.display = "none";
-      // Mount yearly view inside the chart-race container
+      // Show the yearly zoom copy
+      yearlyZoomToggle.style.display = "";
+      // Mount yearly view inside the chart-race container with current zoom
+      yearlyView.setZoom(currentZoom === 10 ? 10 : "all");
       const chartRaceWrapper = app!.querySelector(".chart-race") as HTMLElement | null;
       if (chartRaceWrapper) {
         yearlyView.mount(chartRaceWrapper, dataStore);
@@ -267,10 +315,16 @@ async function main(): Promise<void> {
       // Show race elements
       const barsContainer = app!.querySelector(".chart-race__bars") as HTMLElement | null;
       const playbackControls = app!.querySelector(".playback-controls") as HTMLElement | null;
-      const zoomEl = app!.querySelector(".zoom-selector") as HTMLElement | null;
       if (barsContainer) barsContainer.style.display = "";
       if (playbackControls) playbackControls.style.display = "";
-      if (zoomEl) zoomEl.style.display = "";
+      // Hide the yearly zoom copy
+      yearlyZoomToggle.style.display = "none";
+      // Re-render race view with current zoom
+      if (currentSnapshot) {
+        renderer.update(currentSnapshot, currentZoom, dataStore);
+      }
+      // Hide the yearly zoom copy
+      yearlyZoomToggle.style.display = "none";
       renderer.recheckOverflow();
     }
   }
@@ -313,13 +367,17 @@ async function main(): Promise<void> {
     }
   });
 
-  // zoom:change → re-render with new zoom level and close detail panel
+  // zoom:change → re-render with new zoom level, sync yearly toggle, close detail panel
   eventBus.on("zoom:change", (level: ZoomLevel) => {
     currentZoom = level;
+    syncYearlyZoomVisual();
+    if (currentView === "yearly") {
+      yearlyView.setZoom(currentZoom === 10 ? 10 : "all");
+    }
     if (detailPanel.isOpen()) {
       detailPanel.close();
     }
-    if (currentSnapshot) {
+    if (currentSnapshot && currentView === "race") {
       renderer.update(currentSnapshot, currentZoom, dataStore);
     }
   });

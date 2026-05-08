@@ -1207,3 +1207,91 @@ body {
   outline: 2px solid #0072B2;
   outline-offset: 1px;
 }
+
+
+/* ===== Yearly Stacked Bar View ===== */
+
+.yearly-view--stacked {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.5rem;
+  overflow-y: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.yearly-stacked__row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.yearly-stacked__year {
+  flex-shrink: 0;
+  width: 3rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #213547;
+  text-align: right;
+}
+
+.yearly-stacked__bar {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 40px;
+  display: flex;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.yearly-stacked__segment {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding: 0 4px;
+  overflow: hidden;
+  border-right: 1.5px solid #fff;
+  box-sizing: border-box;
+  cursor: default;
+  min-width: 0;
+}
+
+.yearly-stacked__segment:last-child {
+  border-right: none;
+}
+
+.yearly-stacked__logo {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+@media (max-width: 767px) {
+  .yearly-stacked__bar {
+    height: 32px;
+  }
+
+  .yearly-stacked__logo {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+
+.yearly-stacked__tooltip {
+  display: none;
+  position: fixed;
+  transform: translate(-50%, -100%);
+  background: #213547;
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 500;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 9999;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}

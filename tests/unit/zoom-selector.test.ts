@@ -38,8 +38,9 @@ describe('ZoomSelector', () => {
   it('shows 10 label as active by default', () => {
     selector.mount(container);
     const labels = container.querySelectorAll('.zoom-toggle__label');
-    expect(labels[0].classList.contains('zoom-toggle__label--active')).toBe(true);
-    expect(labels[1].classList.contains('zoom-toggle__label--active')).toBe(false);
+    // Labels: [0] = "All" (left), [1] = "10" (right)
+    expect(labels[0].classList.contains('zoom-toggle__label--active')).toBe(false);
+    expect(labels[1].classList.contains('zoom-toggle__label--active')).toBe(true);
   });
 
   it('toggles to "all" on click and slides thumb', () => {
@@ -55,11 +56,11 @@ describe('ZoomSelector', () => {
     expect(emittedLevel).toBe('all');
 
     const track = container.querySelector('.zoom-toggle__track');
-    expect(track!.classList.contains('zoom-toggle__track--on')).toBe(true);
+    expect(track!.classList.contains('zoom-toggle__track--on')).toBe(false);
 
     const labels = container.querySelectorAll('.zoom-toggle__label');
-    expect(labels[0].classList.contains('zoom-toggle__label--active')).toBe(false);
-    expect(labels[1].classList.contains('zoom-toggle__label--active')).toBe(true);
+    expect(labels[0].classList.contains('zoom-toggle__label--active')).toBe(true);  // "All" active
+    expect(labels[1].classList.contains('zoom-toggle__label--active')).toBe(false); // "10" inactive
   });
 
   it('toggles back to 10 on second click', () => {
@@ -72,17 +73,17 @@ describe('ZoomSelector', () => {
     expect(selector.getLevel()).toBe(10);
 
     const track = container.querySelector('.zoom-toggle__track');
-    expect(track!.classList.contains('zoom-toggle__track--on')).toBe(false);
+    expect(track!.classList.contains('zoom-toggle__track--on')).toBe(true);
   });
 
   it('has role="switch" for accessibility', () => {
     selector.mount(container);
     const toggle = container.querySelector('.zoom-toggle') as HTMLElement;
     expect(toggle.getAttribute('role')).toBe('switch');
-    expect(toggle.getAttribute('aria-checked')).toBe('false');
+    expect(toggle.getAttribute('aria-checked')).toBe('true'); // 10 is "on" by default
 
     toggle.click();
-    expect(toggle.getAttribute('aria-checked')).toBe('true');
+    expect(toggle.getAttribute('aria-checked')).toBe('false'); // all is "off"
   });
 
   it('inserts before the play button in playback controls', () => {

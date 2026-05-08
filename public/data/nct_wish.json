@@ -24,6 +24,20 @@
           { "type": "mv", "url": "https://youtu.be/1o5O2YvV3HU?si=5UBtH-1v1KqkHdh3" }
         ]
       }
+    },
+    {
+      "title": "COLOR",
+      "dailyValues": {
+        "2025-09-12": { "value": 5516, "source": "music_bank", "episode": 1258 },
+        "2025-09-10": { "value": 2317, "source": "show_champion", "episode": 568 }
+      },
+      "embeds": {
+        "2025-09-12": [{ "type": "live_performance", "url": "https://youtu.be/MTjT5XA4iuM?si=ItXq30RGPbxC6NHQ" }],
+        "2025-09-01": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/color-the-3rd-mini-album/1834119254" },
+          { "type": "mv", "url": "https://youtu.be/28dAfmIAlCo?si=WUPOX-8qZHSGj8Uq" }
+        ]
+      }
     }
   ]
 }

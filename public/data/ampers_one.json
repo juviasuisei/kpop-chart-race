@@ -17,6 +17,19 @@
           { "type": "mv", "url": "https://youtu.be/wRZ1MdBoUq0?si=volt814_xfIPOoYj" }
         ]
       }
+    },
+    {
+      "title": "That's That",
+      "dailyValues": {
+        "2025-09-09": { "value": 9310, "source": "the_show", "episode": 388 }
+      },
+      "embeds": {
+        "2025-09-09": [{ "type": "live_performance", "url": "https://youtu.be/OjX3kefMkKA?si=BqBBTbN4HbW12S-G" }],
+        "2025-08-12": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/loud-proud-ep/1829865606" },
+          { "type": "mv", "url": "https://youtu.be/_1MAZnaNjgM?si=gUh_n_FdEMGId-fr" }
+        ]
+      }
     }
   ]
 }

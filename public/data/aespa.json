@@ -15,7 +15,13 @@
         "2025-09-28": { "value": 5851, "source": "inkigayo", "episode": 1285 },
         "2025-09-27": { "value": 6807, "source": "show_music_core", "episode": 919 },
         "2025-09-25": { "value": 7308, "source": "m_countdown", "episode": 907 },
-        "2025-09-24": { "value": 3718, "source": "show_champion", "episode": 570 }
+        "2025-09-24": { "value": 3718, "source": "show_champion", "episode": 570 },
+        "2025-09-21": { "value": 7315, "source": "inkigayo", "episode": 1284 },
+        "2025-09-20": { "value": 6537, "source": "show_music_core", "episode": 918 },
+        "2025-09-19": { "value": 3790, "source": "music_bank", "episode": 1259 },
+        "2025-09-18": { "value": 7308, "source": "m_countdown", "episode": 906 },
+        "2025-09-17": { "value": 5050, "source": "show_champion", "episode": 569 },
+        "2025-09-10": { "value": 2779, "source": "show_champion", "episode": 568 }
       },
       "embeds": {
         "2025-09-25": [{ "type": "live_performance", "url": "https://youtu.be/frMIiHOKw5A?si=VF0pNrQPX_tK5kBZ" }],

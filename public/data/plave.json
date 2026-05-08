@@ -8,6 +8,7 @@
     {
       "title": "Born Savage",
       "dailyValues": {
+        "2026-05-06": { "value": 3489, "source": "show_champion", "episode": 596 },
         "2026-04-25": { "value": 5695, "source": "show_music_core", "episode": 942 },
         "2026-04-24": { "value": 3486, "source": "music_bank", "episode": 1290 },
         "2026-04-22": { "value": 3390, "source": "show_champion", "episode": 594 }

@@ -1,0 +1,25 @@
+{
+  "name": "HAECHAN [NCT]",
+  "korean_name": "이동혁",
+  "artistType": "solo_male",
+  "generation": 3,
+  "debut": "2025-09-08",
+  "releases": [
+    {
+      "title": "CRZY",
+      "dailyValues": {
+        "2025-09-20": { "value": 6347, "source": "show_music_core", "episode": 918 },
+        "2025-09-19": { "value": 6808, "source": "music_bank", "episode": 1259 },
+        "2025-09-17": { "value": 4783, "source": "show_champion", "episode": 569 }
+      },
+      "embeds": {
+        "2025-09-20": [{ "type": "live_performance", "url": "https://youtu.be/TRHu2sl51XM?si=6__DKfU6VbIWY9U0" }],
+        "2025-09-19": [{ "type": "live_performance", "url": "https://youtu.be/xT9JniLp7mw?si=P9bOBB_6axRU6-x6" }],
+        "2025-09-08": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/taste-the-1st-album/1835578137" },
+          { "type": "mv", "url": "https://youtu.be/pqMCgfnBx74?si=oGNqiId9qQJhkxh_" }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "name": "JUNG DAE HYUN [B.A.P]",
+  "korean_name": "정대현",
+  "artistType": "solo_male",
+  "generation": 3,
+  "debut": "2018-12-01",
+  "releases": [
+    {
+      "title": "행로",
+      "dailyValues": {
+        "2025-09-09": { "value": 1037, "source": "the_show", "episode": 388 }
+      },
+      "embeds": {
+        "2025-09-09": [{ "type": "live_performance", "url": "https://youtu.be/IzbXu0Krk90?si=r2Hvsag-zF57FrVR" }],
+        "2025-09-02": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/%ED%96%89%EB%A1%9C-single/1834841282" },
+          { "type": "mv", "url": "https://youtu.be/LnZ2CUMx20Q?si=IUw67vA0vslmQKlK" }
+        ]
+      }
+    }
+  ]
+}

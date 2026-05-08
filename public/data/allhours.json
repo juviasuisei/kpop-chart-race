@@ -17,6 +17,19 @@
           { "type": "mv", "url": "https://youtu.be/4-ba6z64nlQ?si=NxT42HwOPzUkRnuL" }
         ]
       }
+    },
+    {
+      "title": "READY 2 RUMBLE",
+      "dailyValues": {
+        "2025-09-17": { "value": 2546, "source": "show_champion", "episode": 569 }
+      },
+      "embeds": {
+        "2025-09-17": [{ "type": "live_performance", "url": "https://youtu.be/y-Lw_Qf61JU?si=1iejxnP3IoDT0Q9a" }],
+        "2025-09-09": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/vcf-ep/1837317399" },
+          { "type": "mv", "url": "https://youtu.be/TJR0VM8jof0?si=f1aJ2astI4Vb1q95" }
+        ]
+      }
     }
   ]
 }

@@ -21,24 +21,24 @@ export class ZoomSelector {
     this.wrapper = document.createElement("div");
     this.wrapper.className = "zoom-toggle";
     this.wrapper.setAttribute("role", "switch");
-    this.wrapper.setAttribute("aria-checked", "false");
+    this.wrapper.setAttribute("aria-checked", "true");
     this.wrapper.setAttribute("aria-label", "Toggle between 10 and All artists");
     this.wrapper.tabIndex = 0;
 
     const labelLeft = document.createElement("span");
-    labelLeft.className = "zoom-toggle__label zoom-toggle__label--active";
-    labelLeft.textContent = "10";
+    labelLeft.className = "zoom-toggle__label";
+    labelLeft.textContent = "All";
 
     const track = document.createElement("span");
-    track.className = "zoom-toggle__track";
+    track.className = "zoom-toggle__track zoom-toggle__track--on";
 
     const thumb = document.createElement("span");
     thumb.className = "zoom-toggle__thumb";
     track.appendChild(thumb);
 
     const labelRight = document.createElement("span");
-    labelRight.className = "zoom-toggle__label";
-    labelRight.textContent = "All";
+    labelRight.className = "zoom-toggle__label zoom-toggle__label--active";
+    labelRight.textContent = "10";
 
     this.wrapper.appendChild(labelLeft);
     this.wrapper.appendChild(track);
@@ -46,6 +46,9 @@ export class ZoomSelector {
 
     this.wrapper.addEventListener("click", this.handleClick);
     this.wrapper.addEventListener("keydown", this.handleKeydown);
+
+    // Listen for external zoom changes to stay in sync
+    this.eventBus.on("zoom:change", this.handleExternalChange);
 
     // Insert before the play button (first child of playback controls)
     const playbackControls = container.querySelector(".playback-controls");
@@ -69,6 +72,7 @@ export class ZoomSelector {
       this.wrapper.remove();
       this.wrapper = null;
     }
+    this.eventBus.off("zoom:change", this.handleExternalChange);
   }
 
   private handleClick = (): void => {
@@ -82,6 +86,13 @@ export class ZoomSelector {
     }
   };
 
+  private handleExternalChange = (level: ZoomLevel): void => {
+    if (level !== this.currentLevel) {
+      this.currentLevel = level;
+      this.updateVisual();
+    }
+  };
+
   private toggle(): void {
     this.currentLevel = this.currentLevel === 10 ? "all" : 10;
     this.updateVisual();
@@ -90,18 +101,18 @@ export class ZoomSelector {
 
   private updateVisual(): void {
     if (!this.wrapper) return;
-    const isAll = this.currentLevel === "all";
-    this.wrapper.setAttribute("aria-checked", String(isAll));
+    const isTen = this.currentLevel === 10;
+    this.wrapper.setAttribute("aria-checked", String(isTen));
 
     const labels = this.wrapper.querySelectorAll(".zoom-toggle__label");
     if (labels.length === 2) {
-      labels[0].classList.toggle("zoom-toggle__label--active", !isAll);
-      labels[1].classList.toggle("zoom-toggle__label--active", isAll);
+      labels[0].classList.toggle("zoom-toggle__label--active", !isTen); // "All" label
+      labels[1].classList.toggle("zoom-toggle__label--active", isTen);  // "10" label
     }
 
     const track = this.wrapper.querySelector(".zoom-toggle__track");
     if (track) {
-      track.classList.toggle("zoom-toggle__track--on", isAll);
+      track.classList.toggle("zoom-toggle__track--on", isTen);
     }
   }
 }

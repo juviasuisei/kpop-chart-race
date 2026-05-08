@@ -60,7 +60,15 @@
         "2025-10-04": { "value": 5152, "source": "show_music_core", "episode": 920 },
         "2025-09-28": { "value": 4146, "source": "inkigayo", "episode": 1285 },
         "2025-09-27": { "value": 5275, "source": "show_music_core", "episode": 919 },
-        "2025-09-25": { "value": 3692, "source": "m_countdown", "episode": 907 }
+        "2025-09-25": { "value": 3692, "source": "m_countdown", "episode": 907 },
+        "2025-09-21": { "value": 4632, "source": "inkigayo", "episode": 1284 },
+        "2025-09-20": { "value": 4776, "source": "show_music_core", "episode": 918 },
+        "2025-09-18": { "value": 3692, "source": "m_countdown", "episode": 906 },
+        "2025-09-17": { "value": 3310, "source": "show_champion", "episode": 569 },
+        "2025-09-14": { "value": 4742, "source": "inkigayo", "episode": 1283 },
+        "2025-09-13": { "value": 5471, "source": "show_music_core", "episode": 917 },
+        "2025-09-11": { "value": 5557, "source": "m_countdown", "episode": 905 },
+        "2025-09-10": { "value": 3614, "source": "show_champion", "episode": 568 }
       },
       "embeds": {
         "2025-08-25": [

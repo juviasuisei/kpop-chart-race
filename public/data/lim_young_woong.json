@@ -1,0 +1,22 @@
+{
+  "name": "Lim Young Woong",
+  "korean_name": "임영웅",
+  "artistType": "solo_male",
+  "generation": 3,
+  "debut": "2016-08-08",
+  "releases": [
+    {
+      "title": "Eternal Moment",
+      "dailyValues": {
+        "2025-09-13": { "value": 6575, "source": "show_music_core", "episode": 917 }
+      },
+      "embeds": {
+        "2025-09-13": [{ "type": "live_performance", "url": "https://youtu.be/8cMHnIizkCE?si=IgF7yBaoYWLzBdL5" }],
+        "2025-08-29": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/im-hero-2/1836064679" },
+          { "type": "mv", "url": "https://youtu.be/HLg2ZmYsI1k?si=RME15Ov0HznmAeMb" }
+        ]
+      }
+    }
+  ]
+}

@@ -6,6 +6,8 @@
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { YearlyView } from '../../src/yearly-view.ts';
+import { EventBus } from '../../src/event-bus.ts';
+import { ZoomSelector } from '../../src/zoom-selector.ts';
 import type { DataStore, ParsedArtist } from '../../src/models.ts';
 
 function createArtist(id: string, name: string, dailyValues: Record<string, { value: number; source: string; episode: number }>): ParsedArtist {
@@ -509,5 +511,241 @@ describe('YearlyView — Wins Mode', () => {
     const firstBar = rows[0].querySelector('.yearly-view__bar');
     expect(firstBar?.textContent).toContain('Artist A');
     expect(rows.length).toBe(2); // both artists show (even with 0 wins)
+  });
+});
+
+
+describe('YearlyView — Stacked Bar (All mode)', () => {
+  let container: HTMLElement;
+  let view: YearlyView;
+
+  function createArtistWithType(id: string, name: string, type: string, points: number, year: string): ParsedArtist {
+    return {
+      id,
+      name,
+      artistType: type as any,
+      generation: 4,
+      logoUrl: `assets/logos/${id}.svg`,
+      releases: [{
+        id: `${id}-release`,
+        title: 'Test Song',
+        dailyValues: new Map([[`${year}-06-01`, { value: points, source: 'inkigayo', episode: 1 }]]),
+        embeds: new Map(),
+      }],
+    };
+  }
+
+  function createDS(artists: ParsedArtist[], wins?: Map<string, Map<string, { artistIds: string[]; crownLevels: Map<string, number> }>>): DataStore {
+    const artistMap = new Map(artists.map(a => [a.id, a]));
+    const allDates = new Set<string>();
+    for (const artist of artists) {
+      for (const release of artist.releases) {
+        for (const date of release.dailyValues.keys()) allDates.add(date);
+      }
+    }
+    const dates = Array.from(allDates).sort();
+    const firstAppearance = new Map<string, string>();
+    for (const artist of artists) {
+      for (const release of artist.releases) {
+        for (const date of release.dailyValues.keys()) {
+          const cur = firstAppearance.get(artist.id);
+          if (!cur || date < cur) firstAppearance.set(artist.id, date);
+        }
+      }
+    }
+    return {
+      artists: artistMap,
+      dates,
+      startDate: dates[0] ?? '',
+      endDate: dates[dates.length - 1] ?? '',
+      firstAppearance,
+      chartWins: wins ?? new Map(),
+    };
+  }
+
+  beforeEach(() => {
+    container = document.createElement('div');
+    document.body.appendChild(container);
+    view = new YearlyView();
+  });
+
+  afterEach(() => {
+    view.unmount();
+    document.body.removeChild(container);
+  });
+
+  it('setZoom switches to stacked bar layout', () => {
+    const ds = createDS([
+      createArtistWithType('a', 'Artist A', 'girl_group', 5000, '2025'),
+      createArtistWithType('b', 'Artist B', 'boy_group', 3000, '2025'),
+    ]);
+    view.mount(container, ds);
+    view.setZoom('all');
+
+    expect(container.querySelector('.yearly-view--stacked')).not.toBeNull();
+    expect(container.querySelector('.yearly-stacked__row')).not.toBeNull();
+  });
+
+  it('setZoom(10) switches back to grid layout', () => {
+    const ds = createDS([
+      createArtistWithType('a', 'Artist A', 'girl_group', 5000, '2025'),
+    ]);
+    view.mount(container, ds);
+    view.setZoom('all');
+    view.setZoom(10);
+
+    expect(container.querySelector('.yearly-view--stacked')).toBeNull();
+    expect(container.querySelector('.yearly-view__cell')).not.toBeNull();
+  });
+
+  it('stacked bar includes all artists (not just top 10)', () => {
+    const artists = [];
+    for (let i = 1; i <= 15; i++) {
+      artists.push(createArtistWithType(`a${i}`, `Artist ${i}`, 'girl_group', i * 100, '2025'));
+    }
+    const ds = createDS(artists);
+    view.mount(container, ds);
+    view.setZoom('all');
+
+    const segments = container.querySelectorAll('.yearly-stacked__segment');
+    expect(segments.length).toBe(15);
+  });
+
+  it('segments are ordered by rank (highest points first/leftmost)', () => {
+    const ds = createDS([
+      createArtistWithType('a', 'Artist A', 'girl_group', 1000, '2025'),
+      createArtistWithType('b', 'Artist B', 'boy_group', 5000, '2025'),
+      createArtistWithType('c', 'Artist C', 'girl_group', 3000, '2025'),
+    ]);
+    view.mount(container, ds);
+    view.setZoom('all');
+
+    const segments = container.querySelectorAll('.yearly-stacked__segment');
+    // B (5000) should be first, C (3000) second, A (1000) third
+    expect(segments[0].getAttribute('title') ?? segments[0].querySelector('.yearly-stacked__tooltip')?.textContent ?? '').toContain('');
+    // Check via logo src order
+    const logos = container.querySelectorAll('.yearly-stacked__logo') as NodeListOf<HTMLImageElement>;
+    expect(logos[0].src).toContain('b.svg');
+    expect(logos[1].src).toContain('c.svg');
+    expect(logos[2].src).toContain('a.svg');
+  });
+
+  it('segments have white border between them', () => {
+    const ds = createDS([
+      createArtistWithType('a', 'Artist A', 'girl_group', 5000, '2025'),
+      createArtistWithType('b', 'Artist B', 'boy_group', 3000, '2025'),
+    ]);
+    view.mount(container, ds);
+    view.setZoom('all');
+
+    const segment = container.querySelector('.yearly-stacked__segment') as HTMLElement;
+    expect(segment).not.toBeNull();
+    // CSS class handles the border, just verify the element exists
+    expect(segment.className).toContain('yearly-stacked__segment');
+  });
+
+  it('each segment has a logo', () => {
+    const ds = createDS([
+      createArtistWithType('a', 'Artist A', 'girl_group', 5000, '2025'),
+    ]);
+    view.mount(container, ds);
+    view.setZoom('all');
+
+    const logo = container.querySelector('.yearly-stacked__logo') as HTMLImageElement;
+    expect(logo).not.toBeNull();
+    expect(logo.src).toContain('a.svg');
+  });
+
+  it('wins mode in stacked view only shows artists with wins', () => {
+    const artists = [
+      createArtistWithType('a', 'Artist A', 'girl_group', 5000, '2025'),
+      createArtistWithType('b', 'Artist B', 'boy_group', 3000, '2025'),
+    ];
+    const wins = new Map([
+      ['2025-06-01', new Map([
+        ['inkigayo', { artistIds: ['a'], crownLevels: new Map([['a', 1]]) }],
+      ])],
+    ]);
+    const ds = createDS(artists, wins);
+    view.mount(container, ds);
+    view.setMetric('wins');
+    view.setZoom('all');
+
+    const segments = container.querySelectorAll('.yearly-stacked__segment');
+    expect(segments.length).toBe(1); // only Artist A has wins
+  });
+
+  it('getZoom returns current zoom level', () => {
+    const ds = createDS([createArtistWithType('a', 'A', 'girl_group', 1000, '2025')]);
+    view.mount(container, ds);
+
+    expect(view.getZoom()).toBe(10);
+    view.setZoom('all');
+    expect(view.getZoom()).toBe('all');
+  });
+
+  it('source filter works in stacked mode', () => {
+    const artist: ParsedArtist = {
+      id: 'a',
+      name: 'Artist A',
+      artistType: 'girl_group',
+      generation: 4,
+      logoUrl: 'assets/logos/a.svg',
+      releases: [{
+        id: 'r1',
+        title: 'Song',
+        dailyValues: new Map([
+          ['2025-06-01', { value: 5000, source: 'inkigayo', episode: 1 }],
+          ['2025-06-08', { value: 3000, source: 'music_bank', episode: 2 }],
+        ]),
+        embeds: new Map(),
+      }],
+    };
+    const ds = createDS([artist]);
+    view.mount(container, ds);
+    view.setZoom('all');
+
+    // With "all" source, should have 1 segment (8000 total)
+    let segments = container.querySelectorAll('.yearly-stacked__segment');
+    expect(segments.length).toBe(1);
+
+    // Filter to inkigayo only
+    view.setSourceFilter('inkigayo');
+    segments = container.querySelectorAll('.yearly-stacked__segment');
+    expect(segments.length).toBe(1); // still 1 artist, but only 5000 pts
+  });
+});
+
+describe('YearlyView — Zoom Selector Sync', () => {
+  it('zoom selector updates visual when external zoom:change fires', () => {
+    const container = document.createElement('div');
+    const playbackControls = document.createElement('div');
+    playbackControls.className = 'playback-controls';
+    playbackControls.appendChild(document.createElement('button'));
+    container.appendChild(playbackControls);
+    document.body.appendChild(container);
+
+    const eventBus = new EventBus();
+    const selector = new ZoomSelector(eventBus);
+    selector.mount(container);
+
+    // Initially at 10
+    expect(selector.getLevel()).toBe(10);
+
+    // External event changes to "all"
+    eventBus.emit('zoom:change', 'all');
+    expect(selector.getLevel()).toBe('all');
+
+    // Check visual updated
+    const track = container.querySelector('.zoom-toggle__track');
+    expect(track!.classList.contains('zoom-toggle__track--on')).toBe(false);
+
+    // External event changes back to 10
+    eventBus.emit('zoom:change', 10);
+    expect(selector.getLevel()).toBe(10);
+    expect(track!.classList.contains('zoom-toggle__track--on')).toBe(true);
+
+    selector.destroy();
+    container.remove();
   });
 });

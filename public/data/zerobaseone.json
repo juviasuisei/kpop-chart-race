@@ -17,6 +17,29 @@
           { "type": "mv", "url": "https://youtu.be/nYueShCPYUY?si=AGVluY0AkixK0g5M" }
         ]
       }
+    },
+    {
+      "title": "ICONIK",
+      "dailyValues": {
+        "2025-09-14": { "value": 4913, "source": "inkigayo", "episode": 1283 },
+        "2025-09-13": { "value": 7007, "source": "show_music_core", "episode": 917 },
+        "2025-09-12": { "value": 8202, "source": "music_bank", "episode": 1258 },
+        "2025-09-11": { "value": 7917, "source": "m_countdown", "episode": 905 },
+        "2025-09-10": { "value": 7456, "source": "show_champion", "episode": 568 },
+        "2025-09-09": { "value": 9310, "source": "the_show", "episode": 388 }
+      },
+      "embeds": {
+        "2025-09-14": [{ "type": "live_performance", "url": "https://youtu.be/jcH31J--xZY?si=oHVur1iPT-8WOwjZ"}],
+        "2025-09-13": [{ "type": "live_performance", "url": "https://youtu.be/Zz-YsvjszoU?si=-mhFXl_yjH-WOicu"}],
+        "2025-09-12": [{ "type": "live_performance", "url": "https://youtu.be/82mKnELjwmo?si=WE7A790O3MUkc5Pa"}],
+        "2025-09-11": [{ "type": "live_performance", "url": "https://youtu.be/mQ6sFyWxDYM?si=rYHuXgfdNPSpLGAg"}],
+        "2025-09-10": [{ "type": "live_performance", "url": "https://youtu.be/sgpL6Fx584M?si=ue8-WFZ2rY46NiR4"}],
+        "2025-09-09": [{ "type": "live_performance", "url": "https://youtu.be/xoyY10n2_-U?si=_YDURwR-SY-t1Vza"}],
+        "2025-09-01": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/never-say-never/1826911165" },
+          { "type": "mv", "url": "https://youtu.be/HnYtDIW7elY?si=7MfHH7YFq6MvGEwL" }
+        ]
+      }
     }
   ]
 }

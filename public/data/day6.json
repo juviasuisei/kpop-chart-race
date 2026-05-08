@@ -8,7 +8,8 @@
     {
       "title": "Dream Bus",
       "dailyValues": {
-        "2025-10-01": { "value": 2074, "source": "show_champion", "episode": 571 }
+        "2025-10-01": { "value": 2074, "source": "show_champion", "episode": 571 },
+        "2025-09-17": { "value": 2506, "source": "show_champion", "episode": 569 }
       },
       "embeds": {
         "2025-09-05": [

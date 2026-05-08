@@ -34,6 +34,7 @@ export class YearlyView {
   private dataStore: DataStore | null = null;
   private metric: YearlyMetric = "points";
   private sourceFilter: string = "all";
+  private zoom: "all" | 10 = 10;
 
   mount(container: HTMLElement, dataStore: DataStore): void {
     this.dataStore = dataStore;
@@ -70,16 +71,39 @@ export class YearlyView {
     return this.sourceFilter;
   }
 
+  setZoom(zoom: "all" | 10): void {
+    const newZoom = zoom === "all" ? "all" : 10;
+    if (newZoom === this.zoom) return;
+    this.zoom = newZoom;
+    this.render();
+  }
+
+  getZoom(): "all" | 10 {
+    return this.zoom;
+  }
+
   private render(): void {
     if (!this.wrapper || !this.dataStore) return;
     this.wrapper.innerHTML = "";
 
     const years = this.getYears();
+
+    if (this.zoom === "all") {
+      this.wrapper.className = "yearly-view yearly-view--stacked";
+      this.renderStacked(years);
+    } else {
+      this.wrapper.className = "yearly-view";
+      this.renderGrid(years);
+    }
+  }
+
+  private renderGrid(years: number[]): void {
+    if (!this.wrapper || !this.dataStore) return;
     const yearData = new Map<number, YearlyArtistEntry[]>();
 
     // Compute data for all years
     for (const year of years) {
-      const entries = this.computeYearData(year);
+      const entries = this.computeYearData(year, 10);
       yearData.set(year, entries);
     }
 
@@ -99,6 +123,78 @@ export class YearlyView {
     }
   }
 
+  private renderStacked(years: number[]): void {
+    if (!this.wrapper || !this.dataStore) return;
+
+    for (const year of years) {
+      const entries = this.computeYearData(year, Infinity);
+      if (entries.length === 0) continue;
+
+      const yearRow = document.createElement("div");
+      yearRow.className = "yearly-stacked__row";
+
+      const heading = document.createElement("span");
+      heading.className = "yearly-stacked__year";
+      heading.textContent = String(year);
+      yearRow.appendChild(heading);
+
+      const bar = document.createElement("div");
+      bar.className = "yearly-stacked__bar";
+
+      // Compute total for percentage
+      const total = entries.reduce((sum, e) => sum + (this.metric === "wins" ? e.wins : e.points), 0);
+
+      for (const entry of entries) {
+        const value = this.metric === "wins" ? entry.wins : entry.points;
+        if (value === 0) continue;
+        const pct = (value / total) * 100;
+
+        const segment = document.createElement("div");
+        segment.className = "yearly-stacked__segment";
+        segment.style.width = `${pct}%`;
+        segment.style.backgroundColor = ARTIST_TYPE_COLORS[entry.artistType as keyof typeof ARTIST_TYPE_COLORS] ?? "#555";
+
+        // Logo (left-aligned, hidden if segment too narrow)
+        const logo = document.createElement("img");
+        logo.className = "yearly-stacked__logo";
+        logo.src = entry.logoUrl;
+        logo.alt = entry.name;
+        logo.onerror = () => { logo.style.display = "none"; };
+        segment.appendChild(logo);
+
+        // Tooltip (custom, appears instantly on hover)
+        const rank = entries.indexOf(entry) + 1;
+        const indicator = ARTIST_TYPE_INDICATORS[entry.artistType as ArtistType] ?? "";
+        const tooltipText = this.metric === "wins"
+          ? `#${rank} · ${entry.name} ${indicator} · ${entry.wins} ${entry.wins === 1 ? "win" : "wins"}`
+          : `#${rank} · ${entry.name} ${indicator} · ${entry.points.toLocaleString()} pts`;
+
+        segment.addEventListener("mouseenter", () => {
+          let tooltip = document.querySelector(".yearly-stacked__tooltip") as HTMLElement | null;
+          if (!tooltip) {
+            tooltip = document.createElement("div");
+            tooltip.className = "yearly-stacked__tooltip";
+            document.body.appendChild(tooltip);
+          }
+          tooltip.textContent = tooltipText;
+          tooltip.style.display = "block";
+          const rect = segment.getBoundingClientRect();
+          tooltip.style.left = `${rect.left + rect.width / 2}px`;
+          tooltip.style.top = `${rect.top - 6}px`;
+        });
+        segment.addEventListener("mouseleave", () => {
+          const tooltip = document.querySelector(".yearly-stacked__tooltip") as HTMLElement | null;
+          if (tooltip) tooltip.style.display = "none";
+        });
+
+        bar.appendChild(segment);
+      }
+
+      yearRow.appendChild(bar);
+      this.wrapper.appendChild(yearRow);
+    }
+  }
+
   private getYears(): number[] {
     if (!this.dataStore) return [];
     const yearSet = new Set<number>();
@@ -108,7 +204,7 @@ export class YearlyView {
     return Array.from(yearSet).sort((a, b) => b - a); // newest first
   }
 
-  private computeYearData(year: number): YearlyArtistEntry[] {
+  private computeYearData(year: number, limit: number = 10): YearlyArtistEntry[] {
     if (!this.dataStore) return [];
     const yearStr = String(year);
     const artistPoints = new Map<string, number>();
@@ -166,9 +262,9 @@ export class YearlyView {
     });
     // In wins mode, filter out artists with 0 wins
     if (this.metric === "wins") {
-      return entries.filter(e => e.wins > 0).slice(0, 10);
+      return entries.filter(e => e.wins > 0).slice(0, limit);
     }
-    return entries.slice(0, 10);
+    return entries.slice(0, limit);
   }
 
   private createYearCell(year: number, entries: YearlyArtistEntry[], globalMax: number): HTMLDivElement {

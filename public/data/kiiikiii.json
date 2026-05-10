@@ -39,6 +39,20 @@
           { "type": "mv", "url": "https://youtu.be/zhHB4dZTChw?si=-5g1JiKoK_kwJkRe" }
         ]
       }
+    },
+    {
+      "title": "DANCING ALONE",
+      "dailyValues": {
+        "2025-08-20": { "value": 2977, "source": "show_champion", "episode": 566 },
+        "2025-08-19": { "value": 6242, "source": "the_show", "episode": 386 }
+      },
+      "embeds": {
+        "2025-08-19": [{ "type": "live_performance", "url": "https://youtu.be/xqEfnxGPtwU?si=wrfJ-JGY9wokUR1g" }],
+        "2025-08-06": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/dancing-alone-single/1830522219" },
+          { "type": "mv", "url": "https://youtu.be/u5wMLWs6LSs?si=LsCVjqtZsFu1Ft08" }
+        ]
+      }
     }
   ]
 }

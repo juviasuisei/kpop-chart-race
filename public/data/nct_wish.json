@@ -42,7 +42,8 @@
     {
       "title": "Surf",
       "dailyValues": {
-        "2025-08-28": { "value": 3192, "source": "m_countdown", "episode": 903 }
+        "2025-08-28": { "value": 3192, "source": "m_countdown", "episode": 903 },
+        "2025-08-21": { "value": 8364, "source": "m_countdown", "episode": 902 }
       },
       "embeds": {
         "2025-08-12": [

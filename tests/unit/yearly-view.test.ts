@@ -749,3 +749,142 @@ describe('YearlyView — Zoom Selector Sync', () => {
     container.remove();
   });
 });
+
+
+describe('YearlyView — Source Filter in Grid Mode', () => {
+  let container: HTMLElement;
+  let view: YearlyView;
+
+  beforeEach(() => {
+    container = document.createElement('div');
+    document.body.appendChild(container);
+    view = new YearlyView();
+  });
+
+  afterEach(() => {
+    view.unmount();
+    document.body.removeChild(container);
+  });
+
+  it('filters points by source in grid mode', () => {
+    const artist: ParsedArtist = {
+      id: 'a',
+      name: 'Artist A',
+      artistType: 'girl_group',
+      generation: 4,
+      logoUrl: 'assets/logos/a.svg',
+      releases: [{
+        id: 'r1',
+        title: 'Song',
+        dailyValues: new Map([
+          ['2025-06-01', { value: 5000, source: 'inkigayo', episode: 1 }],
+          ['2025-06-08', { value: 3000, source: 'music_bank', episode: 2 }],
+        ]),
+        embeds: new Map(),
+      }],
+    };
+    const ds: DataStore = {
+      artists: new Map([['a', artist]]),
+      dates: ['2025-06-01', '2025-06-08'],
+      startDate: '2025-06-01',
+      endDate: '2025-06-08',
+      firstAppearance: new Map([['a', '2025-06-01']]),
+      chartWins: new Map(),
+    };
+
+    view.mount(container, ds);
+
+    // Default (all): should show 8000 total
+    let stats = container.querySelector('.yearly-view__stats');
+    expect(stats?.textContent).toContain('8,000');
+
+    // Filter to inkigayo: should show 5000
+    view.setSourceFilter('inkigayo');
+    stats = container.querySelector('.yearly-view__stats');
+    expect(stats?.textContent).toContain('5,000');
+
+    // Filter to music_bank: should show 3000
+    view.setSourceFilter('music_bank');
+    stats = container.querySelector('.yearly-view__stats');
+    expect(stats?.textContent).toContain('3,000');
+  });
+
+  it('filters wins by source', () => {
+    const artist: ParsedArtist = {
+      id: 'a',
+      name: 'Artist A',
+      artistType: 'girl_group',
+      generation: 4,
+      logoUrl: 'assets/logos/a.svg',
+      releases: [{
+        id: 'r1',
+        title: 'Song',
+        dailyValues: new Map([
+          ['2025-06-01', { value: 5000, source: 'inkigayo', episode: 1 }],
+          ['2025-06-08', { value: 3000, source: 'music_bank', episode: 2 }],
+        ]),
+        embeds: new Map(),
+      }],
+    };
+    const wins = new Map([
+      ['2025-06-01', new Map([
+        ['inkigayo', { artistIds: ['a'], crownLevels: new Map([['a', 1]]) }],
+      ])],
+      ['2025-06-08', new Map([
+        ['music_bank', { artistIds: ['a'], crownLevels: new Map([['a', 2]]) }],
+      ])],
+    ]);
+    const ds: DataStore = {
+      artists: new Map([['a', artist]]),
+      dates: ['2025-06-01', '2025-06-08'],
+      startDate: '2025-06-01',
+      endDate: '2025-06-08',
+      firstAppearance: new Map([['a', '2025-06-01']]),
+      chartWins: wins,
+    };
+
+    view.mount(container, ds);
+    view.setMetric('wins');
+
+    // Default (all): 2 wins
+    let stats = container.querySelector('.yearly-view__stats');
+    expect(stats?.textContent).toContain('2 wins');
+
+    // Filter to inkigayo: 1 win
+    view.setSourceFilter('inkigayo');
+    stats = container.querySelector('.yearly-view__stats');
+    expect(stats?.textContent).toContain('1 win');
+  });
+
+  it('source filter with no matching data shows empty', () => {
+    const artist: ParsedArtist = {
+      id: 'a',
+      name: 'Artist A',
+      artistType: 'girl_group',
+      generation: 4,
+      logoUrl: 'assets/logos/a.svg',
+      releases: [{
+        id: 'r1',
+        title: 'Song',
+        dailyValues: new Map([
+          ['2025-06-01', { value: 5000, source: 'inkigayo', episode: 1 }],
+        ]),
+        embeds: new Map(),
+      }],
+    };
+    const ds: DataStore = {
+      artists: new Map([['a', artist]]),
+      dates: ['2025-06-01'],
+      startDate: '2025-06-01',
+      endDate: '2025-06-01',
+      firstAppearance: new Map([['a', '2025-06-01']]),
+      chartWins: new Map(),
+    };
+
+    view.mount(container, ds);
+    view.setSourceFilter('music_bank'); // no data for this source
+
+    const rows = container.querySelectorAll('.yearly-view__row');
+    expect(rows.length).toBe(0);
+  });
+});

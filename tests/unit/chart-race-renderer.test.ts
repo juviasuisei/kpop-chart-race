@@ -414,8 +414,8 @@ describe('ChartRaceRenderer', () => {
     expect(wrapper.style.opacity).toBe('1');
   });
 
-  // 27. Bars filtered out are removed from DOM immediately (simplified update)
-  it('bars filtered out are removed from DOM immediately', () => {
+  // 27. Bars filtered out begin shrink animation (not removed immediately)
+  it('bars filtered out begin shrink animation and are marked hidden', () => {
     renderer.mount(container);
 
     // First update: show artist
@@ -432,12 +432,15 @@ describe('ChartRaceRenderer', () => {
     const snapshot2 = makeSnapshot([]);
     renderer.update(snapshot2, 10, emptyDataStore);
 
-    // Bar is removed from DOM immediately (no wipe cover animation)
-    expect(container.querySelectorAll('.chart-race__bar-wrapper').length).toBe(0);
+    // Bar is still in DOM (shrinking) but has height 0 and pointer-events none
+    const wrapper = container.querySelector('.chart-race__bar-wrapper') as HTMLElement;
+    expect(wrapper).not.toBeNull();
+    expect(wrapper.style.height).toBe('0px');
+    expect(wrapper.style.pointerEvents).toBe('none');
   });
 
-  // 28. Bars re-created after removal are placed at correct position
-  it('bars re-created after removal are placed at correct position with full height', () => {
+  // 28. Bars re-created after removal grow in from 0 height
+  it('bars re-created after removal grow in from 0 height at correct position', () => {
     renderer.mount(container);
 
     const MOCKED_HEIGHT = 500;
@@ -452,21 +455,21 @@ describe('ChartRaceRenderer', () => {
     ];
     const ds = makeDataStoreForEntries(entries);
 
-    // Show, then remove (simplified update removes immediately)
+    // Show, then remove (starts shrink animation)
     renderer.update(makeSnapshot(entries), 10, ds);
     renderer.update(makeSnapshot([]), 10, emptyDataStore);
 
-    // Bar was removed from DOM
-    expect(container.querySelectorAll('.chart-race__bar-wrapper').length).toBe(0);
-
-    // Re-show — bar is re-created at correct position
+    // Re-show — bar should grow back in at correct position
     renderer.update(makeSnapshot(entries), 10, ds);
-    const wrapper = container.querySelector('.chart-race__bar-wrapper') as HTMLElement;
-    expect(wrapper).not.toBeNull();
-    expect(wrapper.style.opacity).toBe('1');
-    const barHeight = MOCKED_HEIGHT / 10;
-    expect(wrapper.style.transform).toBe(`translateY(${0 * barHeight}px)`);
-    expect(wrapper.style.height).toBe(`${barHeight}px`);
+    const wrappers = container.querySelectorAll('.chart-race__bar-wrapper');
+    // There may be 2 wrappers briefly (old shrinking + new growing), find the non-hidden one
+    let activeWrapper: HTMLElement | null = null;
+    wrappers.forEach(w => {
+      const el = w as HTMLElement;
+      if (el.style.pointerEvents !== 'none') activeWrapper = el;
+    });
+    expect(activeWrapper).not.toBeNull();
+    expect(activeWrapper!.style.transform).toBe('translateY(0px)');
   });
 
   // 29. Scrubbing disables CSS transitions for instant snapping
@@ -738,6 +741,68 @@ describe('ChartRaceRenderer', () => {
     // The key test is that scrub mode snaps (test 31) while normal mode tweens.
     // We verify the tween was initiated by checking the value is set.
     expect(value!.textContent).toBeTruthy();
+  });
+
+  // 33. Scrubbing removes bars instantly (no shrink animation)
+  it('scrubbing removes bars instantly without shrink animation', () => {
+    renderer.mount(container);
+
+    const entries = [
+      makeEntry({ artistId: 'a1', rank: 1, cumulativeValue: 500 }),
+    ];
+    const ds = makeDataStoreForEntries(entries);
+    renderer.update(makeSnapshot(entries), 10, ds);
+    expect(container.querySelectorAll('.chart-race__bar-wrapper').length).toBe(1);
+
+    // Enter scrub mode
+    eventBus.emit('scrub:start');
+
+    // Update with empty — should remove immediately during scrub
+    renderer.update(makeSnapshot([]), 10, emptyDataStore);
+    expect(container.querySelectorAll('.chart-race__bar-wrapper').length).toBe(0);
+
+    eventBus.emit('scrub:end');
+  });
+
+  // 34. Bar shrinking out can be interrupted by re-entry (hidden restore)
+  it('bar shrinking out is restored when it re-enters before removal completes', () => {
+    renderer.mount(container);
+
+    const MOCKED_HEIGHT = 500;
+    const barsContainer = container.querySelector('.chart-race__bars')!;
+    Object.defineProperty(barsContainer, 'clientHeight', {
+      value: MOCKED_HEIGHT,
+      configurable: true,
+    });
+
+    const entries = [
+      makeEntry({ artistId: 'a1', rank: 1, cumulativeValue: 500 }),
+    ];
+    const ds = makeDataStoreForEntries(entries);
+
+    // Show bar
+    renderer.update(makeSnapshot(entries), 10, ds);
+    const wrapper1 = container.querySelector('.chart-race__bar-wrapper') as HTMLElement;
+    expect(wrapper1).not.toBeNull();
+
+    // Start shrinking (remove from visible)
+    renderer.update(makeSnapshot([]), 10, emptyDataStore);
+    expect(wrapper1.style.height).toBe('0px');
+    expect(wrapper1.style.pointerEvents).toBe('none');
+
+    // Re-add before shrink completes — should restore
+    renderer.update(makeSnapshot(entries), 10, ds);
+
+    // Find the active (non-hidden) wrapper
+    const wrappers = container.querySelectorAll('.chart-race__bar-wrapper');
+    let restored: HTMLElement | null = null;
+    wrappers.forEach(w => {
+      const el = w as HTMLElement;
+      if (el.style.pointerEvents !== 'none') restored = el;
+    });
+    expect(restored).not.toBeNull();
+    // It should be at the correct position
+    expect(restored!.style.transform).toBe('translateY(0px)');
   });
 });
 

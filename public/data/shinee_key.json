@@ -1,0 +1,25 @@
+{
+  "name": "KEY [SHINee]",
+  "korean_name": "김기범",
+  "artistType": "solo_male",
+  "generation": 2,
+  "debut": "2018-11-06",
+  "releases": [
+    {
+      "title": "HUNTER",
+      "dailyValues": {
+        "2025-08-23": { "value": 5685, "source": "show_music_core", "episode": 914 },
+        "2025-08-22": { "value": 5718, "source": "music_bank", "episode": 1255 },
+        "2025-08-20": { "value": 5649, "source": "show_champion", "episode": 566 }
+      },
+      "embeds": {
+        "2025-08-23": [{ "type": "live_performance", "url": "https://youtu.be/hRyVk7iTvOQ?si=YM0IlF9xv_XH4Y3R" }],
+        "2025-08-22": [{ "type": "live_performance", "url": "https://youtu.be/A3epNJFfMSo?si=SpB_wMp2MaDw6R_M" }],
+        "2025-08-11": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/hunter-the-3rd-album/1831167274" },
+          { "type": "mv", "url": "https://youtu.be/ktCF5D6ECk0?si=820svteP8qnJFhob" }
+        ]
+      }
+    }
+  ]
+}

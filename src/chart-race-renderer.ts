@@ -385,10 +385,12 @@ export class ChartRaceRenderer {
         const isReturning = lastY !== undefined || this.seenArtists.has(entry.artistId);
         this.seenArtists.add(entry.artistId);
         if (isReturning) {
-          // Returning bar: snap directly to target position (no animation from stale position)
+          // Returning bar: start at correct position with 0 height, then grow in
           barEl.wrapper.style.transform = `translateY(${yOffsets[visIdx]}px)`;
           const widthPercent = computeBarWidth(entry.cumulativeValue, maxCumulative);
           barEl.bar.style.width = `${widthPercent}%`;
+          barEl.wrapper.style.height = "0px";
+          barEl.wrapper.style.opacity = "0";
           if (lastY !== undefined) {
             this.lastKnownY.delete(entry.artistId);
           }
@@ -398,9 +400,9 @@ export class ChartRaceRenderer {
           barEl.wrapper.style.transform = `translateY(${bottomY}px)`;
           barEl.bar.style.width = "0%";
         }
-        barEl.wrapper.style.height = `${heights[visIdx]}px`;
-        barEl.wrapper.style.opacity = "1";
         if (!isReturning) {
+          barEl.wrapper.style.opacity = "1";
+          barEl.wrapper.style.height = `${heights[visIdx]}px`;
           barEl.bar.style.width = "0%";
         }
         barEl.wrapper.offsetHeight; // force reflow
@@ -410,13 +412,17 @@ export class ChartRaceRenderer {
           if (isZoomChange) {
             barEl.wrapper.style.transition = `transform ${ZOOM_TRANSITION_MS}ms ease-in-out, height ${ZOOM_TRANSITION_MS}ms ease-in-out`;
             barEl.bar.style.transition = `width ${ZOOM_TRANSITION_MS}ms ease-in-out`;
+          } else if (isReturning) {
+            // Returning bars need height transition for the grow-in effect
+            barEl.wrapper.style.transition = "height 600ms ease-in-out, opacity 600ms ease-in-out, transform 1.2s ease-in-out";
+            barEl.bar.style.transition = "";
           } else {
             barEl.wrapper.style.transition = "";
             barEl.bar.style.transition = "";
           }
         }
       } else if (barEl.hidden) {
-        // 4. Restore hidden bar: cancel timeouts, re-attach, place at target
+        // 4. Restore hidden bar: cancel shrink, grow back in from 0 height
         if (barEl.fadeOutTimeoutId !== null) {
           clearTimeout(barEl.fadeOutTimeoutId);
           barEl.fadeOutTimeoutId = null;
@@ -437,15 +443,20 @@ export class ChartRaceRenderer {
         if (this.scrubbing) {
           barEl.wrapper.style.transition = "none";
           barEl.bar.style.transition = "none";
+          barEl.wrapper.style.height = `${heights[visIdx]}px`;
+          barEl.wrapper.style.opacity = "1";
         } else {
+          // Start at 0 height at target position, then grow
           barEl.wrapper.style.transition = "none";
           barEl.bar.style.transition = "none";
           barEl.wrapper.style.transform = `translateY(${yOffsets[visIdx]}px)`;
+          barEl.wrapper.style.height = "0px";
+          barEl.wrapper.style.opacity = "0";
+          barEl.wrapper.offsetHeight; // force reflow
+          barEl.wrapper.style.transition = "height 600ms ease-in-out, opacity 600ms ease-in-out, transform 1.2s ease-in-out";
+          barEl.bar.style.transition = "";
           barEl.wrapper.style.height = `${heights[visIdx]}px`;
           barEl.wrapper.style.opacity = "1";
-          barEl.wrapper.offsetHeight; // force reflow
-          barEl.wrapper.style.transition = "";
-          barEl.bar.style.transition = "";
         }
       }
 
@@ -478,7 +489,7 @@ export class ChartRaceRenderer {
       visIdx++;
     }
 
-    // 6. Remove bars no longer visible — save positions first, then remove
+    // 6. Remove bars no longer visible — animate shrink then remove
     for (const [artistId, barEl] of this.bars) {
       if (visibleIds.has(artistId)) continue;
       // Save last known Y position for smooth reappearance
@@ -500,11 +511,31 @@ export class ChartRaceRenderer {
         clearTimeout(barEl.fadeOutTimeoutId);
         barEl.fadeOutTimeoutId = null;
       }
-      barEl.wrapper.remove();
-      if (barEl.clickHandler) {
-        barEl.wrapper.removeEventListener('click', barEl.clickHandler);
+
+      if (this.scrubbing) {
+        // During scrubbing, remove immediately
+        barEl.wrapper.remove();
+        if (barEl.clickHandler) {
+          barEl.wrapper.removeEventListener('click', barEl.clickHandler);
+        }
+        this.bars.delete(artistId);
+      } else {
+        // Animate shrink to 0 height, then remove
+        barEl.wrapper.style.transition = "height 600ms ease-in-out, opacity 600ms ease-in-out";
+        barEl.wrapper.style.height = "0px";
+        barEl.wrapper.style.opacity = "0";
+        barEl.wrapper.style.pointerEvents = "none";
+        barEl.hidden = true;
+
+        barEl.fadeOutTimeoutId = setTimeout(() => {
+          barEl.fadeOutTimeoutId = null;
+          barEl.wrapper.remove();
+          if (barEl.clickHandler) {
+            barEl.wrapper.removeEventListener('click', barEl.clickHandler);
+          }
+          this.bars.delete(artistId);
+        }, 650);
       }
-      this.bars.delete(artistId);
     }
 
     // 7. Toggle logo visibility

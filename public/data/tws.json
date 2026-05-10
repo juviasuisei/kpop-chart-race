@@ -8,11 +8,13 @@
     {
       "title": "You, You",
       "dailyValues": {
+        "2026-05-10": { "value": 4743, "source": "inkigayo", "episode": 1310 },
         "2026-05-09": { "value": 5139, "source": "show_music_core", "episode": 944 },
         "2026-05-08": { "value": 9538, "source": "music_bank", "episode": 1292 },
         "2026-05-06": { "value": 7202, "source": "show_champion", "episode": 596 }
       },
       "embeds": {
+        "2026-05-10": [{ "type": "live_performance", "url": "https://youtu.be/iruG_az1s28?si=6MiSwgw-iwM73Uxp"}],
         "2026-05-06": [{ "type": "live_performance", "url": "https://youtu.be/wr4_ctgsPOE?si=VelVga8hLRRzvmDc" }],
         "2026-04-27": [
           { "type": "release_date", "url": "https://music.apple.com/us/album/tws-5th-mini-album-no-tragedy-ep/1887723578" },

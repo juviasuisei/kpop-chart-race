@@ -25,6 +25,18 @@
           { "type": "mv", "url": "https://youtu.be/jOnLqqDRfY4?si=4k9jh8w_2i_XJwxQ" }
         ]
       }
+    },
+    {
+      "title": "Beautiful Strangers",
+      "dailyValues": {
+        "2025-08-21": { "value": 7883, "source": "m_countdown", "episode": 902 }
+      },
+      "embeds": {
+        "2025-07-21": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/the-star-chapter-together/1822309911" },
+          { "type": "mv", "url": "https://youtu.be/IcwHopeT5gY?si=uSOqY07JbxkNaYfJ" }
+        ]
+      }
     }
   ]
 }

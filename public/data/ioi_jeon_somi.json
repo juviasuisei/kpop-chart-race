@@ -1,0 +1,21 @@
+{
+  "name": "JEON SOMI [I.O.I]",
+  "korean_name": "전소미",
+  "artistType": "solo_female",
+  "generation": 3,
+  "debut": "2019-06-13",
+  "releases": [
+    {
+      "title": "CLOSER",
+      "dailyValues": {
+        "2025-08-20": { "value": 2851, "source": "show_champion", "episode": 566 }
+      },
+      "embeds": {
+        "2025-08-11": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/chaotic-confused-ep/1831153862" },
+          { "type": "mv", "url": "https://youtu.be/5C5lcn1GYfM?si=W1fkvrxmDOzcM_ft" }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "name": "YOUNG POSSE",
+  "korean_name": "영파씨",
+  "artistType": "girl_group",
+  "generation": 5,
+  "debut": "2023-10-18",
+  "releases": [
+    {
+      "title": "FREESTYLE",
+      "dailyValues": {
+        "2025-08-26": { "value": 3589, "source": "the_show", "episode": 387 }
+      },
+      "embeds": {
+        "2025-08-26": [{ "type": "live_performance", "url": "https://youtu.be/_38jyolvcEc?si=DQ6HQwVA-NageouT" }],
+        "2025-08-14": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/growing-pain-pt-1-free/1831154451" },
+          { "type": "mv", "url": "https://youtu.be/nuhslQ_1kOk?si=5xKea6JrnobD_YDo" }
+        ]
+      }
+    }
+  ]
+}

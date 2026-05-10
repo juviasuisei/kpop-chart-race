@@ -30,6 +30,18 @@
           { "type": "mv", "url": "https://youtu.be/5oQVTnq-UKk?si=QIQtt53D2rt0LQYG" }
         ]
       }
+    },
+    {
+      "title": "Dirty Work",
+      "dailyValues": {
+        "2025-08-31": { "value": 3851, "source": "inkigayo", "episode": 1281 }
+      },
+      "embeds": {
+        "2025-06-27": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/dirty-work-apple-music-edition-ep/1818922030" },
+          { "type": "mv", "url": "https://youtu.be/M2WTUoy4y6E?si=v4tBYyWHKshC4TIY" }
+        ]
+      }
     }
   ]
 }

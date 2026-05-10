@@ -19,6 +19,19 @@
           { "type": "mv", "url": "https://youtu.be/AMwK8YGZGnU?si=XN_ppMbKWpMYvFr9" }
         ]
       }
+    },
+    {
+      "title": "BUBBLE GUM",
+      "dailyValues": {
+        "2025-08-26": { "value": 9490, "source": "the_show", "episode": 387 }
+      },
+      "embeds": {
+        "2025-08-26": [{ "type": "live_performance", "url": "https://youtu.be/8Kv08dYuBaU?si=aLiQJMhzXBVFwNJ-" }],
+        "2025-08-19": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/bubble-gum-ep/1832943665" },
+          { "type": "mv", "url": "https://youtu.be/MZm4qcvbvbQ?si=KKdf7doycV3vKgo3" }
+        ]
+      }
     }
   ]
 }

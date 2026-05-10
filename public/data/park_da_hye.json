@@ -1,0 +1,21 @@
+{
+  "name": "Park Da Hye",
+  "korean_name": "박다혜",
+  "artistType": "solo_female",
+  "generation": 5,
+  "debut": "2023-01-19",
+  "releases": [
+    {
+      "title": "Starting With You ❍",
+      "dailyValues": {
+        "2025-08-30": { "value": 5793, "source": "show_music_core", "episode": 915 }
+      },
+      "embeds": {
+        "2025-08-10": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/starting-with-you-single/1831225990" },
+          { "type": "mv", "url": "https://youtu.be/dAcDmbKXw_0?si=ItLbQx6lkZHdFgqv" }
+        ]
+      }
+    }
+  ]
+}

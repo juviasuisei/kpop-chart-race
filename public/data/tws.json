@@ -8,6 +8,7 @@
     {
       "title": "You, You",
       "dailyValues": {
+        "2026-05-09": { "value": 5139, "source": "show_music_core", "episode": 944 },
         "2026-05-08": { "value": 9538, "source": "music_bank", "episode": 1292 },
         "2026-05-06": { "value": 7202, "source": "show_champion", "episode": 596 }
       },

@@ -1,0 +1,22 @@
+{
+  "name": "MADEIN S",
+  "korean_name": "메이딘S",
+  "artistType": "girl_group",
+  "generation": 5,
+  "debut": "2025-08-14",
+  "releases": [
+    {
+      "title": "BLUE",
+      "dailyValues": {
+        "2025-08-26": { "value": 3053, "source": "the_show", "episode": 387 }
+      },
+      "embeds": {
+        "2025-08-26": [{ "type": "live_performance", "url": "https://youtu.be/1pUk4K-dTzs?si=-oDtHnwVwGAkxffx" }],
+        "2025-08-14": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/blue-single/1832410329" },
+          { "type": "mv", "url": "https://youtu.be/TnseWEOBWDs?si=MfN_v1U9njq4dB-c" }
+        ]
+      }
+    }
+  ]
+}

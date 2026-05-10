@@ -30,7 +30,8 @@
       "title": "JUMP",
       "dailyValues": {
         "2025-10-17": { "value": 2732, "source": "music_bank", "episode": 1263 },
-        "2025-10-03": { "value": 2752, "source": "music_bank", "episode": 1261 }
+        "2025-10-03": { "value": 2752, "source": "music_bank", "episode": 1261 },
+        "2025-08-29": { "value": 3672, "source": "music_bank", "episode": 1256 }
       },
       "embeds": {
         "2025-07-11": [

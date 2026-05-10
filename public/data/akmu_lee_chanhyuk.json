@@ -1,0 +1,21 @@
+{
+  "name": "LEE CHANHYUK [AKMU]",
+  "korean_name": "이찬혁",
+  "artistType": "solo_male",
+  "generation": 3,
+  "debut": "2022-10-17",
+  "releases": [
+    {
+      "title": "Endangered Love",
+      "dailyValues": {
+        "2025-08-30": { "value": 3256, "source": "show_music_core", "episode": 915 }
+      },
+      "embeds": {
+        "2025-07-14": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/eros/1825027867" },
+          { "type": "mv", "url": "https://youtu.be/19oT04OuBhg?si=OF0Z2x3nyDSuS0PQ" }
+        ]
+      }
+    }
+  ]
+}

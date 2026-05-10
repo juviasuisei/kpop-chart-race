@@ -38,6 +38,18 @@
           { "type": "mv", "url": "https://youtu.be/28dAfmIAlCo?si=WUPOX-8qZHSGj8Uq" }
         ]
       }
+    },
+    {
+      "title": "Surf",
+      "dailyValues": {
+        "2025-08-28": { "value": 3192, "source": "m_countdown", "episode": 903 }
+      },
+      "embeds": {
+        "2025-08-12": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/surf-single/1830381182" },
+          { "type": "mv", "url": "https://youtu.be/1pyO6oNmACs?si=bFMPTGh0onQXU6CH" }
+        ]
+      }
     }
   ]
 }

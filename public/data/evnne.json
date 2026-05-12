@@ -21,10 +21,13 @@
     {
       "title": "How Can I Do",
       "dailyValues": {
-        "2025-08-20": { "value": 5290, "source": "show_champion", "episode": 566 }
+        "2025-08-20": { "value": 5290, "source": "show_champion", "episode": 566 },
+        "2025-08-15": { "value": 9335, "source": "music_bank", "episode": 1254 },
+        "2025-08-12": { "value": 6320, "source": "the_show", "episode": 385 }
       },
       "embeds": {
         "2025-08-20": [{ "type": "live_performance", "url": "https://youtu.be/U89j4Y7HjOY?si=ttDW2wB7xS48AC6b" }],
+        "2025-08-12": [{ "type": "live_performance", "url": "https://youtu.be/IjnkiujDlNo?si=_lrpcj3YnZGDQeEz" }],
         "2025-08-04": [
           { "type": "release_date", "url": "https://music.apple.com/us/album/love-anecdote-s-ep/1829947664" },
           { "type": "mv", "url": "https://youtu.be/2pm8e8i4mGs?si=AMZTMLAjTVfWBjAE" }

@@ -19,6 +19,18 @@
           { "type": "mv", "url": "https://youtu.be/NOiyDlWl534?si=RSJQj3ilv6pDA1iZ" }
         ]
       }
+    },
+    {
+      "title": "Being a Good Girl Hurts",
+      "dailyValues": {
+      },
+      "embeds": {
+        "2025-08-12": [{ "type": "live_performance", "url": "https://youtu.be/MA5Uj16gFrw?si=ra11PRcOTZw5s_5U" }],
+        "2025-07-29": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/blooming-wings-ep/1828371014" },
+          { "type": "mv", "url": "https://youtu.be/Za4RPfkgEGo?si=TdCy12SmE0vA9rQi" }
+        ]
+      }
     }
   ]
 }

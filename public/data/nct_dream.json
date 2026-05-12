@@ -20,6 +20,18 @@
           { "type": "mv", "url": "https://youtu.be/wvtNmMmcAYw?si=931_LskQfkVsI47k" }
         ]
       }
+    },
+    {
+      "title": "CHILLER",
+      "dailyValues": {
+        "2025-08-14": { "value": 7535, "source": "m_countdown", "episode": 901 }
+      },
+      "embeds": {
+        "2025-07-14": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/go-back-to-the-future/1822449919" },
+          { "type": "mv", "url": "https://youtu.be/F0veX7ix4x4?si=Cw04pWl12lShIGLg" }
+        ]
+      }
     }
   ]
 }

@@ -29,7 +29,8 @@
     {
       "title": "Beautiful Strangers",
       "dailyValues": {
-        "2025-08-21": { "value": 7883, "source": "m_countdown", "episode": 902 }
+        "2025-08-21": { "value": 7883, "source": "m_countdown", "episode": 902 },
+        "2025-08-14": { "value": 6149, "source": "m_countdown", "episode": 901 }
       },
       "embeds": {
         "2025-07-21": [

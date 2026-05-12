@@ -47,12 +47,25 @@
         "2025-09-07": { "value": 4310, "source": "inkigayo", "episode": 1282 },
         "2025-08-31": { "value": 5253, "source": "inkigayo", "episode": 1281 },
         "2025-08-24": { "value": 5669, "source": "inkigayo", "episode": 1280 },
-        "2025-08-23": { "value": 5375, "source": "show_music_core", "episode": 914 }
+        "2025-08-23": { "value": 5375, "source": "show_music_core", "episode": 914 },
+        "2025-08-17": { "value": 5036, "source": "inkigayo", "episode": 1279 },
+        "2025-08-16": { "value": 5885, "source": "show_music_core", "episode": 913 }
       },
       "embeds": {
         "2025-06-23": [
           { "type": "release_date", "url": "https://music.apple.com/us/album/famous-single/1819675760" },
           { "type": "mv", "url": "https://youtu.be/VjvzYjU1mY0?si=-cbyVKufmQs7NMW4" }
+        ]
+      }
+    },
+    {
+      "title": "WICKED",
+      "dailyValues": {
+        "2025-08-17": { "value": 3182, "source": "inkigayo", "episode": 1279 }
+      },
+      "embeds": {
+        "2025-06-23": [
+          { "type": "mv", "url": "https://youtu.be/mhKCRnUKp5U?si=jJr9ggGa4I8TtoqH" }
         ]
       }
     }

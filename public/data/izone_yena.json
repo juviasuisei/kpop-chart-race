@@ -23,6 +23,7 @@
     {
       "title": "Being a Good Girl Hurts",
       "dailyValues": {
+        "2025-08-12": { "value": 5654, "source": "the_show", "episode": 385 }
       },
       "embeds": {
         "2025-08-12": [{ "type": "live_performance", "url": "https://youtu.be/MA5Uj16gFrw?si=ra11PRcOTZw5s_5U" }],

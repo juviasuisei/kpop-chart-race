@@ -1,0 +1,22 @@
+{
+  "name": "THE BOYZ",
+  "korean_name": "더보이즈",
+  "artistType": "boy_group",
+  "generation": 4,
+  "debut": "2017-12-06",
+  "releases": [
+    {
+      "title": "Stylish",
+      "dailyValues": {
+        "2025-08-10": { "value": 3566, "source": "inkigayo", "episode": 1278 },
+        "2025-08-08": { "value": 7536, "source": "music_bank", "episode": 1253 }
+      },
+      "embeds": {
+        "2025-07-28": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/the-boyz-the-10th-mini-album-a-e%EF%AC%80ect-ep/1828596000" },
+          { "type": "mv", "url": "https://youtu.be/2RKf0dEOWNk?si=mH_z-CcnJ0CGIEX5" }
+        ]
+      }
+    }
+  ]
+}

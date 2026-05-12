@@ -1,0 +1,21 @@
+{
+  "name": "TWICE",
+  "korean_name": "트와이스",
+  "artistType": "girl_group",
+  "generation": 3,
+  "debut": "2015-10-20",
+  "releases": [
+    {
+      "title": "THIS IS FOR",
+      "dailyValues": {
+        "2025-08-07": { "value": 6618, "source": "m_countdown", "episode": 900 }
+      },
+      "embeds": {
+        "2025-07-11": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/this-is-for/1813490993" },
+          { "type": "mv", "url": "https://youtu.be/eHHQaoEW30Q?si=RV9Rv-X9IDgV7nVe" }
+        ]
+      }
+    }
+  ]
+}

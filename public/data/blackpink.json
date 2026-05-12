@@ -35,7 +35,8 @@
         "2025-08-23": { "value": 6684, "source": "show_music_core", "episode": 914 },
         "2025-08-22": { "value": 3670, "source": "music_bank", "episode": 1255 },
         "2025-08-17": { "value": 7838, "source": "inkigayo", "episode": 1279 },
-        "2025-08-16": { "value": 7893, "source": "show_music_core", "episode": 913 }
+        "2025-08-16": { "value": 7893, "source": "show_music_core", "episode": 913 },
+        "2025-08-10": { "value": 6909, "source": "inkigayo", "episode": 1278 }
       },
       "embeds": {
         "2025-07-11": [

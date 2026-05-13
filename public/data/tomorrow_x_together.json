@@ -32,9 +32,15 @@
         "2025-08-21": { "value": 7883, "source": "m_countdown", "episode": 902 },
         "2025-08-14": { "value": 6149, "source": "m_countdown", "episode": 901 },
         "2025-08-08": { "value": 4497, "source": "music_bank", "episode": 1253 },
-        "2025-08-07": { "value": 6301, "source": "m_countdown", "episode": 900 }
+        "2025-08-07": { "value": 6301, "source": "m_countdown", "episode": 900 },
+        "2025-08-03": { "value": 4472, "source": "inkigayo", "episode": 1277 },
+        "2025-08-02": { "value": 5651, "source": "show_music_core", "episode": 912 },
+        "2025-08-01": { "value": 12368, "source": "music_bank", "episode": 1252 }
       },
       "embeds": {
+        "2025-08-03": [{ "type": "live_performance", "url": "https://youtu.be/oDnY46l72xk?si=u9Rfw5M2krIHFIrp" }],
+        "2025-08-02": [{ "type": "live_performance", "url": "https://youtu.be/CXeyg4uFEC4?si=2Qjtr2trlK-AN_FB" }],
+        "2025-08-01": [{ "type": "live_performance", "url": "https://youtu.be/TlPNkMcRAN4?si=k2jVrGhG9OjlRb1q" }],
         "2025-07-21": [
           { "type": "release_date", "url": "https://music.apple.com/us/album/the-star-chapter-together/1822309911" },
           { "type": "mv", "url": "https://youtu.be/IcwHopeT5gY?si=uSOqY07JbxkNaYfJ" }

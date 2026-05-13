@@ -32,6 +32,17 @@
           { "type": "mv", "url": "https://youtu.be/F0veX7ix4x4?si=Cw04pWl12lShIGLg" }
         ]
       }
+    },
+    {
+      "title": "BTTF",
+      "dailyValues": {
+        "2025-07-30": { "value": 659, "source": "show_champion", "episode": 565 }
+      },
+      "embeds": {
+        "2025-07-08": [
+          { "type": "mv", "url": "https://youtu.be/3rsBWr3JOUI?si=dj0tLT8GxoNasV6n" }
+        ]
+      }
     }
   ]
 }

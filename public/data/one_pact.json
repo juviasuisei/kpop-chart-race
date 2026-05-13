@@ -17,6 +17,19 @@
           { "type": "mv", "url": "https://youtu.be/C6--84TzxZc?si=YPXPXynhbZStwFse" }
         ]
       }
+    },
+    {
+      "title": "YES, NO, MAYBE",
+      "dailyValues": {
+        "2025-07-29": { "value": 3008, "source": "the_show", "episode": 384 }
+      },
+      "embeds": {
+        "2025-07-29": [{ "type": "live_performance", "url": "https://youtu.be/wemRgZhH-gs?si=T4PHQ8ENBDx5ovgt" }],
+        "2025-07-22": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/one-fact/1826667215" },
+          { "type": "mv", "url": "https://youtu.be/5abvr0khbU4?si=18kbaQ7sK3gmOlsn" }
+        ]
+      }
     }
   ]
 }

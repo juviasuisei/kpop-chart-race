@@ -8,7 +8,8 @@
     {
       "title": "THIS IS FOR",
       "dailyValues": {
-        "2025-08-07": { "value": 6618, "source": "m_countdown", "episode": 900 }
+        "2025-08-07": { "value": 6618, "source": "m_countdown", "episode": 900 },
+        "2025-07-30": { "value": 625, "source": "show_champion", "episode": 565 }
       },
       "embeds": {
         "2025-07-11": [

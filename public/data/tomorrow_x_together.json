@@ -35,7 +35,9 @@
         "2025-08-07": { "value": 6301, "source": "m_countdown", "episode": 900 },
         "2025-08-03": { "value": 4472, "source": "inkigayo", "episode": 1277 },
         "2025-08-02": { "value": 5651, "source": "show_music_core", "episode": 912 },
-        "2025-08-01": { "value": 12368, "source": "music_bank", "episode": 1252 }
+        "2025-08-01": { "value": 12368, "source": "music_bank", "episode": 1252 },
+        "2025-07-31": { "value": 6301, "source": "m_countdown", "episode": 899 },
+        "2025-07-30": { "value": 5072, "source": "show_champion", "episode": 565 }
       },
       "embeds": {
         "2025-08-03": [{ "type": "live_performance", "url": "https://youtu.be/oDnY46l72xk?si=u9Rfw5M2krIHFIrp" }],

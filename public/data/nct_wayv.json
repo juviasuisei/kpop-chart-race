@@ -1,0 +1,22 @@
+{
+  "name": "WayV [NCT]",
+  "korean_name": "웨이션브이",
+  "artistType": "boy_group",
+  "generation": 3,
+  "debut": "2019-01-17",
+  "releases": [
+    {
+      "title": "BIG BANDS",
+      "dailyValues": {
+        "2025-07-29": { "value": 7650, "source": "the_show", "episode": 384 }
+      },
+      "embeds": {
+        "2025-07-29": [{ "type": "live_performance", "url": "https://youtu.be/k4o8W1grJ0o?si=scCFtdFDoyiF-OhV" }],
+        "2025-07-18": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/big-bands-the-7th-mini-album-ep/1825364278" },
+          { "type": "mv", "url": "https://youtu.be/JK-7RKsU3fw?si=Js3MXlFgSlgB9UO9" }
+        ]
+      }
+    }
+  ]
+}

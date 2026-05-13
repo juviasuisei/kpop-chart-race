@@ -8,7 +8,8 @@
     {
       "title": "I WANT IT",
       "dailyValues": {
-        "2025-08-01": { "value": 4069, "source": "music_bank", "episode": 1252 }
+        "2025-08-01": { "value": 4069, "source": "music_bank", "episode": 1252 },
+        "2025-07-30": { "value": 802, "source": "show_champion", "episode": 565 }
       },
       "embeds": {
         "2025-08-01": [{ "type": "live_performance", "url": "https://youtu.be/JfXy2D7-nrc?si=siH-2XG2j8Omo3Ue" }],

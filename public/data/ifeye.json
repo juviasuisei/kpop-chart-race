@@ -1,0 +1,21 @@
+{
+  "name": "ifeye",
+  "korean_name": "이프아이",
+  "artistType": "girl_group",
+  "generation": 5,
+  "debut": "2025-04-08",
+  "releases": [
+    {
+      "title": "r u ok?",
+      "dailyValues": {
+      },
+      "embeds": {
+        "2025-07-29": [{ "type": "live_performance", "url": "https://youtu.be/KY4E5rQJ0N0?si=YgXUypc4xWHWDoLr" }],
+        "2025-07-16": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/sweet-tang/1825815110" },
+          { "type": "mv", "url": "https://youtu.be/tGMy0z1akLs?si=edo4_jgDm9SckcY5" }
+        ]
+      }
+    }
+  ]
+}

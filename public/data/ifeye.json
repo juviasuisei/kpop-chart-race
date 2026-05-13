@@ -8,6 +8,7 @@
     {
       "title": "r u ok?",
       "dailyValues": {
+        "2025-07-29": { "value": 2872, "source": "the_show", "episode": 384 }
       },
       "embeds": {
         "2025-07-29": [{ "type": "live_performance", "url": "https://youtu.be/KY4E5rQJ0N0?si=YgXUypc4xWHWDoLr" }],

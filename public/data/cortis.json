@@ -8,6 +8,9 @@
     {
       "title": "REDRED",
       "dailyValues": {
+        "2026-05-14": { "value": 10160, "source": "m_countdown", "episode": 928 },
+        "2026-05-13": { "value": 7160, "source": "show_champion", "episode": 597 },
+        "2026-05-07": { "value": 9531, "source": "m_countdown", "episode": 927 },
         "2026-04-30": { "value": 8902, "source": "m_countdown", "episode": 926 }
       },
       "embeds": {

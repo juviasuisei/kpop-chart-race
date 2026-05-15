@@ -1,0 +1,22 @@
+{
+  "name": "NAZE",
+  "korean_name": "네이즈",
+  "artistType": "boy_group",
+  "generation": 5,
+  "debut": "2026-05-04",
+  "releases": [
+    {
+      "title": "People Talk",
+      "dailyValues": {
+        "2026-05-13": { "value": 1263, "source": "show_champion", "episode": 597 }
+      },
+      "embeds": {
+        "2026-05-13": [{ "type": "live_performance", "url": "https://youtu.be/nYZkc-vHPso?si=wYkryVbXx0DeDW-6" }],
+        "2026-05-04": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/naze-ep/1895312913" },
+          { "type": "mv", "url": "https://youtu.be/yTvKqcNyaJo?si=_H8DwiNe1F91tjTB" }
+        ]
+      }
+    }
+  ]
+}

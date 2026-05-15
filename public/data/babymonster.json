@@ -6,6 +6,19 @@
   "debut": "2024-01-01",
   "releases": [
     {
+      "title": "CHOOM",
+      "dailyValues": {
+        "2026-05-14": { "value": 6657, "source": "m_countdown", "episode": 928 },
+        "2026-05-13": { "value": 2235, "source": "show_champion", "episode": 597 }
+      },
+      "embeds": {
+        "2026-05-04": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/%EC%B6%A4-choom-ep/1895588322" },
+          { "type": "mv", "url": "https://youtu.be/x3eqqoZPV_E?si=MsdFjbTiIVgEKOhk" }
+        ]
+      }
+    },
+    {
       "title": "WE GO UP",
       "dailyValues": {
         "2025-10-26": { "value": 4034, "source": "inkigayo", "episode": 1288 },

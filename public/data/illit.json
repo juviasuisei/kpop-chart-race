@@ -8,10 +8,12 @@
     {
       "title": "It's Me",
       "dailyValues": {
+        "2026-05-15": { "value": 3108, "source": "music_bank", "episode": 1293 },
         "2026-05-13": { "value": 6961, "source": "show_champion", "episode": 597 },
         "2026-05-07": { "value": 9531, "source": "m_countdown", "episode": 927 }
       },
       "embeds": {
+        "2026-05-15": [{ "type": "live_performance", "url": "https://youtu.be/orQbEWjlnRo?si=-dSGufwyC3znIofm" }],
         "2026-04-30": [
           { "type": "release_date", "url": "https://music.apple.com/us/album/mamihlapinatapai-ep/1887194024" },
           { "type": "mv", "url": "https://youtu.be/bMhDJ0S0OBA?si=b6avCxhVZ9UlGRxb" }

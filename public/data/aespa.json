@@ -36,7 +36,10 @@
       "dailyValues": {
         "2025-08-31": { "value": 3851, "source": "inkigayo", "episode": 1281 },
         "2025-08-24": { "value": 4318, "source": "inkigayo", "episode": 1280 },
-        "2025-08-16": { "value": 4399, "source": "show_music_core", "episode": 913 }
+        "2025-08-16": { "value": 4399, "source": "show_music_core", "episode": 913 },
+        "2025-07-23": { "value": 2952, "source": "show_champion", "episode": 564 },
+        "2025-07-19": { "value": 6308, "source": "show_music_core", "episode": 910 },
+        "2025-07-16": { "value": 3095, "source": "show_champion", "episode": 563 }
       },
       "embeds": {
         "2025-06-27": [

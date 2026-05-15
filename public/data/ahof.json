@@ -21,6 +21,19 @@
           { "type": "mv", "url": "https://youtu.be/2RKf0dEOWNk?si=mH_z-CcnJ0CGIEX5" }
         ]
       }
+    },
+    {
+      "title": "Rendevouz",
+      "dailyValues": {
+        "2025-07-15": { "value": 4970, "source": "the_show", "episode": 383 }
+      },
+      "embeds": {
+        "2025-07-15": [{ "type": "live_performance", "url": "https://youtu.be/w6R8Hb0Nrtg?si=vcIDVlfap9llFYX7" }],
+        "2025-07-01": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/who-we-are-ep/1821576514" },
+          { "type": "mv", "url": "https://youtu.be/2RKf0dEOWNk?si=mH_z-CcnJ0CGIEX5" }
+        ]
+      }
     }
   ]
 }

@@ -9,7 +9,10 @@
       "title": "THIS IS FOR",
       "dailyValues": {
         "2025-08-07": { "value": 6618, "source": "m_countdown", "episode": 900 },
-        "2025-07-30": { "value": 625, "source": "show_champion", "episode": 565 }
+        "2025-07-30": { "value": 625, "source": "show_champion", "episode": 565 },
+        "2025-07-18": { "value": 5175, "source": "music_bank", "episode": 1250 },
+        "2025-07-17": { "value": 5180, "source": "m_countdown", "episode": 897 },
+        "2025-07-16": { "value": 3274, "source": "show_champion", "episode": 563 }
       },
       "embeds": {
         "2025-07-11": [

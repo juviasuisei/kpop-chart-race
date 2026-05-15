@@ -17,6 +17,19 @@
           { "type": "mv", "url": "https://youtu.be/sBx08M4cDME?si=L_5loe8KC8c8nPs3" }
         ]
       }
+    },
+    {
+      "title": "Summer Was You",
+      "dailyValues": {
+        "2025-07-15": { "value": 5111, "source": "the_show", "episode": 383 }
+      },
+      "embeds": {
+        "2025-07-15": [{ "type": "live_performance", "url": "https://youtu.be/Fz7QDf8nTQQ?si=YNUI1hZf3lei1VyY" }],
+        "2025-06-26": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/h1-key-4th-mini-album-lovestruck-ep/1821353779" },
+          { "type": "mv", "url": "https://youtu.be/1NeLQ-Wl5QU?si=T29e5RkOHi3_eehS" }
+        ]
+      }
     }
   ]
 }

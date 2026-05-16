@@ -39,9 +39,18 @@
         "2025-08-16": { "value": 4399, "source": "show_music_core", "episode": 913 },
         "2025-07-23": { "value": 2952, "source": "show_champion", "episode": 564 },
         "2025-07-19": { "value": 6308, "source": "show_music_core", "episode": 910 },
-        "2025-07-16": { "value": 3095, "source": "show_champion", "episode": 563 }
+        "2025-07-16": { "value": 3095, "source": "show_champion", "episode": 563 },
+        "2025-07-13": { "value": 6709, "source": "inkigayo", "episode": 1275 },
+        "2025-07-12": { "value": 7474, "source": "show_music_core", "episode": 909 },
+        "2025-07-11": { "value": 6352, "source": "music_bank", "episode": 1249 },
+        "2025-07-10": { "value": 8199, "source": "m_countdown", "episode": 896 },
+        "2025-07-09": { "value": 4798, "source": "show_champion", "episode": 562 }
       },
       "embeds": {
+        "2025-07-13": [{ "type": "live_performance", "url": "https://youtu.be/nfD6r2CRyLI?si=tL7-JzY5jqnF2v-y" }],
+        "2025-07-12": [{ "type": "live_performance", "url": "https://youtu.be/H7JZZlWpeU0?si=QelE348x7H7w9NEJ" }],
+        "2025-07-11": [{ "type": "live_performance", "url": "https://youtu.be/HySmGo5L5a8?si=ZYnf2pgLDnwcEBBr" }],
+        "2025-07-10": [{ "type": "live_performance", "url": "https://youtu.be/TBDraDeKUIA?si=MM30PX6l_lTb3Il1" }],
         "2025-06-27": [
           { "type": "release_date", "url": "https://music.apple.com/us/album/dirty-work-apple-music-edition-ep/1818922030" },
           { "type": "mv", "url": "https://youtu.be/M2WTUoy4y6E?si=v4tBYyWHKshC4TIY" }

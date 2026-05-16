@@ -17,6 +17,19 @@
           { "type": "mv", "url": "https://youtu.be/_UQCWEp-8BQ?si=brlUMU7oXZ9gu_Pg" }
         ]
       }
+    },
+    {
+      "title": "X",
+      "dailyValues": {
+        "2025-07-09": { "value": 2312, "source": "show_champion", "episode": 562 }
+      },
+      "embeds": {
+        "2025-07-09": [{ "type": "live_performance", "url": "https://youtu.be/Orv4bv_jGkk?si=-CAIHvWWxFss-_ct" }],
+        "2025-06-30": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/5x-ep/1822191908" },
+          { "type": "mv", "url": "https://youtu.be/7tEgWyYB8YE?si=-2KSOmsQiNYIPF_o" }
+        ]
+      }
     }
   ]
 }

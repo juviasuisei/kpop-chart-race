@@ -30,6 +30,7 @@
     {
       "title": "Paradise of Rumors",
       "dailyValues": {
+        "2026-05-16": { "value": 5801, "source": "show_music_core", "episode": 945 },
         "2026-05-10": { "value": 4287, "source": "inkigayo", "episode": 1310 },
         "2026-05-09": { "value": 5733, "source": "show_music_core", "episode": 944 },
         "2026-05-03": { "value": 4453, "source": "inkigayo", "episode": 1309 },

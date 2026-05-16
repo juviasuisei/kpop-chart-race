@@ -25,10 +25,16 @@
     {
       "title": "Rendevouz",
       "dailyValues": {
-        "2025-07-15": { "value": 4970, "source": "the_show", "episode": 383 }
+        "2025-07-15": { "value": 4970, "source": "the_show", "episode": 383 },
+        "2025-07-11": { "value": 7941, "source": "music_bank", "episode": 1249 },
+        "2025-07-09": { "value": 6831, "source": "show_champion", "episode": 562 },
+        "2025-07-08": { "value": 7980, "source": "the_show", "episode": 382 }
       },
       "embeds": {
         "2025-07-15": [{ "type": "live_performance", "url": "https://youtu.be/w6R8Hb0Nrtg?si=vcIDVlfap9llFYX7" }],
+        "2025-07-11": [{ "type": "live_performance", "url": "https://youtu.be/Saz2Bs7uIlU?si=r2Ra8fU6LZ9L3DXq" }],
+        "2025-07-09": [{ "type": "live_performance", "url": "https://youtu.be/9sKi49yNY9Q?si=_Ksmhn3nDLZMoT7Q" }],
+        "2025-07-08": [{ "type": "live_performance", "url": "https://youtu.be/LSHfWikbe_M?si=5FcuYG0tSV4SbvWE" }],
         "2025-07-01": [
           { "type": "release_date", "url": "https://music.apple.com/us/album/who-we-are-ep/1821576514" },
           { "type": "mv", "url": "https://youtu.be/2RKf0dEOWNk?si=mH_z-CcnJ0CGIEX5" }

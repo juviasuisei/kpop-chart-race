@@ -8,6 +8,7 @@
     {
       "title": "REDRED",
       "dailyValues": {
+        "2026-05-17": { "value": 5926, "source": "inkigayo", "episode": 1311 },
         "2026-05-16": { "value": 6830, "source": "show_music_core", "episode": 945 },
         "2026-05-15": { "value": 12244, "source": "music_bank", "episode": 1293 },
         "2026-05-14": { "value": 10160, "source": "m_countdown", "episode": 928 },

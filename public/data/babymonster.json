@@ -8,10 +8,12 @@
     {
       "title": "CHOOM",
       "dailyValues": {
+        "2026-05-17": { "value": 4569, "source": "inkigayo", "episode": 1311 },
         "2026-05-14": { "value": 6657, "source": "m_countdown", "episode": 928 },
         "2026-05-13": { "value": 2235, "source": "show_champion", "episode": 597 }
       },
       "embeds": {
+        "2026-05-17": [{ "type": "live_performance", "url": "https://youtu.be/4cGD1koF2bk?si=66YGoul4iXMo3klv" }],
         "2026-05-04": [
           { "type": "release_date", "url": "https://music.apple.com/us/album/%EC%B6%A4-choom-ep/1895588322" },
           { "type": "mv", "url": "https://youtu.be/x3eqqoZPV_E?si=MsdFjbTiIVgEKOhk" }

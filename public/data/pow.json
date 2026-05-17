@@ -32,6 +32,19 @@
           { "type": "mv", "url": "https://youtu.be/UpGEn4SkSY0?si=ZYdhbbesLJFjXihI" }
         ]
       }
+    },
+    {
+      "title": "Being Tender",
+      "dailyValues": {
+        "2025-07-01": { "value": 1449, "source": "the_show", "episode": 381 }
+      },
+      "embeds": {
+        "2025-07-01": [{ "type": "live_performance", "url": "https://youtu.be/EaQK7S05QPs?si=diubH4t7bJQcnWlM" }],
+        "2025-06-27": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/being-tender-ep/1822020510" },
+          { "type": "mv", "url": "https://youtu.be/gkoIEw1MH-0?si=lopOGRJsdORg2Dbe" }
+        ]
+      }
     }
   ]
 }

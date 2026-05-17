@@ -59,12 +59,17 @@
         "2025-07-13": { "value": 4868, "source": "inkigayo", "episode": 1275 },
         "2025-07-12": { "value": 6409, "source": "show_music_core", "episode": 909 },
         "2025-07-10": { "value": 5135, "source": "m_countdown", "episode": 896 },
-        "2025-07-09": { "value": 3654, "source": "show_champion", "episode": 562 }
+        "2025-07-09": { "value": 3654, "source": "show_champion", "episode": 562 },
+        "2025-07-06": { "value": 5078, "source": "inkigayo", "episode": 1274 },
+        "2025-07-03": { "value": 6789, "source": "m_countdown", "episode": 895 },
+        "2025-07-02": { "value": 3921, "source": "show_champion", "episode": 561 }
       },
       "embeds": {
         "2025-07-13": [{ "type": "live_performance", "url": "https://youtu.be/KCWrsSFsCBw?si=GTSBShb1oiJ_knoI" }],
         "2025-07-12": [{ "type": "live_performance", "url": "https://youtu.be/DyMD_ecK7ZU?si=2RdEBTiNoXOQoPVF" }],
         "2025-07-10": [{ "type": "live_performance", "url": "https://youtu.be/DNcRUipPRYQ?si=cVTQU90sGteO6G2f" }],
+        "2025-07-06": [{ "type": "live_performance", "url": "https://youtu.be/02i-L0D9QXk?si=ubGkTIlJgLa89Q13" }],
+        "2025-07-03": [{ "type": "live_performance", "url": "https://youtu.be/xnJuxltLUSA?si=5nt8Ndmu29O0l2tC" }],
         "2025-06-23": [
           { "type": "release_date", "url": "https://music.apple.com/us/album/famous-single/1819675760" },
           { "type": "mv", "url": "https://youtu.be/VjvzYjU1mY0?si=-cbyVKufmQs7NMW4" }

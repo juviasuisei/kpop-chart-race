@@ -26,9 +26,12 @@
     {
       "title": "LIKE YOU BETTER",
       "dailyValues": {
-        "2025-07-12": { "value": 3102, "source": "show_music_core", "episode": 909 }
+        "2025-07-12": { "value": 3102, "source": "show_music_core", "episode": 909 },
+        "2025-07-04": { "value": 6903, "source": "music_bank", "episode": 1248 },
+        "2025-07-02": { "value": 3955, "source": "show_champion", "episode": 561 }
       },
       "embeds": {
+        "2025-07-04": [{ "type": "live_performance", "url": "https://youtu.be/uWNvZelLXsI?si=S10lCL24cGQUMnV0" }],
         "2025-06-25": [
           { "type": "release_date", "url": "https://music.apple.com/us/album/from-our-20s-ep/1821787094" },
           { "type": "mv", "url": "https://youtu.be/r1QapH1SIAI?si=Yy9ty1PdmqpENiOl" }

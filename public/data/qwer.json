@@ -1,0 +1,21 @@
+{
+  "name": "QWER",
+  "korean_name": "큐더블유이알",
+  "artistType": "girl_group",
+  "generation": 5,
+  "debut": "2023-10-18",
+  "releases": [
+    {
+      "title": "Dear",
+      "dailyValues": {
+        "2025-07-02": { "value": 2073, "source": "show_champion", "episode": 561 }
+      },
+      "embeds": {
+        "2025-06-09": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/3rd-mini-album-in-a-million-noises-ill-be-your-harmony-ep/1818035338" },
+          { "type": "mv", "url": "https://youtu.be/gvlT8VahXY4?si=Txz6ggrA5NJEOfgL" }
+        ]
+      }
+    }
+  ]
+}

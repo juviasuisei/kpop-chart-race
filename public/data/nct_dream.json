@@ -24,9 +24,11 @@
     {
       "title": "CHILLER",
       "dailyValues": {
-        "2025-08-14": { "value": 7535, "source": "m_countdown", "episode": 901 }
+        "2025-08-14": { "value": 7535, "source": "m_countdown", "episode": 901 },
+        "2025-07-24": { "value": 5321, "source": "m_countdown", "episode": 898 }
       },
       "embeds": {
+        "2025-07-24": [{ "type": "live_performance", "url": "https://youtu.be/tY5R-Quu088?si=S2BjRRYI38FVLtM5" }],
         "2025-07-14": [
           { "type": "release_date", "url": "https://music.apple.com/us/album/go-back-to-the-future/1822449919" },
           { "type": "mv", "url": "https://youtu.be/F0veX7ix4x4?si=Cw04pWl12lShIGLg" }
@@ -36,9 +38,13 @@
     {
       "title": "BTTF",
       "dailyValues": {
-        "2025-07-30": { "value": 659, "source": "show_champion", "episode": 565 }
+        "2025-07-30": { "value": 659, "source": "show_champion", "episode": 565 },
+        "2025-07-26": { "value": 6792, "source": "show_music_core", "episode": 911 },
+        "2025-07-25": { "value": 9732, "source": "music_bank", "episode": 1251 },
+        "2025-07-23": { "value": 4337, "source": "show_champion", "episode": 564 }
       },
       "embeds": {
+        "2025-07-25": [{ "type": "live_performance", "url": "https://youtu.be/NAhPKrFlFoM?si=v84_6IKTs9-xpyHD" }],
         "2025-07-08": [
           { "type": "mv", "url": "https://youtu.be/3rsBWr3JOUI?si=dj0tLT8GxoNasV6n" }
         ]

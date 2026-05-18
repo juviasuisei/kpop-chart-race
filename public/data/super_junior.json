@@ -1,0 +1,21 @@
+{
+  "name": "SUPER JUNIOR",
+  "korean_name": "슈퍼주니어",
+  "artistType": "boy_group",
+  "generation": 2,
+  "debut": "2005-11-06",
+  "releases": [
+    {
+      "title": "Express Mode",
+      "dailyValues": {
+        "2025-07-16": { "value": 3678, "source": "show_champion", "episode": 563 }
+      },
+      "embeds": {
+        "2025-07-08": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/super-junior25-the-12th-album/1822933221" },
+          { "type": "mv", "url": "https://youtu.be/pykdDgWX7-M?si=Cn2BkwBnmlZUQX4g" }
+        ]
+      }
+    }
+  ]
+}

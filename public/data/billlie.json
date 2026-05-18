@@ -1,0 +1,20 @@
+{
+  "name": "NAZE",
+  "korean_name": "빌리",
+  "artistType": "girl_group",
+  "generation": 4,
+  "debut": "2021-11-10",
+  "releases": [
+    {
+      "title": "WORK",
+      "dailyValues": {
+        "2026-05-13": { "value": 2568, "source": "show_champion", "episode": 597 }
+      },
+      "embeds": {
+        "2026-05-13": [{ "type": "live_performance", "url": "https://youtu.be/7sDi8tk9SuM?si=dAvcBy1ax2rUNWso" }],
+        "2026-05-06": [{ "type": "release_date", "url": "https://music.apple.com/us/album/the-collective-soul-and-unconscious-chapter-two/1895807762" }],
+        "2026-05-01": [{ "type": "mv", "url": "https://youtu.be/sHRSiPhOT28?si=zBX9PYHvVQxvs8kI" }]
+      }
+    }
+  ]
+}

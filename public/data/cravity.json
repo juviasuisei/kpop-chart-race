@@ -1,0 +1,24 @@
+{
+  "name": "CRAVITY",
+  "korean_name": "크래비티",
+  "artistType": "boy_group",
+  "generation": 4,
+  "debut": "2020-04-14",
+  "releases": [
+    {
+      "title": "SET NET G0?!",
+      "dailyValues": {
+        "2025-07-02": { "value": 5186, "source": "show_champion", "episode": 561 },
+        "2025-07-01": { "value": 9570, "source": "the_show", "episode": 381 }
+      },
+      "embeds": {
+        "2025-07-02": [{ "type": "live_performance", "url": "https://youtu.be/WK1zZDKj9-o?si=uDB2Q7kLeomCX5Yw" }],
+        "2025-07-01": [{ "type": "live_performance", "url": "https://youtu.be/cF9TFMQRHAc?si=8hCw2IEpiaIA8sIQ" }],
+        "2025-06-23": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/dare-to-crave/1819754827" },
+          { "type": "mv", "url": "https://youtu.be/IV6yrrLyhCA?si=W2_XobwcNSqkscAG" }
+        ]
+      }
+    }
+  ]
+}

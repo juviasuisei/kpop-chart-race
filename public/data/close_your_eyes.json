@@ -19,6 +19,25 @@
           { "type": "mv", "url": "https://youtu.be/D5ljl9pNAmc?si=EQ-52RIqRiv5X95F" }
         ]
       }
+    },
+    {
+      "title": "Snowy Summer",
+      "dailyValues": {
+        "2025-07-23": { "value": 2026, "source": "show_champion", "episode": 564 },
+        "2025-07-18": { "value": 5394, "source": "music_bank", "episode": 1250 },
+        "2025-07-16": { "value": 4478, "source": "show_champion", "episode": 563 },
+        "2025-07-15": { "value": 6002, "source": "the_show", "episode": 383 }
+      },
+      "embeds": {
+        "2025-07-23": [{ "type": "live_performance", "url": "https://youtu.be/-n122t8mVaA?si=hLNk1YxZeqOv9ZAl" }],
+        "2025-07-18": [{ "type": "live_performance", "url": "https://youtu.be/S4incSRTb18?si=hN-GHUkYoB0mGLiq" }],
+        "2025-07-16": [{ "type": "live_performance", "url": "https://youtu.be/s-QsadGIqE4?si=_6ztof4ivi5Mq3Am" }],
+        "2025-07-15": [{ "type": "live_performance", "url": "https://youtu.be/wRIBoE6IWPs?si=xWWPeU5EJpM2MBaX" }],
+        "2025-07-09": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/snowy-summer-ep/1822485809" },
+          { "type": "mv", "url": "https://youtu.be/Li0zo4SZ5AY?si=TIzHTFP9ZEocfDrr" }
+        ]
+      }
     }
   ]
 }

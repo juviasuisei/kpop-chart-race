@@ -19,6 +19,21 @@
         ],
         "2026-03-09": [{ "type": "mv", "url": "https://youtu.be/FeU8m9YEVSY?si=LrBimmHQxbIb77Px" }]
       }
+    },
+    {
+      "title": "n",
+      "dailyValues": {
+        "2025-07-09": { "value": 2936, "source": "show_champion", "episode": 562 },
+        "2025-07-08": { "value": 2220, "source": "the_show", "episode": 382 }
+      },
+      "embeds": {
+        "2025-07-09": [{ "type": "live_performance", "url": "https://youtu.be/KDBusY6DOXA?si=CiOE7IEXu3gh6v5W" }],
+        "2025-07-08": [{ "type": "live_performance", "url": "https://youtu.be/DcLq2AXnmXo?si=Bd4lGp5AEH88Cpmo" }],
+        "2025-06-30": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/n-number-of-cases-ep/1821576843" },
+          { "type": "mv", "url": "https://youtu.be/KAEW-tEnTco?si=cPXHN2mpWpbBkDkd" }
+        ],
+      }
     }
   ]
 }

@@ -1,0 +1,22 @@
+{
+  "name": "Yoon San Ha [ASTRO]",
+  "korean_name": "윤산하",
+  "artistType": "solo_male",
+  "generation": 3,
+  "debut": "2024-08-06",
+  "releases": [
+    {
+      "title": "EXTRA VIRGIN",
+      "dailyValues": {
+        "2025-07-23": { "value": 2386, "source": "show_champion", "episode": 564 }
+      },
+      "embeds": {
+        "2025-07-23": [{ "type": "live_performance", "url": "https://youtu.be/veKtR7vD31U?si=rd3Yz6F5HCn3JLYG" }],
+        "2025-07-15": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/chameleon-ep/1825538824" },
+          { "type": "mv", "url": "https://youtu.be/5UG8Dpg0Q2o?si=bENsmmuBhEbBXe1H" }
+        ]
+      }
+    }
+  ]
+}

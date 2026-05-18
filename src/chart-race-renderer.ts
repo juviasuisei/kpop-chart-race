@@ -75,6 +75,13 @@ export class ChartRaceRenderer {
   private pendingFrames: Set<number> = new Set();
   /** When true, all CSS transitions are disabled (scrubbing mode) */
   private scrubbing = false;
+  /** When true, animations are disabled for performance (mobile/tablet) */
+  private reducedMotion = false;
+
+  /** True when animations should be skipped (scrubbing or mobile/tablet) */
+  private get noAnimate(): boolean {
+    return this.scrubbing || this.reducedMotion;
+  }
   /** Artist IDs that have been seen before (for distinguishing new vs returning) */
   private seenArtists: Set<string> = new Set();
   /** Last known Y positions for bars removed from DOM (for smooth reappearance) */
@@ -215,6 +222,12 @@ export class ChartRaceRenderer {
    * Creates the wrapper, date display, bars container, and legend.
    */
   mount(container: HTMLElement): void {
+    // Detect mobile/tablet for reduced motion (no animations)
+    // Use hover:none media query — true on touch-only devices (phones, tablets)
+    // but false on desktops/laptops (even with touchscreens, since they have a hover-capable pointer)
+    this.reducedMotion = typeof window !== "undefined" &&
+      window.matchMedia &&
+      window.matchMedia("(hover: none)").matches;
 
     this.wrapper = document.createElement("div");
     this.wrapper.className = "chart-race";
@@ -233,8 +246,17 @@ export class ChartRaceRenderer {
     this.dataNote = document.createElement("div");
     this.dataNote.className = "chart-race__data-note";
 
+    const dataNoteToggle = document.createElement("button");
+    dataNoteToggle.className = "chart-race__data-note-toggle";
+    dataNoteToggle.textContent = "ℹ";
+    dataNoteToggle.setAttribute("aria-label", "Toggle info");
+    dataNoteToggle.addEventListener("click", () => {
+      this.dataNote?.classList.toggle("chart-race__data-note--expanded");
+    });
+
     titleHeader.appendChild(titleText);
     titleHeader.appendChild(versionBadge);
+    titleHeader.appendChild(dataNoteToggle);
     titleHeader.appendChild(this.dataNote);
 
     this.dateDisplay = document.createElement("div");
@@ -299,7 +321,7 @@ export class ChartRaceRenderer {
     // Detect goalpost state changes (bars switching between regular and goalpost)
     const becomingGoalpost: Set<string> = new Set();
     const leavingGoalpost: Set<string> = new Set();
-    if (!this.scrubbing) {
+    if (!this.noAnimate) {
       for (const entry of visibleEntries) {
         const barEl = this.bars.get(entry.artistId);
         if (!barEl) continue;
@@ -408,7 +430,7 @@ export class ChartRaceRenderer {
         barEl.wrapper.offsetHeight; // force reflow
 
         // Enable transitions (unless scrubbing)
-        if (!this.scrubbing) {
+        if (!this.noAnimate) {
           if (isZoomChange) {
             barEl.wrapper.style.transition = `transform ${ZOOM_TRANSITION_MS}ms ease-in-out, height ${ZOOM_TRANSITION_MS}ms ease-in-out`;
             barEl.bar.style.transition = `width ${ZOOM_TRANSITION_MS}ms ease-in-out`;
@@ -440,7 +462,7 @@ export class ChartRaceRenderer {
         barEl.wipeCover.style.transition = "none";
         barEl.wipeCover.style.height = "0";
 
-        if (this.scrubbing) {
+        if (this.noAnimate) {
           barEl.wrapper.style.transition = "none";
           barEl.bar.style.transition = "none";
           barEl.wrapper.style.height = `${heights[visIdx]}px`;
@@ -461,7 +483,7 @@ export class ChartRaceRenderer {
       }
 
       // Set transitions
-      if (this.scrubbing) {
+      if (this.noAnimate) {
         barEl.wrapper.style.transition = "none";
         barEl.bar.style.transition = "none";
         barEl.wrapper.offsetHeight; // force reflow
@@ -512,7 +534,7 @@ export class ChartRaceRenderer {
         barEl.fadeOutTimeoutId = null;
       }
 
-      if (this.scrubbing) {
+      if (this.noAnimate) {
         // During scrubbing, remove immediately
         barEl.wrapper.remove();
         if (barEl.clickHandler) {
@@ -546,7 +568,7 @@ export class ChartRaceRenderer {
     }
 
     // Rank tracking
-    if (!this.scrubbing) {
+    if (!this.noAnimate) {
       this.startRankTracking(visibleIds);
     } else {
       this.stopRankTracking();
@@ -554,7 +576,7 @@ export class ChartRaceRenderer {
 
     // 8. Emit update:complete after transition duration (or immediately if scrubbing)
     const phase1Duration = isZoomChange ? ZOOM_TRANSITION_MS : 1200;
-    if (this.scrubbing) {
+    if (this.noAnimate) {
       this.eventBus.emit("update:complete");
     } else if (hasPhase2Work && !isZoomChange) {
       // Phase 1 complete → execute phase 2 (goalpost state changes)
@@ -1073,7 +1095,7 @@ export class ChartRaceRenderer {
       const newWidthNum = widthPercent;
       const oldWidthNum = parseFloat(oldWidth || "0");
       const barGrew = newWidthNum > oldWidthNum + 1;
-      if (this.scrubbing) {
+      if (this.noAnimate) {
         this.moveAllInside(barEl);
         barEl.bar.offsetHeight;
         this.checkBarOverflow(barEl);
@@ -1090,7 +1112,7 @@ export class ChartRaceRenderer {
     }
 
     // Numeric value tweening (snap in scrub mode, goalpost mode, or zoom change)
-    if (this.scrubbing || isGoalpost || this.isZoomChange) {
+    if (this.noAnimate || isGoalpost || this.isZoomChange) {
       barEl.valueSpan.textContent = Math.round(entry.cumulativeValue).toLocaleString();
       barEl.currentDisplayValue = entry.cumulativeValue;
       // Cancel any running tween

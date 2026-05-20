@@ -45,6 +45,26 @@
           { "type": "mv", "url": "https://youtu.be/x_RYZsOfpKY?si=7BTTdumD7YLucT5T" }
         ]
       }
+    },
+    {
+      "title": "Do the Dance",
+      "dailyValues": {
+        "2025-06-29": { "value": 5594, "source": "inkigayo", "episode": 1273 },
+        "2025-06-28": { "value": 5665, "source": "show_music_core", "episode": 908 },
+        "2025-06-27": { "value": 11932, "source": "music_bank", "episode": 1247 },
+        "2025-06-26": { "value": 6738, "source": "m_countdown", "episode": 894 },
+        "2025-06-25": { "value": 4316, "source": "show_champion", "episode": 560 }
+      },
+      "embeds": {
+        "2025-06-29": [{ "type": "live_performance", "url": "https://youtu.be/64EiaePsEj8?si=MD2wKCPHKImGhocY" }],
+        "2025-06-28": [{ "type": "live_performance", "url": "https://youtu.be/zttWgxTrZlQ?si=bJK43QObywiVyQ2y" }],
+        "2025-06-27": [{ "type": "live_performance", "url": "https://youtu.be/VC2vuQ_b95g?si=GAkha_rTpFPGzdrH" }],
+        "2025-06-26": [{ "type": "live_performance", "url": "https://youtu.be/2V_-Oium7SQ?si=6BRRXRIGei8d6Ety" }],
+        "2025-06-16": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/bomb-ep/1817427556" },
+          { "type": "mv", "url": "https://youtu.be/negtrQu5mTA?si=m2aFqpjHb32Et7xk" }
+        ]
+      }
     }
   ]
 }

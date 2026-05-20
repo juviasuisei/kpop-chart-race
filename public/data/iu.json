@@ -17,6 +17,18 @@
       "embeds": {
         "2025-09-10": [{ "type": "release_date", "url": "https://music.apple.com/us/album/bye-summer-single/1838383717" }]
       }
+    },
+    {
+      "title": "Never Ending Story",
+      "dailyValues": {
+        "2025-06-28": { "value": 5929, "source": "show_music_core", "episode": 908 }
+      },
+      "embeds": {
+        "2025-05-27": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/a-flower-bookmark-pt-3-ep/1815869479" },
+          { "type": "mv", "url": "https://youtu.be/6J9ixwhDYSM?si=zuehhx96KVTMs6yV" }
+        ]
+      }
     }
   ]
 }

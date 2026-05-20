@@ -1,0 +1,21 @@
+{
+  "name": "MAKTUB",
+  "korean_name": "양진모",
+  "artistType": "solo_male",
+  "generation": 2,
+  "debut": "2011-09-21",
+  "releases": [
+    {
+      "title": "Starting With You ⦵",
+      "dailyValues": {
+        "2025-06-29": { "value": 3258, "source": "inkigayo", "episode": 1273 }
+      },
+      "embeds": {
+        "2025-01-01": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/starting-with-you-single/1786545168" },
+          { "type": "mv", "url": "https://youtu.be/3XDf5Ke2Zj8?si=ycy4HBzEn6U4B3qM" }
+        ]
+      }
+    }
+  ]
+}

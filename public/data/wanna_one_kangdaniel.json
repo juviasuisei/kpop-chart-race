@@ -1,0 +1,25 @@
+{
+  "name": "KANGDANIEL [Wanna One]",
+  "korean_name": "강의건",
+  "artistType": "solo_male",
+  "generation": 3,
+  "debut": "2019-07-25",
+  "releases": [
+    {
+      "title": "Episode",
+      "dailyValues": {
+        "2025-06-28": { "value": 5954, "source": "show_music_core", "episode": 908 },
+        "2025-06-25": { "value": 6792, "source": "show_champion", "episode": 560 },
+        "2025-06-24": { "value": 7910, "source": "the_show", "episode": 380 }
+      },
+      "embeds": {
+        "2025-06-25": [{ "type": "live_performance", "url": "https://youtu.be/MMV2uyruNXM?si=QQyDwTktr4zOxt2_" }],
+        "2025-06-24": [{ "type": "live_performance", "url": "https://youtu.be/I6jCOquWmho?si=8CdNi1Lu4DZb11wz" }],
+        "2025-06-16": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/glow-to-haze-ep/1818773248" },
+          { "type": "mv", "url": "https://youtu.be/eMCLXX4KrT0?si=ZpLk5y7T43X1s_E1" }
+        ]
+      }
+    }
+  ]
+}

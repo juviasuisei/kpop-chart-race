@@ -1,0 +1,21 @@
+{
+  "name": "j-hope",
+  "korean_name": "정호석",
+  "artistType": "solo_male",
+  "generation": 3,
+  "debut": "2022-07-15",
+  "releases": [
+    {
+      "title": "Killin' It Girl",
+      "dailyValues": {
+        "2025-06-26": { "value": 8282, "source": "m_countdown", "episode": 894 }
+      },
+      "embeds": {
+        "2025-06-13": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/killin-it-girl-single/1816986745" },
+          { "type": "mv", "url": "https://youtu.be/q9leDzlNEaY?si=A5h-aFPUjNP4RcHk" }
+        ]
+      }
+    }
+  ]
+}

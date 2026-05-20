@@ -577,7 +577,16 @@ export class ChartRaceRenderer {
     // 8. Emit update:complete after transition duration (or immediately if scrubbing)
     const phase1Duration = isZoomChange ? ZOOM_TRANSITION_MS : 1200;
     if (this.noAnimate) {
-      this.eventBus.emit("update:complete");
+      if (this.scrubbing) {
+        // Actual scrubbing: emit immediately
+        this.eventBus.emit("update:complete");
+      } else {
+        // Reduced motion playback: wait 1s so each day is visible
+        this.phase2TimeoutId = setTimeout(() => {
+          this.phase2TimeoutId = null;
+          this.eventBus.emit("update:complete");
+        }, 1000);
+      }
     } else if (hasPhase2Work && !isZoomChange) {
       // Phase 1 complete → execute phase 2 (goalpost state changes)
       this.phase2TimeoutId = setTimeout(() => {

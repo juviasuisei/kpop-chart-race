@@ -11,7 +11,12 @@
         "2025-06-22": { "value": 4381, "source": "inkigayo", "episode": 1272 },
         "2025-06-21": { "value": 3388, "source": "show_music_core", "episode": 907 },
         "2025-06-19": { "value": 7750, "source": "m_countdown", "episode": 893 },
-        "2025-06-18": { "value": 5247, "source": "show_champion", "episode": 559 }
+        "2025-06-18": { "value": 5247, "source": "show_champion", "episode": 559 },
+        "2025-06-15": { "value": 4583, "source": "inkigayo", "episode": 1271 },
+        "2025-06-14": { "value": 7001, "source": "show_music_core", "episode": 906 },
+        "2025-06-13": { "value": 4942, "source": "music_bank", "episode": 1245 },
+        "2025-06-12": { "value": 7642, "source": "m_countdown", "episode": 892 },
+        "2025-06-11": { "value": 5742, "source": "show_champion", "episode": 558 }
       },
       "embeds": {
         "2025-05-26": [

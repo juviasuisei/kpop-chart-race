@@ -20,6 +20,18 @@
           { "type": "mv", "url": "https://youtu.be/TVqEwvbZP30?si=nbz64kuZy7nn9meb" }
         ]
       }
+    },
+    {
+      "title": "Fly Up",
+      "dailyValues": {
+        "2025-06-11": { "value": 2061, "source": "show_champion", "episode": 558 }
+      },
+      "embeds": {
+        "2025-05-19": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/odyssey-the-1st-album/1813453693" },
+          { "type": "mv", "url": "https://youtu.be/vLUtHODdLzk?si=CWLTwxzheYY2rzGu" }
+        ]
+      }
     }
   ]
 }

@@ -25,6 +25,26 @@
           { "type": "mv", "url": "https://youtu.be/R6e4tBWxIxE?si=CGTRPf03W80a0GJ_" }
         ]
       }
+    },
+    {
+      "title": "Bad Desire",
+      "dailyValues": {
+        "2025-06-15": { "value": 5125, "source": "inkigayo", "episode": 1271 },
+        "2025-06-14": { "value": 5245, "source": "show_music_core", "episode": 906 },
+        "2025-06-13": { "value": 15416, "source": "music_bank", "episode": 1245 },
+        "2025-06-12": { "value": 7670, "source": "m_countdown", "episode": 892 },
+        "2025-06-11": { "value": 5584, "source": "show_champion", "episode": 558 }
+      },
+      "embeds": {
+        "2025-06-15": [{ "type": "live_performance", "url": "https://youtu.be/-MtxRFKShWM?si=LY0P_rcTD_8G5cRw" }],
+        "2025-06-14": [{ "type": "live_performance", "url": "https://youtu.be/wqbCkS4CjKs?si=DC0LsuZSS46sNvGI" }],
+        "2025-06-13": [{ "type": "live_performance", "url": "https://youtu.be/uxuA-8zzLq0?si=xHpa-9djv9xg9mBt" }],
+        "2025-06-12": [{ "type": "live_performance", "url": "https://youtu.be/uwmiXC59WvY?si=PYZcvBlsdCkkyyiz" }],
+        "2025-06-05": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/desire-unleash/1814718475" },
+          { "type": "mv", "url": "https://youtu.be/a2Zqdo9RbNs?si=lsJILL3buyn7uoYm" }
+        ]
+      }
     }
   ]
 }

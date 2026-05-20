@@ -1,0 +1,22 @@
+{
+  "name": "UAU [Dreamcatcher]",
+  "korean_name": "유아유",
+  "artistType": "girl_group",
+  "generation": 3,
+  "debut": "2025-05-28",
+  "releases": [
+    {
+      "title": "2 Months",
+      "dailyValues": {
+        "2025-06-10": { "value": 3328, "source": "the_show", "episode": 378 }
+      },
+      "embeds": {
+        "2025-06-10": [{ "type": "live_performance", "url": "https://youtu.be/AEu2BgviOYc?si=vAFSPq_oTxEAjq_j" }],
+        "2025-05-28": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/playlist-you-are-you-ep/1815640586" },
+          { "type": "mv", "url": "https://youtu.be/W_Ht7BRVKLo?si=LnwUXbZnP1EJWt0M" }
+        ]
+      }
+    }
+  ]
+}

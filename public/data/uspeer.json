@@ -1,0 +1,24 @@
+{
+  "name": "USPEER",
+  "korean_name": "유스피어",
+  "artistType": "girl_group",
+  "generation": 5,
+  "debut": "2025-06-04",
+  "releases": [
+    {
+      "title": "ZOOM",
+      "dailyValues": {
+        "2025-06-11": { "value": 2218, "source": "show_champion", "episode": 558 },
+        "2025-06-10": { "value": 3153, "source": "the_show", "episode": 378 }
+      },
+      "embeds": {
+        "2025-06-11": [{ "type": "live_performance", "url": "https://youtu.be/arqWQOvdg1k?si=atwovefuvrgs4iH-" }],
+        "2025-06-10": [{ "type": "live_performance", "url": "https://youtu.be/NpH5v-uNLWc?si=ivlARTOAYiYU9cew" }],
+        "2025-06-04": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/speed-zone-single/1817096892" },
+          { "type": "mv", "url": "https://youtu.be/7WSmAo7kSoo?si=tOo1uSEfbLHjWzSC" }
+        ]
+      }
+    }
+  ]
+}

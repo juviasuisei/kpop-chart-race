@@ -16,6 +16,22 @@
           { "type": "mv", "url": "https://youtu.be/zpPFHclAOoM?si=8d3k4K3tBS0BmJHy" }
         ]
       }
+    },
+    {
+      "title": "Memory", 
+      "dailyValues": {
+        "2025-06-21": { "value": 8246, "source": "show_music_core", "episode": 907 },
+        "2025-06-20": { "value": 7063, "source": "music_bank", "episode": 1246 },
+        "2025-06-18": { "value": 5666, "source": "show_champion", "episode": 559 }
+      },
+      "embeds": {
+        "2025-06-21": [{ "type": "live_performance", "url": "https://youtu.be/18j6wTcrwaY?si=odt0AJXAcKX4KTVB" }],
+        "2025-06-20": [{ "type": "live_performance", "url": "https://youtu.be/F0z-YmmDPV8?si=rTfrl5rhxhaEH6fa" }],
+        "2025-06-09": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/promise-single/1852427558" },
+          { "type": "mv", "url": "https://youtu.be/bpJS9ZnTkRw?si=HgZvk9S0BRv_TY7o" }
+        ]
+      }
     }
   ]
 }

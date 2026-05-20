@@ -9,7 +9,8 @@
       "title": "Dear",
       "dailyValues": {
         "2025-07-02": { "value": 2073, "source": "show_champion", "episode": 561 },
-        "2025-06-25": { "value": 3925, "source": "show_champion", "episode": 560 }
+        "2025-06-25": { "value": 3925, "source": "show_champion", "episode": 560 },
+        "2025-06-18": { "value": 4112, "source": "show_champion", "episode": 559 }
       },
       "embeds": {
         "2025-06-09": [

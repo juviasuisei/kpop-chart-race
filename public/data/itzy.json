@@ -18,6 +18,18 @@
           { "type": "mv", "url": "https://youtu.be/piSq8IioghU?si=j3tuOmsT8VDHUhpj" }
         ]
       }
+    },
+    {
+      "title": "Girls Will Be Girls",
+      "dailyValues": {
+        "2025-06-18": { "value": 2575, "source": "show_champion", "episode": 559 }
+      },
+      "embeds": {
+        "2025-06-09": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/girls-will-be-girls-ep/1813822759" },
+          { "type": "mv", "url": "https://youtu.be/1KhOhW_O8-k?si=1mIx2WqSfodFvd3e" }
+        ]
+      }
     }
   ]
 }

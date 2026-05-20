@@ -21,7 +21,9 @@
     {
       "title": "Never Ending Story",
       "dailyValues": {
-        "2025-06-28": { "value": 5929, "source": "show_music_core", "episode": 908 }
+        "2025-06-28": { "value": 5929, "source": "show_music_core", "episode": 908 },
+        "2025-06-22": { "value": 3653, "source": "inkigayo", "episode": 1272 },
+        "2025-06-21": { "value": 4819, "source": "show_music_core", "episode": 907 }
       },
       "embeds": {
         "2025-05-27": [

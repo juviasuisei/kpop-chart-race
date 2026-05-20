@@ -1,0 +1,22 @@
+{
+  "name": "ARTMS",
+  "korean_name": "아르테미스",
+  "artistType": "girl_group",
+  "generation": 4,
+  "debut": "2024-05-31",
+  "releases": [
+    {
+      "title": "Icarus",
+      "dailyValues": {
+        "2025-06-17": { "value": 1967, "source": "the_show", "episode": 379 }
+      },
+      "embeds": {
+        "2025-06-17": [{ "type": "live_performance", "url": "https://youtu.be/UmozIz7novw?si=mJLp1WY3-aPrn23X" }],
+        "2025-06-13": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/club-icarus-ep/1815287239" },
+          { "type": "mv", "url": "https://youtu.be/J-bEGflpV9k?si=YkV1-aVdru5ADcMA" }
+        ]
+      }
+    }
+  ]
+}

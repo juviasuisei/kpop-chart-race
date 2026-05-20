@@ -28,10 +28,12 @@
     {
       "title": "BEEP",
       "dailyValues": {
-        "2025-06-24": { "value": 5105, "source": "the_show", "episode": 380 }
+        "2025-06-24": { "value": 5105, "source": "the_show", "episode": 380 },
+        "2025-06-17": { "value": 7477, "source": "the_show", "episode": 379 }
       },
       "embeds": {
         "2025-06-24": [{ "type": "live_performance", "url": "https://youtu.be/ut5BrAk0b-k?si=QFFqlB_dpnmvRfC2" }],
+        "2025-06-17": [{ "type": "live_performance", "url": "https://youtu.be/DTyAG-Okm1Y?si=grutWAT-xmp0AS3r" }],
         "2025-06-09": [
           { "type": "release_date", "url": "https://music.apple.com/us/album/beep-single/1816101978" },
           { "type": "mv", "url": "https://youtu.be/wLKpQpC3-Sw?si=pnTXNptooM7Mwyic" }

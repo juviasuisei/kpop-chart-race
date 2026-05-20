@@ -27,11 +27,15 @@
       "title": "Lips Hips Kiss",
       "dailyValues": {
         "2025-06-25": { "value": 2509, "source": "show_champion", "episode": 560 },
-        "2025-06-24": { "value": 4130, "source": "the_show", "episode": 380 }
+        "2025-06-24": { "value": 4130, "source": "the_show", "episode": 380 },
+        "2025-06-18": { "value": 3809, "source": "show_champion", "episode": 559 },
+        "2025-06-17": { "value": 7420, "source": "the_show", "episode": 379 }
       },
       "embeds": {
         "2025-06-25": [{ "type": "live_performance", "url": "https://youtu.be/KreECwfHjhQ?si=J7d3d3XBCGuIItPm" }],
         "2025-06-24": [{ "type": "live_performance", "url": "https://youtu.be/vctH7WItRJw?si=ioWgYjnkHg0GkzZx" }],
+        "2025-06-18": [{ "type": "live_performance", "url": "https://youtu.be/opKGPD22xaY?si=HBTODiepxdnhpl7w" }],
+        "2025-06-17": [{ "type": "live_performance", "url": "https://youtu.be/F_9fFDNc5pI?si=XM0HPrvNi_DSnGlS" }],
         "2025-06-09": [
           { "type": "release_date", "url": "https://music.apple.com/us/album/224/1816140537" },
           { "type": "mv", "url": "https://youtu.be/52IyDIMyejQ?si=17qjYmVz97bttIh_" }

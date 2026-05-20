@@ -1,0 +1,24 @@
+{
+  "name": "SEVENTEEN",
+  "korean_name": "세븐틴",
+  "artistType": "boy_group",
+  "generation": 3,
+  "debut": "2015-05-26",
+  "releases": [
+    {
+      "title": "THUNDER",
+      "dailyValues": {
+        "2025-06-22": { "value": 4381, "source": "inkigayo", "episode": 1272 },
+        "2025-06-21": { "value": 3388, "source": "show_music_core", "episode": 907 },
+        "2025-06-19": { "value": 7750, "source": "m_countdown", "episode": 893 },
+        "2025-06-18": { "value": 5247, "source": "show_champion", "episode": 559 }
+      },
+      "embeds": {
+        "2025-05-26": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/seventeen-5th-album-happy-burstday/1846801259" },
+          { "type": "mv", "url": "https://youtu.be/pS57UX6s-xw?si=sgwF4F1dz5LBIg8m" }
+        ]
+      }
+    }
+  ]
+}

@@ -8,10 +8,12 @@
     {
       "title": "2 Months",
       "dailyValues": {
-        "2025-06-10": { "value": 3328, "source": "the_show", "episode": 378 }
+        "2025-06-10": { "value": 3328, "source": "the_show", "episode": 378 },
+        "2025-06-04": { "value": 3021, "source": "show_champion", "episode": 557 }
       },
       "embeds": {
         "2025-06-10": [{ "type": "live_performance", "url": "https://youtu.be/AEu2BgviOYc?si=vAFSPq_oTxEAjq_j" }],
+        "2025-06-04": [{ "type": "live_performance", "url": "https://youtu.be/wlPkxopZMCM?si=Xot9Yf2rSuKOV6Sm" }],
         "2025-05-28": [
           { "type": "release_date", "url": "https://music.apple.com/us/album/playlist-you-are-you-ep/1815640586" },
           { "type": "mv", "url": "https://youtu.be/W_Ht7BRVKLo?si=LnwUXbZnP1EJWt0M" }

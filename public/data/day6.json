@@ -17,6 +17,18 @@
           { "type": "mv", "url": "https://youtu.be/hZ6pts6e8dI?si=WAiBYxWO1Bj1IH59" }
         ]
       }
+    },
+    {
+      "title": "Maybe Tomorrow",
+      "dailyValues": {
+        "2025-06-04": { "value": 2043, "source": "show_champion", "episode": 557 }
+      },
+      "embeds": {
+        "2025-05-07": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/maybe-tomorrow-single/1810090445" },
+          { "type": "mv", "url": "https://youtu.be/hZ6pts6e8dI?si=WAiBYxWO1Bj1IH59" }
+        ]
+      }
     }
   ]
 }

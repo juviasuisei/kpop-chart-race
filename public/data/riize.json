@@ -24,7 +24,9 @@
     {
       "title": "Fly Up",
       "dailyValues": {
-        "2025-06-11": { "value": 2061, "source": "show_champion", "episode": 558 }
+        "2025-06-11": { "value": 2061, "source": "show_champion", "episode": 558 },
+        "2025-06-07": { "value": 2400, "source": "show_music_core", "episode": 905 },
+        "2025-06-04": { "value": 2414, "source": "show_champion", "episode": 557 }
       },
       "embeds": {
         "2025-05-19": [

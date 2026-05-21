@@ -35,6 +35,19 @@
           { "type": "mv", "url": "https://youtu.be/eebhl4lGv_Y?si=0biQhIxKml0bkP4p" }
         ]
       }
+    },
+    {
+      "title": "FREEZE",
+      "dailyValues": {
+        "2025-06-04": { "value": 2595, "source": "show_champion", "episode": 557 }
+      },
+      "embeds": {
+        "2025-06-04": [{ "type": "live_performance", "url": "https://youtu.be/IXIP6h0A1kU?si=1c9uE7eCUBa5SLaZ" }],
+        "2025-05-26": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/kick-out-flip-now/1812709989" },
+          { "type": "mv", "url": "https://youtu.be/eebhl4lGv_Y?si=0biQhIxKml0bkP4p" }
+        ]
+      }
     }
   ]
 }

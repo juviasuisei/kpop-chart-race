@@ -25,6 +25,18 @@
           { "type": "mv", "url": "https://youtu.be/DYgE3SGPEqk?si=CoZ4UZfyD9PROtGt" }
         ]
       }
+    },
+    {
+      "title": "Good Thing",
+      "dailyValues": {
+        "2025-06-06": { "value": 3590, "source": "music_bank", "episode": 1244 }
+      },
+      "embeds": {
+        "2025-05-19": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/we-are-ep/1810452962" },
+          { "type": "mv", "url": "https://youtu.be/hAONx6nuEgI?si=nmqpGflmtzpcPXJ2" }
+        ]
+      }
     }
   ]
 }

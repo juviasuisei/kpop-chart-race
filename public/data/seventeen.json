@@ -16,9 +16,17 @@
         "2025-06-14": { "value": 7001, "source": "show_music_core", "episode": 906 },
         "2025-06-13": { "value": 4942, "source": "music_bank", "episode": 1245 },
         "2025-06-12": { "value": 7642, "source": "m_countdown", "episode": 892 },
-        "2025-06-11": { "value": 5742, "source": "show_champion", "episode": 558 }
+        "2025-06-11": { "value": 5742, "source": "show_champion", "episode": 558 },
+        "2025-06-08": { "value": 7834, "source": "inkigayo", "episode": 1270 },
+        "2025-06-07": { "value": 9655, "source": "show_music_core", "episode": 905 },
+        "2025-06-06": { "value": 12971, "source": "music_bank", "episode": 1244 },
+        "2025-06-05": { "value": 10567, "source": "m_countdown", "episode": 891 },
+        "2025-06-04": { "value": 8000, "source": "show_champion", "episode": 557 }
       },
       "embeds": {
+        "2025-06-08": [{ "type": "live_performance", "url": "https://youtu.be/GAAaAoWHEaQ?si=DyHUAZK11wAkIPCR" }],
+        "2025-06-07": [{ "type": "live_performance", "url": "https://youtu.be/EjyjjebXxAQ?si=YXwBJSJaAL916KQx" }],
+        "2025-06-05": [{ "type": "live_performance", "url": "https://youtu.be/leKfWbEwKI4?si=ya38LG9tVps__JEg" }],
         "2025-05-26": [
           { "type": "release_date", "url": "https://music.apple.com/us/album/seventeen-5th-album-happy-burstday/1846801259" },
           { "type": "mv", "url": "https://youtu.be/pS57UX6s-xw?si=sgwF4F1dz5LBIg8m" }

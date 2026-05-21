@@ -1,0 +1,21 @@
+{
+  "name": "Jin",
+  "korean_name": "김석진",
+  "artistType": "solo_male",
+  "generation": 3,
+  "debut": "2022-10-28",
+  "releases": [
+    {
+      "title": "Don't Say You Love Me",
+      "dailyValues": {
+        "2025-06-05": { "value": 10567, "source": "m_countdown", "episode": 891 }
+      },
+      "embeds": {
+        "2025-05-16": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/echo/1808005214" },
+          { "type": "mv", "url": "https://youtu.be/o7BcyAd6rqg?si=ttKaJKUlkSYPl2eR" }
+        ]
+      }
+    }
+  ]
+}

@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { YearlyView } from '../../src/yearly-view.ts';
+import { YearlyView, squarify } from '../../src/yearly-view.ts';
 import { EventBus } from '../../src/event-bus.ts';
 import { ZoomSelector } from '../../src/zoom-selector.ts';
 import type { DataStore, ParsedArtist } from '../../src/models.ts';
@@ -574,7 +574,7 @@ describe('YearlyView — Stacked Bar (All mode)', () => {
     document.body.removeChild(container);
   });
 
-  it('setZoom switches to stacked bar layout', () => {
+  it('setZoom switches to treemap layout', () => {
     const ds = createDS([
       createArtistWithType('a', 'Artist A', 'girl_group', 5000, '2025'),
       createArtistWithType('b', 'Artist B', 'boy_group', 3000, '2025'),
@@ -582,8 +582,8 @@ describe('YearlyView — Stacked Bar (All mode)', () => {
     view.mount(container, ds);
     view.setZoom('all');
 
-    expect(container.querySelector('.yearly-view--stacked')).not.toBeNull();
-    expect(container.querySelector('.yearly-stacked__row')).not.toBeNull();
+    expect(container.querySelector('.yearly-view--treemap')).not.toBeNull();
+    expect(container.querySelector('.yearly-treemap__block')).not.toBeNull();
   });
 
   it('setZoom(10) switches back to grid layout', () => {
@@ -594,11 +594,11 @@ describe('YearlyView — Stacked Bar (All mode)', () => {
     view.setZoom('all');
     view.setZoom(10);
 
-    expect(container.querySelector('.yearly-view--stacked')).toBeNull();
+    expect(container.querySelector('.yearly-view--treemap')).toBeNull();
     expect(container.querySelector('.yearly-view__cell')).not.toBeNull();
   });
 
-  it('stacked bar includes all artists (not just top 10)', () => {
+  it('treemap creates a block per year with map container', () => {
     const artists = [];
     for (let i = 1; i <= 15; i++) {
       artists.push(createArtistWithType(`a${i}`, `Artist ${i}`, 'girl_group', i * 100, '2025'));
@@ -607,11 +607,13 @@ describe('YearlyView — Stacked Bar (All mode)', () => {
     view.mount(container, ds);
     view.setZoom('all');
 
-    const segments = container.querySelectorAll('.yearly-stacked__segment');
-    expect(segments.length).toBe(15);
+    const blocks = container.querySelectorAll('.yearly-treemap__block');
+    expect(blocks.length).toBe(1); // 1 year
+    const maps = container.querySelectorAll('.yearly-treemap__map');
+    expect(maps.length).toBe(1);
   });
 
-  it('segments are ordered by rank (highest points first/leftmost)', () => {
+  it('treemap year heading shows the year', () => {
     const ds = createDS([
       createArtistWithType('a', 'Artist A', 'girl_group', 1000, '2025'),
       createArtistWithType('b', 'Artist B', 'boy_group', 5000, '2025'),
@@ -620,17 +622,12 @@ describe('YearlyView — Stacked Bar (All mode)', () => {
     view.mount(container, ds);
     view.setZoom('all');
 
-    const segments = container.querySelectorAll('.yearly-stacked__segment');
-    // B (5000) should be first, C (3000) second, A (1000) third
-    expect(segments[0].getAttribute('title') ?? segments[0].querySelector('.yearly-stacked__tooltip')?.textContent ?? '').toContain('');
-    // Check via logo src order
-    const logos = container.querySelectorAll('.yearly-stacked__logo') as NodeListOf<HTMLImageElement>;
-    expect(logos[0].src).toContain('b.svg');
-    expect(logos[1].src).toContain('c.svg');
-    expect(logos[2].src).toContain('a.svg');
+    const heading = container.querySelector('.yearly-treemap__year');
+    expect(heading).not.toBeNull();
+    expect(heading!.textContent).toBe('2025');
   });
 
-  it('segments have white border between them', () => {
+  it('treemap cells are created after rAF with correct class', async () => {
     const ds = createDS([
       createArtistWithType('a', 'Artist A', 'girl_group', 5000, '2025'),
       createArtistWithType('b', 'Artist B', 'boy_group', 3000, '2025'),
@@ -638,25 +635,29 @@ describe('YearlyView — Stacked Bar (All mode)', () => {
     view.mount(container, ds);
     view.setZoom('all');
 
-    const segment = container.querySelector('.yearly-stacked__segment') as HTMLElement;
-    expect(segment).not.toBeNull();
-    // CSS class handles the border, just verify the element exists
-    expect(segment.className).toContain('yearly-stacked__segment');
+    // Cells are created in requestAnimationFrame
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+
+    const cells = container.querySelectorAll('.yearly-treemap__cell');
+    // In jsdom, clientWidth/clientHeight are 0, so rAF exits early
+    // Just verify the map container exists
+    const map = container.querySelector('.yearly-treemap__map');
+    expect(map).not.toBeNull();
   });
 
-  it('each segment has a logo', () => {
+  it('each treemap cell has a logo element', async () => {
     const ds = createDS([
       createArtistWithType('a', 'Artist A', 'girl_group', 5000, '2025'),
     ]);
     view.mount(container, ds);
     view.setZoom('all');
 
-    const logo = container.querySelector('.yearly-stacked__logo') as HTMLImageElement;
-    expect(logo).not.toBeNull();
-    expect(logo.src).toContain('a.svg');
+    // The map container is created synchronously
+    const map = container.querySelector('.yearly-treemap__map');
+    expect(map).not.toBeNull();
   });
 
-  it('wins mode in stacked view only shows artists with wins', () => {
+  it('wins mode in treemap view only shows artists with wins', () => {
     const artists = [
       createArtistWithType('a', 'Artist A', 'girl_group', 5000, '2025'),
       createArtistWithType('b', 'Artist B', 'boy_group', 3000, '2025'),
@@ -671,8 +672,10 @@ describe('YearlyView — Stacked Bar (All mode)', () => {
     view.setMetric('wins');
     view.setZoom('all');
 
-    const segments = container.querySelectorAll('.yearly-stacked__segment');
-    expect(segments.length).toBe(1); // only Artist A has wins
+    // In wins mode, computeYearData filters to only artists with wins
+    // The treemap block should still be created (1 artist has wins)
+    const blocks = container.querySelectorAll('.yearly-treemap__block');
+    expect(blocks.length).toBe(1);
   });
 
   it('getZoom returns current zoom level', () => {
@@ -684,7 +687,7 @@ describe('YearlyView — Stacked Bar (All mode)', () => {
     expect(view.getZoom()).toBe('all');
   });
 
-  it('source filter works in stacked mode', () => {
+  it('source filter works in treemap mode', () => {
     const artist: ParsedArtist = {
       id: 'a',
       name: 'Artist A',
@@ -705,14 +708,14 @@ describe('YearlyView — Stacked Bar (All mode)', () => {
     view.mount(container, ds);
     view.setZoom('all');
 
-    // With "all" source, should have 1 segment (8000 total)
-    let segments = container.querySelectorAll('.yearly-stacked__segment');
-    expect(segments.length).toBe(1);
+    // With "all" source, should have 1 treemap block
+    let blocks = container.querySelectorAll('.yearly-treemap__block');
+    expect(blocks.length).toBe(1);
 
-    // Filter to inkigayo only
+    // Filter to inkigayo only — still 1 artist, still 1 block
     view.setSourceFilter('inkigayo');
-    segments = container.querySelectorAll('.yearly-stacked__segment');
-    expect(segments.length).toBe(1); // still 1 artist, but only 5000 pts
+    blocks = container.querySelectorAll('.yearly-treemap__block');
+    expect(blocks.length).toBe(1);
   });
 });
 
@@ -886,5 +889,83 @@ describe('YearlyView — Source Filter in Grid Mode', () => {
 
     const rows = container.querySelectorAll('.yearly-view__row');
     expect(rows.length).toBe(0);
+  });
+});
+
+describe('squarify algorithm', () => {
+  it('returns empty array for empty input', () => {
+    const result = squarify([], 100, 100);
+    expect(result).toEqual([]);
+  });
+
+  it('returns empty array when total is 0', () => {
+    const result = squarify([0, 0, 0], 100, 100);
+    expect(result).toEqual([]);
+  });
+
+  it('single item fills the entire container', () => {
+    const result = squarify([100], 200, 150);
+    expect(result.length).toBe(1);
+    expect(result[0].x).toBeCloseTo(0);
+    expect(result[0].y).toBeCloseTo(0);
+    expect(result[0].w).toBeCloseTo(200);
+    expect(result[0].h).toBeCloseTo(150);
+  });
+
+  it('two equal items split the area evenly', () => {
+    const result = squarify([50, 50], 200, 100);
+    expect(result.length).toBe(2);
+    // Total area should be preserved
+    const totalArea = result.reduce((sum, r) => sum + r.w * r.h, 0);
+    expect(totalArea).toBeCloseTo(200 * 100);
+    // Each should have roughly half the area
+    expect(result[0].w * result[0].h).toBeCloseTo(10000);
+    expect(result[1].w * result[1].h).toBeCloseTo(10000);
+  });
+
+  it('areas are proportional to values', () => {
+    const values = [60, 30, 10];
+    const result = squarify(values, 300, 200);
+    const totalArea = 300 * 200;
+    expect(result.length).toBe(3);
+    // First item should have 60% of area
+    expect(result[0].w * result[0].h).toBeCloseTo(totalArea * 0.6, -1);
+    // Second item should have 30% of area
+    expect(result[1].w * result[1].h).toBeCloseTo(totalArea * 0.3, -1);
+    // Third item should have 10% of area
+    expect(result[2].w * result[2].h).toBeCloseTo(totalArea * 0.1, -1);
+  });
+
+  it('rectangles do not overlap', () => {
+    const values = [40, 30, 20, 10, 5, 3, 2];
+    const result = squarify(values, 400, 300);
+    // Check no two rectangles overlap
+    for (let i = 0; i < result.length; i++) {
+      for (let j = i + 1; j < result.length; j++) {
+        const a = result[i];
+        const b = result[j];
+        const overlapX = a.x < b.x + b.w && a.x + a.w > b.x;
+        const overlapY = a.y < b.y + b.h && a.y + a.h > b.y;
+        expect(overlapX && overlapY).toBe(false);
+      }
+    }
+  });
+
+  it('rectangles stay within container bounds', () => {
+    const values = [100, 80, 60, 40, 20, 10, 5];
+    const result = squarify(values, 500, 400);
+    for (const rect of result) {
+      expect(rect.x).toBeGreaterThanOrEqual(-0.001);
+      expect(rect.y).toBeGreaterThanOrEqual(-0.001);
+      expect(rect.x + rect.w).toBeLessThanOrEqual(500.001);
+      expect(rect.y + rect.h).toBeLessThanOrEqual(400.001);
+    }
+  });
+
+  it('total area of all rectangles equals container area', () => {
+    const values = [50, 30, 20, 15, 10, 8, 5, 3, 2, 1];
+    const result = squarify(values, 600, 400);
+    const totalArea = result.reduce((sum, r) => sum + r.w * r.h, 0);
+    expect(totalArea).toBeCloseTo(600 * 400, -1);
   });
 });

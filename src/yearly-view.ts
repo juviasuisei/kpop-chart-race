@@ -89,7 +89,7 @@ export class YearlyView {
     const years = this.getYears();
 
     if (this.zoom === "all") {
-      this.wrapper.className = "yearly-view yearly-view--stacked";
+      this.wrapper.className = "yearly-view yearly-view--treemap";
       this.renderStacked(years);
     } else {
       this.wrapper.className = "yearly-view";
@@ -130,79 +130,90 @@ export class YearlyView {
       const entries = this.computeYearData(year, Infinity);
       if (entries.length === 0) continue;
 
-      const yearRow = document.createElement("div");
-      yearRow.className = "yearly-stacked__row";
+      const yearBlock = document.createElement("div");
+      yearBlock.className = "yearly-treemap__block";
 
-      const heading = document.createElement("span");
-      heading.className = "yearly-stacked__year";
+      const heading = document.createElement("h3");
+      heading.className = "yearly-treemap__year";
       heading.textContent = String(year);
-      yearRow.appendChild(heading);
+      yearBlock.appendChild(heading);
 
-      const bar = document.createElement("div");
-      bar.className = "yearly-stacked__bar";
+      const mapContainer = document.createElement("div");
+      mapContainer.className = "yearly-treemap__map";
+      yearBlock.appendChild(mapContainer);
 
-      // Compute total for percentage
-      const total = entries.reduce((sum, e) => sum + (this.metric === "wins" ? e.wins : e.points), 0);
+      // Compute treemap layout after DOM insertion so we can measure
+      this.wrapper.appendChild(yearBlock);
 
-      for (const entry of entries) {
-        const value = this.metric === "wins" ? entry.wins : entry.points;
-        if (value === 0) continue;
-        const pct = (value / total) * 100;
+      // Use requestAnimationFrame to measure after layout
+      requestAnimationFrame(() => {
+        const width = mapContainer.clientWidth;
+        const height = mapContainer.clientHeight;
+        if (width === 0 || height === 0) return;
 
-        const segment = document.createElement("div");
-        segment.className = "yearly-stacked__segment";
-        segment.style.width = `${pct}%`;
-        segment.style.backgroundColor = ARTIST_TYPE_COLORS[entry.artistType as keyof typeof ARTIST_TYPE_COLORS] ?? "#555";
+        const values = entries.map(e => this.metric === "wins" ? e.wins : e.points);
+        const rects = squarify(values, width, height);
 
-        // Logo (left-aligned, hidden if segment too narrow)
-        const logo = document.createElement("img");
-        logo.className = "yearly-stacked__logo";
-        logo.src = entry.logoUrl;
-        logo.alt = entry.name;
-        logo.onerror = () => { logo.style.display = "none"; };
-        segment.appendChild(logo);
+        for (let i = 0; i < entries.length; i++) {
+          const entry = entries[i];
+          const rect = rects[i];
+          const value = this.metric === "wins" ? entry.wins : entry.points;
+          if (value === 0) continue;
 
-        // Tooltip (custom, appears instantly on hover)
-        const rank = entries.indexOf(entry) + 1;
-        const indicator = ARTIST_TYPE_INDICATORS[entry.artistType as ArtistType] ?? "";
-        const tooltipText = this.metric === "wins"
-          ? `#${rank} · ${entry.name} ${indicator} · ${entry.wins} ${entry.wins === 1 ? "win" : "wins"}`
-          : `#${rank} · ${entry.name} ${indicator} · ${entry.points.toLocaleString()} pts`;
+          const cell = document.createElement("div");
+          cell.className = "yearly-treemap__cell";
+          cell.style.left = `${rect.x}px`;
+          cell.style.top = `${rect.y}px`;
+          cell.style.width = `${rect.w}px`;
+          cell.style.height = `${rect.h}px`;
+          cell.style.backgroundColor = ARTIST_TYPE_COLORS[entry.artistType as keyof typeof ARTIST_TYPE_COLORS] ?? "#555";
 
-        segment.addEventListener("mouseenter", () => {
-          let tooltip = document.querySelector(".yearly-stacked__tooltip") as HTMLElement | null;
-          if (!tooltip) {
-            tooltip = document.createElement("div");
-            tooltip.className = "yearly-stacked__tooltip";
-            document.body.appendChild(tooltip);
-          }
-          tooltip.textContent = tooltipText;
-          tooltip.style.display = "block";
-          const rect = segment.getBoundingClientRect();
-          // Position centered above the segment
-          let left = rect.left + rect.width / 2;
-          const top = rect.top - 6;
-          tooltip.style.left = `${left}px`;
-          tooltip.style.top = `${top}px`;
-          // Clamp to viewport edges
-          const tipRect = tooltip.getBoundingClientRect();
-          if (tipRect.right > window.innerWidth - 8) {
-            tooltip.style.left = `${window.innerWidth - 8 - tipRect.width / 2}px`;
-          }
-          if (tipRect.left < 8) {
-            tooltip.style.left = `${8 + tipRect.width / 2}px`;
-          }
-        });
-        segment.addEventListener("mouseleave", () => {
-          const tooltip = document.querySelector(".yearly-stacked__tooltip") as HTMLElement | null;
-          if (tooltip) tooltip.style.display = "none";
-        });
+          // Logo
+          const logo = document.createElement("img");
+          logo.className = "yearly-treemap__logo";
+          logo.src = entry.logoUrl;
+          logo.alt = entry.name;
+          logo.onerror = () => { logo.style.display = "none"; };
+          cell.appendChild(logo);
 
-        bar.appendChild(segment);
-      }
+          // Tooltip on hover
+          const rank = i + 1;
+          const indicator = ARTIST_TYPE_INDICATORS[entry.artistType as ArtistType] ?? "";
+          const tooltipText = this.metric === "wins"
+            ? `#${rank} · ${entry.name} ${indicator} · ${entry.wins} ${entry.wins === 1 ? "win" : "wins"}`
+            : `#${rank} · ${entry.name} ${indicator} · ${entry.points.toLocaleString()} pts`;
 
-      yearRow.appendChild(bar);
-      this.wrapper.appendChild(yearRow);
+          cell.addEventListener("mouseenter", () => {
+            let tooltip = document.querySelector(".yearly-treemap__tooltip") as HTMLElement | null;
+            if (!tooltip) {
+              tooltip = document.createElement("div");
+              tooltip.className = "yearly-treemap__tooltip";
+              document.body.appendChild(tooltip);
+            }
+            tooltip.textContent = tooltipText;
+            tooltip.style.display = "block";
+            const cellRect = cell.getBoundingClientRect();
+            let left = cellRect.left + cellRect.width / 2;
+            const top = cellRect.top - 6;
+            tooltip.style.left = `${left}px`;
+            tooltip.style.top = `${top}px`;
+            // Clamp to viewport
+            const tipRect = tooltip.getBoundingClientRect();
+            if (tipRect.right > window.innerWidth - 8) {
+              tooltip.style.left = `${window.innerWidth - 8 - tipRect.width / 2}px`;
+            }
+            if (tipRect.left < 8) {
+              tooltip.style.left = `${8 + tipRect.width / 2}px`;
+            }
+          });
+          cell.addEventListener("mouseleave", () => {
+            const tooltip = document.querySelector(".yearly-treemap__tooltip") as HTMLElement | null;
+            if (tooltip) tooltip.style.display = "none";
+          });
+
+          mapContainer.appendChild(cell);
+        }
+      });
     }
   }
 
@@ -429,3 +440,116 @@ export class YearlyView {
     return cell;
   }
 }
+
+// --- Squarified Treemap Algorithm ---
+// Based on Bruls, Huizing, van Wijk (2000)
+
+interface TreemapRect {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
+function squarify(values: number[], width: number, height: number): TreemapRect[] {
+  const total = values.reduce((s, v) => s + v, 0);
+  if (total === 0 || values.length === 0) return [];
+
+  // Normalize values so they sum to total area
+  const area = width * height;
+  const normalized = values.map(v => (v / total) * area);
+
+  const rects: TreemapRect[] = new Array(values.length);
+  layoutStrip(normalized, 0, { x: 0, y: 0, w: width, h: height }, rects);
+  return rects;
+}
+
+function layoutStrip(
+  areas: number[],
+  startIndex: number,
+  container: TreemapRect,
+  out: TreemapRect[]
+): void {
+  if (areas.length === 0) return;
+  if (areas.length === 1) {
+    out[startIndex] = { x: container.x, y: container.y, w: container.w, h: container.h };
+    return;
+  }
+
+  // Determine the shorter side of the container
+  const shortSide = Math.min(container.w, container.h);
+
+  // Greedily add items to the current row until aspect ratio worsens
+  let rowSum = 0;
+  let rowItems: number[] = [];
+  let bestWorst = Infinity;
+
+  for (let i = 0; i < areas.length; i++) {
+    const testRow = [...rowItems, areas[i]];
+    const testSum = rowSum + areas[i];
+    const worst = worstAspectRatio(testRow, testSum, shortSide);
+
+    if (worst <= bestWorst) {
+      rowItems = testRow;
+      rowSum = testSum;
+      bestWorst = worst;
+    } else {
+      // Layout current row and recurse on remainder
+      const rowContainer = placeRow(rowItems, rowSum, startIndex, container, out);
+      layoutStrip(areas.slice(i), startIndex + i, rowContainer, out);
+      return;
+    }
+  }
+
+  // All items fit in one row
+  placeRow(rowItems, rowSum, startIndex, container, out);
+}
+
+function worstAspectRatio(row: number[], rowSum: number, shortSide: number): number {
+  const rowWidth = rowSum / shortSide;
+  let worst = 0;
+  for (const area of row) {
+    const h = area / rowWidth;
+    const ratio = Math.max(rowWidth / h, h / rowWidth);
+    if (ratio > worst) worst = ratio;
+  }
+  return worst;
+}
+
+function placeRow(
+  row: number[],
+  rowSum: number,
+  startIndex: number,
+  container: TreemapRect,
+  out: TreemapRect[]
+): TreemapRect {
+  const { x, y, w, h } = container;
+  const horizontal = w >= h; // lay row along the shorter side
+
+  if (horizontal) {
+    // Row fills from left, items stack vertically
+    const rowWidth = rowSum / h;
+    let cy = y;
+    for (let i = 0; i < row.length; i++) {
+      const itemHeight = row[i] / rowWidth;
+      out[startIndex + i] = { x, y: cy, w: rowWidth, h: itemHeight };
+      cy += itemHeight;
+    }
+    // Remaining container is to the right
+    return { x: x + rowWidth, y, w: w - rowWidth, h };
+  } else {
+    // Row fills from top, items stack horizontally
+    const rowHeight = rowSum / w;
+    let cx = x;
+    for (let i = 0; i < row.length; i++) {
+      const itemWidth = row[i] / rowHeight;
+      out[startIndex + i] = { x: cx, y, w: itemWidth, h: rowHeight };
+      cx += itemWidth;
+    }
+    // Remaining container is below
+    return { x, y: y + rowHeight, w, h: h - rowHeight };
+  }
+}
+
+// Export for testing
+export { squarify, type TreemapRect };

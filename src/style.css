@@ -1240,78 +1240,77 @@ body {
 }
 
 
-/* ===== Yearly Stacked Bar View ===== */
+/* ===== Yearly Treemap View ===== */
 
-.yearly-view--stacked {
+.yearly-view--treemap {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  padding: 1.5rem;
+  gap: 1.5rem;
+  padding: 1rem;
   overflow-y: auto;
   flex: 1 1 auto;
   min-height: 0;
 }
 
-.yearly-stacked__row {
+.yearly-treemap__block {
   display: flex;
-  align-items: center;
-  gap: 0.75rem;
+  flex-direction: column;
 }
 
-.yearly-stacked__year {
-  flex-shrink: 0;
-  width: 3rem;
-  font-size: 0.85rem;
+.yearly-treemap__year {
+  margin: 0 0 0.4rem 0;
+  font-size: 0.9rem;
   font-weight: 700;
   color: #213547;
-  text-align: right;
 }
 
-.yearly-stacked__bar {
-  flex: 1 1 auto;
-  min-width: 0;
-  height: 40px;
-  display: flex;
-  border-radius: 4px;
+.yearly-treemap__map {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  border-radius: 6px;
   overflow: hidden;
 }
 
-.yearly-stacked__segment {
-  height: 100%;
+.yearly-treemap__cell {
+  position: absolute;
   display: flex;
   align-items: center;
-  padding: 0 4px;
+  justify-content: center;
   overflow: hidden;
-  border-right: 1.5px solid #fff;
   box-sizing: border-box;
+  border: 1.5px solid rgba(255, 255, 255, 0.7);
   cursor: default;
-  min-width: 0;
+  transition: opacity 0.15s;
 }
 
-.yearly-stacked__segment:last-child {
-  border-right: none;
+.yearly-treemap__cell:hover {
+  opacity: 0.85;
 }
 
-.yearly-stacked__logo {
-  width: 24px;
-  height: 24px;
+.yearly-treemap__logo {
+  width: 60%;
+  height: 60%;
+  max-width: 48px;
+  max-height: 48px;
+  min-width: 12px;
+  min-height: 12px;
   object-fit: contain;
-  flex-shrink: 0;
+  pointer-events: none;
 }
 
 @media (max-width: 767px) {
-  .yearly-stacked__bar {
-    height: 32px;
+  .yearly-treemap__map {
+    height: 160px;
   }
 
-  .yearly-stacked__logo {
-    width: 18px;
-    height: 18px;
+  .yearly-treemap__logo {
+    max-width: 32px;
+    max-height: 32px;
   }
 }
 
-
-.yearly-stacked__tooltip {
+.yearly-treemap__tooltip {
   display: none;
   position: fixed;
   transform: translate(-50%, -100%);

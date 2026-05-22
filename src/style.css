@@ -1246,7 +1246,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  padding: 1rem;
+  padding: 1rem 0;
   overflow-y: auto;
   flex: 1 1 auto;
   min-height: 0;
@@ -1255,6 +1255,7 @@ body {
 .yearly-treemap__block {
   display: flex;
   flex-direction: column;
+  padding: 0 1rem;
 }
 
 .yearly-treemap__year {
@@ -1267,7 +1268,7 @@ body {
 .yearly-treemap__map {
   position: relative;
   width: 100%;
-  height: 200px;
+  height: 300px;
   border-radius: 6px;
   overflow: hidden;
 }
@@ -1301,7 +1302,7 @@ body {
 
 @media (max-width: 767px) {
   .yearly-treemap__map {
-    height: 160px;
+    height: 240px;
   }
 
   .yearly-treemap__logo {

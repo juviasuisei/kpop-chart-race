@@ -1292,8 +1292,8 @@ body {
 .yearly-treemap__logo {
   width: 60%;
   height: 60%;
-  max-width: 48px;
-  max-height: 48px;
+  max-width: 120px;
+  max-height: 120px;
   min-width: 12px;
   min-height: 12px;
   object-fit: contain;

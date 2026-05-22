@@ -1,0 +1,21 @@
+{
+  "name": "BAEKHYUN [EXO]",
+  "korean_name": "변백현",
+  "artistType": "solo_male",
+  "generation": 3,
+  "debut": "2019-07-10",
+  "releases": [
+    {
+      "title": "Elevator",
+      "dailyValues": {
+        "2025-05-28": { "value": 3708, "source": "show_champion", "episode": 556 }
+      },
+      "embeds": {
+        "2025-05-19": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/essence-of-reverie/1811564481" },
+          { "type": "mv", "url": "https://youtu.be/lg3r8-4yfDI?si=qceCVT0cumc3Tb4V" }
+        ]
+      }
+    }
+  ]
+}

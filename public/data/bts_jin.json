@@ -8,7 +8,8 @@
     {
       "title": "Don't Say You Love Me",
       "dailyValues": {
-        "2025-06-05": { "value": 6300, "source": "m_countdown", "episode": 891 }
+        "2025-06-05": { "value": 6300, "source": "m_countdown", "episode": 891 },
+        "2025-05-29": { "value": 7669, "source": "m_countdown", "episode": 890 }
       },
       "embeds": {
         "2025-05-16": [

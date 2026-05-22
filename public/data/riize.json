@@ -26,9 +26,19 @@
       "dailyValues": {
         "2025-06-11": { "value": 2061, "source": "show_champion", "episode": 558 },
         "2025-06-07": { "value": 2400, "source": "show_music_core", "episode": 905 },
-        "2025-06-04": { "value": 2414, "source": "show_champion", "episode": 557 }
+        "2025-06-04": { "value": 2414, "source": "show_champion", "episode": 557 },
+        "2025-06-01": { "value": 5655, "source": "inkigayo", "episode": 1269 },
+        "2025-05-31": { "value": 9319, "source": "show_music_core", "episode": 904 },
+        "2025-05-30": { "value": 10452, "source": "music_bank", "episode": 1243 },
+        "2025-05-29": { "value": 5953, "source": "m_countdown", "episode": 890 },
+        "2025-05-28": { "value": 7719, "source": "show_champion", "episode": 556 }
+
       },
       "embeds": {
+        "2025-06-01": [ { "type": "live_performance", "url": "https://youtu.be/FwB94BrXznc?si=mOm8x5G3qzOXcArw" } ],
+        "2025-05-31": [ { "type": "live_performance", "url": "https://youtu.be/nxxkS90Q_uY?si=g49bP_guBXxz3uK_" } ],
+        "2025-05-30": [ { "type": "live_performance", "url": "https://youtu.be/Cn0ypW-Aj3c?si=NCDaNWZBFGHVN5jb" } ],
+        "2025-05-29": [ { "type": "live_performance", "url": "https://youtu.be/3bYeLSEuxAs?si=H6je7PodK3LvrFLe" } ],
         "2025-05-19": [
           { "type": "release_date", "url": "https://music.apple.com/us/album/odyssey-the-1st-album/1813453693" },
           { "type": "mv", "url": "https://youtu.be/vLUtHODdLzk?si=CWLTwxzheYY2rzGu" }

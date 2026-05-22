@@ -1,0 +1,21 @@
+{
+  "name": "MEOVV",
+  "korean_name": "미야오",
+  "artistType": "girl_group",
+  "generation": 5,
+  "debut": "2024-09-06",
+  "releases": [
+    {
+      "title": "HANDS UP",
+      "dailyValues": {
+        "2025-05-31": { "value": 4268, "source": "show_music_core", "episode": 904 }
+      },
+      "embeds": {
+        "2025-04-28": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/hands-up-single/1808544400" },
+          { "type": "mv", "url": "https://youtu.be/sL0pCS6K9bc?si=VpVhn2mBaPkt3IQP" }
+        ]
+      }
+    }
+  ]
+}

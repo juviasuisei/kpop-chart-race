@@ -21,7 +21,8 @@
     {
       "title": "Maybe Tomorrow",
       "dailyValues": {
-        "2025-06-04": { "value": 2043, "source": "show_champion", "episode": 557 }
+        "2025-06-04": { "value": 2043, "source": "show_champion", "episode": 557 },
+        "2025-05-28": { "value": 3296, "source": "show_champion", "episode": 556 }
       },
       "embeds": {
         "2025-05-07": [

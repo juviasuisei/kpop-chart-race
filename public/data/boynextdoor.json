@@ -22,6 +22,18 @@
           { "type": "mv", "url": "https://youtu.be/yAtew9dZX_E?si=gG73sDDq3cNNYyeu" }
         ]
       }
+    },
+    {
+      "title": "I Feel Good",
+      "dailyValues": {
+        "2025-05-28": { "value": 2369, "source": "show_champion", "episode": 556 }
+      },
+      "embeds": {
+        "2025-05-13": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/no-genre/1811077675" },
+          { "type": "mv", "url": "https://youtu.be/ic31SJ4uK4Y?si=AhWagyGnb_g_kcbr" }
+        ]
+      }
     }
   ]
 }

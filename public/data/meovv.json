@@ -8,7 +8,9 @@
     {
       "title": "HANDS UP",
       "dailyValues": {
-        "2025-05-31": { "value": 4268, "source": "show_music_core", "episode": 904 }
+        "2025-05-31": { "value": 4268, "source": "show_music_core", "episode": 904 },
+        "2025-05-24": { "value": 5169, "source": "show_music_core", "episode": 903 },
+        "2025-05-21": { "value": 4116, "source": "show_champion", "episode": 555 }
       },
       "embeds": {
         "2025-04-28": [

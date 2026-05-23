@@ -17,6 +17,23 @@
           { "type": "mv", "url": "https://youtu.be/28mVLa2S9yw?si=oURhsFn1tZqnLChN" }
         ]
       }
+    },
+    {
+      "title": "Are You Alive",
+      "dailyValues": {
+        "2025-05-23": { "value": 4540, "source": "music_bank", "episode": 1242 },
+        "2025-05-21": { "value": 5758, "source": "show_champion", "episode": 555 },
+        "2025-05-20": { "value": 9560, "source": "the_show", "episode": 377 }
+      },
+      "embeds": {
+        "2025-05-23": [{ "type": "live_performance", "url": "https://youtu.be/4kEos3cvMWA?si=bvdwEPPoEWCtdY2l" }],
+        "2025-05-21": [{ "type": "live_performance", "url": "https://youtu.be/XGDpiUeC9Sw?si=SQk3_T5RMCEGMvi4" }],
+        "2025-05-20": [{ "type": "live_performance", "url": "https://youtu.be/YlLb8gHziPk?si=7dlPm1efPyz4PQNg" }],
+        "2025-05-12": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/assemble25/1809896514" },
+          { "type": "mv", "url": "https://youtu.be/pTycfmVzdl8?si=MCLYMHpPkBIK5H3F" }
+        ]
+      }
     }
   ]
 }

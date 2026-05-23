@@ -26,12 +26,33 @@
     {
       "title": "I Feel Good",
       "dailyValues": {
-        "2025-05-28": { "value": 2369, "source": "show_champion", "episode": 556 }
+        "2025-05-28": { "value": 2369, "source": "show_champion", "episode": 556 },
+        "2025-05-25": { "value": 6069, "source": "inkigayo", "episode": 1268 },
+        "2025-05-24": { "value": 8124, "source": "show_music_core", "episode": 903 },
+        "2025-05-23": { "value": 9353, "source": "music_bank", "episode": 1242 },
+        "2025-05-22": { "value": 8590, "source": "m_countdown", "episode": 889 },
+        "2025-05-21": { "value": 5322, "source": "show_champion", "episode": 555 }
       },
       "embeds": {
+        "2025-05-25": [ { "type": "live_performance", "url": "https://youtu.be/FjleL9g3H3w?si=xexme0SmHBhUNvOv" } ],
+        "2025-05-24": [ { "type": "live_performance", "url": "https://youtu.be/mks0nkqnHA4?si=G8YGxWm8lplC8kq9" } ],
+        "2025-05-23": [ { "type": "live_performance", "url": "https://youtu.be/xt9IRZSLkno?si=YOtosZ2ooNUhH_jD" } ],
+        "2025-05-22": [ { "type": "live_performance", "url": "https://youtu.be/q6VA1KH7owY?si=AJTz8CIV6sgrLeFB" } ],
         "2025-05-13": [
           { "type": "release_date", "url": "https://music.apple.com/us/album/no-genre/1811077675" },
           { "type": "mv", "url": "https://youtu.be/ic31SJ4uK4Y?si=AhWagyGnb_g_kcbr" }
+        ]
+      }
+    },
+    {
+      "title": "IF I SAY, I LOVE YOU",
+      "dailyValues": {
+        "2025-05-25": { "value": 3857, "source": "inkigayo", "episode": 1268 }
+      },
+      "embeds": {
+        "2026-01-06": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/if-i-say-i-love-you-single/1785637094" },
+          { "type": "mv", "url": "https://youtu.be/B4mLKcVIERs?si=mgB2mYT8MlVrUteT" }
         ]
       }
     }

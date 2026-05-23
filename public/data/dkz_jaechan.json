@@ -1,0 +1,22 @@
+{
+  "name": "JAECHAN [DKZ]",
+  "korean_name": "박재찬",
+  "artistType": "solo_male",
+  "generation": 4,
+  "debut": "2023-09-06",
+  "releases": [
+    {
+      "title": "Poster Boy",
+      "dailyValues": {
+        "2025-05-20": { "value": 1248, "source": "the_show", "episode": 377 }
+      },
+      "embeds": {
+        "2025-05-20": [{ "type": "live_performance", "url": "https://youtu.be/AXk1h9qsUNE?si=ELd5kYNg0VV37oLe" }],
+        "2025-05-16": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/jaechan-2nd-mini-album-jcfactory-vol-2-ep/1814283647" },
+          { "type": "mv", "url": "https://youtu.be/Lr3J8QTyoxc?si=-2TXapQjLlTstmXT" }
+        ]
+      }
+    }
+  ]
+}

@@ -48,6 +48,20 @@
           { "type": "mv", "url": "https://youtu.be/IcwHopeT5gY?si=uSOqY07JbxkNaYfJ" }
         ]
       }
+    },
+    {
+      "title": "Love Language",
+      "dailyValues": {
+        "2025-05-18": { "value": 4750, "source": "inkigayo", "episode": 1267 },
+        "2025-05-15": { "value": 6665, "source": "m_countdown", "episode": 888 },
+        "2025-05-14": { "value": 4208, "source": "show_champion", "episode": 554 }
+      },
+      "embeds": {
+        "2025-05-02": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/love-language-single/1808843310" },
+          { "type": "mv", "url": "https://youtu.be/8aRTMQvbODs?si=rp8kxNHb24JccmJN" }
+        ]
+      }
     }
   ]
 }

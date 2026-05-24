@@ -10,9 +10,13 @@
       "dailyValues": {
         "2025-05-31": { "value": 4268, "source": "show_music_core", "episode": 904 },
         "2025-05-24": { "value": 5169, "source": "show_music_core", "episode": 903 },
-        "2025-05-21": { "value": 4116, "source": "show_champion", "episode": 555 }
+        "2025-05-21": { "value": 4116, "source": "show_champion", "episode": 555 },
+        "2025-05-18": { "value": 4374, "source": "inkigayo", "episode": 1267 },
+        "2025-05-15": { "value": 7075, "source": "m_countdown", "episode": 888 }
       },
       "embeds": {
+        "2025-05-18": [ { "type": "live_performance", "url": "https://youtu.be/1eniqvpND3c?si=Gq6s40du7otO3qvW" } ],
+        "2025-05-15": [ { "type": "live_performance", "url": "https://youtu.be/fnSkdJlO1OA?si=XkY10mz1Lb8VFHjC" } ],
         "2025-04-28": [
           { "type": "release_date", "url": "https://music.apple.com/us/album/hands-up-single/1808544400" },
           { "type": "mv", "url": "https://youtu.be/sL0pCS6K9bc?si=VpVhn2mBaPkt3IQP" }

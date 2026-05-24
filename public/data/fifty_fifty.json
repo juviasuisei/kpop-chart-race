@@ -8,10 +8,12 @@
     {
       "title": "Pookie",
       "dailyValues": {
-        "2025-05-21": { "value": 3445, "source": "show_champion", "episode": 555 }
+        "2025-05-21": { "value": 3445, "source": "show_champion", "episode": 555 },
+        "2025-05-14": { "value": 4130, "source": "show_champion", "episode": 554 }
       },
       "embeds": {
         "2025-05-21": [{ "type": "live_performance", "url": "https://youtu.be/Rb52sgNiUmU?si=n3q9SpEQJmoCriMp" }],
+        "2025-05-14": [{ "type": "live_performance", "url": "https://youtu.be/ZH4MbozWKCE?si=_pbcsuPw6q-aG0I1" }],
         "2025-04-29": [
           { "type": "release_date", "url": "https://music.apple.com/us/album/day-night-ep/1809050528" },
           { "type": "mv", "url": "https://youtu.be/1ZX1vEDTfY4?si=Rnd7zL1ksQNPp_qO" }

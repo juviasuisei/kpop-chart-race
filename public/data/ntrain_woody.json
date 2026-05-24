@@ -8,7 +8,8 @@
     {
       "title": "Sadder Than Yesterday",
       "dailyValues": {
-        "2025-05-24": { "value": 5032, "source": "show_music_core", "episode": 903 }
+        "2025-05-24": { "value": 5032, "source": "show_music_core", "episode": 903 },
+        "2025-05-17": { "value": 5052, "source": "show_music_core", "episode": 902 }
       },
       "embeds": {
         "2025-03-31": [

@@ -23,10 +23,14 @@
     {
       "title": "DUH!",
       "dailyValues": {
-        "2025-05-20": { "value": 4776, "source": "the_show", "episode": 377 }
+        "2025-05-20": { "value": 4776, "source": "the_show", "episode": 377 },
+        "2025-05-16": { "value": 9716, "source": "music_bank", "episode": 1241 },
+        "2025-05-14": { "value": 6500, "source": "show_champion", "episode": 554 }
       },
       "embeds": {
         "2025-05-20": [{ "type": "live_performance", "url": "https://youtu.be/xxGBzSDHbLk?si=vJLOQpzepg3b9UNi" }],
+        "2025-05-16": [{ "type": "live_performance", "url": "https://youtu.be/nI4JuSyy2bk?si=CbqGNWVdE69ioEuM" }],
+        "2025-05-14": [{ "type": "live_performance", "url": "https://youtu.be/Juzm7nBBXo4?si=QMja0_8vPqmvM2RS" }],
         "2025-05-08": [
           { "type": "release_date", "url": "https://music.apple.com/us/album/duh-ep/1811491701" },
           { "type": "mv", "url": "https://youtu.be/7G6_avXknCk?si=1Xss60msCYPW5DkH" }

@@ -38,6 +38,19 @@
           { "type": "mv", "url": "https://youtu.be/TzbGBkEh9ms?si=DslLyLXpeeLLSdMJ" }
         ]
       }
+    },
+    {
+      "title": "Countdown!",
+      "dailyValues": {
+        "2025-05-16": { "value": 3333, "source": "music_bank", "episode": 1241 },
+        "2025-05-14": { "value": 2837, "source": "show_champion", "episode": 554 }
+      },
+      "embeds": {
+        "2025-04-21": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/tws-3rd-mini-album-try-with-us-ep/1805792421" },
+          { "type": "mv", "url": "https://youtu.be/Csaj3X6PKxY?si=zgae4-xOMZZrpMt0" }
+        ]
+      }
     }
   ]
 }

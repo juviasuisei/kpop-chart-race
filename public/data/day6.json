@@ -23,7 +23,9 @@
       "dailyValues": {
         "2025-06-04": { "value": 2043, "source": "show_champion", "episode": 557 },
         "2025-05-28": { "value": 3296, "source": "show_champion", "episode": 556 },
-        "2025-05-21": { "value": 3609, "source": "show_champion", "episode": 555 }
+        "2025-05-21": { "value": 3609, "source": "show_champion", "episode": 555 },
+        "2025-05-17": { "value": 6763, "source": "show_music_core", "episode": 902 },
+        "2025-05-14": { "value": 4550, "source": "show_champion", "episode": 554 }
       },
       "embeds": {
         "2025-05-07": [

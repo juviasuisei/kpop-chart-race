@@ -1,0 +1,21 @@
+{
+  "name": "OVAN",
+  "korean_name": "조강석",
+  "artistType": "solo_male",
+  "generation": 3,
+  "debut": "2017-05-10",
+  "releases": [
+    {
+      "title": "Flower",
+      "dailyValues": {
+        "2025-05-10": { "value": 4762, "source": "show_music_core", "episode": 901 }
+      },
+      "embeds": {
+        "2025-03-13": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/church-oppa/1800893834" },
+          { "type": "mv", "url": "https://youtu.be/pqUqaBC_2lk?si=gggk6NlwFBCeErY2" }
+        ]
+      }
+    }
+  ]
+}

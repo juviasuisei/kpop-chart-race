@@ -54,7 +54,8 @@
       "dailyValues": {
         "2025-05-18": { "value": 4750, "source": "inkigayo", "episode": 1267 },
         "2025-05-15": { "value": 6665, "source": "m_countdown", "episode": 888 },
-        "2025-05-14": { "value": 4208, "source": "show_champion", "episode": 554 }
+        "2025-05-14": { "value": 4208, "source": "show_champion", "episode": 554 },
+        "2025-05-08": { "value": 6665, "source": "m_countdown", "episode": 887 }
       },
       "embeds": {
         "2025-05-02": [

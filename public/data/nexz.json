@@ -34,6 +34,19 @@
           { "type": "mv", "url": "https://youtu.be/d4tHKtG9xFo?si=95oQd-zYW-0vhQAi" }
         ]
       }
+    },
+    {
+      "title": "O-RLY?",
+      "dailyValues": {
+        "2025-05-09": { "value": 7435, "source": "music_bank", "episode": 1240 }
+      },
+      "embeds": {
+        "2025-05-09": [ { "type": "live_performance", "url": "https://youtu.be/OIblgepYrFc?si=9dQ3AKiknrQ2PWP1" } ],
+        "2025-04-28": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/o-rly-ep/1805030750" },
+          { "type": "mv", "url": "https://youtu.be/624NpugNTi4?si=ivWM2_T5D344hT2f" }
+        ]
+      }
     }
   ]
 }

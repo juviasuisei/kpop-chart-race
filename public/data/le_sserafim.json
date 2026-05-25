@@ -30,6 +30,19 @@
           { "type": "mv", "url": "https://youtu.be/TvVtYaqCni8?si=TwOZPP6vpvQzK-JM" }
         ]
       }
+    },
+    {
+      "title": "HOT",
+      "dailyValues": {
+        "2025-05-11": { "value": 4035, "source": "inkigayo", "episode": 1266 },
+        "2025-05-10": { "value": 6546, "source": "show_music_core", "episode": 901 }
+      },
+      "embeds": {
+        "2025-03-14": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/hot-ep/1799278610" },
+          { "type": "mv", "url": "https://youtu.be/r9AEGPB6qIU?si=kbSajfoX-FrLOkaW" }
+        ]
+      }
     }
   ]
 }

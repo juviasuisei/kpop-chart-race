@@ -1,0 +1,21 @@
+{
+  "name": "ZO ZAZZ",
+  "korean_name": "조째즈",
+  "artistType": "solo_male",
+  "generation": 5,
+  "debut": "2025-01-07",
+  "releases": [
+    {
+      "title": "Don't you know",
+      "dailyValues": {
+        "2025-05-11": { "value": 3888, "source": "inkigayo", "episode": 1266 }
+      },
+      "embeds": {
+        "2025-01-07": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/dont-you-know-single/1787478136" },
+          { "type": "mv", "url": "https://youtu.be/tfmwbxBKPh0?si=s1hn8zY18qRh1g5T" }
+        ]
+      }
+    }
+  ]
+}

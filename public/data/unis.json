@@ -8,10 +8,12 @@
     {
       "title": "SWICY",
       "dailyValues": {
-        "2025-04-29": { "value": 4204, "source": "the_show", "episode": 376 }
+        "2025-04-29": { "value": 4204, "source": "the_show", "episode": 376 },
+        "2025-04-23": { "value": 6467, "source": "show_champion", "episode": 552 }
       },
       "embeds": {
         "2025-04-29": [{ "type": "live_performance", "url": "https://youtu.be/8xlRkYT1WoY?si=06liJrZQzNoJKGnp" }],
+        "2025-04-23": [{ "type": "live_performance", "url": "https://youtu.be/ZN-6R1bjzxM?si=ClFeRlq3_xETOHrO" }],
         "2025-04-15": [
           { "type": "release_date", "url": "https://music.apple.com/us/album/the-2nd-mini-album-swicy-ep/1807426683" },
           { "type": "mv", "url": "https://youtu.be/R-6qq-o16uA?si=PRwJhaouEQ_OkPtk" }

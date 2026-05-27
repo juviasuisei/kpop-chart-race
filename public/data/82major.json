@@ -1,0 +1,22 @@
+{
+  "name": "82MAJOR",
+  "korean_name": "에이티투메이저",
+  "artistType": "boy_group",
+  "generation": 5,
+  "debut": "2023-10-11",
+  "releases": [
+    {
+      "title": "TAKEOVER",
+      "dailyValues": {
+        "2025-04-23": { "value": 2649, "source": "show_champion", "episode": 552 }
+      },
+      "embeds": {
+        "2025-04-23": [{ "type": "live_performance", "url": "https://youtu.be/_FM1r0F_Rlw?si=0hGSBg3eqgCgHz7_" }],
+        "2025-04-11": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/silence-syndrome-ep/1806559077" },
+          { "type": "mv", "url": "https://youtu.be/bY2JgNSFEG0?si=-mTdfjZS4PQFygux" }
+        ]
+      }
+    }
+  ]
+}

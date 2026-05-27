@@ -40,5 +40,18 @@
         ]
       }
     }
+    },
+    {
+      "title": "SIGN",
+      "dailyValues": {
+        "2025-04-23": { "value": 2403, "source": "show_champion", "episode": 552 }
+      },
+      "embeds": {
+        "2025-03-31": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/sign-single/1804309574" },
+          { "type": "mv", "url": "https://youtu.be/88GkYKvnvvI?si=i9jwTOXEuWYXKMi8" }
+        ]
+      }
+    }
   ]
 }

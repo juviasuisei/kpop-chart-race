@@ -1,0 +1,21 @@
+{
+  "name": "G-DRAGON [BIGBANG]",
+  "korean_name": "권지용",
+  "artistType": "solo_male",
+  "generation": 2,
+  "debut": "2009-08-18",
+  "releases": [
+    {
+      "title": "TOO BAD",
+      "dailyValues": {
+        "2025-04-25": { "value": 4459, "source": "music_bank", "episode": 1238 }
+      },
+      "embeds": {
+        "2025-02-25": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/%C3%BCbermensch/1794882375" },
+          { "type": "mv", "url": "https://youtu.be/o9DhvbqYzns?si=E33IziMkiRqawZYu" }
+        ]
+      }
+    }
+  ]
+}

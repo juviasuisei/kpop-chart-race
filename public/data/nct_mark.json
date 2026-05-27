@@ -9,7 +9,9 @@
       "title": "1999", 
       "dailyValues": {
         "2025-05-01": { "value": 7866, "source": "m_countdown", "episode": 886 },
-        "2025-04-30": { "value": 3682, "source": "show_champion", "episode": 553 }
+        "2025-04-30": { "value": 3682, "source": "show_champion", "episode": 553 },
+        "2025-04-24": { "value": 7697, "source": "m_countdown", "episode": 885 },
+        "2025-04-23": { "value": 3698, "source": "show_champion", "episode": 552 }
       },
       "embeds": {
         "2025-04-07": [

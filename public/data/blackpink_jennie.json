@@ -8,7 +8,8 @@
     {
       "title": "like JENNIE",
       "dailyValues": {
-        "2025-05-03": { "value": 5492, "source": "show_music_core", "episode": 900 }
+        "2025-05-03": { "value": 5492, "source": "show_music_core", "episode": 900 },
+        "2025-04-26": { "value": 5584, "source": "show_music_core", "episode": 899 }
       },
       "embeds": {
         "2025-03-07": [

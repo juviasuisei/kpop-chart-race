@@ -1,0 +1,22 @@
+{
+  "name": "MARK [NCT]",
+  "korean_name": "이민형",
+  "artistType": "solo_male",
+  "generation": 3,
+  "debut": "2025-04-07",
+  "releases": [
+    {
+      "title": "1999", 
+      "dailyValues": {
+        "2025-05-01": { "value": 7866, "source": "m_countdown", "episode": 886 },
+        "2025-04-30": { "value": 3682, "source": "show_champion", "episode": 553 }
+      },
+      "embeds": {
+        "2025-04-07": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/the-firstfruit-the-1st-album/1804768478" },
+          { "type": "mv", "url": "https://youtu.be/c6PeWqj-moU?si=fu7ZeHPcnKBq0Yzd" }
+        ]
+      }
+    }
+  ]
+}

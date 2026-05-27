@@ -1,0 +1,22 @@
+{
+  "name": "ME:I",
+  "korean_name": "미아이",
+  "artistType": "girl_group",
+  "generation": 5,
+  "debut": "2024-04-17",
+  "releases": [
+    {
+      "title": "MUSE",
+      "dailyValues": {
+        "2025-04-30": { "value": 1883, "source": "show_champion", "episode": 553 }
+      },
+      "embeds": {
+        "2025-04-30": [ { "type": "live_performance", "url": "https://youtu.be/sEGE7ryE2Ms?si=P4deJi9yCllq4xVO" } ],
+        "2025-04-14": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/muse-ep/1800421765" },
+          { "type": "mv", "url": "https://youtu.be/zPmSwXMQtRk?si=djUb1RXXk66mlkPS" }
+        ],
+      }
+    }
+  ]
+}

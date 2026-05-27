@@ -35,7 +35,9 @@
       "title": "HOT",
       "dailyValues": {
         "2025-05-11": { "value": 4035, "source": "inkigayo", "episode": 1266 },
-        "2025-05-10": { "value": 6546, "source": "show_music_core", "episode": 901 }
+        "2025-05-10": { "value": 6546, "source": "show_music_core", "episode": 901 },
+        "2025-05-04": { "value": 4414, "source": "inkigayo", "episode": 1265 },
+        "2025-05-03": { "value": 4017, "source": "show_music_core", "episode": 900 }
       },
       "embeds": {
         "2025-03-14": [

@@ -51,6 +51,18 @@
           { "type": "mv", "url": "https://youtu.be/1pyO6oNmACs?si=bFMPTGh0onQXU6CH" }
         ]
       }
+    },
+    {
+      "title": "poppop",
+      "dailyValues": {
+        "2025-04-30": { "value": 2667, "source": "show_champion", "episode": 553 }
+      },
+      "embeds": {
+        "2025-04-14": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/poppop-the-2nd-mini-album-ep/1805788241" },
+          { "type": "mv", "url": "https://youtu.be/LNETckymbzk?si=ZskEfdCUCnz1q6z6" }
+        ]
+      }
     }
   ]
 }

@@ -43,9 +43,21 @@
       "title": "Countdown!",
       "dailyValues": {
         "2025-05-16": { "value": 3333, "source": "music_bank", "episode": 1241 },
-        "2025-05-14": { "value": 2837, "source": "show_champion", "episode": 554 }
+        "2025-05-14": { "value": 2837, "source": "show_champion", "episode": 554 },
+        "2025-05-04": { "value": 5987, "source": "inkigayo", "episode": 1265 },
+        "2025-05-03": { "value": 6448, "source": "show_music_core", "episode": 900 },
+        "2025-05-02": { "value": 12817, "source": "music_bank", "episode": 1239 },
+        "2025-05-01": { "value": 9461, "source": "m_countdown", "episode": 886 },
+        "2025-04-30": { "value": 9394, "source": "show_champion", "episode": 553 },
+        "2025-04-29": { "value": 9570, "source": "the_show", "episode": 376 }
       },
       "embeds": {
+        "2025-05-04": [{ "type": "live_performance", "url": "https://youtu.be/-RpFETIjED0?si=UA_Fe49kiHWz6hiS" }],
+        "2025-05-03": [{ "type": "live_performance", "url": "https://youtu.be/MTQ8aYYwki8?si=Il7NsKwZp4ZI-MeU" }],
+        "2025-05-02": [{ "type": "live_performance", "url": "https://youtu.be/ql4QPwc4-d8?si=WiZFOpnZEnXU1bvB" }],
+        "2025-05-01": [{ "type": "live_performance", "url": "https://youtu.be/BgzLzDpxO5c?si=Mu4hPVlmOPOcR3vP" }],
+        "2025-04-30": [{ "type": "live_performance", "url": "https://youtu.be/WzLPPW_zZes?si=M6zRq2Zf5dMOuurG" }],
+        "2025-04-29": [{ "type": "live_performance", "url": "https://youtu.be/KBr0oBeX-38?si=bjJ5Y52jLQe96_nD" }],
         "2025-04-21": [
           { "type": "release_date", "url": "https://music.apple.com/us/album/tws-3rd-mini-album-try-with-us-ep/1805792421" },
           { "type": "mv", "url": "https://youtu.be/Csaj3X6PKxY?si=zgae4-xOMZZrpMt0" }

@@ -1,0 +1,22 @@
+{
+  "name": "CHUU [LOONA]",
+  "korean_name": "김지우",
+  "artistType": "solo_female",
+  "generation": 4,
+  "debut": "2023-10-18",
+  "releases": [
+    {
+      "title": "Only cry in the rain",
+      "dailyValues": {
+        "2025-04-29": { "value": 1941, "source": "the_show", "episode": 376 }
+      },
+      "embeds": {
+        "2025-04-29": [{ "type": "live_performance", "url": "https://youtu.be/H-i6d23VSsw?si=BDmsZKoNEzgNdMij" }],
+        "2025-04-21": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/only-cry-in-the-rain-ep/1808333343" },
+          { "type": "mv", "url": "https://youtu.be/NhoZ_BYqp0I?si=9WgYEh6mI96trgji" }
+        ]
+      }
+    }
+  ]
+}

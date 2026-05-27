@@ -1,0 +1,22 @@
+{
+  "name": "KAI [EXO]",
+  "korean_name": "김종인",
+  "artistType": "solo_male",
+  "generation": 3,
+  "debut": "2020-11-30",
+  "releases": [
+    {
+      "title": "Wait On Me",
+      "dailyValues": {
+        "2025-05-02": { "value": 3839, "source": "music_bank", "episode": 1239 },
+        "2025-04-30": { "value": 2392, "source": "show_champion", "episode": 553 }
+      },
+      "embeds": {
+        "2025-04-21": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/wait-on-me-the-4th-mini-album/1807956819" },
+          { "type": "mv", "url": "https://youtu.be/JLqXeMabsEQ?si=AN4jT91rY41zRic7" }
+        ]
+      }
+    }
+  ]
+}

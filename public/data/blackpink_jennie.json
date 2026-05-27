@@ -1,0 +1,21 @@
+{
+  "name": "JENNIE [BLACKPINK]",
+  "korean_name": "김제니",
+  "artistType": "solo_female",
+  "generation": 3,
+  "debut": "2018-11-12",
+  "releases": [
+    {
+      "title": "like JENNIE",
+      "dailyValues": {
+        "2025-05-03": { "value": 5492, "source": "show_music_core", "episode": 900 }
+      },
+      "embeds": {
+        "2025-03-07": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/ruby/1795979743" },
+          { "type": "mv", "url": "https://youtu.be/JSFG-IE8n_c?si=0faSkrCCDnW8Appf" }
+        ]
+      }
+    }
+  ]
+}

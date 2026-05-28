@@ -38,6 +38,19 @@
           { "type": "mv", "url": "https://youtu.be/Li0zo4SZ5AY?si=TIzHTFP9ZEocfDrr" }
         ]
       }
+    },
+    {
+      "title": "All My Poetry",
+      "dailyValues": {
+        "2025-04-15": { "value": 2809, "source": "the_show", "episode": 375 }
+      },
+      "embeds": {
+        "2025-04-15": [{ "type": "live_performance", "url": "https://youtu.be/z5yqcGFDtqg?si=ySAgYZlV2otyW6HV" }],
+        "2025-04-04": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/eternalt/1804021166" },
+          { "type": "mv", "url": "https://youtu.be/7dVwqwzavgg?si=Ra4JhPs8SqEZsQyU" }
+        ]
+      }
     }
   ]
 }

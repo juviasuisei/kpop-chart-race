@@ -43,9 +43,12 @@
     {
       "title": "SIGN",
       "dailyValues": {
-        "2025-04-23": { "value": 2403, "source": "show_champion", "episode": 552 }
+        "2025-04-23": { "value": 2403, "source": "show_champion", "episode": 552 },
+        "2025-04-16": { "value": 2088, "source": "show_champion", "episode": 551 },
+        "2025-04-15": { "value": 8450, "source": "the_show", "episode": 375 }
       },
       "embeds": {
+        "2025-04-15": [{ "type": "live_performance", "url": "https://youtu.be/HhObj27rNN4?si=OG0wO7WgrXfRFR7U" }],
         "2025-03-31": [
           { "type": "release_date", "url": "https://music.apple.com/us/album/sign-single/1804309574" },
           { "type": "mv", "url": "https://youtu.be/88GkYKvnvvI?si=i9jwTOXEuWYXKMi8" }

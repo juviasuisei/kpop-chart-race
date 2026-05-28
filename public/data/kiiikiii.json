@@ -56,6 +56,18 @@
           { "type": "mv", "url": "https://youtu.be/u5wMLWs6LSs?si=LsCVjqtZsFu1Ft08" }
         ]
       }
+    },
+    {
+      "title": "I DO ME",
+      "dailyValues": {
+        "2025-04-16": { "value": 3531, "source": "show_champion", "episode": 551 }
+      },
+      "embeds": {
+        "2025-02-24": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/i-do-me-single/1795471738" },
+          { "type": "mv", "url": "https://youtu.be/hAEfi_SKTEU?si=h-mklTlZ6c8z2gyW" }
+        ]
+      }
     }
   ]
 }

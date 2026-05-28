@@ -17,6 +17,18 @@
           { "type": "mv", "url": "https://youtu.be/q9leDzlNEaY?si=A5h-aFPUjNP4RcHk" }
         ]
       }
+    },
+    {
+      "title": "MONA LISA",
+      "dailyValues": {
+        "2025-04-17": { "value": 7643, "source": "m_countdown", "episode": 884 }
+      },
+      "embeds": {
+        "2025-03-21": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/mona-lisa-single/1800800103" },
+          { "type": "mv", "url": "https://youtu.be/ECqGCH1TfLY?si=wRA6sSj0xshlKYzj" }
+        ]
+      }
     }
   ]
 }

@@ -8,7 +8,8 @@
     {
       "title": "Don't you know",
       "dailyValues": {
-        "2025-05-11": { "value": 3888, "source": "inkigayo", "episode": 1266 }
+        "2025-05-11": { "value": 3888, "source": "inkigayo", "episode": 1266 },
+        "2025-04-20": { "value": 4026, "source": "inkigayo", "episode": 1264 }
       },
       "embeds": {
         "2025-01-07": [

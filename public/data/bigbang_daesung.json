@@ -1,0 +1,21 @@
+{
+  "name": "DAESUNG [BIGBANG]",
+  "korean_name": "강대성",
+  "artistType": "solo_male",
+  "generation": 2,
+  "debut": "2008-06-16",
+  "releases": [
+    {
+      "title": "Universe",
+      "dailyValues": {
+        "2025-04-16": { "value": 1341, "source": "show_champion", "episode": 551 }
+      },
+      "embeds": {
+        "2025-04-08": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/ds-wave/1806563216" },
+          { "type": "mv", "url": "https://youtu.be/PHToFdx20ac?si=2VlvipjmRRdQmA8z" }
+        ]
+      }
+    }
+  ]
+}

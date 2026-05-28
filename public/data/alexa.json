@@ -1,0 +1,21 @@
+{
+  "name": "Kik5o & AleXa",
+  "korean_name": "천유경 / 김세리",
+  "artistType": "girl_group",
+  "generation": 4,
+  "debut": "2025-04-10",
+  "releases": [
+    {
+      "title": "VITAL CHECK",
+      "dailyValues": {
+        "2025-04-16": { "value": 2023, "source": "show_champion", "episode": 551 }
+      },
+      "embeds": {
+        "2025-04-10": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/vital-check-single/1807680080" },
+          { "type": "mv", "url": "https://youtu.be/vIyCWMVZwkI?si=GWmSAMTZ5-lLYpGp" }
+        ]
+      }
+    }
+  ]
+}

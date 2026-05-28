@@ -8,10 +8,12 @@
     {
       "title": "Heavy Serenade",
       "dailyValues": {
+        "2026-05-23": { "value": 6961, "source": "show_music_core", "episode": 946 },
         "2026-05-22": { "value": 9582, "source": "music_bank", "episode": 1294 },
         "2026-05-21": { "value": 8167, "source": "m_countdown", "episode": 929 }
       },
       "embeds": {
+        "2026-05-23": [{ "type": "live_performance", "url": "https://youtu.be/Zikcmdp_aoQ?si=0w5W2Yc4zQlWAGaU" }],      
         "2026-05-22": [{ "type": "live_performance", "url": "https://youtu.be/2lzsl0Mr1HI?si=EKfv69doyAdFRhUB" }],      
         "2026-05-21": [{ "type": "live_performance", "url": "https://youtu.be/-spU8OwA0rs?si=UeE3QsjAfB6znTVW" }],      
         "2026-05-11": [

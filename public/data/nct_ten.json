@@ -1,0 +1,26 @@
+{
+  "name": "TEN [NCT]",
+  "korean_name": "이영흠",
+  "artistType": "solo_male",
+  "generation": 3,
+  "debut": "2024-02-13",
+  "releases": [
+    {
+      "title": "STUNNER",
+      "dailyValues": {
+        "2025-04-04": { "value": 7752, "source": "music_bank", "episode": 1235 },
+        "2025-04-02": { "value": 4420, "source": "show_champion", "episode": 549 },
+        "2025-04-01": { "value": 8600, "source": "the_show", "episode": 373 }
+      },
+      "embeds": {
+        "2025-04-04": [ {"type": "live_performance", "url": "https://youtu.be/f_oc29pq26I?si=bH8uKnO5-otGC1lD" } ],
+        "2025-04-02": [ {"type": "live_performance", "url": "https://youtu.be/TVBiOBxgmXU?si=C4d0BWIsSN3lCZ7n" } ],
+        "2025-04-01": [ {"type": "live_performance", "url": "https://youtu.be/NoMouiBh5N8?si=sq4me3T-3C22_aFI" } ],
+        "2025-03-24": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/stunner-the-2nd-mini-album/1802203486" },
+          { "type": "mv", "url": "https://youtu.be/LfoIQZf9Hqs?si=c50HmkCexVs9KZwd" }
+        ]
+      }
+    }
+  ]
+}

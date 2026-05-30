@@ -1,0 +1,24 @@
+{
+  "name": "TNX",
+  "korean_name": "티엔엑스",
+  "artistType": "boy_group",
+  "generation": 4,
+  "debut": "2022-05-17",
+  "releases": [
+    {
+      "title": "For Real?",
+      "dailyValues": {
+        "2025-04-02": { "value": 2948, "source": "show_champion", "episode": 549 },
+        "2025-04-01": { "value": 2139, "source": "the_show", "episode": 373 }
+      },
+      "embeds": {
+        "2025-04-02": [ { "type": "live_performance", "url": "https://youtu.be/pkkaZUwwk1I?si=pChbUqyDV_QoD4Ht" } ],
+        "2025-04-01": [ { "type": "live_performance", "url": "https://youtu.be/ylxMLAyZz-c?si=AdBhqCSC4CnoeJQ_" } ],
+        "2025-03-26": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/for-real-ep/1803590313" },
+          { "type": "mv", "url": "https://youtu.be/jMcnUVuXdfU?si=dw8xvInbLNt5ILmf" }
+        ]
+      }
+    }
+  ]
+}

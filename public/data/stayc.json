@@ -18,6 +18,19 @@
           { "type": "mv", "url": "https://youtu.be/W8ml4ryPwic?si=HbiI6o-HjqHlpKoy" }
         ]
       }
+    },
+    {
+      "title": "BEBE",
+      "dailyValues": {
+        "2025-04-01": { "value": 6880, "source": "the_show", "episode": 373 }
+      },
+      "embeds": {
+        "2025-04-01": [{ "type": "live_performance", "url": "https://youtu.be/GDD-X6VmeDk?si=F_GW18tp1wGVy9ty" }],
+        "2025-03-18": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/s-single/1800597776" },
+          { "type": "mv", "url": "https://youtu.be/z-xfGoabprU?si=k2J67Xt1_unNQSAv" }
+        ]
+      }
     }
   ]
 }

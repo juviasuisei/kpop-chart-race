@@ -21,7 +21,8 @@
     {
       "title": "YELLOW",
       "dailyValues": {
-        "2025-03-26": { "value": 1594, "source": "show_champion", "episode": 548 }
+        "2025-03-26": { "value": 1594, "source": "show_champion", "episode": 548 },
+        "2025-03-19": { "value": 4259, "source": "show_champion", "episode": 547 }
       },
       "embeds": {
         "2025-03-07": [

@@ -48,9 +48,14 @@
         "2025-04-05": { "value": 5367, "source": "show_music_core", "episode": 896 },
         "2025-04-02": { "value": 2564, "source": "show_champion", "episode": 549 },
         "2025-03-30": { "value": 4364, "source": "inkigayo", "episode": 1262 },
-        "2025-03-26": { "value": 2064, "source": "show_champion", "episode": 548 }
+        "2025-03-26": { "value": 2064, "source": "show_champion", "episode": 548 },
+        "2025-03-23": { "value": 4082, "source": "inkigayo", "episode": 1261 },
+        "2025-03-21": { "value": 9917, "source": "music_bank", "episode": 1233 },
+        "2025-03-19": { "value": 2795, "source": "show_champion", "episode": 547 }
       },
       "embeds": {
+        "2025-03-23": [{ "type": "live_performance", "url": "https://youtu.be/9mgW_4rAEy0?si=TvpfO26AXs8ab9Nd" }],
+        "2025-03-21": [{ "type": "live_performance", "url": "https://youtu.be/sxYwpruagVU?si=AELD1C75e417CCYJ" }],
         "2025-03-14": [
           { "type": "release_date", "url": "https://music.apple.com/us/album/hot-ep/1799278610" },
           { "type": "mv", "url": "https://youtu.be/r9AEGPB6qIU?si=kbSajfoX-FrLOkaW" }

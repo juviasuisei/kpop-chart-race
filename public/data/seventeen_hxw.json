@@ -1,0 +1,22 @@
+{
+  "name": "HxW [SEVENTEEN]",
+  "korean_name": "권순영 / 이지훈",
+  "artistType": "boy_group",
+  "generation": 3,
+  "debut": "2025-03-10",
+  "releases": [
+    {
+      "title": "96ers",
+      "dailyValues": {
+        "2025-03-20": { "value": 4529, "source": "m_countdown", "episode": 880 },
+        "2025-03-19": { "value": 2941, "source": "show_champion", "episode": 547 }
+      },
+      "embeds": {
+        "2025-03-10": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/hxw-1st-single-album-beam-single/1798803930" },
+          { "type": "mv", "url": "https://youtu.be/rEBHjYQ8HoI?si=gsMpnFbt0Nt-rBM5" }
+        ]
+      }
+    }
+  ]
+}

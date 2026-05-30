@@ -9,7 +9,10 @@
       "title": "TOO BAD",
       "dailyValues": {
         "2025-04-25": { "value": 4459, "source": "music_bank", "episode": 1238 },
-        "2025-03-29": { "value": 6893, "source": "show_music_core", "episode": 895 }
+        "2025-03-29": { "value": 6893, "source": "show_music_core", "episode": 895 },
+        "2025-03-23": { "value": 5796, "source": "inkigayo", "episode": 1261 },
+        "2025-03-21": { "value": 5694, "source": "music_bank", "episode": 1233 },
+        "2025-03-19": { "value": 3870, "source": "show_champion", "episode": 547 }
       },
       "embeds": {
         "2025-02-25": [

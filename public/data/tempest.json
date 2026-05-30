@@ -17,6 +17,19 @@
           { "type": "mv", "url": "https://youtu.be/Hk2u4zlJ4HE?si=Cq-WS01ksWBn8Xd5" }
         ]
       }
+    },
+    {
+      "title": "Unfreeze",
+      "dailyValues": {
+        "2025-04-08": { "value": 6330, "source": "the_show", "episode": 374 }
+      },
+      "embeds": {
+        "2025-04-08": [{ "type": "live_performance", "url": "https://youtu.be/ghxrE5JkYj8?si=5JoV-2wmx56tFxx_" }],
+        "2025-03-31": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/re-full-of-youth-ep/1804878496" },
+          { "type": "mv", "url": "https://youtu.be/EeYPiPLAFAY?si=O8rcnCPLY_xNfK95" }
+        ]
+      }
     }
   ]
 }

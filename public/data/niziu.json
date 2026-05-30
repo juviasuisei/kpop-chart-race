@@ -1,0 +1,21 @@
+{
+  "name": "NiziU",
+  "korean_name": "니쥬",
+  "artistType": "girl_group",
+  "generation": 4,
+  "debut": "2023-10-30",
+  "releases": [
+    {
+      "title": "LOVE LINE",
+      "dailyValues": {
+        "2025-04-09": { "value": 4823, "source": "show_champion", "episode": 550 }
+      },
+      "embeds": {
+        "2025-03-31": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/love-line-single/1798164408" },
+          { "type": "mv", "url": "https://youtu.be/RkPj6AnKm0Y?si=RY6yFcDttJkW0yLr" }
+        ]
+      }
+    }
+  ]
+}

@@ -21,7 +21,8 @@
     {
       "title": "MONA LISA",
       "dailyValues": {
-        "2025-04-17": { "value": 7643, "source": "m_countdown", "episode": 884 }
+        "2025-04-17": { "value": 7643, "source": "m_countdown", "episode": 884 },
+        "2025-04-10": { "value": 7638, "source": "m_countdown", "episode": 883 }
       },
       "embeds": {
         "2025-03-21": [

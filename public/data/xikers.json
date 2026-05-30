@@ -21,10 +21,13 @@
     {
       "title": "BREATHE",
       "dailyValues": {
-        "2025-04-15": { "value": 4386, "source": "the_show", "episode": 375 }
+        "2025-04-15": { "value": 4386, "source": "the_show", "episode": 375 },
+        "2025-04-09": { "value": 2803, "source": "show_champion", "episode": 550 },
+        "2025-04-08": { "value": 3245, "source": "the_show", "episode": 374 }
       },
       "embeds": {
         "2025-04-15": [{ "type": "live_performance", "url": "https://youtu.be/m5UMq1nQijg?si=Sqlf0FTH_W_z2Qn3" }],
+        "2025-04-08": [{ "type": "live_performance", "url": "https://youtu.be/C6sxwLPlFlI?si=ScwUGWN69FXFKQft" }],
         "2025-04-04": [
           { "type": "release_date", "url": "https://music.apple.com/us/album/house-of-tricky-spur-ep/1804299095" },
           { "type": "mv", "url": "https://youtu.be/aUMr0Oi1I-E?si=DpBay43NS0dZfjYE" }

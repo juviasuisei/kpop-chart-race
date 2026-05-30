@@ -40,7 +40,10 @@
         "2025-05-03": { "value": 4017, "source": "show_music_core", "episode": 900 },
         "2025-04-26": { "value": 4400, "source": "show_music_core", "episode": 899 },
         "2025-04-20": { "value": 4556, "source": "inkigayo", "episode": 1264 },
-        "2025-04-19": { "value": 4262, "source": "show_music_core", "episode": 898 }
+        "2025-04-19": { "value": 4262, "source": "show_music_core", "episode": 898 },
+        "2025-04-12": { "value": 5504, "source": "show_music_core", "episode": 897 },
+        "2025-04-10": { "value": 4930, "source": "m_countdown", "episode": 883 },
+        "2025-04-09": { "value": 3834, "source": "show_champion", "episode": 550 }
       },
       "embeds": {
         "2025-03-14": [

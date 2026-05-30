@@ -8,7 +8,8 @@
     {
       "title": "TOO BAD",
       "dailyValues": {
-        "2025-04-25": { "value": 4459, "source": "music_bank", "episode": 1238 }
+        "2025-04-25": { "value": 4459, "source": "music_bank", "episode": 1238 },
+        "2025-03-29": { "value": 6893, "source": "show_music_core", "episode": 895 }
       },
       "embeds": {
         "2025-02-25": [

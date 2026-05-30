@@ -90,6 +90,8 @@ export class ChartRaceRenderer {
   private previousZoom: ZoomLevel | null = null;
   /** Whether the current update is a zoom change */
   private isZoomChange = false;
+  /** Timeout ID for the cascading overflow pass */
+  private cascadeOverflowTimeoutId: ReturnType<typeof setTimeout> | null = null;
   /** rAF ID for the rank tracking loop during phase 1 */
   private rankTrackingFrameId: number | null = null;
   /** Cached reference to the data store (set on first update) */
@@ -511,6 +513,21 @@ export class ChartRaceRenderer {
       visIdx++;
     }
 
+    // Schedule cascading overflow pass after individual checks complete
+    if (this.cascadeOverflowTimeoutId !== null) {
+      clearTimeout(this.cascadeOverflowTimeoutId);
+    }
+    if (this.noAnimate) {
+      // Synchronous checks already ran — cascade immediately
+      this.cascadeOverflow();
+    } else {
+      // Individual overflow checks fire at 1200ms — cascade shortly after
+      this.cascadeOverflowTimeoutId = setTimeout(() => {
+        this.cascadeOverflowTimeoutId = null;
+        this.cascadeOverflow();
+      }, 1250);
+    }
+
     // 6. Remove bars no longer visible — animate shrink then remove
     for (const [artistId, barEl] of this.bars) {
       if (visibleIds.has(artistId)) continue;
@@ -796,6 +813,7 @@ export class ChartRaceRenderer {
         barEl.bar.offsetHeight;
         this.checkBarOverflow(barEl);
       }
+      this.cascadeOverflow();
     }, 350);
   }
 
@@ -806,6 +824,10 @@ export class ChartRaceRenderer {
     if (this.phase2TimeoutId !== null) {
       clearTimeout(this.phase2TimeoutId);
       this.phase2TimeoutId = null;
+    }
+    if (this.cascadeOverflowTimeoutId !== null) {
+      clearTimeout(this.cascadeOverflowTimeoutId);
+      this.cascadeOverflowTimeoutId = null;
     }
     this.stopRankTracking();
     for (const frameId of this.pendingFrames) {
@@ -1200,6 +1222,44 @@ export class ChartRaceRenderer {
         barEl.nameSpan.classList.add("bar__name--outside");
         barEl.genSpan.classList.add("bar__gen--outside");
         barEl.typeIndicator.classList.add("bar__type-indicator--outside");
+      }
+    }
+  }
+
+  /**
+   * Cascade overflow: once one bar has its name outside (in ascending rank order),
+   * force all lower-ranked bars outside too for visual consistency.
+   */
+  private cascadeOverflow(): void {
+    // Collect visible (non-hidden) bars sorted by rank
+    const sortedBars: BarElement[] = [];
+    for (const [, barEl] of this.bars) {
+      if (barEl.hidden || !barEl.bar.parentElement) continue;
+      if (barEl.wrapper.classList.contains("chart-race__bar-wrapper--goalpost")) continue;
+      sortedBars.push(barEl);
+    }
+    sortedBars.sort((a, b) => a.targetRank - b.targetRank);
+
+    let forceOutside = false;
+    for (const barEl of sortedBars) {
+      if (forceOutside) {
+        // Force this bar's name outside
+        if (!barEl.nameSpan.classList.contains("bar__name--outside")) {
+          // Move release outside first if not already
+          if (!barEl.releaseSpan.classList.contains("bar__release--outside")) {
+            barEl.wrapper.insertBefore(barEl.releaseSpan, barEl.winsSpan.nextSibling);
+            barEl.releaseSpan.classList.add("bar__release--outside");
+          }
+          barEl.wrapper.insertBefore(barEl.nameSpan, barEl.valueSpan);
+          barEl.wrapper.insertBefore(barEl.genSpan, barEl.valueSpan);
+          barEl.wrapper.insertBefore(barEl.typeIndicator, barEl.valueSpan);
+          barEl.nameSpan.classList.add("bar__name--outside");
+          barEl.genSpan.classList.add("bar__gen--outside");
+          barEl.typeIndicator.classList.add("bar__type-indicator--outside");
+        }
+      } else if (barEl.nameSpan.classList.contains("bar__name--outside")) {
+        // This bar naturally overflowed — all subsequent bars go outside
+        forceOutside = true;
       }
     }
   }

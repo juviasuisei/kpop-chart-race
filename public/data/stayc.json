@@ -22,10 +22,12 @@
     {
       "title": "BEBE",
       "dailyValues": {
-        "2025-04-01": { "value": 6880, "source": "the_show", "episode": 373 }
+        "2025-04-01": { "value": 6880, "source": "the_show", "episode": 373 },
+        "2025-03-25": { "value": 7421, "source": "the_show", "episode": 372 }
       },
       "embeds": {
         "2025-04-01": [{ "type": "live_performance", "url": "https://youtu.be/GDD-X6VmeDk?si=F_GW18tp1wGVy9ty" }],
+        "2025-03-25": [{ "type": "live_performance", "url": "https://youtu.be/ETLu7WiAeUc?si=SKCkIk6LPGAEJY5N" }],
         "2025-03-18": [
           { "type": "release_date", "url": "https://music.apple.com/us/album/s-single/1800597776" },
           { "type": "mv", "url": "https://youtu.be/z-xfGoabprU?si=k2J67Xt1_unNQSAv" }

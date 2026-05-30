@@ -51,6 +51,24 @@
           { "type": "mv", "url": "https://youtu.be/EmeW6li6bbo?si=eoFWzGqmTfqXClF_" }
         ]
       }
+    },
+    {
+      "title": "KNOW ABOUT ME",
+      "dailyValues": {
+        "2025-03-30": { "value": 5070, "source": "inkigayo", "episode": 1262 },
+        "2025-03-28": { "value": 11040, "source": "music_bank", "episode": 1234 },
+        "2025-03-27": { "value": 5361, "source": "m_countdown", "episode": 881 },
+        "2025-03-26": { "value": 6865, "source": "show_champion", "episode": 548 }
+      },
+      "embeds": {
+        "2025-03-30": [{ "type": "live_performance", "url": "https://youtu.be/if44aQgFAEA?si=TKjjHJjOCU4fJ-4Q" }],
+        "2025-03-27": [{ "type": "live_performance", "url": "https://youtu.be/sK9BXWUMp2Y?si=n9HKtyCEizHN3W1v" }],
+        "2025-03-26": [{ "type": "live_performance", "url": "https://youtu.be/HEd1P4DD1iI?si=jyJPSuijUHgyOZzw" }],
+        "2025-03-17": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/fe3o4-forward-ep/1799674112" },
+          { "type": "mv", "url": "https://youtu.be/aFrQIJ5cbRc?si=qbqHSknZVKA3dKcO" }
+        ]
+      }
     }
   ]
 }

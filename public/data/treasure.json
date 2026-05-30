@@ -17,6 +17,18 @@
           { "type": "mv", "url": "https://youtu.be/gZNQs3jA7aE?si=FsocvPf-_EFVcJOS" }
         ]
       }
+    },
+    {
+      "title": "YELLOW",
+      "dailyValues": {
+        "2025-03-26": { "value": 1594, "source": "show_champion", "episode": 548 }
+      },
+      "embeds": {
+        "2025-03-07": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/pleasure-ep/1799271725" },
+          { "type": "mv", "url": "https://youtu.be/R55VGD7aYUI?si=n6vh_eHgz9d7ZXRl" }
+        ]
+      }
     }
   ]
 }

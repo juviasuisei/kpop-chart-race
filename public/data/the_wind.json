@@ -1,0 +1,22 @@
+{
+  "name": "The Wind",
+  "korean_name": "더윈드",
+  "artistType": "boy_group",
+  "generation": 5,
+  "debut": "2023-05-15",
+  "releases": [
+    {
+      "title": "Only One",
+      "dailyValues": {
+        "2025-03-25": { "value": 2390, "source": "the_show", "episode": 372 }
+      },
+      "embeds": {
+        "2025-03-25": [{ "type": "live_performance", "url": "https://youtu.be/vWqYNOgOQAU?si=L6b9GDGWpKzaPMR2" }],
+        "2025-03-13": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/only-one-story-single/1801453944" },
+          { "type": "mv", "url": "https://youtu.be/LzTFOoJA0ys?si=MGy5107aE4S_NSSA" }
+        ]
+      }
+    }
+  ]
+}

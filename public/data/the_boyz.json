@@ -17,6 +17,21 @@
           { "type": "mv", "url": "https://youtu.be/2RKf0dEOWNk?si=mH_z-CcnJ0CGIEX5" }
         ]
       }
+    },
+    {
+      "title": "VVV",
+      "dailyValues": {
+        "2025-03-29": { "value": 5141, "source": "show_music_core", "episode": 895 },
+        "2025-03-28": { "value": 6667, "source": "music_bank", "episode": 1234 },
+        "2025-03-26": { "value": 5118, "source": "show_champion", "episode": 548 }
+      },
+      "embeds": {
+        "2025-03-29": [{ "type": "live_performance", "url": "https://youtu.be/x8HXc7tm1bI?si=0Bi6XZPgAbRe6Y0n" }],
+        "2025-03-17": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/unexpected/1801443497" },
+          { "type": "mv", "url": "https://youtu.be/5sulSfWKV4Q?si=rfvJJQQBama2fyMP" }
+        ]
+      }
     }
   ]
 }

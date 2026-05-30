@@ -19,6 +19,19 @@
           { "type": "mv", "url": "https://youtu.be/-fPz0KoVwog?si=8ASsSirPXnikS1my" }
         ]
       }
+    },
+    {
+      "title": "ShaLaLa",
+      "dailyValues": {
+        "2025-03-25": { "value": 5640, "source": "the_show", "episode": 372 }
+      },
+      "embeds": {
+        "2025-03-25": [{ "type": "live_performance", "url": "https://youtu.be/Lu241Aj2LYo?si=A4wTwwImXy3in0z3" }],
+        "2025-03-13": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/my-name-is-ep/1800611207" },
+          { "type": "mv", "url": "https://youtu.be/rPEfIvfmCxM?si=ODDTUC1LNNs81VLI" }
+        ]
+      }
     }
   ]
 }

@@ -85,6 +85,19 @@
           { "type": "mv", "url": "https://youtu.be/B1ShLiq3EVc?si=CGkTp-5mvT3VUaFj" }
         ]
       }
+    },
+    {
+      "title": "ATTITUDE",
+      "dailyValues": {
+        "2025-03-16": { "value": 3186, "source": "inkigayo", "episode": 1260 },
+        "2025-03-15": { "value": 3035, "source": "show_music_core", "episode": 894 }
+      },
+      "embeds": {
+        "2025-02-03": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/ive-empathy-ep/1789740675" },
+          { "type": "mv", "url": "https://youtu.be/38xYeot-ciM?si=URPg0NXhOoRtJT-L" }
+        ]
+      }
     }
   ]
 }

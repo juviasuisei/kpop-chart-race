@@ -1,0 +1,23 @@
+{
+  "name": "INFINITE",
+  "korean_name": "인피니트",
+  "artistType": "boy_group",
+  "generation": 2,
+  "debut": "2010-06-09",
+  "releases": [
+    {
+      "title": "Dangerous",
+      "dailyValues": {
+        "2025-03-15": { "value": 4474, "source": "show_music_core", "episode": 894 },
+        "2025-03-14": { "value": 3746, "source": "music_bank", "episode": 1232 },
+        "2025-03-12": { "value": 2537, "source": "show_champion", "episode": 546 }
+      },
+      "embeds": {
+        "2025-03-06": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/like-infinite/1799164536" },
+          { "type": "mv", "url": "https://youtu.be/O4WQFp9oCRQ?si=AeEX6y-RhQtldtSn" }
+        ]
+      }
+    }
+  ]
+}

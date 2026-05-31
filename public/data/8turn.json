@@ -17,6 +17,19 @@
           { "type": "mv", "url": "https://youtu.be/4TTI8UR7kTE?si=1LUOtxqNu4iuVIwH" }
         ]
       }
+    },
+    {
+      "title": "LEGGO",
+      "dailyValues": {
+        "2025-03-12": { "value": 2185, "source": "show_champion", "episode": 546 }
+      },
+      "embeds": {
+        "2025-03-12": [{ "type": "live_performance", "url": "https://youtu.be/2TY0n77d6t0?si=kvBkPEepxsuMdYh9" }],
+        "2025-03-04": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/leggo-single/1798136339" },
+          { "type": "mv", "url": "https://youtu.be/li5H5D3Jd70?si=GcvMUqpQ4QPK1iI9" }
+        ]
+      }
     }
   ]
 }

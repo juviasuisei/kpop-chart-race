@@ -1,0 +1,22 @@
+{
+  "name": "GENBLUE",
+  "korean_name": "젠블루",
+  "artistType": "girl_group",
+  "generation": 5,
+  "debut": "2024-09-02",
+  "releases": [
+    {
+      "title": "ACT LIKE THAT",
+      "dailyValues": {
+        "2025-03-11": { "value": 3351, "source": "the_show", "episode": 371 }
+      },
+      "embeds": {
+        "2025-03-11": [{ "type": "live_performance", "url": "https://youtu.be/boHcthI9b9k?si=3lomQPsFEyfsTUJZ" }],
+        "2025-02-26": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/act-like-that-ep/1799921657" },
+          { "type": "mv", "url": "https://youtu.be/69QCKEYOAZs?si=e05t8qA_3ta4OGql" }
+        ]
+      }
+    }
+  ]
+}

@@ -19,7 +19,9 @@
         "2025-03-27": { "value": 6719, "source": "m_countdown", "episode": 881 },
         "2025-03-26": { "value": 3931, "source": "show_champion", "episode": 548 },
         "2025-03-20": { "value": 6856, "source": "m_countdown", "episode": 880 },
-        "2025-03-19": { "value": 3705, "source": "show_champion", "episode": 547 }
+        "2025-03-19": { "value": 3705, "source": "show_champion", "episode": 547 },
+        "2025-03-13": { "value": 7511, "source": "m_countdown", "episode": 879 },
+        "2025-03-12": { "value": 3187, "source": "show_champion", "episode": 546 }
       },
       "embeds": {
         "2025-03-07": [

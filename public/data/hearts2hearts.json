@@ -53,6 +53,21 @@
           { "type": "mv", "url": "https://youtu.be/Ur7aK4FvK-U?si=2sobk7C9frHRQfy1" }
         ]
       }
+    },
+    {
+      "title": "The Chase",
+      "dailyValues": {
+        "2025-03-12": { "value": 1992, "source": "show_champion", "episode": 546 },
+        "2025-03-11": { "value": 8500, "source": "the_show", "episode": 371 }
+      },
+      "embeds": {
+        "2025-03-12": [{ "type": "live_performance", "url": "https://youtu.be/3fWBeaeNvN0?si=ISP36z4IEnBexoA0" }],
+        "2025-03-11": [{ "type": "live_performance", "url": "https://youtu.be/7-gVWmzjNDI?si=uH8k89MOMXhNZ0Kh" }],
+        "2025-02-24": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/the-chase-single/1796402197" },
+          { "type": "mv", "url": "https://youtu.be/kxUA2wwYiME?si=wnUtkZapOUczZMUI" }
+        ]
+      }
     }
   ]
 }

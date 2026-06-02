@@ -35,10 +35,10 @@
 
       },
       "embeds": {
-        "2025-06-01": [ { "type": "live_performance", "url": "https://youtu.be/FwB94BrXznc?si=mOm8x5G3qzOXcArw" } ],
-        "2025-05-31": [ { "type": "live_performance", "url": "https://youtu.be/nxxkS90Q_uY?si=g49bP_guBXxz3uK_" } ],
-        "2025-05-30": [ { "type": "live_performance", "url": "https://youtu.be/Cn0ypW-Aj3c?si=NCDaNWZBFGHVN5jb" } ],
-        "2025-05-29": [ { "type": "live_performance", "url": "https://youtu.be/3bYeLSEuxAs?si=H6je7PodK3LvrFLe" } ],
+        "2025-06-01": [{ "type": "live_performance", "url": "https://youtu.be/FwB94BrXznc?si=mOm8x5G3qzOXcArw" }],
+        "2025-05-31": [{ "type": "live_performance", "url": "https://youtu.be/nxxkS90Q_uY?si=g49bP_guBXxz3uK_" }],
+        "2025-05-30": [{ "type": "live_performance", "url": "https://youtu.be/Cn0ypW-Aj3c?si=NCDaNWZBFGHVN5jb" }],
+        "2025-05-29": [{ "type": "live_performance", "url": "https://youtu.be/3bYeLSEuxAs?si=H6je7PodK3LvrFLe" }],
         "2025-05-19": [
           { "type": "release_date", "url": "https://music.apple.com/us/album/odyssey-the-1st-album/1813453693" },
           { "type": "mv", "url": "https://youtu.be/vLUtHODdLzk?si=CWLTwxzheYY2rzGu" }

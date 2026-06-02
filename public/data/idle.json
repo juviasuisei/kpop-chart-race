@@ -36,9 +36,9 @@
         "2025-05-28": { "value": 4209, "source": "show_champion", "episode": 556 }
       },
       "embeds": {
-        "2025-06-01": [ { "type": "live_performance", "url": "https://youtu.be/B_4WoSrUuZA?si=2kzTuzIaE0JSNJiM" } ],
-        "2025-05-31": [ { "type": "live_performance", "url": "https://youtu.be/xwEgu6CoJ-w?si=lpy6Cj1T0sAtGtwN" } ],
-        "2025-05-30": [ { "type": "live_performance", "url": "https://youtu.be/3YjdLVg_qno?si=LLqnJn94Eu1aaVnB" } ],
+        "2025-06-01": [{ "type": "live_performance", "url": "https://youtu.be/B_4WoSrUuZA?si=2kzTuzIaE0JSNJiM" }],
+        "2025-05-31": [{ "type": "live_performance", "url": "https://youtu.be/xwEgu6CoJ-w?si=lpy6Cj1T0sAtGtwN" }],
+        "2025-05-30": [{ "type": "live_performance", "url": "https://youtu.be/3YjdLVg_qno?si=LLqnJn94Eu1aaVnB" }],
         "2025-05-19": [
           { "type": "release_date", "url": "https://music.apple.com/us/album/we-are-ep/1810452962" },
           { "type": "mv", "url": "https://youtu.be/hAONx6nuEgI?si=nmqpGflmtzpcPXJ2" }

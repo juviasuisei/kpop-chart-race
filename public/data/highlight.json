@@ -11,7 +11,7 @@
         "2025-05-09": { "value": 7879, "source": "music_bank", "episode": 1240 }
       },
       "embeds": {
-        "2025-05-09": [ { "type": "live_performance", "url": "https://youtu.be/64fLVrZ8dJE?si=pmI1Ym_TGX3izbAK" } ],
+        "2025-05-09": [{ "type": "live_performance", "url": "https://youtu.be/64fLVrZ8dJE?si=pmI1Ym_TGX3izbAK" }],
         "2025-04-28": [
           { "type": "release_date", "url": "https://music.apple.com/us/album/from-real-to-surreal-ep/1810620512" },
           { "type": "mv", "url": "https://youtu.be/3kfhoikVzUc?si=9gyGi5LULZK_z1zH" }

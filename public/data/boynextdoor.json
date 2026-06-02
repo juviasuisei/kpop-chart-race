@@ -34,10 +34,10 @@
         "2025-05-21": { "value": 5322, "source": "show_champion", "episode": 555 }
       },
       "embeds": {
-        "2025-05-25": [ { "type": "live_performance", "url": "https://youtu.be/FjleL9g3H3w?si=xexme0SmHBhUNvOv" } ],
-        "2025-05-24": [ { "type": "live_performance", "url": "https://youtu.be/mks0nkqnHA4?si=G8YGxWm8lplC8kq9" } ],
-        "2025-05-23": [ { "type": "live_performance", "url": "https://youtu.be/xt9IRZSLkno?si=YOtosZ2ooNUhH_jD" } ],
-        "2025-05-22": [ { "type": "live_performance", "url": "https://youtu.be/q6VA1KH7owY?si=AJTz8CIV6sgrLeFB" } ],
+        "2025-05-25": [{ "type": "live_performance", "url": "https://youtu.be/FjleL9g3H3w?si=xexme0SmHBhUNvOv" }],
+        "2025-05-24": [{ "type": "live_performance", "url": "https://youtu.be/mks0nkqnHA4?si=G8YGxWm8lplC8kq9" }],
+        "2025-05-23": [{ "type": "live_performance", "url": "https://youtu.be/xt9IRZSLkno?si=YOtosZ2ooNUhH_jD" }],
+        "2025-05-22": [{ "type": "live_performance", "url": "https://youtu.be/q6VA1KH7owY?si=AJTz8CIV6sgrLeFB" }],
         "2025-05-13": [
           { "type": "release_date", "url": "https://music.apple.com/us/album/no-genre/1811077675" },
           { "type": "mv", "url": "https://youtu.be/ic31SJ4uK4Y?si=AhWagyGnb_g_kcbr" }

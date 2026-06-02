@@ -29,12 +29,12 @@
         "2025-09-09": { "value": 9310, "source": "the_show", "episode": 388 }
       },
       "embeds": {
-        "2025-09-14": [ { "type": "live_performance", "url": "https://youtu.be/jcH31J--xZY?si=oHVur1iPT-8WOwjZ"} ],
-        "2025-09-13": [ { "type": "live_performance", "url": "https://youtu.be/Zz-YsvjszoU?si=-mhFXl_yjH-WOicu"} ],
-        "2025-09-12": [ { "type": "live_performance", "url": "https://youtu.be/82mKnELjwmo?si=WE7A790O3MUkc5Pa"} ],
-        "2025-09-11": [ { "type": "live_performance", "url": "https://youtu.be/mQ6sFyWxDYM?si=rYHuXgfdNPSpLGAg"} ],
-        "2025-09-10": [ { "type": "live_performance", "url": "https://youtu.be/sgpL6Fx584M?si=ue8-WFZ2rY46NiR4"} ],
-        "2025-09-09": [ { "type": "live_performance", "url": "https://youtu.be/xoyY10n2_-U?si=_YDURwR-SY-t1Vza"} ],
+        "2025-09-14": [{ "type": "live_performance", "url": "https://youtu.be/jcH31J--xZY?si=oHVur1iPT-8WOwjZ" }],
+        "2025-09-13": [{ "type": "live_performance", "url": "https://youtu.be/Zz-YsvjszoU?si=-mhFXl_yjH-WOicu" }],
+        "2025-09-12": [{ "type": "live_performance", "url": "https://youtu.be/82mKnELjwmo?si=WE7A790O3MUkc5Pa" }],
+        "2025-09-11": [{ "type": "live_performance", "url": "https://youtu.be/mQ6sFyWxDYM?si=rYHuXgfdNPSpLGAg" }],
+        "2025-09-10": [{ "type": "live_performance", "url": "https://youtu.be/sgpL6Fx584M?si=ue8-WFZ2rY46NiR4" }],
+        "2025-09-09": [{ "type": "live_performance", "url": "https://youtu.be/xoyY10n2_-U?si=_YDURwR-SY-t1Vza" }],
         "2025-09-01": [
           { "type": "release_date", "url": "https://music.apple.com/us/album/never-say-never/1826911165" },
           { "type": "mv", "url": "https://youtu.be/HnYtDIW7elY?si=7MfHH7YFq6MvGEwL" }
@@ -52,12 +52,12 @@
         "2025-03-04": { "value": 9570, "source": "the_show", "episode": 370 }
       },
       "embeds": {
-        "2025-03-09": [ { "type": "live_performance", "url": "https://youtu.be/69M6wo9MQSk?si=x7v9UHc7K3qDGBwI"} ],
-        "2025-03-08": [ { "type": "live_performance", "url": "https://youtu.be/WCEuJL5E_XA?si=xseFPStW5S7WJyxr"} ],
-        "2025-03-07": [ { "type": "live_performance", "url": "https://youtu.be/j9wCSUg5ZuU?si=hPjFHIev6dtvfEmz"} ],
-        "2025-03-06": [ { "type": "live_performance", "url": "https://youtu.be/aKMtBf64F2c?si=bjh5thLy8me6IVYQ"} ],
-        "2025-03-05": [ { "type": "live_performance", "url": "https://youtu.be/ClX9Ii-ZLs0?si=ZAu1Vy3bMIL2wy4y"} ],
-        "2025-03-04": [ { "type": "live_performance", "url": "https://youtu.be/hUIfRMMBT8w?si=UNM7CVpgv159RBAo" } ],
+        "2025-03-09": [{ "type": "live_performance", "url": "https://youtu.be/69M6wo9MQSk?si=x7v9UHc7K3qDGBwI" }],
+        "2025-03-08": [{ "type": "live_performance", "url": "https://youtu.be/WCEuJL5E_XA?si=xseFPStW5S7WJyxr" }],
+        "2025-03-07": [{ "type": "live_performance", "url": "https://youtu.be/j9wCSUg5ZuU?si=hPjFHIev6dtvfEmz" }],
+        "2025-03-06": [{ "type": "live_performance", "url": "https://youtu.be/aKMtBf64F2c?si=bjh5thLy8me6IVYQ" }],
+        "2025-03-05": [{ "type": "live_performance", "url": "https://youtu.be/ClX9Ii-ZLs0?si=ZAu1Vy3bMIL2wy4y" }],
+        "2025-03-04": [{ "type": "live_performance", "url": "https://youtu.be/hUIfRMMBT8w?si=UNM7CVpgv159RBAo" }],
         "2025-02-24": [
           { "type": "release_date", "url": "https://music.apple.com/us/album/blue-paradise-ep/1795372994" },
           { "type": "mv", "url": "https://youtu.be/2hwiRN8t8Ok?si=KSVInbmUyBbO4mhF" }

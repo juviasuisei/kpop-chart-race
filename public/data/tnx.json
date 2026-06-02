@@ -12,8 +12,8 @@
         "2025-04-01": { "value": 2139, "source": "the_show", "episode": 373 }
       },
       "embeds": {
-        "2025-04-02": [ { "type": "live_performance", "url": "https://youtu.be/pkkaZUwwk1I?si=pChbUqyDV_QoD4Ht" } ],
-        "2025-04-01": [ { "type": "live_performance", "url": "https://youtu.be/ylxMLAyZz-c?si=AdBhqCSC4CnoeJQ_" } ],
+        "2025-04-02": [{ "type": "live_performance", "url": "https://youtu.be/pkkaZUwwk1I?si=pChbUqyDV_QoD4Ht" }],
+        "2025-04-01": [{ "type": "live_performance", "url": "https://youtu.be/ylxMLAyZz-c?si=AdBhqCSC4CnoeJQ_" }],
         "2025-03-26": [
           { "type": "release_date", "url": "https://music.apple.com/us/album/for-real-ep/1803590313" },
           { "type": "mv", "url": "https://youtu.be/jMcnUVuXdfU?si=dw8xvInbLNt5ILmf" }

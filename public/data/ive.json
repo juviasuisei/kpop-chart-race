@@ -90,7 +90,8 @@
       "title": "ATTITUDE",
       "dailyValues": {
         "2025-03-16": { "value": 3186, "source": "inkigayo", "episode": 1260 },
-        "2025-03-15": { "value": 3035, "source": "show_music_core", "episode": 894 }
+        "2025-03-15": { "value": 3035, "source": "show_music_core", "episode": 894 },
+        "2025-03-08": { "value": 3099, "source": "show_music_core", "episode": 893 }
       },
       "embeds": {
         "2025-02-03": [

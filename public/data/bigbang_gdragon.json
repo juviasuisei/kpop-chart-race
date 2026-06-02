@@ -17,7 +17,11 @@
         "2025-03-15": { "value": 7864, "source": "show_music_core", "episode": 894 },
         "2025-03-14": { "value": 6271, "source": "music_bank", "episode": 1232 },
         "2025-03-13": { "value": 7981, "source": "m_countdown", "episode": 879 },
-        "2025-03-12": { "value": 4892, "source": "show_champion", "episode": 546 }
+        "2025-03-12": { "value": 4892, "source": "show_champion", "episode": 546 },
+        "2025-03-09": { "value": 6788, "source": "inkigayo", "episode": 1259 },
+        "2025-03-08": { "value": 7465, "source": "show_music_core", "episode": 893 },
+        "2025-03-06": { "value": 6687, "source": "m_countdown", "episode": 878 },
+        "2025-03-05": { "value": 5136, "source": "show_champion", "episode": 545 }
       },
       "embeds": {
         "2025-02-25": [

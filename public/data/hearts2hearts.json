@@ -58,11 +58,17 @@
       "title": "The Chase",
       "dailyValues": {
         "2025-03-12": { "value": 1992, "source": "show_champion", "episode": 546 },
-        "2025-03-11": { "value": 8500, "source": "the_show", "episode": 371 }
+        "2025-03-11": { "value": 8500, "source": "the_show", "episode": 371 },
+        "2025-03-07": { "value": 5400, "source": "music_bank", "episode": 1231 },
+        "2025-03-05": { "value": 2371, "source": "show_champion", "episode": 545 },
+        "2025-03-04": { "value": 4651, "source": "the_show", "episode": 370 }
       },
       "embeds": {
         "2025-03-12": [{ "type": "live_performance", "url": "https://youtu.be/3fWBeaeNvN0?si=ISP36z4IEnBexoA0" }],
         "2025-03-11": [{ "type": "live_performance", "url": "https://youtu.be/7-gVWmzjNDI?si=uH8k89MOMXhNZ0Kh" }],
+        "2025-03-07": [{ "type": "live_performance", "url": "https://youtu.be/kzCtw4OD97g?si=3uqwMfTl5k6qZmxj" }],
+        "2025-03-05": [{ "type": "live_performance", "url": "https://youtu.be/qB4MYtaL4Gs?si=ytHgQ113_NhEnMUR" }],
+        "2025-03-04": [{ "type": "live_performance", "url": "https://youtu.be/hsn0T-SesuA?si=E454AbBV0wdY7y9F" }],
         "2025-02-24": [
           { "type": "release_date", "url": "https://music.apple.com/us/album/the-chase-single/1796402197" },
           { "type": "mv", "url": "https://youtu.be/kxUA2wwYiME?si=wnUtkZapOUczZMUI" }

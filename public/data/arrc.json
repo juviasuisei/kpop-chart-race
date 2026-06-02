@@ -17,6 +17,19 @@
           { "type": "mv", "url": "https://youtu.be/LU06eFKen9k?si=3moWY46eKVD-bCwu" }
         ]
       }
+    },
+    {
+      "title": "nu kidz",
+      "dailyValues": {
+        "2025-03-04": { "value": 1541, "source": "the_show", "episode": 370 }
+      },
+      "embeds": {
+        "2025-03-04": [{ "type": "live_performance", "url": "https://youtu.be/UybFvUiumjM?si=ZvoF38UTDcfms9-J" }],
+        "2025-02-18": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/nu-kidz-out-the-box-ep/1796741590" },
+          { "type": "mv", "url": "https://youtu.be/BKOiJ6Cxoy8?si=6LH-NEdMteP9oT2Z" }
+        ]
+      }
     }
   ]
 }

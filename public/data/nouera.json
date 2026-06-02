@@ -38,10 +38,12 @@
     {
       "title": "N.I.N",
       "dailyValues": {
-        "2025-03-11": { "value": 2674, "source": "the_show", "episode": 371 }
+        "2025-03-11": { "value": 2674, "source": "the_show", "episode": 371 },
+        "2025-03-05": { "value": 1177, "source": "show_champion", "episode": 545 }
       },
       "embeds": {
         "2025-03-11": [{ "type": "live_performance", "url": "https://youtu.be/eizhz3Wdcfw?si=RGsUX1Ruz0OIEYkZ" }],
+        "2025-03-05": [{ "type": "live_performance", "url": "https://youtu.be/pp_Mv-hOSrI?si=d6aiJyL6cSHRIfnS" }],
         "2025-02-26": [
           { "type": "release_date", "url": "https://music.apple.com/us/album/new-is-now-ep/1797439209" },
           { "type": "mv", "url": "https://youtu.be/KAEW-tEnTco?si=cPXHN2mpWpbBkDkd" }

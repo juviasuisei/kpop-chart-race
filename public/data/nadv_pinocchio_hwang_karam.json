@@ -1,0 +1,18 @@
+{
+  "name": "Hwang Karam [NADV / 동네청년 / Pinocchio]",
+  "korean_name": "황가람",
+  "artistType": "solo_male",
+  "generation": 2,
+  "debut": "2013-01-23",
+  "releases": [
+    {
+      "title": "I'm Firefly",
+      "dailyValues": {
+        "2025-03-09": { "value": 3177, "source": "inkigayo", "episode": 1259 }
+      },
+      "embeds": {
+        "2024-10-21": [ { "type": "release_date", "url": "https://music.apple.com/us/album/im-firefly-single/1773943441" } ]
+      }
+    }
+  ]
+}

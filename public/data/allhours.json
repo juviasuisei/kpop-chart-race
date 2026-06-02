@@ -30,6 +30,19 @@
           { "type": "mv", "url": "https://youtu.be/TJR0VM8jof0?si=f1aJ2astI4Vb1q95" }
         ]
       }
+    },
+    {
+      "title": "GIMME GIMME",
+      "dailyValues": {
+        "2025-03-05": { "value": 1646, "source": "show_champion", "episode": 545 }
+      },
+      "embeds": {
+        "2025-03-05": [{ "type": "live_performance", "url": "https://youtu.be/vY2Irenxc1A?si=hMEomGDLz48MQCbR" }],
+        "2025-02-04": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/smoke-point-ep/1791876598" },
+          { "type": "mv", "url": "https://youtu.be/qW_3HCrda58?si=r_gvEFeYgyHq6rcS" }
+        ]
+      }
     }
   ]
 }

@@ -8,7 +8,8 @@
     {
       "title": "I'm Firefly",
       "dailyValues": {
-        "2025-03-09": { "value": 3177, "source": "inkigayo", "episode": 1259 }
+        "2025-03-09": { "value": 3177, "source": "inkigayo", "episode": 1259 },
+        "2025-03-02": { "value": 3944, "source": "inkigayo", "episode": 1258 }
       },
       "embeds": {
         "2024-10-21": [ { "type": "release_date", "url": "https://music.apple.com/us/album/im-firefly-single/1773943441" } ]

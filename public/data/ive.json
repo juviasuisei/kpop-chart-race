@@ -91,12 +91,27 @@
       "dailyValues": {
         "2025-03-16": { "value": 3186, "source": "inkigayo", "episode": 1260 },
         "2025-03-15": { "value": 3035, "source": "show_music_core", "episode": 894 },
-        "2025-03-08": { "value": 3099, "source": "show_music_core", "episode": 893 }
+        "2025-03-08": { "value": 3099, "source": "show_music_core", "episode": 893 },
+        "2025-03-02": { "value": 5155, "source": "inkigayo", "episode": 1258 },
+        "2025-03-01": { "value": 6169, "source": "show_music_core", "episode": 892 }
       },
       "embeds": {
         "2025-02-03": [
           { "type": "release_date", "url": "https://music.apple.com/us/album/ive-empathy-ep/1789740675" },
           { "type": "mv", "url": "https://youtu.be/38xYeot-ciM?si=URPg0NXhOoRtJT-L" }
+        ]
+      }
+    },
+    {
+      "title": "REBEL HEART",
+      "dailyValues": {
+        "2025-02-28": { "value": 3885, "source": "music_bank", "episode": 1230 },
+        "2025-02-26": { "value": 4250, "source": "show_champion", "episode": 544 }
+      },
+      "embeds": {
+        "2025-01-13": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/rebel-heart-single/1786710182" },
+          { "type": "mv", "url": "https://youtu.be/g36q0ZLvygQ?si=xh8KT0yj-GpghvRb" }
         ]
       }
     }

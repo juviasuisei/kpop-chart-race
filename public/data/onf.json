@@ -1,0 +1,26 @@
+{
+  "name": "ONF",
+  "korean_name": "온앤오프",
+  "artistType": "boy_group",
+  "generation": 3,
+  "debut": "2017-08-03",
+  "releases": [
+    {
+      "title": "The Stranger",
+      "dailyValues": {
+        "2025-03-01": { "value": 6082, "source": "show_music_core", "episode": 892 },
+        "2025-02-28": { "value": 7680, "source": "music_bank", "episode": 1230 },
+        "2025-02-26": { "value": 6519, "source": "show_champion", "episode": 544 }
+      },
+      "embeds": {
+        "2025-03-01": [{ "type": "live_performance", "url": "https://youtu.be/tvCzuZqhAOE?si=Ljs0xJPz2aHzgMxQ" }],
+        "2025-02-28": [{ "type": "live_performance", "url": "https://youtu.be/3p1afxl5AoE?si=hrDnPugWFW5wGR-e" }],
+        "2025-02-26": [{ "type": "live_performance", "url": "https://youtu.be/cgYXM0-RTaM?si=ze-U4xOObNwMN9Wb" }],
+        "2025-02-18": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/onf-my-identity-ep/1795571993" },
+          { "type": "mv", "url": "https://youtu.be/xEeROqUidGg?si=CRHiiO1ouOjL0oRm" }
+        ]
+      }
+    }
+  ]
+}

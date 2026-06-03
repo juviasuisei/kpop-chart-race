@@ -33,6 +33,19 @@
           { "type": "mv", "url": "https://youtu.be/2pm8e8i4mGs?si=AMZTMLAjTVfWBjAE" }
         ]
       }
+    },
+    {
+      "title": "HOT MESS",
+      "dailyValues": {
+        "2025-02-26": { "value": 2046, "source": "show_champion", "episode": 544 }
+      },
+      "embeds": {
+        "2025-02-26": [{ "type": "live_performance", "url": "https://youtu.be/cSjuP86LTck?si=1d-WGawByP54oNjk" }],
+        "2025-02-10": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/hot-mess-ep/1794242524" },
+          { "type": "mv", "url": "https://youtu.be/kNITt0i55NI?si=weIZYcljFLv5AzqV" }
+        ]
+      }
     }
   ]
 }

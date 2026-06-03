@@ -30,6 +30,19 @@
           { "type": "mv", "url": "https://youtu.be/5abvr0khbU4?si=18kbaQ7sK3gmOlsn" }
         ]
       }
+    },
+    {
+      "title": "100!",
+      "dailyValues": {
+        "2025-02-26": { "value": 1923, "source": "show_champion", "episode": 544 }
+      },
+      "embeds": {
+        "2025-02-26": [{ "type": "live_performance", "url": "https://youtu.be/X_kLcYkvq1A?si=3ILUW4yjuTga0-fA" }],
+        "2025-02-14": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/pink-crush/1794454340" },
+          { "type": "mv", "url": "https://youtu.be/GdnHFGo0RCY?si=iwNWeEAtnn38A4Fg" }
+        ]
+      }
     }
   ]
 }

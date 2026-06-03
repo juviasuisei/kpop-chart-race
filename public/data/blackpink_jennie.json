@@ -29,6 +29,18 @@
           { "type": "mv", "url": "https://youtu.be/JSFG-IE8n_c?si=0faSkrCCDnW8Appf" }
         ]
       }
+    },
+    {
+      "title": "ExtraL",
+      "dailyValues": {
+        "2025-02-27": { "value": 5943, "source": "m_countdown", "episode": 877 }
+      },
+      "embeds": {
+        "2025-02-21": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/extral-single/1797383523" },
+          { "type": "mv", "url": "https://youtu.be/eWAdpUyzCkI?si=itiKMKpLm9-LbTjj" }
+        ]
+      }
     }
   ]
 }

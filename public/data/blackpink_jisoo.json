@@ -1,0 +1,23 @@
+{
+  "name": "JISOO [BLACKPINK]",
+  "korean_name": "김지수",
+  "artistType": "solo_female",
+  "generation": 3,
+  "debut": "2023-03-31",
+  "releases": [
+    {
+      "title": "earthquake",
+      "dailyValues": {
+        "2025-03-02": { "value": 5759, "source": "inkigayo", "episode": 1258 },
+        "2025-02-27": { "value": 9266, "source": "m_countdown", "episode": 877 },
+        "2025-02-26": { "value": 4862, "source": "show_champion", "episode": 544 }
+      },
+      "embeds": {
+        "2025-02-14": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/amortage-ep/1794049581" },
+          { "type": "mv", "url": "https://youtu.be/2V6lvCUPT8I?si=rjvFA6tzDl0YmFYc" }
+        ]
+      }
+    }
+  ]
+}

@@ -47,10 +47,11 @@
     {
       "title": "IF I SAY, I LOVE YOU",
       "dailyValues": {
-        "2025-05-25": { "value": 3857, "source": "inkigayo", "episode": 1268 }
+        "2025-05-25": { "value": 3857, "source": "inkigayo", "episode": 1268 },
+        "2025-03-01": { "value": 5836, "source": "show_music_core", "episode": 892 }
       },
       "embeds": {
-        "2026-01-06": [
+        "2025-01-06": [
           { "type": "release_date", "url": "https://music.apple.com/us/album/if-i-say-i-love-you-single/1785637094" },
           { "type": "mv", "url": "https://youtu.be/B4mLKcVIERs?si=mgB2mYT8MlVrUteT" }
         ]

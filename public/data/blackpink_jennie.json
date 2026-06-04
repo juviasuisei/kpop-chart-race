@@ -41,6 +41,18 @@
           { "type": "mv", "url": "https://youtu.be/eWAdpUyzCkI?si=itiKMKpLm9-LbTjj" }
         ]
       }
+    },
+    {
+      "title": "Love Hangover",
+      "dailyValues": {
+        "2025-02-20": { "value": 7765, "source": "m_countdown", "episode": 876 }
+      },
+      "embeds": {
+        "2025-01-31": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/love-hangover-single/1792952246" },
+          { "type": "mv", "url": "https://youtu.be/23urWKmHS6o?si=aBfXg87IDpKXX3Fz" }
+        ]
+      }
     }
   ]
 }

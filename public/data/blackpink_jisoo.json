@@ -10,9 +10,12 @@
       "dailyValues": {
         "2025-03-02": { "value": 5759, "source": "inkigayo", "episode": 1258 },
         "2025-02-27": { "value": 9266, "source": "m_countdown", "episode": 877 },
-        "2025-02-26": { "value": 4862, "source": "show_champion", "episode": 544 }
+        "2025-02-26": { "value": 4862, "source": "show_champion", "episode": 544 },
+        "2025-02-23": { "value": 4247, "source": "inkigayo", "episode": 1257 },
+        "2025-02-20": { "value": 6524, "source": "m_countdown", "episode": 876 }
       },
       "embeds": {
+        "2025-02-23": [{ "type": "live_performance", "url": "https://youtu.be/d7_bXJeONSc?si=jkDliaPxAwN2jNU8" }],
         "2025-02-14": [
           { "type": "release_date", "url": "https://music.apple.com/us/album/amortage-ep/1794049581" },
           { "type": "mv", "url": "https://youtu.be/2V6lvCUPT8I?si=rjvFA6tzDl0YmFYc" }

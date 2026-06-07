@@ -40,9 +40,13 @@
     {
       "title": "Dash",
       "dailyValues": {
-        "2025-02-22": { "value": 4945, "source": "show_music_core", "episode": 891 }
+        "2025-02-22": { "value": 4945, "source": "show_music_core", "episode": 891 },
+        "2025-02-16": { "value": 4467, "source": "inkigayo", "episode": 1256 },
+        "2025-02-15": { "value": 9571, "source": "show_music_core", "episode": 890 },
+        "2025-02-12": { "value": 6852, "source": "show_champion", "episode": 543 }
       },
       "embeds": {
+        "2025-02-15": [{ "type": "live_performance", "url": "https://youtu.be/MxIm2v4W9h8?si=82_oKitgrXknRvel" }],
         "2025-02-03": [
           { "type": "release_date", "url": "https://music.apple.com/us/album/caligo-pt-1-ep/1793717362" },
           { "type": "mv", "url": "https://youtu.be/b3GoZMfHJT4?si=VknJdlrgk0A_kIUu" }

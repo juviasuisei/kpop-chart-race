@@ -48,6 +48,19 @@
           { "type": "mv", "url": "https://youtu.be/eebhl4lGv_Y?si=0biQhIxKml0bkP4p" }
         ]
       }
+    },
+    {
+      "title": "Mama Said",
+      "dailyValues": {
+        "2025-02-12": { "value": 2040, "source": "show_champion", "episode": 543 }
+      },
+      "embeds": {
+        "2025-02-12": [{ "type": "live_performance", "url": "https://youtu.be/dx0NO3RNYiA?si=sbacXQ9rifAjqi23" }],
+        "2025-01-20": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/flip-it-kick-it-ep/1787193034" },
+          { "type": "mv", "url": "https://youtu.be/JY0UTOgh8M8?si=RbXWU6WA9bde73Lk" }
+        ]
+      }
     }
   ]
 }

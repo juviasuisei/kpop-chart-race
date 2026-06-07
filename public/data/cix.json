@@ -1,0 +1,22 @@
+{
+  "name": "CIX",
+  "korean_name": "씨아이엑스",
+  "artistType": "boy_group",
+  "generation": 4,
+  "debut": "2019-07-23",
+  "releases": [
+    {
+      "title": "THUNDER",
+      "dailyValues": {
+        "2025-02-12": { "value": 2393, "source": "show_champion", "episode": 543 }
+      },
+      "embeds": {
+        "2025-02-12": [{ "type": "live_performance", "url": "https://youtu.be/p7zdBfKHhlI?si=ljuZHd-fbERgGihG" }],
+        "2025-01-23": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/cix-7th-ep-album-thunder-fever-ep/1790109593" },
+          { "type": "mv", "url": "https://youtu.be/d1ndYsGGWes?si=IbsJHvAmPZaPJflB" }
+        ]
+      }
+    }
+  ]
+}

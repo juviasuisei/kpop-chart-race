@@ -45,7 +45,8 @@
     {
       "title": "Love Hangover",
       "dailyValues": {
-        "2025-02-20": { "value": 7765, "source": "m_countdown", "episode": 876 }
+        "2025-02-20": { "value": 7765, "source": "m_countdown", "episode": 876 },
+        "2025-02-13": { "value": 7149, "source": "m_countdown", "episode": 875 }
       },
       "embeds": {
         "2025-01-31": [

@@ -1,0 +1,22 @@
+{
+  "name": "RESCENE",
+  "korean_name": "리센느",
+  "artistType": "girl_group",
+  "generation": 5,
+  "debut": "2024-03-26",
+  "releases": [
+    {
+      "title": "Glow Up",
+      "dailyValues": {
+        "2025-02-12": { "value": 2392, "source": "show_champion", "episode": 543 }
+      },
+      "embeds": {
+        "2025-02-12": [{ "type": "live_performance", "url": "https://youtu.be/VYVDd1qgstw?si=zFoMok5jizFuH0SY" }],
+        "2025-02-05": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/glow-up-ep/1794040636" },
+          { "type": "mv", "url": "https://youtu.be/h0xUtrb_JBc?si=D6-V6iWmnQKWwzVb" }
+        ]
+      }
+    }
+  ]
+}

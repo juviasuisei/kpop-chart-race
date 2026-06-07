@@ -37,6 +37,18 @@
           { "type": "mv", "url": "https://youtu.be/wlHwjkYpSr0?si=g-q87Meb2-Kw2i6T" }
         ]
       }
+    },
+    {
+      "title": "DRIP",
+      "dailyValues": {
+        "2025-02-09": { "value": 5809, "source": "inkigayo", "episode": 1255 }
+      },
+      "embeds": {
+        "2024-11-01": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/drip/1773262053" },
+          { "type": "mv", "url": "https://youtu.be/Zp-Jhuhq0bQ?si=f7FIVRu78NgI6ZWP" }
+        ]
+      }
     }
   ]
 }

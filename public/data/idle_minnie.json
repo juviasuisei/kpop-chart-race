@@ -1,0 +1,21 @@
+{
+  "name": "MINNIE [i-dle]",
+  "korean_name": "ณิชา ยนตรรักษ์",
+  "artistType": "solo_female",
+  "generation": 4,
+  "debut": "2025-01-21",
+  "releases": [
+    {
+      "title": "HER",
+      "dailyValues": {
+        "2025-02-08": { "value": 2541, "source": "show_music_core", "episode": 889 }
+      },
+      "embeds": {
+        "2025-01-21": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/her/1802808625" },
+          { "type": "mv", "url": "https://youtu.be/UTHqh7Vpa64?si=ee-Ty6yGkbKSPxEp" }
+        ]
+      }
+    }
+  ]
+}

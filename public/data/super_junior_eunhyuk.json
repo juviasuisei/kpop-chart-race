@@ -1,0 +1,22 @@
+{
+  "name": "EUNHYUK [SUPER JUNIOR]",
+  "korean_name": "조규현",
+  "artistType": "solo_male",
+  "generation": 2,
+  "debut": "2021-10-10",
+  "releases": [
+    {
+      "title": "UP N DOWN",
+      "dailyValues": {
+        "2025-02-07": { "value": 7917, "source": "music_bank", "episode": 1227 }
+      },
+      "embeds": {
+        "2025-02-07": [{ "type": "live_performance", "url": "https://youtu.be/VP2ajzcnD5o?si=8rNSlj-Ea10UvZ8w" }],
+        "2025-01-27": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/explorer/1791686736" },
+          { "type": "mv", "url": "https://youtu.be/6jfWILdI1xg?si=lZG7XyrIjf9o2bEu" }
+        ]
+      }
+    }
+  ]
+}

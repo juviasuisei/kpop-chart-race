@@ -1,0 +1,21 @@
+{
+  "name": "ROSÉ [BLACKPINK]",
+  "korean_name": "박채영",
+  "artistType": "solo_female",
+  "generation": 3,
+  "debut": "2021-03-12",
+  "releases": [
+    {
+      "title": "toxic till the end",
+      "dailyValues": {
+        "2025-02-09": { "value": 4122, "source": "inkigayo", "episode": 1255 }
+      },
+      "embeds": {
+        "2024-12-06": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/rosie/1771105914" },
+          { "type": "mv", "url": "https://youtu.be/eA0lHNZ1KCA?si=eKXPFlRG_DLj6iaP" }
+        ]
+      }
+    }
+  ]
+}

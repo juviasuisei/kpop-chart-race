@@ -9,7 +9,9 @@
       "title": "toxic till the end",
       "dailyValues": {
         "2025-02-09": { "value": 4122, "source": "inkigayo", "episode": 1255 },
-        "2025-02-02": { "value": 4040, "source": "inkigayo", "episode": 1254 }
+        "2025-02-02": { "value": 4040, "source": "inkigayo", "episode": 1254 },
+        "2025-01-26": { "value": 4216, "source": "inkigayo", "episode": 1253 },
+        "2025-01-25": { "value": 5646, "source": "show_music_core", "episode": 888 }
       },
       "embeds": {
         "2024-12-06": [

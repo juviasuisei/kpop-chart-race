@@ -51,7 +51,9 @@
         "2025-03-01": { "value": 5836, "source": "show_music_core", "episode": 892 },
         "2025-02-22": { "value": 4154, "source": "show_music_core", "episode": 891 },
         "2025-02-15": { "value": 3972, "source": "show_music_core", "episode": 890 },
-        "2025-02-08": { "value": 5340, "source": "show_music_core", "episode": 889 }
+        "2025-02-08": { "value": 5340, "source": "show_music_core", "episode": 889 },
+        "2025-01-25": { "value": 5815, "source": "show_music_core", "episode": 888 },
+        "2025-01-23": { "value": 6077, "source": "m_countdown", "episode": 872 }
       },
       "embeds": {
         "2025-01-06": [

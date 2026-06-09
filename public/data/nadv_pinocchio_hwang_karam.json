@@ -11,7 +11,8 @@
         "2025-03-09": { "value": 3177, "source": "inkigayo", "episode": 1259 },
         "2025-03-02": { "value": 3944, "source": "inkigayo", "episode": 1258 },
         "2025-02-23": { "value": 3962, "source": "inkigayo", "episode": 1257 },
-        "2025-02-16": { "value": 3803, "source": "inkigayo", "episode": 1256 }
+        "2025-02-16": { "value": 3803, "source": "inkigayo", "episode": 1256 },
+        "2025-01-24": { "value": 3531, "source": "music_bank", "episode": 1225 }
       },
       "embeds": {
         "2024-10-21": [ { "type": "release_date", "url": "https://music.apple.com/us/album/im-firefly-single/1773943441" } ]

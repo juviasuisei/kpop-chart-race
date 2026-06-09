@@ -63,6 +63,18 @@
           { "type": "mv", "url": "https://youtu.be/2hwiRN8t8Ok?si=KSVInbmUyBbO4mhF" }
         ]
       }
+    },
+    {
+      "title": "Doctor! Doctor!",
+      "dailyValues": {
+        "2025-01-30": { "value": 5558, "source": "m_countdown", "episode": 873 }
+      },
+      "embeds": {
+        "2025-01-20": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/doctor-doctor-single/1789502102" },
+          { "type": "mv", "url": "https://youtu.be/9BXF8gSpEwY?si=4afzDO1TKjUT3v8m" }
+        ]
+      }
     }
   ]
 }

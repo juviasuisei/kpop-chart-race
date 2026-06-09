@@ -8,7 +8,8 @@
     {
       "title": "HER",
       "dailyValues": {
-        "2025-02-08": { "value": 2541, "source": "show_music_core", "episode": 889 }
+        "2025-02-08": { "value": 2541, "source": "show_music_core", "episode": 889 },
+        "2025-01-31": { "value": 7505, "source": "music_bank", "episode": 1226 }
       },
       "embeds": {
         "2025-01-21": [

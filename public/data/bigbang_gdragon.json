@@ -29,6 +29,15 @@
           { "type": "mv", "url": "https://youtu.be/o9DhvbqYzns?si=E33IziMkiRqawZYu" }
         ]
       }
+    },
+    {
+      "title": "HOME SWEET HOME",
+      "dailyValues": {
+        "2025-01-18": { "value": 6581, "source": "show_music_core", "episode": 887 }
+      },
+      "embeds": {
+        "2024-11-22": [{ "type": "release_date", "url": "https://music.apple.com/us/album/home-sweet-home-feat-taeyang-daesung-single/1780634924" }]
+      }
     }
   ]
 }

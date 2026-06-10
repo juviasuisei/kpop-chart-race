@@ -1,0 +1,24 @@
+{
+  "name": "BSS [SEVENTEEN]",
+  "korean_name": "부승관 / 이석민 / 권순영",
+  "artistType": "boy_group",
+  "generation": 3,
+  "debut": "2018-03-21",
+  "releases": [
+    {
+      "title": "CBZ",
+      "dailyValues": {
+        "2025-01-19": { "value": 4260, "source": "inkigayo", "episode": 1252 },
+        "2025-01-18": { "value": 5795, "source": "show_music_core", "episode": 887 },
+        "2025-01-17": { "value": 10191, "source": "music_bank", "episode": 1224 },
+        "2025-01-16": { "value": 8317, "source": "m_countdown", "episode": 871 }
+      },
+      "embeds": {
+        "2025-01-08": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/bss-2nd-single-album-teleparty-single/1786412390" },
+          { "type": "mv", "url": "https://youtu.be/Mt9SBZam4X4?si=hzC83Gtm1yZXV8sQ" }
+        ]
+      }
+    }
+  ]
+}

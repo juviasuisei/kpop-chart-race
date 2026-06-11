@@ -1,0 +1,21 @@
+{
+  "name": "JAESSBEE",
+  "korean_name": "재쓰비",
+  "artistType": "mixed_group",
+  "generation": 5,
+  "debut": "2024-11-11",
+  "releases": [
+    {
+      "title": "Every Moment With You",
+      "dailyValues": {
+        "2025-01-11": { "value": 4054, "source": "show_music_core", "episode": 886 }
+      },
+      "embeds": {
+        "2024-11-11": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/every-moment-with-you-single/1777993497" },
+          { "type": "mv", "url": "https://youtu.be/XV0lSvr0huU?si=0HawqKLKMxCiYYza" }
+        ]
+      }
+    }
+  ]
+}

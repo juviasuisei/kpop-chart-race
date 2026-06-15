@@ -8,7 +8,7 @@
 import "./style.css";
 
 import { EventBus } from "./event-bus.ts";
-import { loadAll } from "./data-loader.ts";
+import { loadFromAirtable } from "./airtable/data-adapter.ts";
 import { computeSnapshot, computeChartWins } from "./chart-engine.ts";
 import { LoadingScreen } from "./loading-screen.ts";
 import { ChartRaceRenderer } from "./chart-race-renderer.ts";
@@ -41,7 +41,7 @@ async function main(): Promise<void> {
 
   let dataStore: DataStore;
   try {
-    dataStore = await loadAll("data", (loaded, total, name) => {
+    dataStore = await loadFromAirtable((loaded, total, name) => {
       loadingScreen.onFileProgress(loaded, total, [name]);
     });
 

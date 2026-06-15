@@ -43,6 +43,20 @@
           { "type": "mv", "url": "https://youtu.be/P7vBoGWoReg?si=lbkBIdCEt8-G7sq4" }
         ]
       }
+    },
+    {
+      "title": "Walkin On Water",
+      "dailyValues": {
+        "2025-01-09": { "value": 8656, "source": "m_countdown", "episode": 870 },
+        "2025-01-03": { "value": 3433, "source": "music_bank", "episode": 1222 },
+        "2024-12-27": { "value": 5599, "source": "music_bank", "episode": 1221 }
+      },
+      "embeds": {
+        "2024-12-13": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/hop/1780411692" },
+          { "type": "mv", "url": "https://youtu.be/ovHoY8UBIu8?si=Anpr-w2_A8cygt7Y" }
+        ]
+      }
     }
   ]
 }

@@ -14,12 +14,38 @@
         "2025-01-25": { "value": 5646, "source": "show_music_core", "episode": 888 },
         "2025-01-19": { "value": 4476, "source": "inkigayo", "episode": 1252 },
         "2025-01-12": { "value": 4822, "source": "inkigayo", "episode": 1251 },
-        "2025-01-11": { "value": 5137, "source": "show_music_core", "episode": 886 }
+        "2025-01-11": { "value": 5137, "source": "show_music_core", "episode": 886 },
+        "2025-01-05": { "value": 4835, "source": "inkigayo", "episode": 1250 }
       },
       "embeds": {
         "2024-12-06": [
           { "type": "release_date", "url": "https://music.apple.com/us/album/rosie/1771105914" },
           { "type": "mv", "url": "https://youtu.be/eA0lHNZ1KCA?si=eKXPFlRG_DLj6iaP" }
+        ]
+      }
+    },
+    {
+      "title": "number one girl",
+      "dailyValues": {
+        "2025-01-05": { "value": 4100, "source": "inkigayo", "episode": 1250 }
+      },
+      "embeds": {
+        "2024-11-22": [
+          { "type": "mv", "url": "https://youtu.be/pZ1NdE69VTs?si=isnqS8JNOI0LSiIB" }
+        ]
+      }
+    },
+    {
+      "title": "APT.",
+      "dailyValues": {
+        "2025-01-10": { "value": 3379, "source": "music_bank", "episode": 1223 },
+        "2025-01-03": { "value": 4087, "source": "music_bank", "episode": 1222 },
+        "2024-12-27": { "value": 4106, "source": "music_bank", "episode": 1221 }
+      },
+      "embeds": {
+        "2024-10-17": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/apt/1773452219" },
+          { "type": "mv", "url": "https://youtu.be/ekr2nIex040?si=8ShsQ5kUCIxWLHV1" }
         ]
       }
     }

@@ -1,0 +1,24 @@
+{
+  "name": "n.SSign",
+  "korean_name": "엔싸인",
+  "artistType": "boy_group",
+  "generation": 5,
+  "debut": "2023-08-09",
+  "releases": [
+    {
+      "title": "Love Potion",
+      "dailyValues": {
+        "2025-01-10": { "value": 7525, "source": "music_bank", "episode": 1223 },
+        "2025-01-09": { "value": 2992, "source": "m_countdown", "episode": 870 }
+      },
+      "embeds": {
+        "2025-01-10": [{ "type": "live_performance", "url": "https://youtu.be/WL-GkwJpmLg?si=WLDEdignbYxS5a5O" }],
+        "2025-01-09": [{ "type": "live_performance", "url": "https://youtu.be/CDDygpxLO8M?si=xBBOOhRiRIIrCPfF" }],
+        "2024-12-30": [
+          { "type": "release_date", "url": "https://music.apple.com/us/album/n-ssign-3rd-mini-album-love-potion-ep/1787113819" },
+          { "type": "mv", "url": "https://youtu.be/d78d-xsbCu8?si=_N2HVfATRP9Wvg4C" }
+        ]
+      }
+    }
+  ]
+}

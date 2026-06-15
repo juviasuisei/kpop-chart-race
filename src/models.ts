@@ -23,6 +23,12 @@ export interface ParsedRelease {
   embeds: Map<string, ParsedEmbedDateEntry[]>;
 }
 
+/** An album/EP release linked to an Apple Music URL, shown on the timeline */
+export interface AlbumRelease {
+  date: string;
+  appleMusicUrl: string;
+}
+
 /** A fully parsed artist with a derived id and parsed releases */
 export interface ParsedArtist {
   id: string;
@@ -33,6 +39,7 @@ export interface ParsedArtist {
   koreanName?: string;
   debut?: string;
   releases: ParsedRelease[];
+  albumReleases: AlbumRelease[];
 }
 
 /** Information about the featured release for a ranked entry */

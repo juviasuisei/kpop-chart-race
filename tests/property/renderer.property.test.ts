@@ -284,6 +284,7 @@ function makeDataStoreForSnapshot(snapshot: ChartSnapshot): DataStore {
         dailyValues: new Map([[snapshot.date, dv]]),
         embeds: new Map(),
       }],
+      albumReleases: [],
     });
   }
   return { artists, dates: [snapshot.date], startDate: snapshot.date, endDate: snapshot.date, firstAppearance: new Map(), chartWins: new Map() };

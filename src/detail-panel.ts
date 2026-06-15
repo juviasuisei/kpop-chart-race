@@ -129,6 +129,7 @@ export class DetailPanel {
   private panelEl: HTMLElement | null = null;
   private previouslyFocusedEl: HTMLElement | null = null;
   private observer: IntersectionObserver | null = null;
+  private currentArtistDebut: string | undefined = undefined;
   private boundKeyHandler: ((e: KeyboardEvent) => void) | null = null;
 
   constructor(eventBus: EventBus) {
@@ -146,6 +147,8 @@ export class DetailPanel {
 
     const artist = dataStore.artists.get(artistId);
     if (!artist) return;
+
+    this.currentArtistDebut = artist.debut;
 
     // Store the currently focused element for focus return
     this.previouslyFocusedEl = document.activeElement as HTMLElement | null;
@@ -413,6 +416,20 @@ export class DetailPanel {
       }
     }
 
+    // Inject albumReleases as timeline items with release_date embeds
+    for (const albumRelease of artist.albumReleases) {
+      items.push({
+        date: albumRelease.date,
+        releaseTitle: "",
+        releaseId: "",
+        dailyValue: undefined,
+        embedGroups: [{ type: "release_date", url: albumRelease.appleMusicUrl }],
+        crownLevel: 0,
+        subReleases: [],
+        mergedEmbeds: [],
+      });
+    }
+
     // Merge items that share the same (date, source, episode) into one card.
     // The highest-value release becomes the primary; others become subReleases.
     // Only the primary gets the crown.
@@ -654,11 +671,13 @@ export class DetailPanel {
         entry.appendChild(subEl);
       }
     } else {
-      // Embed-only entry — still show release title at top
-      const releaseEl = document.createElement("div");
-      releaseEl.className = "timeline-entry__release";
-      releaseEl.textContent = `♪ ${item.releaseTitle}`;
-      entry.appendChild(releaseEl);
+      // Embed-only entry — show release title only if it has one (albumReleases have empty title)
+      if (item.releaseTitle) {
+        const releaseEl = document.createElement("div");
+        releaseEl.className = "timeline-entry__release";
+        releaseEl.textContent = `♪ ${item.releaseTitle}`;
+        entry.appendChild(releaseEl);
+      }
     }
 
     // Embed groups — sorted so live performances come first (closest to chart data)
@@ -681,10 +700,14 @@ export class DetailPanel {
       const groupEl = document.createElement("div");
       groupEl.className = "timeline-entry__embed-group";
 
-      // Event type label
+      // Event type label — use "Debut" or "Comeback" for release_date entries
       const labelEl = document.createElement("div");
       labelEl.className = "timeline-entry__event-type";
-      labelEl.textContent = EVENT_TYPE_LABELS[group.type] ?? group.type;
+      if (group.type === "release_date") {
+        labelEl.textContent = (this.currentArtistDebut && item.date === this.currentArtistDebut) ? "Debut" : "Comeback";
+      } else {
+        labelEl.textContent = EVENT_TYPE_LABELS[group.type] ?? group.type;
+      }
       groupEl.appendChild(labelEl);
 
       // Embed — lazy-loaded via IntersectionObserver

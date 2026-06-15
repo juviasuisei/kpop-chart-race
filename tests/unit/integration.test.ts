@@ -69,6 +69,7 @@ function createTestDataStore(): DataStore {
     generation: 4,
     logoUrl: 'assets/logos/a.svg',
     releases: [releaseA],
+    albumReleases: [],
   };
 
   const artistB: ParsedArtist = {
@@ -78,6 +79,7 @@ function createTestDataStore(): DataStore {
     generation: 3,
     logoUrl: 'assets/logos/b.svg',
     releases: [releaseB],
+    albumReleases: [],
   };
 
   const artistC: ParsedArtist = {
@@ -87,6 +89,7 @@ function createTestDataStore(): DataStore {
     generation: 5,
     logoUrl: 'assets/logos/c.svg',
     releases: [releaseC],
+    albumReleases: [],
   };
 
   return {

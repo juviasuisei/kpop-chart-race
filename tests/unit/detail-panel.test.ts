@@ -63,6 +63,7 @@ function createTestDataStore(): DataStore {
     koreanName: '테스트 아티스트',
     debut: '2020-03-15',
     releases: [release1],
+    albumReleases: [],
   };
 
   // Chart wins: artist wins on 2024-05-13 inkigayo (crown level 1),
@@ -387,6 +388,7 @@ describe('DetailPanel — same-date card merging', () => {
       generation: 4,
       logoUrl: 'assets/logos/merge.svg',
       releases: [release1, release2],
+      albumReleases: [],
     };
 
     const store: DataStore = {
@@ -441,6 +443,7 @@ describe('DetailPanel — same-date card merging', () => {
       generation: 4,
       logoUrl: 'assets/logos/embed-merge.svg',
       releases: [chartRelease, embedRelease],
+      albumReleases: [],
     };
 
     const store: DataStore = {
@@ -496,6 +499,7 @@ describe('DetailPanel — same-date card merging', () => {
       generation: 4,
       logoUrl: 'assets/logos/heading.svg',
       releases: [primaryRelease, otherRelease],
+      albumReleases: [],
     };
 
     const store: DataStore = {
@@ -544,6 +548,7 @@ describe('DetailPanel — same-date card merging', () => {
       generation: 4,
       logoUrl: 'assets/logos/source-diff.svg',
       releases: [release1, release2],
+      albumReleases: [],
     };
 
     const store: DataStore = {
@@ -599,6 +604,7 @@ describe('DetailPanel — crown label simplification', () => {
       generation: 4,
       logoUrl: 'assets/logos/crown.svg',
       releases: [release],
+      albumReleases: [],
     };
 
     const chartWins: DataStore['chartWins'] = new Map([

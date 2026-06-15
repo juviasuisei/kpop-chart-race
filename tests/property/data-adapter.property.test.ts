@@ -412,11 +412,10 @@ describe('Property 6: Ranking-to-DailyValue mapping', () => {
 //   URL whose linked Episode has a Date
 // ============================================================
 
-const VALID_EMBED_TYPES = ['release_date', 'mv', 'live_performance'] as const;
+const VALID_EMBED_TYPES = ['mv', 'live_performance'] as const;
 const EMBED_TYPE_ORDER: Record<string, number> = {
-  release_date: 0,
-  mv: 1,
-  live_performance: 2,
+  mv: 0,
+  live_performance: 1,
 };
 
 /** Generate a date in YYYY-MM-DD format using integer-based generation for reliability */
@@ -610,14 +609,12 @@ describe('Property 7: Embed generation and type ordering', () => {
         }
       }
 
-      // Verify 3: If release has Date + Apple Music URL, there should be a release_date embed
+      // Verify 3: If release has Date + Apple Music URL, it should appear in albumReleases (not embeds)
       if (release.appleMusicUrl) {
-        const dateEntries = embeds.get(release.date);
-        expect(dateEntries).toBeDefined();
-        const hasReleaseDate = dateEntries!.some(
-          (e) => e.type === 'release_date' && e.url === release.appleMusicUrl,
+        const hasAlbumRelease = artist.albumReleases.some(
+          (ar) => ar.date === release.date && ar.appleMusicUrl === release.appleMusicUrl,
         );
-        expect(hasReleaseDate).toBe(true);
+        expect(hasAlbumRelease).toBe(true);
       }
 
       // Verify 4: If release has Date + MV URL, there should be an mv embed

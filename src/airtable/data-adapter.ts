@@ -247,22 +247,40 @@ function assembleDataStore(
   // Structure: artistRecordId → ParsedRelease[]
   const releasesPerArtist = new Map<string, ParsedRelease[]>();
 
+  // Album releases per artist (Apple Music URLs extracted separately)
+  // Structure: artistRecordId → AlbumRelease[]
+  const albumReleasesPerArtist = new Map<string, Array<{ date: string; appleMusicUrl: string }>>();
+
   for (const releaseRecord of releaseRecords) {
     const fields = releaseRecord.fields;
     const releaseName = fields["Name"];
     const artistLinks = fields["Artist"];
+    const releaseDate = fields["Date"];
+    const appleMusicUrl = fields["Apple Music"];
 
-    if (!releaseName) {
+    if (!artistLinks || artistLinks.length === 0) {
       console.warn(
-        `[Data_Adapter] Skipping release "${releaseRecord.id}": missing Name field.`,
+        `[Data_Adapter] Skipping release "${releaseName ?? releaseRecord.id}": links to zero Artists.`,
       );
       continue;
     }
 
-    if (!artistLinks || artistLinks.length === 0) {
-      console.warn(
-        `[Data_Adapter] Skipping release "${releaseName}": links to zero Artists.`,
-      );
+    // Extract Apple Music URL into albumReleases for all linked artists
+    if (releaseDate && appleMusicUrl) {
+      for (const artistRecordId of artistLinks) {
+        if (!validArtists.has(artistRecordId)) continue;
+        const existing = albumReleasesPerArtist.get(artistRecordId);
+        const entry = { date: releaseDate, appleMusicUrl };
+        if (existing) {
+          existing.push(entry);
+        } else {
+          albumReleasesPerArtist.set(artistRecordId, [entry]);
+        }
+      }
+    }
+
+    // If no Name, this release only contributes to albumReleases — skip ParsedRelease creation
+    if (!releaseName) {
       continue;
     }
 
@@ -270,18 +288,10 @@ function assembleDataStore(
     const dailyValues = new Map<string, DailyValueEntry>();
     const embeds = new Map<string, ParsedEmbedDateEntry[]>();
 
-    // Add release-level embeds (release_date and mv)
-    const releaseDate = fields["Date"];
-    const appleMusicUrl = fields["Apple Music"];
+    // Add MV embed (Apple Music is now handled separately via albumReleases)
     const mvUrl = fields["MV"];
-
-    if (releaseDate) {
-      if (appleMusicUrl) {
-        addEmbed(embeds, releaseDate, { type: "release_date", url: appleMusicUrl });
-      }
-      if (mvUrl) {
-        addEmbed(embeds, releaseDate, { type: "mv", url: mvUrl });
-      }
+    if (releaseDate && mvUrl) {
+      addEmbed(embeds, releaseDate, { type: "mv", url: mvUrl });
     }
 
     // Process rankings for this release
@@ -389,6 +399,7 @@ function assembleDataStore(
       koreanName: nativeName && nativeName.trim() !== "" ? nativeName : undefined,
       debut: debut && debut.trim() !== "" ? debut : undefined,
       releases,
+      albumReleases: albumReleasesPerArtist.get(recordId) ?? [],
     };
 
     artists.set(artistId, parsedArtist);

@@ -23,6 +23,7 @@ function createArtist(id: string, name: string, dailyValues: Record<string, { va
       dailyValues: new Map(Object.entries(dailyValues)),
       embeds: new Map(),
     }],
+    albumReleases: [],
   };
 }
 
@@ -272,6 +273,7 @@ describe('YearlyView', () => {
           embeds: new Map(),
         },
       ],
+      albumReleases: [],
     };
 
     const artistMap = new Map([['multi-release', artist]]);
@@ -320,6 +322,7 @@ describe('YearlyView — Wins Mode', () => {
         dailyValues: new Map([[`${year}-06-01`, { value: points, source: 'inkigayo', episode: 1 }]]),
         embeds: new Map(),
       }],
+      albumReleases: [],
     };
   }
 
@@ -532,6 +535,7 @@ describe('YearlyView — Stacked Bar (All mode)', () => {
         dailyValues: new Map([[`${year}-06-01`, { value: points, source: 'inkigayo', episode: 1 }]]),
         embeds: new Map(),
       }],
+      albumReleases: [],
     };
   }
 
@@ -703,6 +707,7 @@ describe('YearlyView — Stacked Bar (All mode)', () => {
         ]),
         embeds: new Map(),
       }],
+      albumReleases: [],
     };
     const ds = createDS([artist]);
     view.mount(container, ds);
@@ -785,6 +790,7 @@ describe('YearlyView — Source Filter in Grid Mode', () => {
         ]),
         embeds: new Map(),
       }],
+      albumReleases: [],
     };
     const ds: DataStore = {
       artists: new Map([['a', artist]]),
@@ -828,6 +834,7 @@ describe('YearlyView — Source Filter in Grid Mode', () => {
         ]),
         embeds: new Map(),
       }],
+      albumReleases: [],
     };
     const wins = new Map([
       ['2025-06-01', new Map([
@@ -874,6 +881,7 @@ describe('YearlyView — Source Filter in Grid Mode', () => {
         ]),
         embeds: new Map(),
       }],
+      albumReleases: [],
     };
     const ds: DataStore = {
       artists: new Map([['a', artist]]),

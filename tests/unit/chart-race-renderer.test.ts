@@ -51,6 +51,7 @@ function makeDataStoreForEntries(entries: RankedEntry[], date = '2024-06-01'): D
         dailyValues: new Map([[date, dv]]),
         embeds: new Map(),
       }],
+      albumReleases: [],
     });
   }
   return { artists, dates: [date], startDate: date, endDate: date, firstAppearance: new Map(), chartWins: new Map() };
@@ -825,6 +826,7 @@ function createMockDataStore(artistId: string): DataStore {
     generation: 4,
     logoUrl: 'assets/logos/luna-park.svg',
     releases: [],
+    albumReleases: [],
   };
   const artists = new Map<string, ParsedArtist>();
   artists.set(artistId, artist);

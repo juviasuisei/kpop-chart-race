@@ -140,6 +140,7 @@ function arbArtist(dates: string[]): fc.Arbitrary<ParsedArtist> {
     generation,
     logoUrl: 'assets/logos/test.svg',
     releases,
+    albumReleases: [],
   }));
 }
 
@@ -483,6 +484,7 @@ describe('Feature: 0013-detail-panel-overhaul, Property 9: Header background col
           generation: 1,
           logoUrl: 'assets/logos/test.svg',
           releases: [release],
+          albumReleases: [],
         };
         const store = buildDataStore(artist, ['2024-05-13']);
 
@@ -568,6 +570,7 @@ function buildSimpleArtist(overrides: Partial<ParsedArtist> = {}): ParsedArtist 
     generation: 4,
     logoUrl: 'assets/logos/test.svg',
     releases: [release],
+    albumReleases: [],
     ...overrides,
   };
 }

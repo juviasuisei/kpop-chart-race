@@ -165,15 +165,12 @@ function buildJsonEntry(data: GeneratedArtistData): ArtistEntry {
     }
 
     // Build embeds matching what Airtable produces:
-    // - release_date embed if release has Date + Apple Music URL
     // - mv embed if release has Date + MV URL
     // - live_performance embeds are from Rankings with Performance URLs (not generated here for JSON side)
+    // NOTE: Apple Music URLs now go into albumReleases, NOT embeds
     const embeds: Record<string, Array<{ type: string; url: string }>> = {};
-    if (release.appleMusicUrl || release.mvUrl) {
+    if (release.mvUrl) {
       const entries: Array<{ type: string; url: string }> = [];
-      if (release.appleMusicUrl) {
-        entries.push({ type: 'release_date', url: release.appleMusicUrl });
-      }
       if (release.mvUrl) {
         entries.push({ type: 'mv', url: release.mvUrl });
       }
@@ -425,6 +422,23 @@ describe('Property 11: Round-trip equivalence with JSON loader', () => {
           expect(atSet).toEqual(jsonSet);
         }
       }
+
+      // --- Compare albumReleases ---
+      // Both sides should produce the same albumReleases entries
+      const jsonAlbumReleases = data.releases
+        .filter(r => r.appleMusicUrl)
+        .map(r => ({ date: r.releaseDate, appleMusicUrl: r.appleMusicUrl! }));
+      
+      expect(airtableParsed.albumReleases.length).toBe(jsonAlbumReleases.length);
+      
+      // Compare as sets (order may differ)
+      const atAlbumSet = new Set(
+        airtableParsed.albumReleases.map(ar => `${ar.date}::${ar.appleMusicUrl}`),
+      );
+      const jsonAlbumSet = new Set(
+        jsonAlbumReleases.map(ar => `${ar.date}::${ar.appleMusicUrl}`),
+      );
+      expect(atAlbumSet).toEqual(jsonAlbumSet);
     },
   );
 });

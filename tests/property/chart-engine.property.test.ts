@@ -103,6 +103,7 @@ function arbParsedArtist(dates: string[]): fc.Arbitrary<ParsedArtist> {
         generation,
         logoUrl: `assets/logos/${id}.svg`,
         releases,
+        albumReleases: [],
       } satisfies ParsedArtist;
     });
 }
@@ -584,6 +585,7 @@ describe('Feature 0014, Property 1: Chart Win Deduplication and Crown Correctnes
                 embeds: new Map(),
               },
             ],
+            albumReleases: [],
           };
 
           // Create a second artist with one release
@@ -601,6 +603,7 @@ describe('Feature 0014, Property 1: Chart Win Deduplication and Crown Correctnes
                 embeds: new Map(),
               },
             ],
+            albumReleases: [],
           };
 
           const dataStore = buildDataStore([artist, otherArtist], dates);
@@ -666,6 +669,7 @@ describe('Feature 0014, Property 1: Chart Win Deduplication and Crown Correctnes
                 embeds: new Map(),
               },
             ],
+            albumReleases: [],
           };
 
           const dataStore = buildDataStore([artist], dates);
@@ -759,6 +763,7 @@ describe('Feature 0014, Property 2: Activity Filter Correctness at Zoom 10', () 
                 dailyValues: new Map([[dateForValues, { value: 100, source: 'inkigayo', episode: 1 }]]),
                 embeds: new Map(),
               }],
+              albumReleases: [],
             });
           }
 

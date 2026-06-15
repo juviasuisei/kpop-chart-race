@@ -158,6 +158,7 @@ export function toParseArtist(entry: ArtistEntry, filename: string): ParsedArtis
     koreanName: entry.korean_name || undefined,
     debut: entry.debut || undefined,
     releases,
+    albumReleases: [],
   };
 }
 

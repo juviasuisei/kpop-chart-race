@@ -32,6 +32,7 @@ interface SerializedArtist {
   koreanName?: string;
   debut?: string;
   releases: SerializedRelease[];
+  albumReleases: Array<{ date: string; appleMusicUrl: string }>;
 }
 
 interface SerializedRelease {
@@ -182,6 +183,7 @@ export class CacheManager {
       releases: artist.releases.map((release) =>
         this.serializeRelease(release),
       ),
+      albumReleases: artist.albumReleases,
     };
   }
 
@@ -231,6 +233,7 @@ export class CacheManager {
       releases: serialized.releases.map((release) =>
         this.deserializeRelease(release),
       ),
+      albumReleases: serialized.albumReleases ?? [],
     };
   }
 

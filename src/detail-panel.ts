@@ -112,6 +112,8 @@ interface TimelineItem {
   dailyValue?: DailyValueEntry;
   embedGroups: ParsedEmbedDateEntry[];
   crownLevel: number;
+  /** True if this is an album release marked as a pre-release single */
+  isPreReleaseSingle?: boolean;
   /** Additional releases on the same date — merged into one card */
   subReleases: { title: string; releaseId: string; value: number; source?: string; episode?: number }[];
   /** Embeds from other releases merged into this card, with their release title */
@@ -425,6 +427,7 @@ export class DetailPanel {
         dailyValue: undefined,
         embedGroups: [{ type: "release_date", url: albumRelease.appleMusicUrl }],
         crownLevel: 0,
+        isPreReleaseSingle: albumRelease.isSingle,
         subReleases: [],
         mergedEmbeds: [],
       });
@@ -500,6 +503,10 @@ export class DetailPanel {
         if (existing) {
           if (item.embedGroups.length > 0) {
             existing.mergedEmbeds.push({ releaseTitle: item.releaseTitle, groups: item.embedGroups });
+          }
+          // Propagate isPreReleaseSingle flag from album release items
+          if (item.isPreReleaseSingle) {
+            existing.isPreReleaseSingle = true;
           }
         } else {
           mergeMap.set(key, item);
@@ -700,11 +707,17 @@ export class DetailPanel {
       const groupEl = document.createElement("div");
       groupEl.className = "timeline-entry__embed-group";
 
-      // Event type label — use "Debut" or "Comeback" for release_date entries
+      // Event type label — use "Debut", "Pre-Release Single", or "Comeback" for release_date entries
       const labelEl = document.createElement("div");
       labelEl.className = "timeline-entry__event-type";
       if (group.type === "release_date") {
-        labelEl.textContent = (this.currentArtistDebut && item.date === this.currentArtistDebut) ? "Debut" : "Comeback";
+        if (item.isPreReleaseSingle) {
+          labelEl.textContent = "Pre-Release Single";
+        } else if (this.currentArtistDebut && item.date === this.currentArtistDebut) {
+          labelEl.textContent = "Debut";
+        } else {
+          labelEl.textContent = "Comeback";
+        }
       } else {
         labelEl.textContent = EVENT_TYPE_LABELS[group.type] ?? group.type;
       }
@@ -725,11 +738,14 @@ export class DetailPanel {
 
     // Merged embeds from other releases on the same date — with song headings
     for (const merged of item.mergedEmbeds) {
-      const songHeading = document.createElement("div");
-      songHeading.className = "timeline-entry__release";
-      songHeading.textContent = `♪ ${merged.releaseTitle}`;
-      songHeading.style.marginTop = "0.75rem";
-      entry.appendChild(songHeading);
+      // Only show song heading if it has a title (albumReleases have empty title)
+      if (merged.releaseTitle) {
+        const songHeading = document.createElement("div");
+        songHeading.className = "timeline-entry__release";
+        songHeading.textContent = `♪ ${merged.releaseTitle}`;
+        songHeading.style.marginTop = "0.75rem";
+        entry.appendChild(songHeading);
+      }
 
       const sortedMerged = [...merged.groups].sort((a, b) => {
         const order: Record<string, number> = {
@@ -746,7 +762,17 @@ export class DetailPanel {
 
         const labelEl = document.createElement("div");
         labelEl.className = "timeline-entry__event-type";
-        labelEl.textContent = EVENT_TYPE_LABELS[group.type] ?? group.type;
+        if (group.type === "release_date") {
+          if (item.isPreReleaseSingle) {
+            labelEl.textContent = "Pre-Release Single";
+          } else if (this.currentArtistDebut && item.date === this.currentArtistDebut) {
+            labelEl.textContent = "Debut";
+          } else {
+            labelEl.textContent = "Comeback";
+          }
+        } else {
+          labelEl.textContent = EVENT_TYPE_LABELS[group.type] ?? group.type;
+        }
         groupEl.appendChild(labelEl);
 
         const placeholder = document.createElement("div");

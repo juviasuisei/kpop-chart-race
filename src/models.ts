@@ -27,6 +27,7 @@ export interface ParsedRelease {
 export interface AlbumRelease {
   date: string;
   appleMusicUrl: string;
+  isSingle: boolean;
 }
 
 /** A fully parsed artist with a derived id and parsed releases */

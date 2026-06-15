@@ -57,6 +57,7 @@ interface ReleaseFields {
   "Apple Music"?: string;
   "MV"?: string;
   "Rankings"?: string[];
+  "Is Single"?: boolean;
 }
 
 /** Airtable Episode record fields */
@@ -249,7 +250,7 @@ function assembleDataStore(
 
   // Album releases per artist (Apple Music URLs extracted separately)
   // Structure: artistRecordId → AlbumRelease[]
-  const albumReleasesPerArtist = new Map<string, Array<{ date: string; appleMusicUrl: string }>>();
+  const albumReleasesPerArtist = new Map<string, Array<{ date: string; appleMusicUrl: string; isSingle: boolean }>>();
 
   for (const releaseRecord of releaseRecords) {
     const fields = releaseRecord.fields;
@@ -267,10 +268,11 @@ function assembleDataStore(
 
     // Extract Apple Music URL into albumReleases for all linked artists
     if (releaseDate && appleMusicUrl) {
+      const isSingle = fields["Is Single"] === true;
       for (const artistRecordId of artistLinks) {
         if (!validArtists.has(artistRecordId)) continue;
         const existing = albumReleasesPerArtist.get(artistRecordId);
-        const entry = { date: releaseDate, appleMusicUrl };
+        const entry = { date: releaseDate, appleMusicUrl, isSingle };
         if (existing) {
           existing.push(entry);
         } else {

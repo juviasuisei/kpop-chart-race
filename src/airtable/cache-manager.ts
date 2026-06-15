@@ -32,7 +32,7 @@ interface SerializedArtist {
   koreanName?: string;
   debut?: string;
   releases: SerializedRelease[];
-  albumReleases: Array<{ date: string; appleMusicUrl: string }>;
+  albumReleases: Array<{ date: string; appleMusicUrl: string; isSingle: boolean }>;
 }
 
 interface SerializedRelease {

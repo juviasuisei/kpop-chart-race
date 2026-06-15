@@ -348,6 +348,15 @@ function assembleDataStore(
 
     // Create a ParsedRelease for each linked artist
     const releaseId = slugify(releaseName);
+    // Resolve all valid artist slugs for this release's artistIds
+    const resolvedArtistIds: string[] = [];
+    for (const rid of artistLinks) {
+      const info = validArtists.get(rid);
+      if (info) {
+        resolvedArtistIds.push(info.artistId);
+      }
+    }
+
     for (const artistRecordId of artistLinks) {
       // Only include if the artist is valid
       if (!validArtists.has(artistRecordId)) {
@@ -359,6 +368,7 @@ function assembleDataStore(
         title: releaseName,
         dailyValues: new Map(dailyValues),
         embeds: new Map(embeds.entries()),
+        artistIds: resolvedArtistIds.length > 0 ? [...resolvedArtistIds] : [validArtists.get(artistRecordId)!.artistId],
       };
 
       const existing = releasesPerArtist.get(artistRecordId);

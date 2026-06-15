@@ -3,8 +3,10 @@
  * and featured releases. No DOM access.
  */
 
-import type { DailyValueEntry } from "./types.ts";
+import type { DailyValueEntry, FilterState } from "./types.ts";
 import type { DataStore, ParsedArtist, ChartSnapshot, RankedEntry, FeaturedReleaseInfo } from "./models.ts";
+import { resolveArtists } from "./co-artist-resolver.ts";
+import { toRomanNumeral } from "./utils.ts";
 
 /**
  * Compute the daily performance value for an artist on a given date.
@@ -35,6 +37,33 @@ export function computeCumulativeValue(
   for (const d of dates) {
     if (d > date) break;
     cumulative += computeDailyValue(artist, d);
+  }
+  return cumulative;
+}
+
+/**
+ * Compute the cumulative value for an artist from startDate through the given date,
+ * filtered by source. When source is "all", sums everything (same as computeCumulativeValue).
+ * When source is a specific ChartSource, only sums dailyValues entries whose `.source` matches.
+ */
+export function computeCumulativeValueFiltered(
+  artist: ParsedArtist,
+  date: string,
+  dates: string[],
+  source: string,
+): number {
+  if (source === "all") {
+    return computeCumulativeValue(artist, date, dates);
+  }
+  let cumulative = 0;
+  for (const d of dates) {
+    if (d > date) break;
+    for (const release of artist.releases) {
+      const entry = release.dailyValues.get(d);
+      if (entry && entry.source === source) {
+        cumulative += entry.value;
+      }
+    }
   }
   return cumulative;
 }
@@ -135,12 +164,14 @@ export function identifyFeaturedRelease(
  * @param date - The current date (YYYY-MM-DD)
  * @param dataStore - The loaded DataStore with all artist data
  * @param previousSnapshot - Optional previous snapshot for stable sort and previous values
+ * @param source - Optional source filter; when provided and !== "all", only sums dailyValues matching that source
  * @returns A ChartSnapshot with ranked entries
  */
 export function computeSnapshot(
   date: string,
   dataStore: DataStore,
   previousSnapshot?: ChartSnapshot,
+  source?: string,
 ): ChartSnapshot {
   const { artists, dates } = dataStore;
 
@@ -163,7 +194,9 @@ export function computeSnapshot(
 
   for (const [artistId, artist] of artists) {
     const dailyValue = computeDailyValue(artist, date);
-    const cumulativeValue = computeCumulativeValue(artist, date, dates);
+    const cumulativeValue = (source && source !== "all")
+      ? computeCumulativeValueFiltered(artist, date, dates, source)
+      : computeCumulativeValue(artist, date, dates);
     const prev = previousMap.get(artistId);
     const previousCumulativeValue = prev?.cumulativeValue ?? 0;
     const previousRank = prev?.rank ?? 0;
@@ -220,6 +253,178 @@ export function computeSnapshot(
   };
 }
 
+
+/**
+ * Compute a chart snapshot for Songs mode — one RankedEntry per release.
+ *
+ * @param date - The current date (YYYY-MM-DD)
+ * @param dataStore - The loaded DataStore with all artist data
+ * @param filterState - The current filter state (source filter applied)
+ * @param previousSnapshot - Optional previous snapshot for stable sort
+ * @returns A ChartSnapshot with one entry per release
+ */
+export function computeSnapshotSongs(
+  date: string,
+  dataStore: DataStore,
+  filterState: FilterState,
+  previousSnapshot?: ChartSnapshot,
+): ChartSnapshot {
+  const { artists, dates } = dataStore;
+  const source = filterState.source;
+
+  // Build a lookup from the previous snapshot for tie-breaking
+  const previousMap = new Map<string, { cumulativeValue: number; rank: number; index: number }>();
+  if (previousSnapshot) {
+    for (let i = 0; i < previousSnapshot.entries.length; i++) {
+      const e = previousSnapshot.entries[i];
+      const key = e.releaseKey ?? e.artistId;
+      previousMap.set(key, {
+        cumulativeValue: e.cumulativeValue,
+        rank: e.rank,
+        index: i,
+      });
+    }
+  }
+
+  const unsorted: RankedEntry[] = [];
+
+  for (const [artistId, artist] of artists) {
+    for (const release of artist.releases) {
+      // Only include releases that have ANY dailyValues data at all
+      if (release.dailyValues.size === 0) continue;
+
+      // Compute cumulative value for this specific release, filtered by source
+      let cumulativeValue = 0;
+      for (const d of dates) {
+        if (d > date) break;
+        const entry = release.dailyValues.get(d);
+        if (entry) {
+          if (source === "all" || entry.source === source) {
+            cumulativeValue += entry.value;
+          }
+        }
+      }
+
+      // Compute daily value for this release on the current date
+      let dailyValue = 0;
+      const todayEntry = release.dailyValues.get(date);
+      if (todayEntry) {
+        if (source === "all" || todayEntry.source === source) {
+          dailyValue = todayEntry.value;
+        }
+      }
+
+      const releaseKey = `${artistId}::${release.id}`;
+      const prev = previousMap.get(releaseKey);
+      const previousCumulativeValue = prev?.cumulativeValue ?? 0;
+      const previousRank = prev?.rank ?? 0;
+
+      // Resolve co-artists
+      const coArtists = resolveArtists(release.artistIds, dataStore, artist);
+
+      unsorted.push({
+        artistId: releaseKey,
+        artistName: release.title,
+        artistType: artist.artistType,
+        generation: artist.generation,
+        logoUrl: coArtists.length > 0 ? coArtists[0].logoUrl : artist.logoUrl,
+        cumulativeValue,
+        previousCumulativeValue,
+        dailyValue,
+        rank: 0,
+        previousRank,
+        featuredRelease: { releaseId: release.id, title: coArtists.map(a => {
+          const indicator = ({ boy_group: '▲', girl_group: '●', solo_male: '◆', solo_female: '★', mixed_group: '■' })[a.artistType] ?? '';
+          return `${a.name} ${toRomanNumeral(a.generation)} ${indicator}`;
+        }).join(' • ') },
+        isGoalpost: false,
+        releaseKey,
+        coArtists,
+        mode: "songs",
+      });
+    }
+  }
+
+  // Sort descending by cumulativeValue with stable sort for ties
+  unsorted.sort((a, b) => {
+    if (b.cumulativeValue !== a.cumulativeValue) {
+      return b.cumulativeValue - a.cumulativeValue;
+    }
+    // Tie: preserve previous relative order
+    const keyA = a.releaseKey!;
+    const keyB = b.releaseKey!;
+    const prevA = previousMap.get(keyA);
+    const prevB = previousMap.get(keyB);
+    if (prevA != null && prevB != null) {
+      return prevA.index - prevB.index;
+    }
+    if (prevA != null) return -1;
+    if (prevB != null) return 1;
+    return 0;
+  });
+
+  // Assign contiguous 1-based ranks
+  for (let i = 0; i < unsorted.length; i++) {
+    unsorted[i].rank = i + 1;
+  }
+
+  return {
+    date,
+    entries: unsorted,
+  };
+}
+
+
+/**
+ * Apply generation filtering to ranked entries.
+ *
+ * When generation is "all", returns entries unchanged.
+ * When a specific generation number is provided, keeps only entries where:
+ * - The entry's own generation matches, OR
+ * - At least one co-artist's generation matches (Songs mode)
+ *
+ * After filtering, re-assigns contiguous 1-based ranks sorted by descending cumulativeValue.
+ */
+export function applyGenerationFilter(
+  entries: RankedEntry[],
+  generation: number | "all",
+): RankedEntry[] {
+  if (generation === "all") {
+    // Re-assign contiguous ranks even for "all"
+    return entries.map((entry, index) => ({
+      ...entry,
+      rank: index + 1,
+    }));
+  }
+
+  // Filter entries matching the selected generation
+  const filtered = entries.filter((entry) => {
+    // Songs mode: check co-artists array
+    if (entry.coArtists && entry.coArtists.length > 0) {
+      return entry.coArtists.some((a) => a.generation === generation);
+    }
+    // Artists mode: check the entry's own generation field
+    return entry.generation === generation;
+  });
+
+  // Re-assign contiguous 1-based ranks
+  return filtered.map((entry, index) => ({
+    ...entry,
+    rank: index + 1,
+  }));
+}
+
+/**
+ * Extract all unique generation numbers from a DataStore's artists.
+ * Returns them sorted in descending numeric order.
+ */
+export function extractGenerations(dataStore: DataStore): number[] {
+  const generations = new Set<number>();
+  for (const [, artist] of dataStore.artists) {
+    generations.add(artist.generation);
+  }
+  return Array.from(generations).sort((a, b) => b - a);
+}
 
 /**
  * Deduplicate entries by artist, keeping only the highest-value release per artist.

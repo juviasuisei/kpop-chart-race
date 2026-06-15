@@ -64,6 +64,8 @@ interface BarElement {
   fadeOutTimeoutId: ReturnType<typeof setTimeout> | null;
   /** The target rank this bar is animating toward */
   targetRank: number;
+  /** Additional logo elements for Songs mode multi-artist releases */
+  extraLogos: HTMLImageElement[];
 }
 
 export class ChartRaceRenderer {
@@ -581,6 +583,9 @@ export class ChartRaceRenderer {
     for (const [artistId, barEl] of this.bars) {
       if (visibleIds.has(artistId)) {
         barEl.logo.classList.toggle("bar__logo--hidden", zoomLevel === "all");
+        for (const extraLogo of barEl.extraLogos) {
+          extraLogo.classList.toggle("bar__logo--hidden", zoomLevel === "all");
+        }
       }
     }
 
@@ -895,6 +900,7 @@ export class ChartRaceRenderer {
 
   /** Create a new bar element for an artist entry */
   private createBarElement(entry: RankedEntry): BarElement {
+    const isSongsMode = entry.mode === "songs";
     const wrapper = document.createElement("div");
     wrapper.className = "chart-race__bar-wrapper";
 
@@ -904,11 +910,34 @@ export class ChartRaceRenderer {
 
     const logo = document.createElement("img");
     logo.className = "bar__logo";
-    logo.src = entry.logoUrl;
-    logo.alt = `${entry.artistName} logo`;
     logo.onerror = () => {
       logo.src = PLACEHOLDER_SVG;
     };
+
+    // In Songs mode with co-artists, the primary logo is the first co-artist's logo
+    const extraLogos: HTMLImageElement[] = [];
+    if (isSongsMode && entry.coArtists && entry.coArtists.length > 0) {
+      logo.src = entry.coArtists[0].logoUrl;
+      logo.alt = `${entry.coArtists[0].name} logo`;
+      logo.dataset.artistId = entry.coArtists[0].id;
+
+      // Create additional logos for remaining co-artists
+      for (let i = 1; i < entry.coArtists.length; i++) {
+        const extraLogo = document.createElement("img");
+        extraLogo.className = "bar__logo";
+        extraLogo.src = entry.coArtists[i].logoUrl;
+        extraLogo.alt = `${entry.coArtists[i].name} logo`;
+        extraLogo.style.marginLeft = "4px";
+        extraLogo.dataset.artistId = entry.coArtists[i].id;
+        extraLogo.onerror = () => {
+          extraLogo.src = PLACEHOLDER_SVG;
+        };
+        extraLogos.push(extraLogo);
+      }
+    } else {
+      logo.src = entry.logoUrl;
+      logo.alt = `${entry.artistName} logo`;
+    }
 
     const rankSpan = document.createElement("span");
     rankSpan.className = "bar__rank";
@@ -916,7 +945,9 @@ export class ChartRaceRenderer {
 
     const nameSpan = document.createElement("span");
     nameSpan.className = "bar__name";
-    nameSpan.textContent = entry.artistName;
+    // In Songs mode: primary label is release title with ♫ prefix
+    // (artistName holds the release title in Songs mode)
+    nameSpan.textContent = isSongsMode ? `♫ ${entry.artistName}` : entry.artistName;
 
     const genSpan = document.createElement("span");
     genSpan.className = "bar__gen";
@@ -928,9 +959,14 @@ export class ChartRaceRenderer {
 
     const releaseSpan = document.createElement("span");
     releaseSpan.className = "bar__release";
-    releaseSpan.textContent = "";
+    // In Songs mode: secondary label is artist name(s) with type indicators
+    releaseSpan.textContent = isSongsMode && entry.featuredRelease ? entry.featuredRelease.title : "";
 
     bar.appendChild(logo);
+    // Append extra logos for Songs mode multi-artist releases
+    for (const extraLogo of extraLogos) {
+      bar.appendChild(extraLogo);
+    }
     bar.appendChild(nameSpan);
     bar.appendChild(genSpan);
     bar.appendChild(typeIndicator);
@@ -966,7 +1002,18 @@ export class ChartRaceRenderer {
       // clicks on the blank area to the right of the bar should close
       // the detail panel instead of selecting this row.
       if (target === wrapper) return;
-      this.eventBus.emit('bar:click', entry.artistId);
+
+      if (isSongsMode && entry.coArtists && entry.coArtists.length > 0) {
+        // In Songs mode: if a specific logo was clicked, emit that artist's ID
+        if (target instanceof HTMLImageElement && target.dataset.artistId) {
+          this.eventBus.emit('bar:click', target.dataset.artistId);
+        } else {
+          // Default: emit first co-artist's ID (index 0)
+          this.eventBus.emit('bar:click', entry.coArtists[0].id);
+        }
+      } else {
+        this.eventBus.emit('bar:click', entry.artistId);
+      }
     };
     wrapper.addEventListener('click', clickHandler);
 
@@ -990,6 +1037,7 @@ export class ChartRaceRenderer {
       hidden: false,
       fadeOutTimeoutId: null,
       targetRank: entry.rank,
+      extraLogos,
     };
   }
 
@@ -1004,12 +1052,27 @@ export class ChartRaceRenderer {
     dataStore: DataStore,
     goalpostOverride?: boolean,
   ): void {
+    const isSongsMode = entry.mode === "songs";
+
     // Store target rank — actual rank text is updated by the rank tracking loop
     barEl.targetRank = entry.rank;
     barEl.rankSpan.style.backgroundColor = ARTIST_TYPE_COLORS[entry.artistType];
-    barEl.nameSpan.textContent = entry.artistName;
-    barEl.genSpan.textContent = toRomanNumeral(entry.generation);
-    barEl.typeIndicator.textContent = ARTIST_TYPE_INDICATORS[entry.artistType];
+
+    // In Songs mode: primary label is release title with ♫ prefix
+    barEl.nameSpan.textContent = isSongsMode ? `♫ ${entry.artistName}` : entry.artistName;
+    if (isSongsMode) {
+      // In Songs mode, gen and type indicator belong with the artist name (secondary position)
+      // They're already encoded in featuredRelease.title, so hide the separate spans
+      barEl.genSpan.textContent = "";
+      barEl.genSpan.style.display = "none";
+      barEl.typeIndicator.textContent = "";
+      barEl.typeIndicator.style.display = "none";
+    } else {
+      barEl.genSpan.textContent = toRomanNumeral(entry.generation);
+      barEl.genSpan.style.display = "";
+      barEl.typeIndicator.textContent = ARTIST_TYPE_INDICATORS[entry.artistType];
+      barEl.typeIndicator.style.display = "";
+    }
     barEl.bar.style.backgroundColor = ARTIST_TYPE_COLORS[entry.artistType];
 
     // Compute total wins (used by both goalpost label and normal display)
@@ -1077,24 +1140,29 @@ export class ChartRaceRenderer {
     // Featured release with per-song count if artist has multiple releases
     // Skip for goalposts (release span is hidden)
     if (!isGoalpost) {
-      const artist = dataStore.artists.get(entry.artistId);
-      const hasMultipleReleases = artist ? artist.releases.filter(r => {
-        for (const d of dataStore.dates) {
-          if (d > snapshotDate) break;
-          if (r.dailyValues.has(d)) return true;
-        }
-        return false;
-      }).length > 1 : false;
-
-      if (entry.featuredRelease.title) {
-        if (hasMultipleReleases && artist) {
-          const songPts = computeReleaseCumulativeValue(artist, entry.featuredRelease.releaseId, snapshotDate, dataStore.dates);
-          barEl.releaseSpan.textContent = `♪ ${entry.featuredRelease.title} (${songPts.toLocaleString()})`;
-        } else {
-          barEl.releaseSpan.textContent = `♪ ${entry.featuredRelease.title}`;
-        }
+      if (isSongsMode) {
+        // In Songs mode: secondary label shows artist name(s) with type indicators
+        barEl.releaseSpan.textContent = entry.featuredRelease.title || "";
       } else {
-        barEl.releaseSpan.textContent = "";
+        const artist = dataStore.artists.get(entry.artistId);
+        const hasMultipleReleases = artist ? artist.releases.filter(r => {
+          for (const d of dataStore.dates) {
+            if (d > snapshotDate) break;
+            if (r.dailyValues.has(d)) return true;
+          }
+          return false;
+        }).length > 1 : false;
+
+        if (entry.featuredRelease.title) {
+          if (hasMultipleReleases && artist) {
+            const songPts = computeReleaseCumulativeValue(artist, entry.featuredRelease.releaseId, snapshotDate, dataStore.dates);
+            barEl.releaseSpan.textContent = `♪ ${entry.featuredRelease.title} (${songPts.toLocaleString()})`;
+          } else {
+            barEl.releaseSpan.textContent = `♪ ${entry.featuredRelease.title}`;
+          }
+        } else {
+          barEl.releaseSpan.textContent = "";
+        }
       }
     }
 

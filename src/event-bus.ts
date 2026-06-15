@@ -3,7 +3,7 @@
  */
 
 import type { ChartSnapshot } from "./models.ts";
-import type { ZoomLevel } from "./types.ts";
+import type { FilterState, ZoomLevel } from "./types.ts";
 
 /** Map of event names to their handler signatures */
 export interface EventMap {
@@ -22,6 +22,7 @@ export interface EventMap {
   "loading:progress": (loaded: number, total: number, artistNames: string[]) => void;
   "loading:complete": () => void;
   "loading:error": (message: string) => void;
+  "filter:change": (state: FilterState) => void;
 }
 
 type Handler = (...args: never[]) => void;

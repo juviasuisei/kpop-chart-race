@@ -284,8 +284,8 @@ function makeRankedEntries(count: number): RankedEntry[] {
 
 describe('filterByActivity — goalpost logic', () => {
   const snapshotDate = '2024-06-15';
-  const recentDate = '2024-06-10'; // within 14 days of snapshot
-  const oldDate = '2023-01-01';    // outside 14 days
+  const recentDate = '2024-06-13'; // within 3 days of snapshot
+  const oldDate = '2023-01-01';    // outside 3 days
 
   it('rank 1 is always included even if inactive', () => {
     const entries = makeRankedEntries(5);
@@ -524,6 +524,75 @@ describe('filterByActivity — goalpost logic', () => {
     const goalposts = result.filter(r => r.isGoalpost);
     expect(goalposts.length).toBe(0);
     expect(result.length).toBe(10);
+  });
+});
+
+// ============================================================
+// Inactive window 3-day boundary — Requirement 10.1
+// ============================================================
+
+describe('filterByActivity — 3-day inactive window boundary', () => {
+  const snapshotDate = '2024-06-15';
+
+  it('artist with activity exactly 3 days ago is active', () => {
+    // 3 days before 2024-06-15 is 2024-06-12
+    const boundaryDate = '2024-06-12';
+    const entries = makeRankedEntries(15);
+    // Only rank 2 has activity at exactly the boundary (day-3), rank 1 always included
+    const ds = makeActivityDataStore(
+      entries.map(e => ({
+        id: e.artistId,
+        activityDate: e.artistId === 'a2' ? boundaryDate : (e.artistId === 'a1' ? '2024-06-14' : '2023-01-01'),
+      })),
+    );
+    const result = filterByActivity(entries, snapshotDate, ds, 10);
+    // a2 is active (within 3-day window), so it should trigger goalpost logic:
+    // rank 1 (above a2) is already included, so no goalpost needed for a2
+    // But a2 must be included as a regular active entry (not just backfill)
+    const ids = result.map(r => r.artistId);
+    expect(ids).toContain('a2');
+  });
+
+  it('artist with activity 4 days ago is treated as inactive by filterByActivity', () => {
+    // 4 days before 2024-06-15 is 2024-06-11 — outside the 3-day window
+    const outsideBoundary = '2024-06-11';
+    const entries = makeRankedEntries(15);
+    // rank 3 has activity at day-4, rank 5 has recent activity (within 3 days)
+    // With 3-day window: rank 3 is INACTIVE, rank 5 is ACTIVE
+    // Goalpost: rank 4 should be goalpost for rank 5 (inactive entry above active rank 5)
+    // If window were 14 days: rank 3 would be ACTIVE and rank 2 would be its goalpost
+    const ds = makeActivityDataStore(
+      entries.map(e => ({
+        id: e.artistId,
+        activityDate:
+          e.artistId === 'a1' ? '2024-06-14' :   // active (rank 1)
+          e.artistId === 'a5' ? '2024-06-13' :   // active (within 3 days)
+          e.artistId === 'a3' ? outsideBoundary : // INACTIVE with 3-day window, active with 14-day
+          '2023-01-01',                           // old
+      })),
+    );
+    const result = filterByActivity(entries, snapshotDate, ds, 10);
+    // rank 4 should be a goalpost for rank 5 (inactive entry above active rank 5)
+    const goalposts = result.filter(r => r.isGoalpost);
+    const goalpostIds = goalposts.map(r => r.artistId);
+    expect(goalpostIds).toContain('a4');
+    // rank 3 should NOT be a goalpost (it's not immediately above an active entry in filtered view)
+    // With 14-day window, rank 3 would be active and rank 2 would be its goalpost instead
+    // Verify rank 3 is NOT treated as active (no goalpost above it)
+    const rank2Goalpost = goalposts.find(r => r.artistId === 'a2');
+    expect(rank2Goalpost).toBeUndefined();
+  });
+
+  it('hasRecentActivity boundary: day-3 is active, day-4 is not', () => {
+    const day3Date = '2024-06-12'; // exactly 3 days before 2024-06-15
+    const day4Date = '2024-06-11'; // exactly 4 days before 2024-06-15
+    const cutoff = dateMinusDays(snapshotDate, 3); // should be 2024-06-12
+
+    const dsActive = makeActivityDataStore([{ id: 'boundary-active', activityDate: day3Date }]);
+    const dsInactive = makeActivityDataStore([{ id: 'boundary-inactive', activityDate: day4Date }]);
+
+    expect(hasRecentActivity('boundary-active', cutoff, snapshotDate, dsActive)).toBe(true);
+    expect(hasRecentActivity('boundary-inactive', cutoff, snapshotDate, dsInactive)).toBe(false);
   });
 });
 

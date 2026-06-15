@@ -653,3 +653,223 @@ describe('DetailPanel — crown label simplification', () => {
     expect(crownLabel!.textContent).toBe('2nd Win');
   });
 });
+
+
+// ============================================================
+// Multi-artist stacked display — Songs mode (Task 10.5)
+// ============================================================
+
+describe('DetailPanel — Songs mode multi-artist stacked display', () => {
+  let eventBus: EventBus;
+  let panel: DetailPanel;
+
+  beforeEach(() => {
+    eventBus = new EventBus();
+    panel = new DetailPanel(eventBus);
+  });
+
+  afterEach(() => {
+    panel.destroy();
+    document.querySelectorAll('.detail-panel').forEach((el) => el.remove());
+  });
+
+  function createMultiArtistDataStore(): DataStore {
+    const release: ParsedRelease = {
+      id: 'collab-song',
+      title: 'Collab Song',
+      dailyValues: new Map([
+        ['2024-06-01', { value: 1000, source: 'inkigayo', episode: 300 }],
+      ]),
+      embeds: new Map([
+        ['2024-06-01', [{ type: 'mv', url: 'https://www.youtube.com/watch?v=collab1' }]],
+      ]),
+      artistIds: ['artist-a', 'artist-b'],
+    };
+
+    const artistA: ParsedArtist = {
+      id: 'artist-a',
+      name: 'Artist Alpha',
+      artistType: 'girl_group',
+      generation: 4,
+      logoUrl: 'assets/logos/artist-a.svg',
+      koreanName: '아티스트 알파',
+      debut: '2020-03-15',
+      releases: [release],
+      albumReleases: [],
+    };
+
+    const artistB: ParsedArtist = {
+      id: 'artist-b',
+      name: 'Artist Beta',
+      artistType: 'boy_group',
+      generation: 5,
+      logoUrl: 'assets/logos/artist-b.svg',
+      koreanName: '아티스트 베타',
+      debut: '2021-07-20',
+      releases: [
+        {
+          id: 'solo-song',
+          title: 'Solo Song',
+          dailyValues: new Map([
+            ['2024-06-02', { value: 500, source: 'music_bank', episode: 200 }],
+          ]),
+          embeds: new Map(),
+          artistIds: ['artist-b'],
+        },
+      ],
+      albumReleases: [],
+    };
+
+    return {
+      artists: new Map([['artist-a', artistA], ['artist-b', artistB]]),
+      dates: ['2024-06-01', '2024-06-02'],
+      startDate: '2024-06-01',
+      endDate: '2024-06-02',
+      firstAppearance: new Map([['artist-a', '2024-06-01'], ['artist-b', '2024-06-01']]),
+      chartWins: new Map(),
+    };
+  }
+
+  // Req 4.3: Multi-artist stacked display with dividers
+  it('renders stacked artist sections with visual dividers for multi-artist release', () => {
+    const dataStore = createMultiArtistDataStore();
+    const coArtists = [
+      { id: 'artist-a', name: 'Artist Alpha', logoUrl: 'assets/logos/artist-a.svg', artistType: 'girl_group' as const, generation: 4 },
+      { id: 'artist-b', name: 'Artist Beta', logoUrl: 'assets/logos/artist-b.svg', artistType: 'boy_group' as const, generation: 5 },
+    ];
+
+    panel.open('artist-a', dataStore, '2024-06-01', 1, coArtists);
+
+    // Should have visual dividers between sections
+    const dividers = document.body.querySelectorAll('.detail-panel__divider');
+    expect(dividers.length).toBe(1); // One divider between 2 artists
+
+    // Should have 2 artist sections
+    const sections = document.body.querySelectorAll('.detail-panel__artist-section');
+    expect(sections.length).toBe(2);
+  });
+
+  // Req 4.3: Each artist's section has their own header
+  it('shows each artist name in their own header section', () => {
+    const dataStore = createMultiArtistDataStore();
+    const coArtists = [
+      { id: 'artist-a', name: 'Artist Alpha', logoUrl: 'assets/logos/artist-a.svg', artistType: 'girl_group' as const, generation: 4 },
+      { id: 'artist-b', name: 'Artist Beta', logoUrl: 'assets/logos/artist-b.svg', artistType: 'boy_group' as const, generation: 5 },
+    ];
+
+    panel.open('artist-a', dataStore, '2024-06-01', 1, coArtists);
+
+    const nameEls = document.body.querySelectorAll('.detail-panel__artist-name');
+    expect(nameEls.length).toBe(2);
+    expect(nameEls[0].textContent).toContain('Artist Alpha');
+    expect(nameEls[1].textContent).toContain('Artist Beta');
+  });
+
+  // Req 4.3: Each artist section has timeline with their embeds/data
+  it('renders separate timeline for each artist in stacked view', () => {
+    const dataStore = createMultiArtistDataStore();
+    const coArtists = [
+      { id: 'artist-a', name: 'Artist Alpha', logoUrl: 'assets/logos/artist-a.svg', artistType: 'girl_group' as const, generation: 4 },
+      { id: 'artist-b', name: 'Artist Beta', logoUrl: 'assets/logos/artist-b.svg', artistType: 'boy_group' as const, generation: 5 },
+    ];
+
+    panel.open('artist-a', dataStore, '2024-06-01', 1, coArtists);
+
+    // Each section should have its own timeline
+    const timelines = document.body.querySelectorAll('.detail-panel__timeline');
+    expect(timelines.length).toBe(2);
+  });
+
+  // Req 4.2: Single artist behaves identically to Artists mode
+  it('single artist in coArtists array renders single artist view (no dividers)', () => {
+    const dataStore = createMultiArtistDataStore();
+    const coArtists = [
+      { id: 'artist-a', name: 'Artist Alpha', logoUrl: 'assets/logos/artist-a.svg', artistType: 'girl_group' as const, generation: 4 },
+    ];
+
+    panel.open('artist-a', dataStore, '2024-06-01', 1, coArtists);
+
+    // Should NOT have dividers (single artist)
+    const dividers = document.body.querySelectorAll('.detail-panel__divider');
+    expect(dividers.length).toBe(0);
+
+    // Should NOT have artist-section wrappers (uses single-artist path)
+    const sections = document.body.querySelectorAll('.detail-panel__artist-section');
+    expect(sections.length).toBe(0);
+  });
+
+  // Req 4.2: Undefined coArtists renders single artist view
+  it('undefined coArtists renders single artist view (existing behavior)', () => {
+    const dataStore = createMultiArtistDataStore();
+
+    panel.open('artist-a', dataStore, '2024-06-01', 1, undefined);
+
+    // No dividers
+    const dividers = document.body.querySelectorAll('.detail-panel__divider');
+    expect(dividers.length).toBe(0);
+
+    // No artist-section wrappers
+    const sections = document.body.querySelectorAll('.detail-panel__artist-section');
+    expect(sections.length).toBe(0);
+
+    // Should still show a header with the artist name
+    const nameEl = document.body.querySelector('.detail-panel__artist-name');
+    expect(nameEl).not.toBeNull();
+    expect(nameEl!.textContent).toContain('Artist Alpha');
+  });
+
+  // Req 4.3: Artists rendered in order of the co-artist array
+  it('renders artists in the order defined by the coArtists array', () => {
+    const dataStore = createMultiArtistDataStore();
+    // Put artist-b first
+    const coArtists = [
+      { id: 'artist-b', name: 'Artist Beta', logoUrl: 'assets/logos/artist-b.svg', artistType: 'boy_group' as const, generation: 5 },
+      { id: 'artist-a', name: 'Artist Alpha', logoUrl: 'assets/logos/artist-a.svg', artistType: 'girl_group' as const, generation: 4 },
+    ];
+
+    panel.open('artist-b', dataStore, '2024-06-01', 1, coArtists);
+
+    const nameEls = document.body.querySelectorAll('.detail-panel__artist-name');
+    expect(nameEls.length).toBe(2);
+    // artist-b should be first since it's first in the array
+    expect(nameEls[0].textContent).toContain('Artist Beta');
+    expect(nameEls[1].textContent).toContain('Artist Alpha');
+  });
+
+  // Req 4.3: aria-label includes all artist names for multi-artist
+  it('panel aria-label includes all artist names for multi-artist', () => {
+    const dataStore = createMultiArtistDataStore();
+    const coArtists = [
+      { id: 'artist-a', name: 'Artist Alpha', logoUrl: 'assets/logos/artist-a.svg', artistType: 'girl_group' as const, generation: 4 },
+      { id: 'artist-b', name: 'Artist Beta', logoUrl: 'assets/logos/artist-b.svg', artistType: 'boy_group' as const, generation: 5 },
+    ];
+
+    panel.open('artist-a', dataStore, '2024-06-01', 1, coArtists);
+
+    const panelEl = document.body.querySelector('.detail-panel');
+    expect(panelEl).not.toBeNull();
+    const ariaLabel = panelEl!.getAttribute('aria-label');
+    expect(ariaLabel).toContain('Artist Alpha');
+    expect(ariaLabel).toContain('Artist Beta');
+  });
+
+  // Req 4.1: Missing artist in coArtists (not in DataStore) is skipped gracefully
+  it('skips co-artists not found in DataStore without crashing', () => {
+    const dataStore = createMultiArtistDataStore();
+    const coArtists = [
+      { id: 'artist-a', name: 'Artist Alpha', logoUrl: 'assets/logos/artist-a.svg', artistType: 'girl_group' as const, generation: 4 },
+      { id: 'missing-artist', name: 'Unknown', logoUrl: 'assets/logos/unknown.svg', artistType: 'solo_female' as const, generation: 3 },
+    ];
+
+    // Should not throw
+    panel.open('artist-a', dataStore, '2024-06-01', 1, coArtists);
+
+    // Only one section rendered (missing artist is skipped)
+    const sections = document.body.querySelectorAll('.detail-panel__artist-section');
+    expect(sections.length).toBe(1);
+
+    // No divider (only 1 section rendered)
+    const dividers = document.body.querySelectorAll('.detail-panel__divider');
+    expect(dividers.length).toBe(0);
+  });
+});

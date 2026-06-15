@@ -5,7 +5,7 @@
  */
 
 import { EventBus } from "./event-bus.ts";
-import type { DataStore, ParsedArtist, ParsedEmbedDateEntry } from "./models.ts";
+import type { DataStore, ParsedArtist, ParsedEmbedDateEntry, ResolvedArtist } from "./models.ts";
 import type { DailyValueEntry } from "./types.ts";
 import { render as renderEmbed } from "./embed-renderer.ts";
 import { toRomanNumeral } from "./utils.ts";
@@ -140,12 +140,17 @@ export class DetailPanel {
 
   /**
    * Open the detail panel for a given artist.
+   * When coArtists is provided and has >1 entry, renders stacked multi-artist sections
+   * with visual dividers between each artist's section.
    */
-  open(artistId: string, dataStore: DataStore, currentDate?: string, currentRank?: number): void {
+  open(artistId: string, dataStore: DataStore, currentDate?: string, currentRank?: number, coArtists?: ResolvedArtist[]): void {
     // Close any existing panel first
     if (this.panelEl) {
       this.close();
     }
+
+    // Determine if we should render stacked multi-artist
+    const isMultiArtist = coArtists !== undefined && coArtists.length > 1;
 
     const artist = dataStore.artists.get(artistId);
     if (!artist) return;
@@ -155,12 +160,6 @@ export class DetailPanel {
     // Store the currently focused element for focus return
     this.previouslyFocusedEl = document.activeElement as HTMLElement | null;
 
-    // Compute cumulative value if currentDate provided
-    let cumulativeValue: number | undefined;
-    if (currentDate) {
-      cumulativeValue = computeCumulativeValue(artist, currentDate, dataStore.dates);
-    }
-
     // Determine mobile vs desktop
     const isMobile = window.innerWidth < 768;
 
@@ -169,7 +168,12 @@ export class DetailPanel {
     panel.className = `detail-panel ${isMobile ? "detail-panel--mobile" : "detail-panel--desktop"}`;
     panel.setAttribute("role", "dialog");
     panel.setAttribute("aria-modal", "true");
-    panel.setAttribute("aria-label", `Details for ${artist.name}`);
+
+    if (isMultiArtist) {
+      panel.setAttribute("aria-label", `Details for ${coArtists!.map(a => a.name).join(", ")}`);
+    } else {
+      panel.setAttribute("aria-label", `Details for ${artist.name}`);
+    }
 
     // Close button
     const closeBtn = document.createElement("button");
@@ -178,6 +182,132 @@ export class DetailPanel {
     closeBtn.textContent = "✕";
     closeBtn.addEventListener("click", () => this.close());
     panel.appendChild(closeBtn);
+
+    if (isMultiArtist) {
+      // --- Multi-artist stacked rendering ---
+      this.renderMultiArtistContent(panel, coArtists!, dataStore, currentDate, currentRank);
+    } else {
+      // --- Single artist rendering (existing behavior) ---
+      this.renderSingleArtistContent(panel, artist, artistId, dataStore, currentDate, currentRank);
+    }
+
+    // Add to DOM
+    document.body.appendChild(panel);
+    this.panelEl = panel;
+
+    // On desktop, squeeze the main app area to make room for the panel
+    if (!isMobile) {
+      const appEl = document.getElementById("app");
+      if (appEl) {
+        appEl.style.marginRight = "500px";
+        appEl.style.transition = "margin-right 0.3s ease";
+      }
+    }
+
+    // Set up focus trap
+    this.setupFocusTrap(panel);
+
+    // Focus the close button
+    closeBtn.focus();
+  }
+
+  /**
+   * Renders stacked multi-artist content with visual dividers between each artist section.
+   */
+  private renderMultiArtistContent(
+    panel: HTMLElement,
+    coArtists: ResolvedArtist[],
+    dataStore: DataStore,
+    currentDate?: string,
+    currentRank?: number,
+  ): void {
+    for (let idx = 0; idx < coArtists.length; idx++) {
+      const resolvedArtist = coArtists[idx];
+      const artist = dataStore.artists.get(resolvedArtist.id);
+      if (!artist) continue;
+
+      // Add visual divider between artist sections (not before the first)
+      if (idx > 0) {
+        const divider = document.createElement("hr");
+        divider.className = "detail-panel__divider";
+        panel.appendChild(divider);
+      }
+
+      // Create a section wrapper for this artist
+      const section = document.createElement("div");
+      section.className = "detail-panel__artist-section";
+
+      // Render header for this artist
+      const header = this.createArtistHeader(artist, resolvedArtist.id, dataStore, currentDate, idx === 0 ? currentRank : undefined);
+      section.appendChild(header);
+
+      // Timeline for this artist
+      const timeline = document.createElement("div");
+      timeline.className = "detail-panel__timeline";
+
+      const timelineInner = document.createElement("div");
+      timelineInner.className = "detail-panel__timeline-inner";
+
+      // Store debut for this artist
+      this.currentArtistDebut = artist.debut;
+
+      const dateGroups = this.buildDateGroups(artist, dataStore, currentDate);
+
+      // Set up IntersectionObserver if not already created
+      if (!this.observer) {
+        this.observer = new IntersectionObserver(
+          (entries) => {
+            for (const entry of entries) {
+              if (entry.isIntersecting) {
+                const placeholder = entry.target as HTMLElement;
+                const linkData = placeholder.dataset.embedUrl;
+                if (linkData) {
+                  renderEmbed(linkData, placeholder);
+                  placeholder.classList.remove("detail-panel__embed-placeholder");
+                  this.observer?.unobserve(placeholder);
+                }
+              }
+            }
+          },
+          { root: timeline, rootMargin: "200px" },
+        );
+      }
+
+      for (const group of dateGroups) {
+        const groupContainer = document.createElement("div");
+        groupContainer.className = "timeline-date-group";
+        groupContainer.dataset.date = group.date;
+
+        for (let i = 0; i < group.items.length; i++) {
+          const entryEl = this.createTimelineEntry(group.items[i], i === 0 ? group.date : undefined);
+          groupContainer.appendChild(entryEl);
+        }
+
+        timelineInner.appendChild(groupContainer);
+      }
+
+      timeline.appendChild(timelineInner);
+      section.appendChild(timeline);
+      panel.appendChild(section);
+    }
+  }
+
+  /**
+   * Renders single artist content (original behavior extracted into a method).
+   */
+  private renderSingleArtistContent(
+    panel: HTMLElement,
+    artist: ParsedArtist,
+    artistId: string,
+    dataStore: DataStore,
+    currentDate?: string,
+    currentRank?: number,
+  ): void {
+    // Compute cumulative value if currentDate provided
+    let cumulativeValue: number | undefined;
+    if (currentDate) {
+      cumulativeValue = computeCumulativeValue(artist, currentDate, dataStore.dates);
+    }
 
     // Sticky Header
     const header = document.createElement("div");
@@ -292,25 +422,89 @@ export class DetailPanel {
 
     timeline.appendChild(timelineInner);
     panel.appendChild(timeline);
+  }
 
-    // Add to DOM
-    document.body.appendChild(panel);
-    this.panelEl = panel;
+  /**
+   * Creates the header section for an artist (used in both single and multi-artist modes).
+   */
+  private createArtistHeader(
+    artist: ParsedArtist,
+    artistId: string,
+    dataStore: DataStore,
+    currentDate?: string,
+    currentRank?: number,
+  ): HTMLElement {
+    const header = document.createElement("div");
+    header.className = "detail-panel__header";
 
-    // On desktop, squeeze the main app area to make room for the panel
-    if (!isMobile) {
-      const appEl = document.getElementById("app");
-      if (appEl) {
-        appEl.style.marginRight = "500px";
-        appEl.style.transition = "margin-right 0.3s ease";
+    // Logo with colored background
+    const logoBg = document.createElement("div");
+    logoBg.className = "detail-panel__logo-bg";
+    logoBg.style.backgroundColor = ARTIST_TYPE_COLORS[artist.artistType];
+
+    const logoImg = document.createElement("img");
+    logoImg.className = "detail-panel__logo-img";
+    logoImg.src = artist.logoUrl;
+    logoImg.alt = `${artist.name} logo`;
+    logoImg.width = 80;
+    logoImg.height = 80;
+    logoBg.appendChild(logoImg);
+    header.appendChild(logoBg);
+
+    // Artist name (+ Korean name)
+    const nameEl = document.createElement("h2");
+    nameEl.className = "detail-panel__artist-name";
+    const nameHtml = artist.koreanName
+      ? `${this.escapeHtml(artist.name)} (${this.escapeHtml(artist.koreanName)})`
+      : this.escapeHtml(artist.name);
+    nameEl.innerHTML = nameHtml;
+    header.appendChild(nameEl);
+
+    // Generation (+ debut) — use "solo debut" for solo artists
+    const metaEl = document.createElement("span");
+    metaEl.className = "detail-panel__artist-meta";
+    const genLabel = toRomanNumeral(artist.generation);
+    const isSolo = artist.artistType.startsWith("solo_");
+    const debutPrefix = isSolo ? "solo debut" : "debut";
+    const debutHtml = artist.debut
+      ? ` <span class="detail-panel__debut">(${debutPrefix}: ${this.escapeHtml(artist.debut)})</span>`
+      : "";
+    metaEl.innerHTML = `${genLabel}${debutHtml}`;
+    header.appendChild(metaEl);
+
+    // Compute cumulative value if currentDate provided
+    let cumulativeValue: number | undefined;
+    if (currentDate) {
+      cumulativeValue = computeCumulativeValue(artist, currentDate, dataStore.dates);
+    }
+
+    // Rank and cumulative value on one line
+    if (currentRank !== undefined || cumulativeValue !== undefined) {
+      const statsEl = document.createElement("div");
+      statsEl.className = "detail-panel__stats";
+      const parts: string[] = [];
+      if (currentRank !== undefined && currentRank > 0) {
+        parts.push(`#${currentRank}`);
+      }
+      if (cumulativeValue !== undefined) {
+        parts.push(`${cumulativeValue.toLocaleString()} pts`);
+      }
+      statsEl.textContent = parts.join(" · ");
+      header.appendChild(statsEl);
+    }
+
+    // Total wins count
+    if (currentDate) {
+      const totalWins = computeTotalWins(artistId, currentDate, dataStore);
+      if (totalWins > 0) {
+        const winsEl = document.createElement("div");
+        winsEl.className = "detail-panel__total-wins";
+        winsEl.textContent = `${totalWins} ${totalWins === 1 ? "win" : "wins"}`;
+        header.appendChild(winsEl);
       }
     }
 
-    // Set up focus trap
-    this.setupFocusTrap(panel);
-
-    // Focus the close button
-    closeBtn.focus();
+    return header;
   }
 
   /**

@@ -5,9 +5,10 @@
  * All years share the same scale (global max) for at-a-glance comparison.
  */
 
-import type { DataStore } from "./models.ts";
+import type { DataStore, ResolvedArtist } from "./models.ts";
 import type { ArtistType } from "./types.ts";
 import { ARTIST_TYPE_COLORS } from "./colors.ts";
+import { resolveArtists } from "./co-artist-resolver.ts";
 
 /** Secondary indicator icons per ArtistType */
 const ARTIST_TYPE_INDICATORS: Record<ArtistType, string> = {
@@ -27,6 +28,19 @@ interface YearlyArtistEntry {
   wins: number;
 }
 
+/** Entry for Songs mode: one per release */
+interface YearlySongEntry {
+  releaseKey: string;
+  title: string;
+  logoUrl: string;
+  logoUrls: string[];
+  artistNames: string[];
+  artistType: string;
+  points: number;
+  wins: number;
+  coArtists: ResolvedArtist[];
+}
+
 export type YearlyMetric = "points" | "wins";
 
 export class YearlyView {
@@ -35,6 +49,8 @@ export class YearlyView {
   private metric: YearlyMetric = "points";
   private sourceFilter: string = "all";
   private zoom: "all" | 10 = 10;
+  private displayMode: "songs" | "artists" = "artists";
+  private generationFilter: number | "all" = "all";
 
   mount(container: HTMLElement, dataStore: DataStore): void {
     this.dataStore = dataStore;
@@ -82,6 +98,26 @@ export class YearlyView {
     return this.zoom;
   }
 
+  setDisplayMode(mode: "songs" | "artists"): void {
+    if (mode === this.displayMode) return;
+    this.displayMode = mode;
+    this.render();
+  }
+
+  getDisplayMode(): "songs" | "artists" {
+    return this.displayMode;
+  }
+
+  setGenerationFilter(generation: number | "all"): void {
+    if (generation === this.generationFilter) return;
+    this.generationFilter = generation;
+    this.render();
+  }
+
+  getGenerationFilter(): number | "all" {
+    return this.generationFilter;
+  }
+
   private render(): void {
     if (!this.wrapper || !this.dataStore) return;
     this.wrapper.innerHTML = "";
@@ -90,10 +126,18 @@ export class YearlyView {
 
     if (this.zoom === "all") {
       this.wrapper.className = "yearly-view yearly-view--treemap";
-      this.renderStacked(years);
+      if (this.displayMode === "songs") {
+        this.renderStackedSongs(years);
+      } else {
+        this.renderStacked(years);
+      }
     } else {
       this.wrapper.className = "yearly-view";
-      this.renderGrid(years);
+      if (this.displayMode === "songs") {
+        this.renderGridSongs(years);
+      } else {
+        this.renderGrid(years);
+      }
     }
   }
 
@@ -215,6 +259,410 @@ export class YearlyView {
         }
       });
     }
+  }
+
+  /** Songs mode: grid with release-level entries ("Top 10" zoom) */
+  private renderGridSongs(years: number[]): void {
+    if (!this.wrapper || !this.dataStore) return;
+    const yearData = new Map<number, YearlySongEntry[]>();
+
+    for (const year of years) {
+      const entries = this.computeYearDataSongs(year, 10);
+      yearData.set(year, entries);
+    }
+
+    let globalMax = 0;
+    for (const entries of yearData.values()) {
+      if (entries.length > 0) {
+        const topValue = this.metric === "wins" ? entries[0].wins : entries[0].points;
+        if (topValue > globalMax) globalMax = topValue;
+      }
+    }
+
+    for (const year of years) {
+      const entries = yearData.get(year) ?? [];
+      const cell = this.createYearCellSongs(year, entries, globalMax);
+      this.wrapper.appendChild(cell);
+    }
+  }
+
+  /** Songs mode: treemap with per-release cells ("All" zoom) */
+  private renderStackedSongs(years: number[]): void {
+    if (!this.wrapper || !this.dataStore) return;
+
+    for (const year of years) {
+      const entries = this.computeYearDataSongs(year, Infinity);
+      if (entries.length === 0) continue;
+
+      const yearBlock = document.createElement("div");
+      yearBlock.className = "yearly-treemap__block";
+
+      const heading = document.createElement("h3");
+      heading.className = "yearly-treemap__year";
+      heading.textContent = String(year);
+      yearBlock.appendChild(heading);
+
+      const mapContainer = document.createElement("div");
+      mapContainer.className = "yearly-treemap__map";
+      yearBlock.appendChild(mapContainer);
+
+      this.wrapper.appendChild(yearBlock);
+
+      const capturedEntries = entries;
+      requestAnimationFrame(() => {
+        const width = mapContainer.clientWidth;
+        const height = mapContainer.clientHeight;
+        if (width === 0 || height === 0) return;
+
+        const values = capturedEntries.map(e => this.metric === "wins" ? e.wins : e.points);
+        const rects = squarify(values, width, height);
+
+        for (let i = 0; i < capturedEntries.length; i++) {
+          const entry = capturedEntries[i];
+          const rect = rects[i];
+          const value = this.metric === "wins" ? entry.wins : entry.points;
+          if (value === 0) continue;
+
+          const cell = document.createElement("div");
+          cell.className = "yearly-treemap__cell";
+          cell.style.left = `${rect.x}px`;
+          cell.style.top = `${rect.y}px`;
+          cell.style.width = `${rect.w}px`;
+          cell.style.height = `${rect.h}px`;
+          const primaryType = entry.coArtists.length > 0
+            ? entry.coArtists[0].artistType
+            : entry.artistType;
+          cell.style.backgroundColor = ARTIST_TYPE_COLORS[primaryType as keyof typeof ARTIST_TYPE_COLORS] ?? "#555";
+
+          // Render all artist logos (multi-artist: side by side)
+          for (const logoUrl of entry.logoUrls) {
+            const logo = document.createElement("img");
+            logo.className = "yearly-treemap__logo";
+            logo.src = logoUrl;
+            logo.alt = entry.title;
+            logo.onerror = () => { logo.style.display = "none"; };
+            cell.appendChild(logo);
+          }
+
+          // Tooltip on hover: shows release info
+          const rank = i + 1;
+          const artistLabel = entry.coArtists.map(a => `${a.name} ${ARTIST_TYPE_INDICATORS[a.artistType as ArtistType] ?? ""}`).join(" • ");
+          const tooltipText = this.metric === "wins"
+            ? `#${rank} · ${entry.title} · ${artistLabel} · ${entry.wins} ${entry.wins === 1 ? "win" : "wins"}`
+            : `#${rank} · ${entry.title} · ${artistLabel} · ${entry.points.toLocaleString()} pts`;
+
+          cell.addEventListener("mouseenter", () => {
+            let tooltip = document.querySelector(".yearly-treemap__tooltip") as HTMLElement | null;
+            if (!tooltip) {
+              tooltip = document.createElement("div");
+              tooltip.className = "yearly-treemap__tooltip";
+              document.body.appendChild(tooltip);
+            }
+            tooltip.textContent = tooltipText;
+            tooltip.style.display = "block";
+            const cellRect = cell.getBoundingClientRect();
+            let left = cellRect.left + cellRect.width / 2;
+            const top = cellRect.top - 6;
+            tooltip.style.left = `${left}px`;
+            tooltip.style.top = `${top}px`;
+            const tipRect = tooltip.getBoundingClientRect();
+            if (tipRect.right > window.innerWidth - 8) {
+              tooltip.style.left = `${window.innerWidth - 8 - tipRect.width / 2}px`;
+            }
+            if (tipRect.left < 8) {
+              tooltip.style.left = `${8 + tipRect.width / 2}px`;
+            }
+          });
+          cell.addEventListener("mouseleave", () => {
+            const tooltip = document.querySelector(".yearly-treemap__tooltip") as HTMLElement | null;
+            if (tooltip) tooltip.style.display = "none";
+          });
+
+          mapContainer.appendChild(cell);
+        }
+      });
+    }
+  }
+
+  /** Creates a year cell for Songs mode grid */
+  private createYearCellSongs(year: number, entries: YearlySongEntry[], globalMax: number): HTMLDivElement {
+    const cell = document.createElement("div");
+    cell.className = "yearly-view__cell";
+
+    const heading = document.createElement("h2");
+    heading.className = "yearly-view__year";
+    heading.textContent = String(year);
+    cell.appendChild(heading);
+
+    if (entries.length === 0) {
+      const empty = document.createElement("div");
+      empty.className = "yearly-view__empty";
+      empty.textContent = "No data";
+      cell.appendChild(empty);
+      return cell;
+    }
+
+    const barsContainer = document.createElement("div");
+    barsContainer.className = "yearly-view__bars";
+
+    for (let i = 0; i < entries.length; i++) {
+      const entry = entries[i];
+      const row = document.createElement("div");
+      row.className = "yearly-view__row";
+
+      const rank = document.createElement("span");
+      rank.className = "yearly-view__rank";
+      const primaryType = entry.coArtists.length > 0
+        ? entry.coArtists[0].artistType
+        : entry.artistType;
+      rank.textContent = `#${i + 1}`;
+      rank.style.backgroundColor = ARTIST_TYPE_COLORS[primaryType as keyof typeof ARTIST_TYPE_COLORS] ?? "#555";
+
+      const barTrack = document.createElement("div");
+      barTrack.className = "yearly-view__bar-track";
+
+      const bar = document.createElement("div");
+      bar.className = "yearly-view__bar";
+      bar.style.backgroundColor = ARTIST_TYPE_COLORS[primaryType as keyof typeof ARTIST_TYPE_COLORS] ?? "#555";
+      const metricValue = this.metric === "wins" ? entry.wins : entry.points;
+      const widthPct = globalMax > 0 ? (metricValue / globalMax) * 100 : 0;
+      bar.style.width = `${widthPct}%`;
+
+      // Logo
+      const logo = document.createElement("img");
+      logo.className = "yearly-view__logo";
+      logo.src = entry.logoUrl;
+      logo.alt = "";
+      logo.onerror = () => { logo.style.display = "none"; };
+      bar.appendChild(logo);
+
+      // Label format: "Release Title • Artist Name(s)"
+      const artistLabel = entry.artistNames.join(" • ");
+      const labelText = `${entry.title} • ${artistLabel}`;
+
+      const name = document.createElement("span");
+      name.className = "yearly-view__name";
+      name.textContent = labelText;
+      bar.appendChild(name);
+
+      // Type indicator
+      const indicator = document.createElement("span");
+      indicator.className = "yearly-view__indicator";
+      indicator.textContent = ARTIST_TYPE_INDICATORS[primaryType as ArtistType] ?? "";
+      indicator.dataset.color = ARTIST_TYPE_COLORS[primaryType as keyof typeof ARTIST_TYPE_COLORS] ?? "#555";
+      bar.appendChild(indicator);
+
+      const statsText = this.metric === "wins"
+        ? (entry.wins > 0 ? `${entry.wins} ${entry.wins === 1 ? "win" : "wins"}` : "")
+        : entry.points.toLocaleString();
+
+      const stats = document.createElement("span");
+      stats.className = "yearly-view__stats";
+      stats.textContent = statsText;
+      bar.appendChild(stats);
+
+      barTrack.appendChild(bar);
+
+      row.appendChild(rank);
+      row.appendChild(barTrack);
+      barsContainer.appendChild(row);
+    }
+
+    cell.appendChild(barsContainer);
+
+    // After layout, check each bar for overflow and move text outside if needed
+    requestAnimationFrame(() => {
+      const rows = barsContainer.querySelectorAll(".yearly-view__row");
+      rows.forEach((row) => {
+        const bar = row.querySelector(".yearly-view__bar") as HTMLElement | null;
+        const barTrack = row.querySelector(".yearly-view__bar-track") as HTMLElement | null;
+        const name = bar?.querySelector(".yearly-view__name") as HTMLElement | null;
+        const indicator = bar?.querySelector(".yearly-view__indicator") as HTMLElement | null;
+        const stats = bar?.querySelector(".yearly-view__stats") as HTMLElement | null;
+        if (!bar || !barTrack || !name || !stats) return;
+
+        bar.style.overflow = "visible";
+        name.style.flexShrink = "0";
+        stats.style.flexShrink = "0";
+        bar.offsetHeight;
+
+        const barOverflows = bar.scrollWidth > bar.clientWidth;
+
+        bar.style.overflow = "";
+        name.style.flexShrink = "";
+        stats.style.flexShrink = "";
+
+        if (barOverflows) {
+          bar.removeChild(stats);
+
+          const overflow = document.createElement("span");
+          overflow.className = "yearly-view__overflow-text";
+          overflow.style.left = bar.style.width;
+
+          bar.style.overflow = "visible";
+          name.style.flexShrink = "0";
+          bar.offsetHeight;
+          const stillOverflows = bar.scrollWidth > bar.clientWidth;
+          bar.style.overflow = "";
+          name.style.flexShrink = "";
+
+          if (stillOverflows) {
+            bar.removeChild(name);
+            if (indicator) bar.removeChild(indicator);
+            const nameSpan = document.createElement("span");
+            nameSpan.className = "yearly-view__name yearly-view__name--outside";
+            nameSpan.textContent = name.textContent ?? "";
+            const indSpan = document.createElement("span");
+            indSpan.className = "yearly-view__indicator yearly-view__indicator--outside";
+            indSpan.textContent = indicator?.textContent ?? "";
+            const statsSpan = document.createElement("span");
+            statsSpan.className = "yearly-view__overflow-stats";
+            statsSpan.textContent = stats.textContent ?? "";
+            overflow.appendChild(nameSpan);
+            overflow.appendChild(indSpan);
+            overflow.appendChild(statsSpan);
+          } else {
+            const statsSpan = document.createElement("span");
+            statsSpan.className = "yearly-view__overflow-stats";
+            statsSpan.textContent = stats.textContent ?? "";
+            overflow.appendChild(statsSpan);
+          }
+
+          barTrack.appendChild(overflow);
+        }
+      });
+
+      // Cascade: once one bar has name outside, force all below it outside too
+      let forceOutside = false;
+      rows.forEach((row) => {
+        const bar = row.querySelector(".yearly-view__bar") as HTMLElement | null;
+        const barTrack = row.querySelector(".yearly-view__bar-track") as HTMLElement | null;
+        const nameEl = bar?.querySelector(".yearly-view__name") as HTMLElement | null;
+        const indicatorEl = bar?.querySelector(".yearly-view__indicator") as HTMLElement | null;
+        const statsEl = bar?.querySelector(".yearly-view__stats") as HTMLElement | null;
+        if (!bar || !barTrack) return;
+
+        // Check if this row already has its name outside
+        const nameIsOutside = barTrack.querySelector(".yearly-view__name--outside") !== null;
+        if (nameIsOutside && !forceOutside) {
+          forceOutside = true;
+          return;
+        }
+
+        if (forceOutside && nameEl && bar.contains(nameEl)) {
+          // Remove any existing stats-only overflow span first
+          const existingOverflow = barTrack.querySelector(".yearly-view__overflow-text");
+          if (existingOverflow) existingOverflow.remove();
+
+          if (statsEl && bar.contains(statsEl)) bar.removeChild(statsEl);
+          bar.removeChild(nameEl);
+          if (indicatorEl && bar.contains(indicatorEl)) bar.removeChild(indicatorEl);
+
+          const overflow = document.createElement("span");
+          overflow.className = "yearly-view__overflow-text";
+          overflow.style.left = bar.style.width;
+
+          const nameSpan = document.createElement("span");
+          nameSpan.className = "yearly-view__name yearly-view__name--outside";
+          nameSpan.textContent = nameEl.textContent ?? "";
+          const indSpan = document.createElement("span");
+          indSpan.className = "yearly-view__indicator yearly-view__indicator--outside";
+          indSpan.textContent = indicatorEl?.textContent ?? "";
+          const statsSpan = document.createElement("span");
+          statsSpan.className = "yearly-view__overflow-stats";
+          statsSpan.textContent = statsEl?.textContent ?? (existingOverflow?.querySelector(".yearly-view__overflow-stats")?.textContent ?? "");
+          overflow.appendChild(nameSpan);
+          overflow.appendChild(indSpan);
+          overflow.appendChild(statsSpan);
+
+          barTrack.appendChild(overflow);
+        }
+      });
+    });
+
+    return cell;
+  }
+
+  /** Compute release-level year data for Songs mode */
+  private computeYearDataSongs(year: number, limit: number = 10): YearlySongEntry[] {
+    if (!this.dataStore) return [];
+    const yearStr = String(year);
+    const entries: YearlySongEntry[] = [];
+
+    for (const [artistId, artist] of this.dataStore.artists) {
+      for (const release of artist.releases) {
+        let points = 0;
+        let wins = 0;
+        for (const [date, entry] of release.dailyValues) {
+          if (date.startsWith(yearStr)) {
+            if (this.sourceFilter === "all" || entry.source === this.sourceFilter) {
+              points += entry.value;
+            }
+
+            // Count wins: check if this artist won on this (date, source)
+            // and this release was the top-value release for that artist on this date
+            const dateWins = this.dataStore.chartWins.get(date);
+            if (dateWins) {
+              const sourceWins = dateWins.get(entry.source);
+              if (sourceWins && sourceWins.artistIds.includes(artistId)) {
+                if (this.sourceFilter === "all" || entry.source === this.sourceFilter) {
+                  // Check if this release is the highest-value one for this artist on this date
+                  let isTopRelease = true;
+                  for (const otherRelease of artist.releases) {
+                    if (otherRelease.id === release.id) continue;
+                    const otherEntry = otherRelease.dailyValues.get(date);
+                    if (otherEntry && otherEntry.source === entry.source && otherEntry.value > entry.value) {
+                      isTopRelease = false;
+                      break;
+                    }
+                  }
+                  if (isTopRelease) {
+                    wins++;
+                  }
+                }
+              }
+            }
+          }
+        }
+        if (points <= 0) continue;
+
+        // Resolve co-artists
+        const resolved = resolveArtists(release.artistIds, this.dataStore, artist);
+
+        // Apply generation filter
+        if (this.generationFilter !== "all") {
+          const matchesGeneration = resolved.some(a => a.generation === this.generationFilter);
+          if (!matchesGeneration) continue;
+        }
+
+        const logoUrls = resolved.map(a => a.logoUrl);
+        const artistNames = resolved.map(a => a.name);
+
+        entries.push({
+          releaseKey: `${artistId}::${release.id}`,
+          title: release.title,
+          logoUrl: resolved[0]?.logoUrl ?? artist.logoUrl,
+          logoUrls,
+          artistNames,
+          artistType: resolved[0]?.artistType ?? artist.artistType,
+          points,
+          wins,
+          coArtists: resolved,
+        });
+      }
+    }
+
+    entries.sort((a, b) => {
+      if (this.metric === "wins") {
+        return b.wins - a.wins || b.points - a.points;
+      }
+      return b.points - a.points;
+    });
+
+    if (this.metric === "wins") {
+      return entries.filter(e => e.wins > 0).slice(0, limit);
+    }
+    return entries.slice(0, limit);
   }
 
   private getYears(): number[] {
@@ -431,6 +879,52 @@ export class YearlyView {
             statsSpan.textContent = stats.textContent ?? "";
             overflow.appendChild(statsSpan);
           }
+
+          barTrack.appendChild(overflow);
+        }
+      });
+
+      // Cascade: once one bar has name outside, force all below it outside too
+      let forceOutside = false;
+      rows.forEach((row) => {
+        const bar = row.querySelector(".yearly-view__bar") as HTMLElement | null;
+        const barTrack = row.querySelector(".yearly-view__bar-track") as HTMLElement | null;
+        const nameEl = bar?.querySelector(".yearly-view__name") as HTMLElement | null;
+        const indicatorEl = bar?.querySelector(".yearly-view__indicator") as HTMLElement | null;
+        const statsEl = bar?.querySelector(".yearly-view__stats") as HTMLElement | null;
+        if (!bar || !barTrack) return;
+
+        const nameIsOutside = barTrack.querySelector(".yearly-view__name--outside") !== null;
+        if (nameIsOutside && !forceOutside) {
+          forceOutside = true;
+          return;
+        }
+
+        if (forceOutside && nameEl && bar.contains(nameEl)) {
+          // Remove any existing stats-only overflow span first
+          const existingOverflow = barTrack.querySelector(".yearly-view__overflow-text");
+          if (existingOverflow) existingOverflow.remove();
+
+          if (statsEl && bar.contains(statsEl)) bar.removeChild(statsEl);
+          bar.removeChild(nameEl);
+          if (indicatorEl && bar.contains(indicatorEl)) bar.removeChild(indicatorEl);
+
+          const overflow = document.createElement("span");
+          overflow.className = "yearly-view__overflow-text";
+          overflow.style.left = bar.style.width;
+
+          const nameSpan = document.createElement("span");
+          nameSpan.className = "yearly-view__name yearly-view__name--outside";
+          nameSpan.textContent = nameEl.textContent ?? "";
+          const indSpan = document.createElement("span");
+          indSpan.className = "yearly-view__indicator yearly-view__indicator--outside";
+          indSpan.textContent = indicatorEl?.textContent ?? "";
+          const statsSpan = document.createElement("span");
+          statsSpan.className = "yearly-view__overflow-stats";
+          statsSpan.textContent = statsEl?.textContent ?? (existingOverflow?.querySelector(".yearly-view__overflow-stats")?.textContent ?? "");
+          overflow.appendChild(nameSpan);
+          overflow.appendChild(indSpan);
+          overflow.appendChild(statsSpan);
 
           barTrack.appendChild(overflow);
         }

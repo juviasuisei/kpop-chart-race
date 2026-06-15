@@ -96,12 +96,15 @@ export function hasRecentActivity(
   return false;
 }
 
+/** Number of days without chart activity before an artist is considered inactive. */
+export const INACTIVE_WINDOW_DAYS = 3;
+
 /**
- * Filter entries by zoom level with a 14-day activity check for zoom 10.
+ * Filter entries by zoom level with a 3-day activity check for zoom 10.
  *
  * Rules:
  * - Always show #1.
- * - Include all active artists (activity in last 14 days).
+ * - Include all active artists (activity in last 3 days).
  * - For each included artist, also include the entry immediately above it
  *   (its "goalpost" — the next target to chase). This chains: if rank 10
  *   is a goalpost for rank 11, then rank 9 becomes a goalpost for rank 10.
@@ -118,7 +121,7 @@ export function filterByActivity(
   if (zoomLevel !== 10) return filterByZoom(entries, zoomLevel);
   if (entries.length === 0) return [];
 
-  const cutoff = dateMinusDays(snapshotDate, 14);
+  const cutoff = dateMinusDays(snapshotDate, INACTIVE_WINDOW_DAYS);
 
   const isActive = (e: RankedEntry) =>
     hasRecentActivity(e.artistId, cutoff, snapshotDate, dataStore);

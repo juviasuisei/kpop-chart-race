@@ -40,6 +40,7 @@ interface SerializedRelease {
   title: string;
   dailyValues: [string, DailyValueEntry][];
   embeds: [string, ParsedEmbedDateEntry[]][];
+  artistIds: string[];
 }
 
 const STORAGE_KEY = "airtable-v1";
@@ -193,6 +194,7 @@ export class CacheManager {
       title: release.title,
       dailyValues: Array.from(release.dailyValues.entries()),
       embeds: Array.from(release.embeds.entries()),
+      artistIds: release.artistIds,
     };
   }
 
@@ -243,6 +245,7 @@ export class CacheManager {
       title: serialized.title,
       dailyValues: new Map(serialized.dailyValues),
       embeds: new Map(serialized.embeds),
+      artistIds: serialized.artistIds ?? [],
     };
   }
 }

@@ -737,8 +737,8 @@ describe('Feature 0014, Property 2: Activity Filter Correctness at Zoom 10', () 
         (entryCount, activeCount) => {
           const clampedActive = Math.min(activeCount, entryCount - 1);
           const snapshotDate = '2024-06-15';
-          const recentDate = '2024-06-01'; // within 14 days
-          const oldDate = '2024-01-01'; // outside 14 days
+          const recentDate = '2024-06-13'; // within 3 days
+          const oldDate = '2024-01-01'; // outside 3 days
 
           const entries: RankedEntry[] = [];
           const artists = new Map<string, ParsedArtist>();

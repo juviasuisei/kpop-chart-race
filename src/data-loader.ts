@@ -146,6 +146,7 @@ export function toParseArtist(entry: ArtistEntry, filename: string): ParsedArtis
       title: rel.title,
       dailyValues,
       embeds,
+      artistIds: [artistId],
     };
   });
 

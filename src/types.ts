@@ -68,3 +68,13 @@ export interface ArtistEntry {
 
 /** A single JSON data file contains one ArtistEntry */
 export type DataFile = ArtistEntry;
+
+/** Centralized filter state for the toolbar and views */
+export interface FilterState {
+  displayMode: "songs" | "artists";
+  generation: number | "all";
+  source: string; // ChartSource | "all"
+  zoom: ZoomLevel; // 10 | "all"
+  view: "race" | "yearly";
+  metric: "points" | "wins"; // yearly-view only
+}

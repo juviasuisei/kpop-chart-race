@@ -21,6 +21,17 @@ export interface ParsedRelease {
   title: string;
   dailyValues: Map<string, DailyValueEntry>;
   embeds: Map<string, ParsedEmbedDateEntry[]>;
+  /** Ordered array of artist IDs credited on this release (1–20 entries) */
+  artistIds: string[];
+}
+
+/** A resolved artist with all display-relevant fields */
+export interface ResolvedArtist {
+  id: string;
+  name: string;
+  logoUrl: string;
+  artistType: ArtistType;
+  generation: number;
 }
 
 /** An album/EP release linked to an Apple Music URL, shown on the timeline */
@@ -64,6 +75,12 @@ export interface RankedEntry {
   featuredRelease: FeaturedReleaseInfo;
   /** True if this entry is included only as a goalpost (inactive target above an active artist) */
   isGoalpost: boolean;
+  /** In Songs mode, the unique release identifier (format: `${artistId}::${releaseId}`) */
+  releaseKey?: string;
+  /** In Songs mode, array of resolved artist data for co-artists */
+  coArtists?: ResolvedArtist[];
+  /** Display mode that produced this entry */
+  mode?: "songs" | "artists";
 }
 
 /** A snapshot of the chart state for a given date */

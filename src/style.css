@@ -191,7 +191,7 @@ body {
 .bar__release--outside {
   color: #666;
   margin-left: 0.5rem;
-  max-width: 200px;
+  max-width: none;
   cursor: pointer;
 }
 
@@ -398,6 +398,11 @@ body {
   width: 2px;
   background: #d0d0d0;
   transform: translateX(-50%);
+}
+
+/* Suppress global line in multi-artist mode */
+.detail-panel__timeline-inner--multi::before {
+  display: none;
 }
 
 /* ===== Timeline Entry ===== */
@@ -1519,9 +1524,41 @@ body {
   border: none;
   border-top: 2px solid #e0e0e0;
   margin: 1.5rem 1rem;
+  position: relative;
+  z-index: 1;
+  background: #ffffff;
+  padding: 0.75rem 0;
 }
 
 .detail-panel__artist-section {
   display: flex;
   flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+.detail-panel__artist-section > .detail-panel__header {
+  position: relative;
+  z-index: 1;
+  background: #ffffff;
+  padding: 1.25rem 1rem 1rem;
+  border-bottom: 1px solid #e0e0e0;
+  text-align: center;
+}
+
+/* Per-section timeline line: only within the date-group entries */
+.detail-panel__artist-section .timeline-date-group {
+  position: relative;
+}
+
+.detail-panel__artist-section .timeline-date-group::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  background: #d0d0d0;
+  transform: translateX(-50%);
+  z-index: 0;
 }

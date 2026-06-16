@@ -287,11 +287,21 @@ export function computeSnapshotSongs(
   }
 
   const unsorted: RankedEntry[] = [];
+  const processedReleases = new Set<string>();
 
   for (const [artistId, artist] of artists) {
     for (const release of artist.releases) {
       // Only include releases that have ANY dailyValues data at all
       if (release.dailyValues.size === 0) continue;
+
+      // Deduplicate multi-artist releases: only process from the first artist in artistIds
+      // If this artist is not the first in the release's artistIds, skip it
+      if (release.artistIds.length > 1 && release.artistIds[0] !== artistId) continue;
+
+      // Also skip if we've already seen this exact release (by title + first artistId combo)
+      const dedupeKey = `${release.artistIds[0]}::${release.id}`;
+      if (processedReleases.has(dedupeKey)) continue;
+      processedReleases.add(dedupeKey);
 
       // Compute cumulative value for this specific release, filtered by source
       let cumulativeValue = 0;
@@ -314,13 +324,14 @@ export function computeSnapshotSongs(
         }
       }
 
-      const releaseKey = `${artistId}::${release.id}`;
+      const releaseKey = `${release.artistIds[0]}::${release.id}`;
       const prev = previousMap.get(releaseKey);
       const previousCumulativeValue = prev?.cumulativeValue ?? 0;
       const previousRank = prev?.rank ?? 0;
 
-      // Resolve co-artists
-      const coArtists = resolveArtists(release.artistIds, dataStore, artist);
+      // Resolve co-artists (using the primary artist as parent for fallback)
+      const primaryArtist = dataStore.artists.get(release.artistIds[0]) ?? artist;
+      const coArtists = resolveArtists(release.artistIds, dataStore, primaryArtist);
 
       unsorted.push({
         artistId: releaseKey,

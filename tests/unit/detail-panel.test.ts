@@ -766,7 +766,7 @@ describe('DetailPanel — Songs mode multi-artist stacked display', () => {
   });
 
   // Req 4.3: Each artist section has timeline with their embeds/data
-  it('renders separate timeline for each artist in stacked view', () => {
+  it('renders a scrollable container with both artist sections stacked', () => {
     const dataStore = createMultiArtistDataStore();
     const coArtists = [
       { id: 'artist-a', name: 'Artist Alpha', logoUrl: 'assets/logos/artist-a.svg', artistType: 'girl_group' as const, generation: 4 },
@@ -775,9 +775,13 @@ describe('DetailPanel — Songs mode multi-artist stacked display', () => {
 
     panel.open('artist-a', dataStore, '2024-06-01', 1, coArtists);
 
-    // Each section should have its own timeline
+    // Single scrollable timeline container with both artist sections inside
     const timelines = document.body.querySelectorAll('.detail-panel__timeline');
-    expect(timelines.length).toBe(2);
+    expect(timelines.length).toBe(1);
+
+    // Both artist sections should be inside it
+    const sections = document.body.querySelectorAll('.detail-panel__artist-section');
+    expect(sections.length).toBe(2);
   });
 
   // Req 4.2: Single artist behaves identically to Artists mode

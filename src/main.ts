@@ -269,7 +269,15 @@ async function main(): Promise<void> {
     if (playbackController.isPlaying()) {
       playbackController.pause();
     }
-    const entry = currentSnapshot?.entries.find(e => e.artistId === artistId);
+    // In Songs mode, the emitted ID is the actual artist ID (from coArtists),
+    // but entries are keyed by composite releaseKey. Find the entry that contains
+    // this artist in its coArtists array.
+    let entry = currentSnapshot?.entries.find(e => e.artistId === artistId);
+    if (!entry) {
+      entry = currentSnapshot?.entries.find(e =>
+        e.coArtists?.some(a => a.id === artistId)
+      );
+    }
     const rank = entry?.rank;
     const coArtists = entry?.coArtists;
     detailPanel.open(artistId, dataStore, currentSnapshot?.date, rank, coArtists);

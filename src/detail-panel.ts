@@ -221,6 +221,33 @@ export class DetailPanel {
     currentDate?: string,
     currentRank?: number,
   ): void {
+    // Single scrollable container for all stacked artist sections
+    const scrollContainer = document.createElement("div");
+    scrollContainer.className = "detail-panel__timeline";
+    scrollContainer.style.flex = "1 1 auto";
+    scrollContainer.style.overflowY = "auto";
+
+    const scrollInner = document.createElement("div");
+    scrollInner.className = "detail-panel__timeline-inner detail-panel__timeline-inner--multi";
+
+    // Set up IntersectionObserver for lazy-loading embeds
+    this.observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            const placeholder = entry.target as HTMLElement;
+            const linkData = placeholder.dataset.embedUrl;
+            if (linkData) {
+              renderEmbed(linkData, placeholder);
+              placeholder.classList.remove("detail-panel__embed-placeholder");
+              this.observer?.unobserve(placeholder);
+            }
+          }
+        }
+      },
+      { root: scrollContainer, rootMargin: "200px" },
+    );
+
     for (let idx = 0; idx < coArtists.length; idx++) {
       const resolvedArtist = coArtists[idx];
       const artist = dataStore.artists.get(resolvedArtist.id);
@@ -230,48 +257,22 @@ export class DetailPanel {
       if (idx > 0) {
         const divider = document.createElement("hr");
         divider.className = "detail-panel__divider";
-        panel.appendChild(divider);
+        scrollInner.appendChild(divider);
       }
 
       // Create a section wrapper for this artist
       const section = document.createElement("div");
       section.className = "detail-panel__artist-section";
 
-      // Render header for this artist
+      // Render header for this artist (centered like single-artist mode)
       const header = this.createArtistHeader(artist, resolvedArtist.id, dataStore, currentDate, idx === 0 ? currentRank : undefined);
+      header.style.textAlign = "center";
       section.appendChild(header);
-
-      // Timeline for this artist
-      const timeline = document.createElement("div");
-      timeline.className = "detail-panel__timeline";
-
-      const timelineInner = document.createElement("div");
-      timelineInner.className = "detail-panel__timeline-inner";
 
       // Store debut for this artist
       this.currentArtistDebut = artist.debut;
 
       const dateGroups = this.buildDateGroups(artist, dataStore, currentDate);
-
-      // Set up IntersectionObserver if not already created
-      if (!this.observer) {
-        this.observer = new IntersectionObserver(
-          (entries) => {
-            for (const entry of entries) {
-              if (entry.isIntersecting) {
-                const placeholder = entry.target as HTMLElement;
-                const linkData = placeholder.dataset.embedUrl;
-                if (linkData) {
-                  renderEmbed(linkData, placeholder);
-                  placeholder.classList.remove("detail-panel__embed-placeholder");
-                  this.observer?.unobserve(placeholder);
-                }
-              }
-            }
-          },
-          { root: timeline, rootMargin: "200px" },
-        );
-      }
 
       for (const group of dateGroups) {
         const groupContainer = document.createElement("div");
@@ -283,13 +284,14 @@ export class DetailPanel {
           groupContainer.appendChild(entryEl);
         }
 
-        timelineInner.appendChild(groupContainer);
+        section.appendChild(groupContainer);
       }
 
-      timeline.appendChild(timelineInner);
-      section.appendChild(timeline);
-      panel.appendChild(section);
+      scrollInner.appendChild(section);
     }
+
+    scrollContainer.appendChild(scrollInner);
+    panel.appendChild(scrollContainer);
   }
 
   /**

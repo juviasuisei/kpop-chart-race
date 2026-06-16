@@ -588,9 +588,18 @@ export class YearlyView {
     if (!this.dataStore) return [];
     const yearStr = String(year);
     const entries: YearlySongEntry[] = [];
+    const processedReleases = new Set<string>();
 
     for (const [artistId, artist] of this.dataStore.artists) {
       for (const release of artist.releases) {
+        // Deduplicate multi-artist releases: only process from the first artist in artistIds
+        if (release.artistIds.length > 1 && release.artistIds[0] !== artistId) continue;
+
+        // Skip if already processed this release
+        const dedupeKey = `${release.artistIds[0]}::${release.id}`;
+        if (processedReleases.has(dedupeKey)) continue;
+        processedReleases.add(dedupeKey);
+
         let points = 0;
         let wins = 0;
         for (const [date, entry] of release.dailyValues) {

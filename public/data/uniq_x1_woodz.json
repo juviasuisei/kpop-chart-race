@@ -16,36 +16,6 @@
           { "type": "mv", "url": "https://youtu.be/4V9isfZVjnI?si=3vHvQens8v2gVJrt" }
         ]
       }
-    },
-    {
-      "title": "Drowning",
-      "dailyValues": {
-        "2026-02-01": { "value": 4054, "source": "inkigayo", "episode": 1298 },
-        "2026-01-25": { "value": 4017, "source": "inkigayo", "episode": 1297 },
-        "2025-11-23": { "value": 3361, "source": "inkigayo", "episode": 1292 },
-        "2025-10-26": { "value": 3889, "source": "inkigayo", "episode": 1288 },
-        "2025-10-19": { "value": 4757, "source": "inkigayo", "episode": 1287 },
-        "2025-10-12": { "value": 4447, "source": "inkigayo", "episode": 1286 },
-        "2025-08-24": { "value": 4162, "source": "inkigayo", "episode": 1280 },
-        "2025-07-13": { "value": 3688, "source": "inkigayo", "episode": 1275 },
-        "2025-07-06": { "value": 4136, "source": "inkigayo", "episode": 1274 },
-        "2025-06-29": { "value": 4150, "source": "inkigayo", "episode": 1273 },
-        "2025-06-22": { "value": 4434, "source": "inkigayo", "episode": 1272 },
-        "2025-06-15": { "value": 4054, "source": "inkigayo", "episode": 1271 },
-        "2025-06-08": { "value": 4144, "source": "inkigayo", "episode": 1270 },
-        "2025-06-01": { "value": 3972, "source": "inkigayo", "episode": 1269 },
-        "2025-05-25": { "value": 4750, "source": "inkigayo", "episode": 1268 },
-        "2025-05-18": { "value": 4492, "source": "inkigayo", "episode": 1267 },
-        "2025-05-11": { "value": 5179, "source": "inkigayo", "episode": 1266 },
-        "2025-05-04": { "value": 4670, "source": "inkigayo", "episode": 1265 },
-        "2025-04-20": { "value": 4141, "source": "inkigayo", "episode": 1264 },
-        "2025-04-18": { "value": 2822, "source": "music_bank", "episode": 1237 }
-      },
-      "embeds": {
-        "2023-04-26": [
-          { "type": "release_date", "url": "https://music.apple.com/us/album/oo-li/1683448653" }
-        ]
-      }
     }
   ]
 }

@@ -6,23 +6,6 @@
   "debut": "2022-02-22",
   "releases": [
     {
-      "title": "Heavy Serenade",
-      "dailyValues": {
-        "2026-05-23": { "value": 6961, "source": "show_music_core", "episode": 946 },
-        "2026-05-22": { "value": 9582, "source": "music_bank", "episode": 1294 },
-        "2026-05-21": { "value": 8167, "source": "m_countdown", "episode": 929 }
-      },
-      "embeds": {
-        "2026-05-23": [{ "type": "live_performance", "url": "https://youtu.be/Zikcmdp_aoQ?si=0w5W2Yc4zQlWAGaU" }],      
-        "2026-05-22": [{ "type": "live_performance", "url": "https://youtu.be/2lzsl0Mr1HI?si=EKfv69doyAdFRhUB" }],      
-        "2026-05-21": [{ "type": "live_performance", "url": "https://youtu.be/-spU8OwA0rs?si=UeE3QsjAfB6znTVW" }],      
-        "2026-05-11": [
-          { "type": "release_date", "url": "https://music.apple.com/us/album/heavy-serenade-ep/1892154305" },
-          { "type": "mv", "url": "https://youtu.be/6Ycn9qZK09I?si=0Y1m9_SsukKBGmNf" }
-        ]
-      }
-    },
-    {
       "title": "Blue Valentine",
       "dailyValues": {
         "2026-01-02": { "value": 3918, "source": "music_bank", "episode": 1274 },

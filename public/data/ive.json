@@ -20,38 +20,6 @@
       }
     },
     {
-      "title": "BANG BANG",
-      "dailyValues": {
-        "2026-04-19": { "value": 4361, "source": "inkigayo", "episode": 1307 },
-        "2026-04-12": { "value": 4261, "source": "inkigayo", "episode": 1306 },
-        "2026-04-05": { "value": 4047, "source": "inkigayo", "episode": 1305 },
-        "2026-04-04": { "value": 4423, "source": "show_music_core", "episode": 939 },
-        "2026-03-29": { "value": 4218, "source": "inkigayo", "episode": 1304 },
-        "2026-03-27": { "value": 3042, "source": "music_bank", "episode": 1286 },
-        "2026-03-22": { "value": 5365, "source": "inkigayo", "episode": 1304 },
-        "2026-03-21": { "value": 5976, "source": "show_music_core", "episode": 938 },
-        "2026-03-15": { "value": 5422, "source": "inkigayo", "episode": 1303 },
-        "2026-03-14": { "value": 6730, "source": "show_music_core", "episode": 937 },
-        "2026-03-13": { "value": 4405, "source": "music_bank", "episode": 1284 },
-        "2026-03-08": { "value": 6612, "source": "inkigayo", "episode": 1302 },
-        "2026-03-07": { "value": 7205, "source": "show_music_core", "episode": 936 },
-        "2026-03-06": { "value": 8840, "source": "music_bank", "episode": 1283 },
-        "2026-03-01": { "value": 8345, "source": "inkigayo", "episode": 1301 },
-        "2026-02-28": { "value": 7103, "source": "show_music_core", "episode": 935 },
-        "2026-02-27": { "value": 7695, "source": "music_bank", "episode": 1282 },
-        "2026-02-26": { "value": 7985, "source": "m_countdown", "episode": 917 },
-        "2026-02-20": { "value": 4198, "source": "music_bank", "episode": 1281 }
-      },
-      "embeds": {
-        "2026-03-08": [{ "type": "live_performance", "url": "https://youtu.be/iVQz6J0mSY8?si=7vH4z0qkA-f2HQkE" }],
-        "2026-03-07": [{ "type": "live_performance", "url": "https://youtu.be/eZjGoXOD82w?si=JIIQQF-n9WoLQI6j" }],
-        "2026-02-09": [
-          { "type": "release_date", "url": "https://music.apple.com/us/album/bang-bang-single/1872627662" },
-          { "type": "mv", "url": "https://youtu.be/9qkpcLK422o?si=ywAmpK2pRFzT_hAB" }
-        ]
-      }
-    },
-    {
       "title": "XOXZ",
       "dailyValues": {
         "2025-10-25": { "value": 5323, "source": "show_music_core", "episode": 922 },

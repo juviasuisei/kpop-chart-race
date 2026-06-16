@@ -6,32 +6,6 @@
   "debut": "2022-05-02",
   "releases": [
     {
-      "title": "SPAGHETTI",
-      "dailyValues": {
-        "2026-03-01": { "value": 4576, "source": "inkigayo", "episode": 1301 },
-        "2026-02-08": { "value": 4453, "source": "inkigayo", "episode": 1299 },
-        "2026-02-01": { "value": 3880, "source": "inkigayo", "episode": 1298 },
-        "2026-01-25": { "value": 4007, "source": "inkigayo", "episode": 1297 },
-        "2026-01-18": { "value": 4193, "source": "inkigayo", "episode": 1296 },
-        "2026-01-11": { "value": 4811, "source": "inkigayo", "episode": 1295 },
-        "2025-12-20": { "value": 4536, "source": "show_music_core", "episode": 929 },
-        "2025-11-30": { "value": 4985, "source": "inkigayo", "episode": 1293 },
-        "2025-11-23": { "value": 4907, "source": "inkigayo", "episode": 1292 },
-        "2025-11-19": { "value": 3934, "source": "show_champion", "episode": 578 },
-        "2025-11-16": { "value": 4275, "source": "inkigayo", "episode": 1291 },
-        "2025-11-15": { "value": 4619, "source": "show_music_core", "episode": 924 },
-        "2025-11-12": { "value": 2947, "source": "show_champion", "episode": 577 },
-        "2025-11-09": { "value": 3656, "source": "inkigayo", "episode": 1290 }
-      },
-      "embeds": {
-        "2025-11-09": [{ "type": "live_performance", "url": "https://youtu.be/rJHd-yJodyE?si=lmomkTb9iwwjIXmO" }],
-        "2025-10-24": [
-          { "type": "release_date", "url": "https://music.apple.com/us/album/spaghetti/1846119152" },
-          { "type": "mv", "url": "https://youtu.be/TvVtYaqCni8?si=TwOZPP6vpvQzK-JM" }
-        ]
-      }
-    },
-    {
       "title": "HOT",
       "dailyValues": {
         "2025-05-11": { "value": 4035, "source": "inkigayo", "episode": 1266 },

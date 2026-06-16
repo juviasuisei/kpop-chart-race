@@ -6,22 +6,6 @@
   "debut": "2023-05-12",
   "releases": [
     {
-      "title": "Born Savage",
-      "dailyValues": {
-        "2026-05-06": { "value": 3489, "source": "show_champion", "episode": 596 },
-        "2026-04-25": { "value": 5695, "source": "show_music_core", "episode": 942 },
-        "2026-04-24": { "value": 3486, "source": "music_bank", "episode": 1290 },
-        "2026-04-22": { "value": 3390, "source": "show_champion", "episode": 594 }
-      },
-      "embeds": {
-        "2026-04-25": [{ "type": "live_performance", "url": "https://youtu.be/3zvHS4-C4uo?si=iNoVP4xuAAW4Ksqh" }],
-        "2026-04-13": [
-          { "type": "release_date", "url": "https://music.apple.com/us/album/caligo-pt-2-ep/1891527164" },
-          { "type": "mv", "url": "https://youtu.be/XukB7ZG8CDQ?si=cd-zP4ZhyX-4VZBR" }
-        ]
-      }
-    },
-    {
       "title": "BBUU!",
       "dailyValues": {
         "2025-12-03": { "value": 2429, "source": "show_champion", "episode": 580 },

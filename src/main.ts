@@ -278,8 +278,17 @@ async function main(): Promise<void> {
         e.coArtists?.some(a => a.id === artistId)
       );
     }
-    const rank = entry?.rank;
     const coArtists = entry?.coArtists;
+
+    // Always compute artist rank from artist-mode snapshot so the detail panel
+    // shows consistent ranking regardless of display mode
+    let rank: number | undefined;
+    if (currentSnapshot?.date) {
+      const artistSnapshot = computeSnapshot(currentSnapshot.date, dataStore);
+      const artistEntry = artistSnapshot.entries.find(e => e.artistId === artistId);
+      rank = artistEntry?.rank;
+    }
+
     detailPanel.open(artistId, dataStore, currentSnapshot?.date, rank, coArtists);
     renderer.recheckOverflow();
   });
@@ -288,9 +297,16 @@ async function main(): Promise<void> {
   eventBus.on("pause", () => {
     if (currentSnapshot && currentSnapshot.entries.length > 0) {
       const topEntry = currentSnapshot.entries[0];
-      const topArtistId = topEntry.artistId;
       const coArtists = topEntry.coArtists;
-      detailPanel.open(topArtistId, dataStore, currentSnapshot.date, 1, coArtists);
+      // In Songs mode, get the first co-artist's actual ID for the detail panel
+      const actualArtistId = coArtists && coArtists.length > 0
+        ? coArtists[0].id
+        : topEntry.artistId;
+      // Compute artist rank from artist-mode snapshot
+      const artistSnapshot = computeSnapshot(currentSnapshot.date, dataStore);
+      const artistEntry = artistSnapshot.entries.find(e => e.artistId === actualArtistId);
+      const rank = artistEntry?.rank ?? 1;
+      detailPanel.open(actualArtistId, dataStore, currentSnapshot.date, rank, coArtists);
       renderer.recheckOverflow();
     }
   });

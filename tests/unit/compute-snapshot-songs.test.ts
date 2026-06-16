@@ -311,8 +311,8 @@ describe('computeSnapshotSongs — source "all" sums everything', () => {
 // Requirement 7.5
 // ============================================================
 
-describe('computeSnapshotSongs — zero-value entries still appear', () => {
-  it('entry with zero matching values for a source still appears with cumulativeValue 0', () => {
+describe('computeSnapshotSongs — zero-value entries are hidden', () => {
+  it('entry with zero matching values for a source is excluded from results', () => {
     // Create an artist with a release that only has 'inkigayo' data
     const artistOnlyInkigayo = makeArtist({
       id: 'solo',
@@ -334,26 +334,21 @@ describe('computeSnapshotSongs — zero-value entries still appear', () => {
 
     const snapshot = computeSnapshotSongs('2024-01-03', dataStore, filterState);
 
-    // The entry should still appear but with 0 cumulative value
+    // The entry should NOT appear since its cumulative value is 0
     const entry = snapshot.entries.find(e => e.releaseKey === 'solo::only-inkigayo');
-    expect(entry).toBeDefined();
-    expect(entry!.cumulativeValue).toBe(0);
+    expect(entry).toBeUndefined();
+    expect(snapshot.entries).toHaveLength(0);
   });
 
-  it('entries with no data on selected source coexist with entries that have data', () => {
+  it('entries with no data on selected source are excluded while entries with data remain', () => {
     const dataStore = makeDataStore([artistA, artistB], dates);
     // Filter to m_countdown — none of the test data uses m_countdown
     const filterState = makeFilterState({ source: 'm_countdown' });
 
     const snapshot = computeSnapshotSongs('2024-01-03', dataStore, filterState);
 
-    // All 3 releases should still appear
-    expect(snapshot.entries).toHaveLength(3);
-
-    // All should have cumulativeValue = 0
-    for (const entry of snapshot.entries) {
-      expect(entry.cumulativeValue).toBe(0);
-    }
+    // All entries have 0 cumulative for m_countdown, so none should appear
+    expect(snapshot.entries).toHaveLength(0);
   });
 });
 
@@ -388,16 +383,15 @@ describe('computeSnapshotSongs — ranking', () => {
     expect(snapshot.entries[2].rank).toBe(3);
   });
 
-  it('ranks are contiguous even when some entries have zero value', () => {
+  it('zero-value entries are excluded from results', () => {
     const dataStore = makeDataStore([artistA, artistB], dates);
     // Use m_countdown which has no data, so all are 0
     const filterState = makeFilterState({ source: 'm_countdown' });
 
     const snapshot = computeSnapshotSongs('2024-01-03', dataStore, filterState);
 
-    // All entries should have contiguous ranks starting at 1
-    const ranks = snapshot.entries.map(e => e.rank).sort((a, b) => a - b);
-    expect(ranks).toEqual([1, 2, 3]);
+    // All entries have 0 cumulative, so none should appear
+    expect(snapshot.entries).toHaveLength(0);
   });
 
   it('snapshot date matches the requested date', () => {

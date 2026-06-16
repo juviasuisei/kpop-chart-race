@@ -363,14 +363,17 @@ export function computeSnapshotSongs(
     return 0;
   });
 
+  // Filter out entries with zero cumulative value (same as artist mode)
+  const nonZero = unsorted.filter(e => e.cumulativeValue > 0);
+
   // Assign contiguous 1-based ranks
-  for (let i = 0; i < unsorted.length; i++) {
-    unsorted[i].rank = i + 1;
+  for (let i = 0; i < nonZero.length; i++) {
+    nonZero[i].rank = i + 1;
   }
 
   return {
     date,
-    entries: unsorted,
+    entries: nonZero,
   };
 }
 

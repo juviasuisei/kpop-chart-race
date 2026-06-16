@@ -305,27 +305,24 @@ describe("Property 10: Source filter cumulative correctness", () => {
 // **Validates: Requirements 7.5**
 // ============================================================
 
-describe("Property 11: Source filter preserves zero-value entries", () => {
-  it("entries with zero matching values for a source still appear with cumulativeValue === 0", () => {
+describe("Property 11: Source filter excludes zero-value entries", () => {
+  it("entries with zero matching values for a source are excluded from results", () => {
     fc.assert(
       fc.property(
         arbDataStoreWithSources,
         (dataStore) => {
           // Find a source that at least one artist/release does NOT use
-          // Strategy: pick a source that is absent from at least one release
           let targetSource: ChartSource | null = null;
           let targetArtistId: string | null = null;
           let targetReleaseId: string | null = null;
 
           for (const [artistId, artist] of dataStore.artists) {
             for (const release of artist.releases) {
-              // Check which sources this release uses
               const usedSources = new Set<string>();
               for (const [, dv] of release.dailyValues) {
                 usedSources.add(dv.source);
               }
 
-              // Find a source NOT used by this release
               for (const source of SPECIFIC_SOURCES) {
                 if (!usedSources.has(source)) {
                   targetSource = source;
@@ -339,8 +336,6 @@ describe("Property 11: Source filter preserves zero-value entries", () => {
             if (targetSource) break;
           }
 
-          // If we couldn't find a mismatch (all releases use all sources), skip
-          // This is a precondition — fast-check will generate another case
           if (!targetSource || !targetArtistId || !targetReleaseId) return;
 
           const filterState: FilterState = {
@@ -358,12 +353,15 @@ describe("Property 11: Source filter preserves zero-value entries", () => {
             filterState,
           );
 
-          // The entry for the target release should still exist with cumulativeValue === 0
+          // The entry for the target release should NOT exist (zero cumulative excluded)
           const targetKey = `${targetArtistId}::${targetReleaseId}`;
           const entry = snapshot.entries.find((e) => e.releaseKey === targetKey);
+          expect(entry).toBeUndefined();
 
-          expect(entry).toBeDefined();
-          expect(entry!.cumulativeValue).toBe(0);
+          // All entries that DO appear should have cumulativeValue > 0
+          for (const e of snapshot.entries) {
+            expect(e.cumulativeValue).toBeGreaterThan(0);
+          }
         },
       ),
       { numRuns: 100 },

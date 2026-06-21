@@ -397,7 +397,7 @@ describe('Property 18: Chart Win Determination and Crown Level', () => {
         ),
         ([dates, artists]) => {
           const dataStore = buildDataStore(artists, dates);
-          const chartWins = computeChartWins(dataStore);
+          const chartWins = computeChartWins(dataStore).chartWins;
 
           // Track expected win counts per (artistId, releaseId, source)
           const expectedWinCounts = new Map<string, number>();
@@ -607,7 +607,7 @@ describe('Feature 0014, Property 1: Chart Win Deduplication and Crown Correctnes
           };
 
           const dataStore = buildDataStore([artist, otherArtist], dates);
-          const chartWins = computeChartWins(dataStore);
+          const chartWins = computeChartWins(dataStore).chartWins;
 
           const dateResult = chartWins.get(date);
           if (dateResult) {
@@ -673,7 +673,7 @@ describe('Feature 0014, Property 1: Chart Win Deduplication and Crown Correctnes
           };
 
           const dataStore = buildDataStore([artist], dates);
-          const chartWins = computeChartWins(dataStore);
+          const chartWins = computeChartWins(dataStore).chartWins;
 
           // On both dates, the artist should win with the high-value release
           for (const date of dates) {

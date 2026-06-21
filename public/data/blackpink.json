@@ -25,35 +25,6 @@
           { "type": "mv", "url": "https://youtu.be/2GJfWMYCWY0?si=wRzEfNcb91NKkG0P" }
         ]
       }
-    },
-    {
-      "title": "JUMP",
-      "dailyValues": {
-        "2025-10-17": { "value": 2732, "source": "music_bank", "episode": 1263 },
-        "2025-10-03": { "value": 2752, "source": "music_bank", "episode": 1261 },
-        "2025-08-29": { "value": 3672, "source": "music_bank", "episode": 1256 },
-        "2025-08-23": { "value": 6684, "source": "show_music_core", "episode": 914 },
-        "2025-08-22": { "value": 3670, "source": "music_bank", "episode": 1255 },
-        "2025-08-17": { "value": 7838, "source": "inkigayo", "episode": 1279 },
-        "2025-08-16": { "value": 7893, "source": "show_music_core", "episode": 913 },
-        "2025-08-10": { "value": 6909, "source": "inkigayo", "episode": 1278 },
-        "2025-08-03": { "value": 7289, "source": "inkigayo", "episode": 1277 },
-        "2025-08-02": { "value": 6757, "source": "show_music_core", "episode": 912 },
-        "2025-07-31": { "value": 6942, "source": "m_countdown", "episode": 899 },
-        "2025-07-30": { "value": 4689, "source": "show_champion", "episode": 565 },
-        "2025-07-26": { "value": 6761, "source": "show_music_core", "episode": 911 },
-        "2025-07-25": { "value": 3378, "source": "music_bank", "episode": 1251 },
-        "2025-07-24": { "value": 6942, "source": "m_countdown", "episode": 898 },
-        "2025-07-23": { "value": 4652, "source": "show_champion", "episode": 564 },
-        "2025-07-19": { "value": 3683, "source": "show_music_core", "episode": 910 },
-        "2025-07-17": { "value": 7792, "source": "m_countdown", "episode": 897 }
-      },
-      "embeds": {
-        "2025-07-11": [
-          { "type": "release_date", "url": "https://music.apple.com/us/album/jump-single/1824672650" },
-          { "type": "mv", "url": "https://youtu.be/CgCVZdcKcqY?si=3TPMs8npmgqMOyvo" }
-        ]
-      }
     }
   ]
 }

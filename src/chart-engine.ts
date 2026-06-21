@@ -89,6 +89,72 @@ export function computeTotalWins(
 }
 
 /**
+ * Compute the total number of chart wins for a specific release
+ * up to and including the given date.
+ *
+ * Uses binary search on the pre-computed `releaseWinDates` for efficient lookup.
+ *
+ * @param releaseKey - Composite key in format `${artistId}::${releaseId}`
+ * @param date - The cutoff date (inclusive, YYYY-MM-DD)
+ * @param dataStore - The loaded DataStore with releaseWinDates and artists
+ * @returns The cumulative win count for this release
+ */
+export function computeReleaseWins(
+  releaseKey: string,
+  date: string,
+  dataStore: DataStore,
+): number {
+  // Validate releaseKey format
+  const separatorIndex = releaseKey.indexOf("::");
+  if (separatorIndex === -1) return 0;
+
+  const primaryArtistId = releaseKey.substring(0, separatorIndex);
+  const releaseId = releaseKey.substring(separatorIndex + 2);
+  if (!primaryArtistId || !releaseId) return 0;
+
+  // Graceful fallback if releaseWinDates is not populated
+  if (!dataStore.releaseWinDates) return 0;
+
+  // Look up the artist to get the release's artistIds (co-artists)
+  const artist = dataStore.artists.get(primaryArtistId);
+  if (!artist) return 0;
+
+  const release = artist.releases.find((r) => r.id === releaseId);
+  if (!release) return 0;
+
+  // For each credited artist, count wins from their releaseKey
+  let total = 0;
+  for (const creditedArtistId of release.artistIds) {
+    const key = `${creditedArtistId}::${releaseId}`;
+    const winDates = dataStore.releaseWinDates.get(key);
+    if (!winDates || winDates.length === 0) continue;
+
+    // Binary search: count entries ≤ date
+    total += upperBound(winDates, date);
+  }
+
+  return total;
+}
+
+/**
+ * Returns the number of elements in a sorted array that are ≤ target.
+ * Uses binary search for O(log n) performance.
+ */
+function upperBound(sortedDates: string[], target: string): number {
+  let lo = 0;
+  let hi = sortedDates.length;
+  while (lo < hi) {
+    const mid = (lo + hi) >>> 1;
+    if (sortedDates[mid] <= target) {
+      lo = mid + 1;
+    } else {
+      hi = mid;
+    }
+  }
+  return lo;
+}
+
+/**
  * Compute the cumulative value for a specific release up to the given date.
  */
 export function computeReleaseCumulativeValue(
@@ -472,17 +538,27 @@ function deduplicateByArtist(
  * tuple with no upper bound. The crown level for a given date entry is the running
  * total up to and including that date.
  *
- * @returns Map<date, Map<source, { artistIds, crownLevels }>>
- *   where crownLevels is Map<artistId, crownLevel>
+ * @returns An object containing:
+ *   - chartWins: Map<date, Map<source, { artistIds, crownLevels }>>
+ *     where crownLevels is Map<artistId, crownLevel>
+ *   - releaseWinDates: Map<releaseKey, string[]>
+ *     where releaseKey is `${artistId}::${releaseId}` and the array contains
+ *     chronologically sorted dates on which that release won
  */
 export function computeChartWins(
   dataStore: DataStore,
-): Map<string, Map<string, { artistIds: string[]; crownLevels: Map<string, number> }>> {
+): {
+  chartWins: Map<string, Map<string, { artistIds: string[]; crownLevels: Map<string, number> }>>;
+  releaseWinDates: Map<string, string[]>;
+} {
   const { artists, dates } = dataStore;
 
   // Running win counts per (artistId, releaseId, source) → total wins
   // Key format: `${artistId}|${releaseId}|${source}`
   const winCounts = new Map<string, number>();
+
+  // Maps releaseKey (artistId::releaseId) → array of win dates
+  const releaseWinDates = new Map<string, string[]>();
 
   const result = new Map<
     string,
@@ -539,6 +615,13 @@ export function computeChartWins(
         const key = `${winner.artistId}|${winner.releaseId}|${source}`;
         const prev = winCounts.get(key) ?? 0;
         winCounts.set(key, prev + 1);
+
+        // Track release win dates
+        const releaseKey = `${winner.artistId}::${winner.releaseId}`;
+        if (!releaseWinDates.has(releaseKey)) {
+          releaseWinDates.set(releaseKey, []);
+        }
+        releaseWinDates.get(releaseKey)!.push(date);
       }
 
       // Build crown levels for this (date, source) — one entry per winning artistId
@@ -567,5 +650,12 @@ export function computeChartWins(
     }
   }
 
-  return result;
+  // Sort each release's date array chronologically
+  // (dates are already processed in order, so arrays should already be sorted,
+  // but we sort explicitly to guarantee correctness)
+  for (const [, winDates] of releaseWinDates) {
+    winDates.sort();
+  }
+
+  return { chartWins: result, releaseWinDates };
 }

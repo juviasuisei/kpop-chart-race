@@ -271,6 +271,7 @@ export async function loadAll(
     endDate: dates[dates.length - 1] ?? "",
     firstAppearance,
     chartWins: new Map(),
+    releaseWinDates: new Map(),
   };
 }
 
@@ -297,5 +298,6 @@ function emptyDataStore(): DataStore {
     endDate: "",
     firstAppearance: new Map(),
     chartWins: new Map(),
+    releaseWinDates: new Map(),
   };
 }

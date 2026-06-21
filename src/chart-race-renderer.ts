@@ -8,7 +8,7 @@ import type { ArtistType, ZoomLevel } from "./types.ts";
 import { filterByActivity, computeBarWidth, toRomanNumeral, tween } from "./utils.ts";
 import { EventBus } from "./event-bus.ts";
 import { ARTIST_TYPE_COLORS } from "./colors.ts";
-import { computeTotalWins, computeReleaseCumulativeValue } from "./chart-engine.ts";
+import { computeTotalWins, computeReleaseWins, computeReleaseCumulativeValue } from "./chart-engine.ts";
 import pkg from "../package.json";
 
 /** Secondary indicator icons per ArtistType */
@@ -1076,7 +1076,9 @@ export class ChartRaceRenderer {
     barEl.bar.style.backgroundColor = ARTIST_TYPE_COLORS[entry.artistType];
 
     // Compute total wins (used by both goalpost label and normal display)
-    const totalWins = computeTotalWins(entry.artistId, snapshotDate, dataStore);
+    const totalWins = isSongsMode
+      ? computeReleaseWins(entry.releaseKey!, snapshotDate, dataStore)
+      : computeTotalWins(entry.artistId, snapshotDate, dataStore);
 
     // Toggle goalpost mode (use override if provided, otherwise use entry flag)
     const isGoalpost = goalpostOverride !== undefined ? goalpostOverride : !!entry.isGoalpost;

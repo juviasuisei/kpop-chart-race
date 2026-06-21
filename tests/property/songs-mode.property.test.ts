@@ -144,6 +144,7 @@ const arbDataStore: fc.Arbitrary<DataStore> = arbSortedDates(5, 20).chain((dates
         endDate: dates[dates.length - 1],
         firstAppearance: new Map(),
         chartWins: new Map(),
+        releaseWinDates: new Map(),
       } satisfies DataStore;
     }),
 );

@@ -90,7 +90,7 @@ describe('Dedup tie-breaking', () => {
       firstAppearance: new Map(), chartWins: new Map(),
     };
 
-    const chartWins = computeChartWins(dataStore);
+    const chartWins = computeChartWins(dataStore).chartWins;
     const dateResult = chartWins.get(date);
     expect(dateResult).toBeDefined();
 

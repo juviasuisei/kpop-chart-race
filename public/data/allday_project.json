@@ -19,64 +19,6 @@
       }
     },
     {
-      "title": "ONE MORE TIME",
-      "dailyValues": {
-        "2026-01-17": { "value": 5735, "source": "show_music_core", "episode": 931 },
-        "2026-01-10": { "value": 4536, "source": "show_music_core", "episode": 930 },
-        "2025-12-20": { "value": 6150, "source": "show_music_core", "episode": 929 },
-        "2025-12-19": { "value": 5804, "source": "music_bank", "episode": 1272 },
-        "2025-12-13": { "value": 3590, "source": "show_music_core", "episode": 928 },
-        "2025-12-06": { "value": 3739, "source": "show_music_core", "episode": 927 },
-        "2025-11-30": { "value": 6010, "source": "inkigayo", "episode": 1293 },
-        "2025-11-29": { "value": 6426, "source": "show_music_core", "episode": 926 }
-      },
-      "embeds": {
-        "2025-11-17": [
-          { "type": "release_date", "url": "https://music.apple.com/us/album/one-more-time-single/1850392562" },
-          { "type": "mv", "url": "https://youtu.be/OgEwJ8a1OoY?si=UI05BxSKGrAXpVDx" }
-        ]
-      }
-    },
-    {
-      "title": "FAMOUS",
-      "dailyValues": {
-        "2025-10-19": { "value": 3743, "source": "inkigayo", "episode": 1287 },
-        "2025-09-28": { "value": 4076, "source": "inkigayo", "episode": 1285 },
-        "2025-09-21": { "value": 4182, "source": "inkigayo", "episode": 1284 },
-        "2025-09-14": { "value": 4363, "source": "inkigayo", "episode": 1283 },
-        "2025-09-07": { "value": 4310, "source": "inkigayo", "episode": 1282 },
-        "2025-08-31": { "value": 5253, "source": "inkigayo", "episode": 1281 },
-        "2025-08-24": { "value": 5669, "source": "inkigayo", "episode": 1280 },
-        "2025-08-23": { "value": 5375, "source": "show_music_core", "episode": 914 },
-        "2025-08-17": { "value": 5036, "source": "inkigayo", "episode": 1279 },
-        "2025-08-16": { "value": 5885, "source": "show_music_core", "episode": 913 },
-        "2025-08-10": { "value": 3840, "source": "inkigayo", "episode": 1278 },
-        "2025-08-03": { "value": 4003, "source": "inkigayo", "episode": 1277 },
-        "2025-08-02": { "value": 5271, "source": "show_music_core", "episode": 912 },
-        "2025-07-26": { "value": 5420, "source": "show_music_core", "episode": 911 },
-        "2025-07-19": { "value": 6365, "source": "show_music_core", "episode": 910 },
-        "2025-07-16": { "value": 3563, "source": "show_champion", "episode": 563 },
-        "2025-07-13": { "value": 4868, "source": "inkigayo", "episode": 1275 },
-        "2025-07-12": { "value": 6409, "source": "show_music_core", "episode": 909 },
-        "2025-07-10": { "value": 5135, "source": "m_countdown", "episode": 896 },
-        "2025-07-09": { "value": 3654, "source": "show_champion", "episode": 562 },
-        "2025-07-06": { "value": 5078, "source": "inkigayo", "episode": 1274 },
-        "2025-07-03": { "value": 6789, "source": "m_countdown", "episode": 895 },
-        "2025-07-02": { "value": 3921, "source": "show_champion", "episode": 561 }
-      },
-      "embeds": {
-        "2025-07-13": [{ "type": "live_performance", "url": "https://youtu.be/KCWrsSFsCBw?si=GTSBShb1oiJ_knoI" }],
-        "2025-07-12": [{ "type": "live_performance", "url": "https://youtu.be/DyMD_ecK7ZU?si=2RdEBTiNoXOQoPVF" }],
-        "2025-07-10": [{ "type": "live_performance", "url": "https://youtu.be/DNcRUipPRYQ?si=cVTQU90sGteO6G2f" }],
-        "2025-07-06": [{ "type": "live_performance", "url": "https://youtu.be/02i-L0D9QXk?si=ubGkTIlJgLa89Q13" }],
-        "2025-07-03": [{ "type": "live_performance", "url": "https://youtu.be/xnJuxltLUSA?si=5nt8Ndmu29O0l2tC" }],
-        "2025-06-23": [
-          { "type": "release_date", "url": "https://music.apple.com/us/album/famous-single/1819675760" },
-          { "type": "mv", "url": "https://youtu.be/VjvzYjU1mY0?si=-cbyVKufmQs7NMW4" }
-        ]
-      }
-    },
-    {
       "title": "WICKED",
       "dailyValues": {
         "2025-08-17": { "value": 3182, "source": "inkigayo", "episode": 1279 }

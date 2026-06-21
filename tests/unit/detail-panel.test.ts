@@ -876,4 +876,58 @@ describe('DetailPanel — Songs mode multi-artist stacked display', () => {
     const dividers = document.body.querySelectorAll('.detail-panel__divider');
     expect(dividers.length).toBe(0);
   });
+
+  // 3-artist collab renders all three stacked sections with 2 dividers
+  it('renders 3 stacked artist sections with 2 dividers for a 3-artist collab', () => {
+    const release: ParsedRelease = {
+      id: 'triple-collab',
+      title: 'Triple Collab',
+      dailyValues: new Map([
+        ['2024-06-01', { value: 2000, source: 'inkigayo', episode: 300 }],
+      ]),
+      embeds: new Map(),
+      artistIds: ['artist-a', 'artist-b', 'artist-c'],
+    };
+
+    const artistC: ParsedArtist = {
+      id: 'artist-c',
+      name: 'Artist Gamma',
+      artistType: 'solo_female',
+      generation: 3,
+      logoUrl: 'assets/logos/artist-c.svg',
+      koreanName: '아티스트 감마',
+      debut: '2019-05-01',
+      releases: [release],
+      albumReleases: [],
+    };
+
+    const dataStore = createMultiArtistDataStore();
+    // Add artist-c and update existing artists' releases
+    dataStore.artists.set('artist-c', artistC);
+    dataStore.artists.get('artist-a')!.releases.push(release);
+    dataStore.artists.get('artist-b')!.releases.push(release);
+
+    const coArtists = [
+      { id: 'artist-a', name: 'Artist Alpha', logoUrl: 'assets/logos/artist-a.svg', artistType: 'girl_group' as const, generation: 4 },
+      { id: 'artist-b', name: 'Artist Beta', logoUrl: 'assets/logos/artist-b.svg', artistType: 'boy_group' as const, generation: 5 },
+      { id: 'artist-c', name: 'Artist Gamma', logoUrl: 'assets/logos/artist-c.svg', artistType: 'solo_female' as const, generation: 3 },
+    ];
+
+    panel.open('artist-a', dataStore, '2024-06-01', 1, coArtists);
+
+    // Should have 2 dividers between 3 sections
+    const dividers = document.body.querySelectorAll('.detail-panel__divider');
+    expect(dividers.length).toBe(2);
+
+    // Should have 3 artist sections
+    const sections = document.body.querySelectorAll('.detail-panel__artist-section');
+    expect(sections.length).toBe(3);
+
+    // All artist names should appear in order
+    const nameEls = document.body.querySelectorAll('.detail-panel__artist-name');
+    expect(nameEls.length).toBe(3);
+    expect(nameEls[0].textContent).toContain('Artist Alpha');
+    expect(nameEls[1].textContent).toContain('Artist Beta');
+    expect(nameEls[2].textContent).toContain('Artist Gamma');
+  });
 });

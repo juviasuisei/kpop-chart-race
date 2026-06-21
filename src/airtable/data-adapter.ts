@@ -250,7 +250,7 @@ function assembleDataStore(
 
   // Album releases per artist (Apple Music URLs extracted separately)
   // Structure: artistRecordId → AlbumRelease[]
-  const albumReleasesPerArtist = new Map<string, Array<{ date: string; appleMusicUrl: string; isSingle: boolean }>>();
+  const albumReleasesPerArtist = new Map<string, Array<{ date: string; appleMusicUrl: string; isSingle: boolean; artistIds: string[] }>>();
 
   for (const releaseRecord of releaseRecords) {
     const fields = releaseRecord.fields;
@@ -269,10 +269,16 @@ function assembleDataStore(
     // Extract Apple Music URL into albumReleases for all linked artists
     if (releaseDate && appleMusicUrl) {
       const isSingle = fields["Is Single"] === true;
+      // Resolve all valid artist slugs for this release
+      const resolvedIds: string[] = [];
+      for (const rid of artistLinks) {
+        const info = validArtists.get(rid);
+        if (info) resolvedIds.push(info.artistId);
+      }
       for (const artistRecordId of artistLinks) {
         if (!validArtists.has(artistRecordId)) continue;
         const existing = albumReleasesPerArtist.get(artistRecordId);
-        const entry = { date: releaseDate, appleMusicUrl, isSingle };
+        const entry = { date: releaseDate, appleMusicUrl, isSingle, artistIds: resolvedIds };
         if (existing) {
           existing.push(entry);
         } else {
@@ -461,6 +467,7 @@ function assembleDataStore(
     endDate: dates[dates.length - 1] ?? "",
     firstAppearance,
     chartWins: new Map(),
+    releaseWinDates: new Map(),
   };
 }
 

@@ -13,7 +13,7 @@ export interface EventMap {
   "play": () => void;
   "pause": () => void;
   "zoom:change": (level: ZoomLevel) => void;
-  "bar:click": (artistId: string) => void;
+  "bar:click": (artistId: string, releaseKey?: string) => void;
   "panel:close": () => void;
   "scrub:start": () => void;
   "scrub:end": () => void;

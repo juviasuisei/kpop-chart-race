@@ -1006,10 +1006,10 @@ export class ChartRaceRenderer {
       if (isSongsMode && entry.coArtists && entry.coArtists.length > 0) {
         // In Songs mode: if a specific logo was clicked, emit that artist's ID
         if (target instanceof HTMLImageElement && target.dataset.artistId) {
-          this.eventBus.emit('bar:click', target.dataset.artistId);
+          this.eventBus.emit('bar:click', target.dataset.artistId, entry.releaseKey);
         } else {
           // Default: emit first co-artist's ID (index 0)
-          this.eventBus.emit('bar:click', entry.coArtists[0].id);
+          this.eventBus.emit('bar:click', entry.coArtists[0].id, entry.releaseKey);
         }
       } else {
         this.eventBus.emit('bar:click', entry.artistId);

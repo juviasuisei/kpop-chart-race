@@ -60,7 +60,9 @@ async function main(): Promise<void> {
     }
 
     // Compute chart wins and attach to dataStore
-    dataStore.chartWins = computeChartWins(dataStore);
+    const chartWinsResult = computeChartWins(dataStore);
+    dataStore.chartWins = chartWinsResult.chartWins;
+    dataStore.releaseWinDates = chartWinsResult.releaseWinDates;
 
     await loadingScreen.onComplete();
   } catch (_err) {
@@ -265,7 +267,7 @@ async function main(): Promise<void> {
   });
 
   // bar:click → freeze-then-resolve: pause if playing, then open detail panel
-  eventBus.on("bar:click", (artistId: string) => {
+  eventBus.on("bar:click", (artistId: string, releaseKey?: string) => {
     if (playbackController.isPlaying()) {
       playbackController.pause();
     }
@@ -273,6 +275,10 @@ async function main(): Promise<void> {
     // but entries are keyed by composite releaseKey. Find the entry that contains
     // this artist in its coArtists array.
     let entry = currentSnapshot?.entries.find(e => e.artistId === artistId);
+    if (!entry && releaseKey) {
+      // Precise lookup by releaseKey (songs mode)
+      entry = currentSnapshot?.entries.find(e => e.releaseKey === releaseKey);
+    }
     if (!entry) {
       entry = currentSnapshot?.entries.find(e =>
         e.coArtists?.some(a => a.id === artistId)

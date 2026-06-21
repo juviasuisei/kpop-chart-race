@@ -39,6 +39,8 @@ export interface AlbumRelease {
   date: string;
   appleMusicUrl: string;
   isSingle: boolean;
+  /** Ordered array of artist IDs credited on this release */
+  artistIds: string[];
 }
 
 /** A fully parsed artist with a derived id and parsed releases */
@@ -107,4 +109,11 @@ export interface DataStore {
       }
     >
   >;
+  /**
+   * Maps releaseKey (format: `${artistId}::${releaseId}`) to a sorted array
+   * of dates on which that release won a chart show.
+   * Multiple entries for the same date are possible (wins on different sources).
+   * Array is sorted chronologically for efficient binary-search lookups.
+   */
+  releaseWinDates: Map<string, string[]>;
 }

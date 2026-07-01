@@ -50,7 +50,9 @@ const p4NativeNameArb = fc.oneof(
 /** Generate an optional Debut date (sometimes empty, sometimes valid ISO date) */
 const p4DebutArb = fc.oneof(
   fc.constant(''),
-  fc.date({ min: new Date('1990-01-01'), max: new Date('2025-12-31') }).map(d => d.toISOString().slice(0, 10)),
+  fc.date({ min: new Date('1990-01-01'), max: new Date('2025-12-31') })
+    .filter(d => !isNaN(d.getTime()))
+    .map(d => d.toISOString().slice(0, 10)),
 );
 
 /** Composite arbitrary for Property 4 artist fields */

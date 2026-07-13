@@ -8,7 +8,7 @@ import { EventBus } from "./event-bus.ts";
 import type { DataStore, ParsedArtist, ParsedEmbedDateEntry, ResolvedArtist } from "./models.ts";
 import type { DailyValueEntry } from "./types.ts";
 import { render as renderEmbed } from "./embed-renderer.ts";
-import { toRomanNumeral } from "./utils.ts";
+import { toRomanNumeral, generateFallbackLogoDataUri } from "./utils.ts";
 import { ARTIST_TYPE_COLORS } from "./colors.ts";
 import { computeCumulativeValue, computeTotalWins } from "./chart-engine.ts";
 
@@ -328,6 +328,9 @@ export class DetailPanel {
     logoImg.alt = `${artist.name} logo`;
     logoImg.width = 80;
     logoImg.height = 80;
+    logoImg.onerror = () => {
+      logoImg.src = generateFallbackLogoDataUri(artist.koreanName ?? artist.name);
+    };
     logoBg.appendChild(logoImg);
     header.appendChild(logoBg);
 
@@ -452,6 +455,9 @@ export class DetailPanel {
     logoImg.alt = `${artist.name} logo`;
     logoImg.width = 80;
     logoImg.height = 80;
+    logoImg.onerror = () => {
+      logoImg.src = generateFallbackLogoDataUri(artist.koreanName ?? artist.name);
+    };
     logoBg.appendChild(logoImg);
     header.appendChild(logoBg);
 

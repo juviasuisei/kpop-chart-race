@@ -7,6 +7,37 @@ import type { DataStore, RankedEntry } from "./models.ts";
 import type { ZoomLevel } from "./types.ts";
 
 /**
+ * Generate a data-URI SVG that renders the given text as a white label,
+ * matching the style of hand-crafted text logos (e.g. annyeong.svg).
+ * Used as a fallback when an artist's logo SVG file is missing.
+ * Prefers koreanName (native name) when available, otherwise uses the English name.
+ */
+export function generateFallbackLogoDataUri(name: string): string {
+  // Scale font size down for longer names so text fits in the 200×200 viewBox
+  const len = name.length;
+  let fontSize: number;
+  if (len <= 3) fontSize = 64;
+  else if (len <= 5) fontSize = 48;
+  else if (len <= 8) fontSize = 36;
+  else if (len <= 12) fontSize = 28;
+  else fontSize = 22;
+
+  // Escape XML special chars in the name
+  const escaped = name
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+
+  const svg =
+    `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">` +
+    `<text x="100" y="110" font-family="sans-serif" font-size="${fontSize}" font-weight="bold" fill="#fff" text-anchor="middle" dominant-baseline="middle">${escaped}</text>` +
+    `</svg>`;
+
+  return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+}
+
+/**
  * Linear interpolation between two values.
  * Returns start + (end - start) * t.
  */

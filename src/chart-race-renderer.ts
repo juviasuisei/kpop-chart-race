@@ -5,7 +5,7 @@
 
 import type { ChartSnapshot, DataStore, RankedEntry } from "./models.ts";
 import type { ArtistType, ZoomLevel } from "./types.ts";
-import { filterByActivity, computeBarWidth, toRomanNumeral, tween } from "./utils.ts";
+import { filterByActivity, computeBarWidth, toRomanNumeral, tween, generateFallbackLogoDataUri } from "./utils.ts";
 import { EventBus } from "./event-bus.ts";
 import { ARTIST_TYPE_COLORS } from "./colors.ts";
 import { computeTotalWins, computeReleaseWins, computeReleaseCumulativeValue } from "./chart-engine.ts";
@@ -28,11 +28,6 @@ const ARTIST_TYPE_LABELS: Record<ArtistType, string> = {
   solo_female: "Solo Female",
   mixed_group: "Non-Gendered Group",
 };
-
-/** Placeholder SVG data URI for missing logos */
-const PLACEHOLDER_SVG = `data:image/svg+xml,${encodeURIComponent(
-  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect width="40" height="40" rx="8" fill="#ccc"/><text x="20" y="24" text-anchor="middle" font-size="16" fill="#666">♪</text></svg>'
-)}`;
 
 /** Fixed bar height in pixels when zoom is "all" */
 const BAR_HEIGHT_ALL = 40;
@@ -155,6 +150,16 @@ export class ChartRaceRenderer {
         this.seenArtists.add(artistId);
       }
     }
+  }
+
+  /**
+   * Generate a text-based fallback logo for an artist whose SVG file is missing.
+   * Prefers the korean_name (native name) when available, falling back to the English name.
+   */
+  private getFallbackLogo(artistId: string, fallbackName: string): string {
+    const artist = this.dataStoreRef?.artists.get(artistId);
+    const displayName = artist?.koreanName ?? fallbackName;
+    return generateFallbackLogoDataUri(displayName);
   }
 
   /** Cancel all in-flight animations, timeouts, and pending phase 2 work */
@@ -911,7 +916,7 @@ export class ChartRaceRenderer {
     const logo = document.createElement("img");
     logo.className = "bar__logo";
     logo.onerror = () => {
-      logo.src = PLACEHOLDER_SVG;
+      logo.src = this.getFallbackLogo(entry.artistId, entry.artistName);
     };
 
     // In Songs mode with co-artists, the primary logo is the first co-artist's logo
@@ -930,7 +935,7 @@ export class ChartRaceRenderer {
         extraLogo.style.marginLeft = "4px";
         extraLogo.dataset.artistId = entry.coArtists[i].id;
         extraLogo.onerror = () => {
-          extraLogo.src = PLACEHOLDER_SVG;
+          extraLogo.src = this.getFallbackLogo(entry.coArtists![i].id, entry.coArtists![i].name);
         };
         extraLogos.push(extraLogo);
       }

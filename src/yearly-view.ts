@@ -9,6 +9,7 @@ import type { DataStore, ResolvedArtist } from "./models.ts";
 import type { ArtistType } from "./types.ts";
 import { ARTIST_TYPE_COLORS } from "./colors.ts";
 import { resolveArtists } from "./co-artist-resolver.ts";
+import { generateFallbackLogoDataUri } from "./utils.ts";
 
 /** Secondary indicator icons per ArtistType */
 const ARTIST_TYPE_INDICATORS: Record<ArtistType, string> = {
@@ -217,7 +218,10 @@ export class YearlyView {
           logo.className = "yearly-treemap__logo";
           logo.src = entry.logoUrl;
           logo.alt = entry.name;
-          logo.onerror = () => { logo.style.display = "none"; };
+          logo.onerror = () => {
+            const artist = this.dataStore?.artists.get(entry.artistId);
+            logo.src = generateFallbackLogoDataUri(artist?.koreanName ?? entry.name);
+          };
           cell.appendChild(logo);
 
           // Tooltip on hover
@@ -335,12 +339,18 @@ export class YearlyView {
           cell.style.backgroundColor = ARTIST_TYPE_COLORS[primaryType as keyof typeof ARTIST_TYPE_COLORS] ?? "#555";
 
           // Render all artist logos (multi-artist: side by side)
-          for (const logoUrl of entry.logoUrls) {
+          for (let logoIdx = 0; logoIdx < entry.logoUrls.length; logoIdx++) {
+            const logoUrl = entry.logoUrls[logoIdx];
+            const coArtist = entry.coArtists[logoIdx];
             const logo = document.createElement("img");
             logo.className = "yearly-treemap__logo";
             logo.src = logoUrl;
             logo.alt = entry.title;
-            logo.onerror = () => { logo.style.display = "none"; };
+            logo.onerror = () => {
+              const artistData = coArtist ? this.dataStore?.artists.get(coArtist.id) : undefined;
+              const fallbackName = artistData?.koreanName ?? coArtist?.name ?? entry.title;
+              logo.src = generateFallbackLogoDataUri(fallbackName);
+            };
             cell.appendChild(logo);
           }
 
@@ -433,7 +443,12 @@ export class YearlyView {
       logo.className = "yearly-view__logo";
       logo.src = entry.logoUrl;
       logo.alt = "";
-      logo.onerror = () => { logo.style.display = "none"; };
+      logo.onerror = () => {
+        const primaryArtist = entry.coArtists[0];
+        const artistData = primaryArtist ? this.dataStore?.artists.get(primaryArtist.id) : undefined;
+        const fallbackName = artistData?.koreanName ?? primaryArtist?.name ?? entry.title;
+        logo.src = generateFallbackLogoDataUri(fallbackName);
+      };
       bar.appendChild(logo);
 
       // Label format: "Release Title • Artist Name(s)"
@@ -794,7 +809,10 @@ export class YearlyView {
       logo.className = "yearly-view__logo";
       logo.src = entry.logoUrl;
       logo.alt = "";
-      logo.onerror = () => { logo.style.display = "none"; };
+      logo.onerror = () => {
+        const artist = this.dataStore?.artists.get(entry.artistId);
+        logo.src = generateFallbackLogoDataUri(artist?.koreanName ?? entry.name);
+      };
       bar.appendChild(logo);
 
       // Put name and stats inside initially — overflow check happens after layout

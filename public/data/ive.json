@@ -6,20 +6,6 @@
   "debut": "2022-10-19",
   "releases": [
     {
-      "title": "BLACKHOLE",
-      "dailyValues": {
-        "2026-03-18": { "value": 2887, "source": "show_champion", "episode": 589 },
-        "2026-03-11": { "value": 3643, "source": "show_champion", "episode": 588 },
-        "2026-03-04": { "value": 5716, "source": "show_champion", "episode": 587 }
-      },
-      "embeds": {
-        "2026-02-23": [
-          { "type": "release_date", "url": "https://music.apple.com/us/album/revive/1873882195" },
-          { "type": "mv", "url": "https://youtu.be/1Lmy7qwmSMc?si=asuite8BXjEv2RLk" }
-        ]
-      }
-    },
-    {
       "title": "XOXZ",
       "dailyValues": {
         "2025-10-25": { "value": 5323, "source": "show_music_core", "episode": 922 },
@@ -75,39 +61,6 @@
         "2025-02-03": [
           { "type": "release_date", "url": "https://music.apple.com/us/album/ive-empathy-ep/1789740675" },
           { "type": "mv", "url": "https://youtu.be/38xYeot-ciM?si=URPg0NXhOoRtJT-L" }
-        ]
-      }
-    },
-    {
-      "title": "REBEL HEART",
-      "dailyValues": {
-        "2025-02-28": { "value": 3885, "source": "music_bank", "episode": 1230 },
-        "2025-02-26": { "value": 4250, "source": "show_champion", "episode": 544 },
-        "2025-02-22": { "value": 5937, "source": "show_music_core", "episode": 891 },
-        "2025-02-21": { "value": 5649, "source": "music_bank", "episode": 1229 },
-        "2025-02-15": { "value": 6988, "source": "show_music_core", "episode": 890 },
-        "2025-02-14": { "value": 11520, "source": "music_bank", "episode": 1228 },
-        "2025-02-09": { "value": 7588, "source": "inkigayo", "episode": 1255 },
-        "2025-02-08": { "value": 7347, "source": "show_music_core", "episode": 889 },
-        "2025-02-07": { "value": 5014, "source": "music_bank", "episode": 1227 },
-        "2025-02-06": { "value": 7076, "source": "m_countdown", "episode": 874 },
-        "2025-02-02": { "value": 6150, "source": "inkigayo", "episode": 1254 },
-        "2025-01-31": { "value": 4148, "source": "music_bank", "episode": 1226 },
-        "2025-01-30": { "value": 7612, "source": "m_countdown", "episode": 873 },
-        "2025-01-26": { "value": 6580, "source": "inkigayo", "episode": 1253 },
-        "2025-01-25": { "value": 8341, "source": "show_music_core", "episode": 888 },
-        "2025-01-24": { "value": 4356, "source": "music_bank", "episode": 1225 },
-        "2025-01-23": { "value": 8147, "source": "m_countdown", "episode": 872 }
-      },
-      "embeds": {
-        "2025-02-14": [{ "type": "live_performance", "url": "https://youtu.be/6jAKd6FvJm4?si=U5W03eNpNTY2VR4F" }],
-        "2025-01-26": [{ "type": "live_performance", "url": "https://youtu.be/wsK5SkrruWo?si=YSIKJBqh7upcICMq" }],
-        "2025-01-25": [{ "type": "live_performance", "url": "https://youtu.be/SZc_JAPevIQ?si=JcgTJGe2uQW4cJaM" }],
-        "2025-01-24": [{ "type": "live_performance", "url": "https://youtu.be/6jAKd6FvJm4?si=reYJ1B3-hJ-Ymy2z" }],
-        "2025-01-23": [{ "type": "live_performance", "url": "https://youtu.be/MSCL9kYldNg?si=dzs9HEO9FRJkQN5H" }],
-        "2025-01-13": [
-          { "type": "release_date", "url": "https://music.apple.com/us/album/rebel-heart-single/1786710182" },
-          { "type": "mv", "url": "https://youtu.be/g36q0ZLvygQ?si=xh8KT0yj-GpghvRb" }
         ]
       }
     }

@@ -148,9 +148,11 @@ function buildPixelPoints(
   const points: PixelPoint[] = [];
   const values: number[] = [];
 
-  // Add the value at viewport start (interpolated)
+  // Only add a starting point at the left edge if the line was already active
+  // BEFORE the viewport start (i.e., it has accumulated value from prior activity)
   const startValue = getValueAtDate(changePoints, startDateIndex);
-  if (startValue > 0 || changePoints.length > 0) {
+  const lineStartsBeforeViewport = changePoints.length > 0 && changePoints[0][0] < startDateIndex;
+  if (startValue > 0 && lineStartsBeforeViewport) {
     points.push({
       x: padding.left,
       y: padding.top + chartH - (startValue / effectiveMax) * chartH,
@@ -171,13 +173,14 @@ function buildPixelPoints(
     values.push(value);
   }
 
-  // Add the value at viewport end (extend flat line)
-  if (changePoints.length > 0) {
+  // Add the value at viewport end (extend flat line to the right edge)
+  // Only if the line already has points drawn in the viewport
+  if (points.length > 0) {
     const endValue = getValueAtDate(changePoints, endDateIndex);
     const lastPoint = points[points.length - 1];
     const endX = padding.left + chartW;
     // Only add end point if it differs from the last plotted point
-    if (!lastPoint || Math.abs(lastPoint.x - endX) > 1) {
+    if (Math.abs(lastPoint.x - endX) > 1) {
       points.push({
         x: endX,
         y: padding.top + chartH - (endValue / effectiveMax) * chartH,

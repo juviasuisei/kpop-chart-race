@@ -1021,31 +1021,69 @@ export class LineChartController {
   /** Find an event dot at the given CSS point (only when a line is selected) */
   private findEventDotAtPoint(x: number, y: number): { lineId: string; dateIndex: number; eventTypes: string[] } | null {
     if (this.state.selectedLineIds.length === 0) return null;
+    if (!this.dataStore) return null;
 
     const selectedId = this.state.selectedLineIds[0];
     const rd = this.renderDataCache.find(r => r.lineId === selectedId);
     if (!rd) return null;
 
-    // Look up win dates for this line
-    const releaseWinDates = this.dataStore?.releaseWinDates?.get(selectedId);
-    if (!releaseWinDates || releaseWinDates.length === 0) return null;
+    const meta = this.lineMetadata.get(selectedId);
+    if (!meta) return null;
+
+    const artist = this.dataStore.artists.get(meta.artistId);
+    if (!artist) return null;
 
     const viewStart = this.state.viewportStart;
     const viewEnd = this.state.viewportEnd;
-    const viewRange = viewEnd - viewStart;
-    const totalPoints = rd.points.length;
+    const totalDateSpan = viewEnd + 1 - viewStart;
+    const { width } = this.renderer!.getSize();
+    const chartW = width - PADDING.left - PADDING.right;
+    const chartH = this.renderer!.getSize().height - PADDING.top - PADDING.bottom;
+    const frameMax = this.getCurrentFrameMax();
 
+    // Collect all dot dates (wins + embeds)
+    const dotDates: { date: string; dateIdx: number; eventTypes: string[] }[] = [];
+
+    // Win dates
+    const releaseWinDates = this.dataStore.releaseWinDates?.get(selectedId) ?? [];
     for (const winDate of releaseWinDates) {
       const dateIdx = this.state.dates.indexOf(winDate);
-      if (dateIdx < viewStart || dateIdx > viewEnd) continue;
+      if (dateIdx >= viewStart && dateIdx <= viewEnd) {
+        dotDates.push({ date: winDate, dateIdx, eventTypes: ["win"] });
+      }
+    }
 
-      const pointIdx = Math.round(((dateIdx - viewStart) / viewRange) * (totalPoints - 1));
-      if (pointIdx < 0 || pointIdx >= totalPoints) continue;
+    // Embed dates
+    if (meta.releaseId) {
+      const release = artist.releases.find(r => r.id === meta.releaseId);
+      if (release) {
+        for (const [date, embeds] of release.embeds) {
+          if (!embeds || embeds.length === 0) continue;
+          const dateIdx = this.state.dates.indexOf(date);
+          if (dateIdx >= viewStart && dateIdx <= viewEnd) {
+            const types = embeds.map(e => e.type as string);
+            // Merge with existing if same date
+            const existing = dotDates.find(d => d.dateIdx === dateIdx);
+            if (existing) {
+              existing.eventTypes.push(...types);
+            } else {
+              dotDates.push({ date, dateIdx, eventTypes: types });
+            }
+          }
+        }
+      }
+    }
 
-      const pt = rd.points[pointIdx];
-      const dist = Math.hypot(x - pt.x, y - pt.y);
-      if (dist <= 10) {
-        return { lineId: selectedId, dateIndex: dateIdx, eventTypes: ["win"] };
+    // Hit test each dot
+    for (const dot of dotDates) {
+      const xRatio = (dot.dateIdx - viewStart) / totalDateSpan;
+      const dotX = PADDING.left + xRatio * chartW;
+      const value = this.getValueAtDateForLine(rd, dot.dateIdx);
+      const dotY = PADDING.top + chartH - (value / (frameMax || 1)) * chartH;
+
+      const dist = Math.hypot(x - dotX, y - dotY);
+      if (dist <= 12) {
+        return { lineId: selectedId, dateIndex: dot.dateIdx, eventTypes: dot.eventTypes };
       }
     }
 

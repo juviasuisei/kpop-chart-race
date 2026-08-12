@@ -316,9 +316,9 @@ function computeFrame(msg: ComputeFrameMessage): void {
 
     if (opacity <= 0 && !isSelected) continue;
 
-    // Apply selection dimming: if any line is selected, non-selected lines get ×0.2
+    // Apply selection dimming: if any line is selected, non-selected lines get ×0.08
     if (selectedLineIds.size > 0 && !isSelected) {
-      opacity *= 0.2;
+      opacity *= 0.08;
     }
 
     const layer = assignLayer(opacity, isSelected);

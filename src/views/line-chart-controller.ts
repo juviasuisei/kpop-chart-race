@@ -882,20 +882,18 @@ export class LineChartController {
   }
 
   private drawCrownDot(ctx: CanvasRenderingContext2D, x: number, y: number, winNumber: number): void {
-    const crownLevel = Math.min(winNumber, 12); // levels 13+ reuse crown-12
+    const crownLevel = Math.min(winNumber, 12);
     const img = this.crownImages.get(crownLevel);
     const dotSize = EVENT_DOT_SIZE * 1.8;
 
     if (img && img.complete && img.naturalWidth > 0) {
       const imgSize = dotSize * 2.5;
-      // Draw thin black border circle behind the crown
       ctx.save();
-      ctx.strokeStyle = "rgba(0, 0, 0, 0.3)";
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.arc(x, y, imgSize / 2 + 1, 0, Math.PI * 2);
-      ctx.stroke();
-      // Draw crown SVG image centered on the point, colored white
+      // Draw black border layer (slightly larger, behind)
+      ctx.filter = "brightness(0)";
+      const borderSize = imgSize + 2;
+      ctx.drawImage(img, x - borderSize / 2, y - borderSize / 2, borderSize, borderSize);
+      // Draw white crown on top
       ctx.filter = "brightness(0) invert(1)";
       ctx.drawImage(img, x - imgSize / 2, y - imgSize / 2, imgSize, imgSize);
       ctx.restore();

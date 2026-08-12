@@ -497,12 +497,8 @@ export class LineChartController {
 
   private startAnimationLoop(): void {
     if (this.rafId !== null) return;
-    // Start at -1 if beginning from the first date, so lines animate from 0 upward
-    if (this.state.currentDateIndex === 0) {
-      this.animationPosition = -1;
-    } else {
-      this.animationPosition = this.state.currentDateIndex;
-    }
+    // Start at currentDateIndex (which is 0 = zero-day after reset)
+    this.animationPosition = this.state.currentDateIndex;
     this.lastFrameTime = performance.now();
     this.rafLoop();
   }

@@ -164,15 +164,13 @@ function buildPixelPoints(
   // its first change-point so it animates up from the bottom
   const firstInViewport = changePoints.find(([idx]) => idx >= startDateIndex && idx <= endDateIndex);
   if (firstInViewport && !lineStartsBeforeViewport) {
-    const zeroDateIdx = firstInViewport[0] - 1;
-    if (zeroDateIdx >= startDateIndex) {
-      const xRatio = (zeroDateIdx - startDateIndex) / dateRange;
-      points.push({
-        x: padding.left + xRatio * chartW,
-        y: padding.top + chartH, // Y = 0 value = bottom of chart
-      });
-      values.push(0);
-    }
+    const zeroDateIdx = Math.max(startDateIndex, firstInViewport[0] - 1);
+    const xRatio = (zeroDateIdx - startDateIndex) / dateRange;
+    points.push({
+      x: padding.left + xRatio * chartW,
+      y: padding.top + chartH, // Y = 0 value = bottom of chart
+    });
+    values.push(0);
   }
 
   // Add each change-point within the viewport

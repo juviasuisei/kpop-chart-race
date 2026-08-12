@@ -244,16 +244,15 @@ export class LineChartController {
 
   setDateIndex(index: number): void {
     this.state.currentDateIndex = index;
-    if (this.state.playing) {
-      // During playback: viewport right edge IS the current date (progressive reveal)
-      const zoomWindow = PRESET_DAYS[this.state.timeZoom] === Infinity
-        ? this.state.dates.length
-        : PRESET_DAYS[this.state.timeZoom];
 
-      this.state.viewportEnd = index;
-      this.state.viewportStart = Math.max(0, index - zoomWindow);
-      this.backgroundDirty = true;
-    }
+    // Viewport right edge always tracks the current date
+    const zoomWindow = PRESET_DAYS[this.state.timeZoom] === Infinity
+      ? this.state.dates.length
+      : PRESET_DAYS[this.state.timeZoom];
+
+    this.state.viewportEnd = index;
+    this.state.viewportStart = Math.max(0, index - zoomWindow);
+    this.backgroundDirty = true;
     this.requestFrame();
   }
 

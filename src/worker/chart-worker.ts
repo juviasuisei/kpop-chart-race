@@ -97,14 +97,15 @@ function assignLayer(opacity: number, isSelected: boolean): CanvasLayer {
 
 /**
  * Extract visible points for a line within the viewport, mapping to pixel coords.
+ * Returns both pixel points and corresponding cumulative values.
  */
 function buildPixelPoints(
   changePoints: [number, number][],
   viewport: Viewport,
-): PixelPoint[] {
+): { points: PixelPoint[]; values: number[] } {
   const { startDateIndex, endDateIndex, width, height } = viewport;
   const dateRange = endDateIndex - startDateIndex;
-  if (dateRange <= 0) return [];
+  if (dateRange <= 0) return { points: [], values: [] };
 
   // Compute chart area in CSS pixels (canvas context has DPR transform applied)
   const padding = { top: 40, right: 160, bottom: 40, left: 0 };
@@ -117,6 +118,7 @@ function buildPixelPoints(
 
   // Collect points within viewport range
   const points: PixelPoint[] = [];
+  const values: number[] = [];
 
   // Add the value at viewport start (interpolated)
   const startValue = getValueAtDate(changePoints, startDateIndex);
@@ -125,6 +127,7 @@ function buildPixelPoints(
       x: padding.left,
       y: padding.top + chartH - (startValue / maxValue) * chartH,
     });
+    values.push(startValue);
   }
 
   // Add each change-point within the viewport
@@ -137,6 +140,7 @@ function buildPixelPoints(
       x: padding.left + xRatio * chartW,
       y: padding.top + chartH - (value / maxValue) * chartH,
     });
+    values.push(value);
   }
 
   // Add the value at viewport end (extend flat line)
@@ -150,10 +154,11 @@ function buildPixelPoints(
         x: endX,
         y: padding.top + chartH - (endValue / maxValue) * chartH,
       });
+      values.push(endValue);
     }
   }
 
-  return points;
+  return { points, values };
 }
 
 // Global max value for Y-axis scaling (updated on init and viewport changes)
@@ -224,7 +229,7 @@ function computeFrame(msg: ComputeFrameMessage): void {
     const zIndex = isSelected ? Infinity : computeZIndex(daysSinceActivity, lifetimePoints);
 
     // Build pixel coordinates
-    const points = buildPixelPoints(line.changePoints, viewport);
+    const { points, values } = buildPixelPoints(line.changePoints, viewport);
     if (points.length < 2) continue;
 
     const lineWidth = isSelected ? 3 : 1.5;
@@ -233,6 +238,7 @@ function computeFrame(msg: ComputeFrameMessage): void {
       cmd: {
         lineId: line.lineId,
         points,
+        values,
         color: line.color,
         opacity,
         lineWidth,

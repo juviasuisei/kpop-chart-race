@@ -13,8 +13,6 @@
 
 import { ChartWorkerClient } from "../worker/chart-worker-client.ts";
 import { CanvasRenderer } from "../canvas/canvas-renderer.ts";
-import { SpatialIndex } from "../canvas/spatial-index.ts";
-import { InteractionLayer } from "../canvas/interaction-layer.ts";
 import { Tooltip } from "../canvas/tooltip.ts";
 import { Disambiguation } from "../canvas/disambiguation.ts";
 import { Popover } from "../canvas/popover.ts";
@@ -24,7 +22,7 @@ import { ARTIST_TYPE_COLORS } from "../colors.ts";
 import type { EventBus } from "../event-bus.ts";
 import type { DataStore } from "../models.ts";
 import type { FilterState } from "../types.ts";
-import type { SerializedLineData, FrameResultMessage, Viewport, VisibilityParams, LineDrawCommand } from "../worker/messages.ts";
+import type { SerializedLineData, FrameResultMessage, Viewport, VisibilityParams, LineDrawCommand, PixelPoint } from "../worker/messages.ts";
 
 /** Time zoom presets with their date range widths */
 export type TimeZoomPreset = "90d" | "quarter" | "year" | "decade" | "all";
@@ -80,6 +78,25 @@ const SOURCE_LOGO_URLS: Record<string, string> = {
   show_music_core: "assets/sources/show_music_core.png",
 };
 
+/** Cached render data for a single line (mirrors prototype's renderDataCache) */
+interface RenderLineData {
+  lineId: string;
+  points: PixelPoint[];
+  values: number[];
+  color: string;
+  opacity: number;
+  lineWidth: number;
+}
+
+/** Label hit box for click detection */
+interface LabelHitBox {
+  lineId: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
 /** State for the line chart view */
 interface LineChartState {
   dates: string[];
@@ -100,12 +117,15 @@ export class LineChartController {
   private dataStore: DataStore | null = null;
   private workerClient: ChartWorkerClient;
   private renderer: CanvasRenderer | null = null;
-  private spatialIndex: SpatialIndex;
-  private interaction: InteractionLayer | null = null;
   private tooltip: Tooltip | null = null;
   private disambiguation: Disambiguation | null = null;
   private popover: Popover | null = null;
   private legend: Legend | null = null;
+
+  /** Cached render data from last frame (mirrors prototype's renderDataCache) */
+  private renderDataCache: RenderLineData[] = [];
+  /** Label hit boxes for click detection */
+  private labelHitBoxes: LabelHitBox[] = [];
 
   private state: LineChartState = {
     dates: [],
@@ -134,6 +154,15 @@ export class LineChartController {
   private backgroundDirty = true;
   /** Whether popover is currently open */
   private popoverOpen = false;
+  /** Pan gesture state */
+  private isPanning = false;
+  private lastPanX = 0;
+  /** Pinch gesture state */
+  private pinchActive = false;
+  private pinchStartDistance = 0;
+  /** Touch gesture state */
+  private touchStartPos = { x: 0, y: 0 };
+  private touchMoved = false;
 
   /** Callback for when the controller needs playback to advance */
   onRequestDateAdvance: ((dateIndex: number) => void) | null = null;
@@ -143,7 +172,6 @@ export class LineChartController {
   constructor(eventBus: EventBus) {
     this.eventBus = eventBus;
     this.workerClient = new ChartWorkerClient();
-    this.spatialIndex = new SpatialIndex(32);
   }
 
   /**
@@ -154,19 +182,6 @@ export class LineChartController {
     this.renderer = new CanvasRenderer({ container });
     this.renderer.mount();
     this.renderer.onResize = this.handleResize;
-
-    // Initialize interaction layer
-    this.interaction = new InteractionLayer(
-      this.renderer.getInteractionCanvas()!,
-      this.spatialIndex,
-    );
-    this.interaction.onHover = this.handleHover;
-    this.interaction.onClick = this.handleClick;
-    this.interaction.onPanStart = this.handlePanStart;
-    this.interaction.onPan = this.handlePan;
-    this.interaction.onPanEnd = this.handlePanEnd;
-    this.interaction.onPinchZoom = this.handlePinchZoom;
-    this.interaction.mount();
 
     // Mount tooltip, disambiguation, popover
     this.tooltip = new Tooltip(container);
@@ -179,6 +194,19 @@ export class LineChartController {
     // Mount legend below chart container
     this.legend = new Legend();
     this.legend.mount(container);
+
+    // Attach direct event listeners on the highlight canvas (like prototype)
+    const hlCanvas = this.renderer.getInteractionCanvas()!;
+    hlCanvas.addEventListener("mousemove", this.handleMouseMove);
+    hlCanvas.addEventListener("click", this.handleCanvasClick);
+    hlCanvas.addEventListener("mouseleave", this.handleMouseLeave);
+    hlCanvas.addEventListener("mousedown", this.handleMouseDown);
+    hlCanvas.addEventListener("mouseup", this.handleMouseUp);
+    hlCanvas.addEventListener("touchstart", this.handleTouchStart, { passive: false });
+    hlCanvas.addEventListener("touchmove", this.handleTouchMove, { passive: false });
+    hlCanvas.addEventListener("touchend", this.handleTouchEnd);
+    hlCanvas.addEventListener("touchcancel", this.handleTouchEnd);
+    hlCanvas.addEventListener("contextmenu", (e) => e.preventDefault());
 
     // Keyboard: Escape to close popover / deselect
     this.handleKeydown = this.handleKeydown.bind(this);
@@ -351,7 +379,21 @@ export class LineChartController {
   destroy(): void {
     this.stopAnimationLoop();
     document.removeEventListener("keydown", this.handleKeydown);
-    this.interaction?.destroy();
+
+    // Remove direct canvas event listeners
+    const hlCanvas = this.renderer?.getInteractionCanvas();
+    if (hlCanvas) {
+      hlCanvas.removeEventListener("mousemove", this.handleMouseMove);
+      hlCanvas.removeEventListener("click", this.handleCanvasClick);
+      hlCanvas.removeEventListener("mouseleave", this.handleMouseLeave);
+      hlCanvas.removeEventListener("mousedown", this.handleMouseDown);
+      hlCanvas.removeEventListener("mouseup", this.handleMouseUp);
+      hlCanvas.removeEventListener("touchstart", this.handleTouchStart);
+      hlCanvas.removeEventListener("touchmove", this.handleTouchMove);
+      hlCanvas.removeEventListener("touchend", this.handleTouchEnd);
+      hlCanvas.removeEventListener("touchcancel", this.handleTouchEnd);
+    }
+
     this.renderer?.destroy();
     this.workerClient.destroy();
     this.tooltip?.destroy();
@@ -476,6 +518,39 @@ export class LineChartController {
 
     const { width, height } = this.renderer.getSize();
 
+    // Build renderDataCache from all layers (mirrors prototype's structure)
+    this.renderDataCache = [];
+    for (const cmd of result.background) {
+      this.renderDataCache.push({
+        lineId: cmd.lineId,
+        points: cmd.points,
+        values: cmd.values,
+        color: cmd.color,
+        opacity: cmd.opacity,
+        lineWidth: cmd.lineWidth,
+      });
+    }
+    for (const cmd of result.foreground) {
+      this.renderDataCache.push({
+        lineId: cmd.lineId,
+        points: cmd.points,
+        values: cmd.values,
+        color: cmd.color,
+        opacity: cmd.opacity,
+        lineWidth: cmd.lineWidth,
+      });
+    }
+    for (const cmd of result.highlight) {
+      this.renderDataCache.push({
+        lineId: cmd.lineId,
+        points: cmd.points,
+        values: cmd.values,
+        color: cmd.color,
+        opacity: cmd.opacity,
+        lineWidth: cmd.lineWidth,
+      });
+    }
+
     // Draw layers
     if (this.backgroundDirty) {
       this.renderer.drawBackground(result.background);
@@ -502,9 +577,6 @@ export class LineChartController {
         this.drawHighlightLabelsAndDots(hlCtx, result.highlight);
       }
     }
-
-    // Update spatial index
-    this.rebuildSpatialIndex(result);
 
     this.onUpdateComplete?.();
     this.eventBus.emit("update:complete");
@@ -541,6 +613,8 @@ export class LineChartController {
   }
 
   private drawEndpointLabels(ctx: CanvasRenderingContext2D, commands: LineDrawCommand[]): void {
+    this.labelHitBoxes = []; // reset
+
     // Collect label candidates (only visible lines, opacity > 0.5)
     const labeled = commands
       .filter(cmd => cmd.points.length >= 2 && cmd.opacity > 0.5)
@@ -549,11 +623,12 @@ export class LineChartController {
         endPoint: cmd.points[cmd.points.length - 1],
         color: cmd.color,
         opacity: cmd.opacity,
+        finalValue: cmd.values.length > 0 ? cmd.values[cmd.values.length - 1] : 0,
       }))
       .sort((a, b) => a.endPoint.y - b.endPoint.y);
 
     // Stagger to avoid overlap (MIN_GAP = 18px)
-    const resolvedPositions: { y: number; lineId: string; endPoint: { x: number; y: number }; color: string; opacity: number }[] = [];
+    const resolvedPositions: { y: number; lineId: string; endPoint: PixelPoint; color: string; opacity: number; finalValue: number }[] = [];
 
     for (const item of labeled) {
       let labelY = item.endPoint.y;
@@ -565,7 +640,7 @@ export class LineChartController {
       resolvedPositions.push({ ...item, y: labelY });
     }
 
-    for (const { y: labelY, lineId, endPoint, color, opacity } of resolvedPositions) {
+    for (const { y: labelY, lineId, endPoint, color, opacity, finalValue } of resolvedPositions) {
       const meta = this.lineMetadata.get(lineId);
       if (!meta) continue;
 
@@ -586,9 +661,25 @@ export class LineChartController {
       ctx.fillText(displayText, endPoint.x + 6, labelY - 1);
 
       // Line 2: "value · wins" (smaller, lighter)
-      ctx.font = "8px system-ui, -apple-system, sans-serif";
-      ctx.globalAlpha = opacity * 0.7;
-      // TODO: worker doesn't include final value in draw command yet
+      if (finalValue > 0) {
+        const wins = this.getWinCount(lineId);
+        const statsText = wins > 0
+          ? `${finalValue.toLocaleString()} \u00B7 ${wins}W`
+          : `${finalValue.toLocaleString()}`;
+        ctx.font = "8px system-ui, -apple-system, sans-serif";
+        ctx.globalAlpha = opacity * 0.7;
+        ctx.fillText(statsText, endPoint.x + 6, labelY + 8);
+      }
+
+      // Register hit box for click detection
+      this.labelHitBoxes.push({
+        lineId,
+        x: endPoint.x + 6,
+        y: labelY - 10,
+        width: MAX_LABEL_WIDTH,
+        height: 20,
+      });
+
       ctx.globalAlpha = 1;
     }
   }
@@ -614,11 +705,18 @@ export class LineChartController {
         }
         ctx.fillText(displayText, lastPt.x + 6, lastPt.y - 1);
 
-        // Stats line
-        ctx.font = "8px system-ui, -apple-system, sans-serif";
-        ctx.globalAlpha = 0.7;
-        // TODO: include value from worker
-        ctx.globalAlpha = 1;
+        // Stats line with value + wins
+        const finalValue = cmd.values.length > 0 ? cmd.values[cmd.values.length - 1] : 0;
+        if (finalValue > 0) {
+          const wins = this.getWinCount(cmd.lineId);
+          const statsText = wins > 0
+            ? `${finalValue.toLocaleString()} \u00B7 ${wins}W`
+            : `${finalValue.toLocaleString()}`;
+          ctx.font = "8px system-ui, -apple-system, sans-serif";
+          ctx.globalAlpha = 0.7;
+          ctx.fillText(statsText, lastPt.x + 6, lastPt.y + 8);
+          ctx.globalAlpha = 1;
+        }
       }
 
       // Draw event dots on the highlighted line
@@ -695,21 +793,6 @@ export class LineChartController {
     ctx.restore();
   }
 
-  // --- Private: Spatial index ---
-
-  private rebuildSpatialIndex(result: FrameResultMessage): void {
-    const { width, height } = this.renderer!.getSize();
-    this.spatialIndex.resize(width, height);
-    this.spatialIndex.clear();
-
-    const indexable = [...result.foreground, ...result.highlight];
-    for (const cmd of indexable) {
-      if (cmd.points.length < 2) continue;
-      // Points are already in CSS pixel space (worker outputs CSS pixels)
-      this.spatialIndex.insert({ lineId: cmd.lineId, points: cmd.points });
-    }
-  }
-
   // --- Private: Viewport management ---
 
   private autoScrollViewport(): void {
@@ -726,6 +809,370 @@ export class LineChartController {
     }
   }
 
+  // --- Private: Hit detection (matching prototype exactly) ---
+
+  /** Find lines near a CSS point, returns lineId + nearest point index */
+  private findLinesAtPoint(x: number, y: number): { rd: RenderLineData; nearestIndex: number }[] {
+    const hits: { rd: RenderLineData; nearestIndex: number }[] = [];
+
+    for (const rd of this.renderDataCache) {
+      if (rd.opacity <= 0) continue;
+      for (let i = 0; i < rd.points.length - 1; i++) {
+        const dist = this.pointToSegmentDistance(x, y, rd.points[i], rd.points[i + 1]);
+        if (dist <= HIT_RADIUS) {
+          const distToI = Math.hypot(x - rd.points[i].x, y - rd.points[i].y);
+          const distToI1 = Math.hypot(x - rd.points[i + 1].x, y - rd.points[i + 1].y);
+          const nearestIndex = distToI <= distToI1 ? i : i + 1;
+          hits.push({ rd, nearestIndex });
+          break;
+        }
+      }
+    }
+
+    return hits;
+  }
+
+  /** Find an event dot at the given CSS point (only when a line is selected) */
+  private findEventDotAtPoint(x: number, y: number): { lineId: string; dateIndex: number; eventTypes: string[] } | null {
+    if (this.state.selectedLineIds.length === 0) return null;
+
+    const selectedId = this.state.selectedLineIds[0];
+    const rd = this.renderDataCache.find(r => r.lineId === selectedId);
+    if (!rd) return null;
+
+    // Look up win dates for this line
+    const releaseWinDates = this.dataStore?.releaseWinDates?.get(selectedId);
+    if (!releaseWinDates || releaseWinDates.length === 0) return null;
+
+    const viewStart = this.state.viewportStart;
+    const viewEnd = this.state.viewportEnd;
+    const viewRange = viewEnd - viewStart;
+    const totalPoints = rd.points.length;
+
+    for (const winDate of releaseWinDates) {
+      const dateIdx = this.state.dates.indexOf(winDate);
+      if (dateIdx < viewStart || dateIdx > viewEnd) continue;
+
+      const pointIdx = Math.round(((dateIdx - viewStart) / viewRange) * (totalPoints - 1));
+      if (pointIdx < 0 || pointIdx >= totalPoints) continue;
+
+      const pt = rd.points[pointIdx];
+      const dist = Math.hypot(x - pt.x, y - pt.y);
+      if (dist <= 10) {
+        return { lineId: selectedId, dateIndex: dateIdx, eventTypes: ["win"] };
+      }
+    }
+
+    return null;
+  }
+
+  /** Find a label hit box at the given CSS point */
+  private findLabelAtPoint(x: number, y: number): string | null {
+    for (const box of this.labelHitBoxes) {
+      if (x >= box.x && x <= box.x + box.width && y >= box.y && y <= box.y + box.height) {
+        return box.lineId;
+      }
+    }
+    return null;
+  }
+
+  /** Point-to-segment distance (matches prototype) */
+  private pointToSegmentDistance(px: number, py: number, a: PixelPoint, b: PixelPoint): number {
+    const dx = b.x - a.x;
+    const dy = b.y - a.y;
+    const lenSq = dx * dx + dy * dy;
+    if (lenSq === 0) return Math.hypot(px - a.x, py - a.y);
+
+    let t = ((px - a.x) * dx + (py - a.y) * dy) / lenSq;
+    t = Math.max(0, Math.min(1, t));
+
+    const projX = a.x + t * dx;
+    const projY = a.y + t * dy;
+    return Math.hypot(px - projX, py - projY);
+  }
+
+  /** Get canvas-relative coordinates from a MouseEvent */
+  private getCanvasCoords(e: MouseEvent): { x: number; y: number } {
+    const canvas = this.renderer?.getInteractionCanvas();
+    if (!canvas) return { x: 0, y: 0 };
+    const rect = canvas.getBoundingClientRect();
+    return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+  }
+
+  /** Get canvas-relative coordinates from a Touch */
+  private getCanvasCoordsFromTouch(touch: Touch): { x: number; y: number } {
+    const canvas = this.renderer?.getInteractionCanvas();
+    if (!canvas) return { x: 0, y: 0 };
+    const rect = canvas.getBoundingClientRect();
+    return { x: touch.clientX - rect.left, y: touch.clientY - rect.top };
+  }
+
+  private getTouchDistance(touches: TouchList): number {
+    const dx = touches[1].clientX - touches[0].clientX;
+    const dy = touches[1].clientY - touches[0].clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
+  // --- Private: Direct event handlers (matching prototype lines 720-933) ---
+
+  private handleMouseMove = (e: MouseEvent): void => {
+    if (this.isPanning) {
+      const deltaX = e.clientX - this.lastPanX;
+      this.lastPanX = e.clientX;
+      this.panByPixels(deltaX);
+      return;
+    }
+
+    if (this.disambiguation?.isVisible()) return;
+    if (this.popoverOpen) return;
+
+    const { x, y } = this.getCanvasCoords(e);
+    const hlCanvas = this.renderer?.getInteractionCanvas();
+
+    // Check event dots first (if line is selected)
+    const dotHit = this.findEventDotAtPoint(x, y);
+    if (dotHit) {
+      if (hlCanvas) hlCanvas.style.cursor = "pointer";
+      const rd = this.renderDataCache.find(r => r.lineId === dotHit.lineId);
+      if (rd) {
+        const eventLabel = "Chart Win";
+        this.showRichTooltip(x, y, rd, this.getNearestPointIndex(rd, x), eventLabel, true);
+      }
+      return;
+    }
+
+    // Check label hover (only when not in highlight mode)
+    if (this.state.selectedLineIds.length === 0) {
+      const labelHit = this.findLabelAtPoint(x, y);
+      if (labelHit) {
+        if (hlCanvas) hlCanvas.style.cursor = "pointer";
+        this.tooltip?.hide();
+        return;
+      }
+    }
+
+    // Check lines
+    const hits = this.findLinesAtPoint(x, y);
+    if (hits.length === 0) {
+      if (hlCanvas) hlCanvas.style.cursor = "default";
+      this.tooltip?.hide();
+      this.eventBus.emit("line:hover", null);
+      return;
+    }
+
+    if (hlCanvas) hlCanvas.style.cursor = "pointer";
+
+    // When a line is already highlighted, only show tooltip for the selected line
+    if (this.state.selectedLineIds.length > 0) {
+      const selectedHit = hits.find(h => this.state.selectedLineIds.includes(h.rd.lineId));
+      if (selectedHit) {
+        this.showRichTooltip(x, y, selectedHit.rd, selectedHit.nearestIndex);
+      } else {
+        this.tooltip?.hide();
+      }
+      return;
+    }
+
+    if (hits.length === 1) {
+      const { rd, nearestIndex } = hits[0];
+      this.showRichTooltip(x, y, rd, nearestIndex);
+    } else {
+      // Multiple hits — show cluster hint
+      this.tooltip?.showClusterHint(hits.length, x, y);
+    }
+
+    this.eventBus.emit("line:hover", { lineId: hits[0].rd.lineId, label: "", x, y });
+  };
+
+  private handleMouseDown = (e: MouseEvent): void => {
+    if (e.button !== 0) return;
+
+    const { x, y } = this.getCanvasCoords(e);
+    const hits = this.findLinesAtPoint(x, y);
+
+    if (hits.length > 0) return; // Will handle on mouseup
+
+    // Start panning (clicked on empty area)
+    this.isPanning = true;
+    this.lastPanX = e.clientX;
+    const hlCanvas = this.renderer?.getInteractionCanvas();
+    if (hlCanvas) hlCanvas.style.cursor = "grabbing";
+  };
+
+  private handleMouseUp = (_e: MouseEvent): void => {
+    if (this.isPanning) {
+      this.isPanning = false;
+      const hlCanvas = this.renderer?.getInteractionCanvas();
+      if (hlCanvas) hlCanvas.style.cursor = "default";
+      return;
+    }
+  };
+
+  private handleCanvasClick = (e: MouseEvent): void => {
+    const { x, y } = this.getCanvasCoords(e);
+
+    // Hide disambiguation if open and clicked elsewhere
+    if (this.disambiguation?.isVisible()) {
+      this.disambiguation.hide();
+      return;
+    }
+
+    // Check label click (toggle highlight)
+    const labelHit = this.findLabelAtPoint(x, y);
+    if (labelHit) {
+      if (this.state.selectedLineIds.length > 0) {
+        this.clearSelection();
+      } else {
+        this.selectLine(labelHit);
+      }
+      return;
+    }
+
+    // Check event dot click — open popover with embeds
+    const dotHit = this.findEventDotAtPoint(x, y);
+    if (dotHit) {
+      this.showPopoverForDot(dotHit);
+      return;
+    }
+
+    // Check line clicks
+    const hits = this.findLinesAtPoint(x, y);
+    if (hits.length === 0) {
+      if (this.popoverOpen) {
+        this.hidePopover();
+        return;
+      }
+      this.clearSelection();
+      return;
+    }
+
+    if (this.state.selectedLineIds.length > 0) {
+      if (this.popoverOpen) {
+        this.hidePopover();
+        return;
+      }
+      // Already highlighting — clicking deselects
+      this.clearSelection();
+      return;
+    }
+
+    if (hits.length === 1) {
+      this.selectLine(hits[0].rd.lineId);
+    } else {
+      // Show disambiguation popup
+      const items = hits.map(h => {
+        const meta = this.lineMetadata.get(h.rd.lineId);
+        return {
+          lineId: h.rd.lineId,
+          label: meta?.label ?? h.rd.lineId,
+          color: h.rd.color,
+        };
+      });
+      this.disambiguation?.show(x, y, items);
+    }
+  };
+
+  private handleMouseLeave = (): void => {
+    if (this.isPanning) {
+      this.isPanning = false;
+    }
+    if (!this.popoverOpen) {
+      this.tooltip?.hide();
+    }
+    const hlCanvas = this.renderer?.getInteractionCanvas();
+    if (hlCanvas) hlCanvas.style.cursor = "default";
+  };
+
+  private handleTouchStart = (e: TouchEvent): void => {
+    if (e.touches.length === 2) {
+      e.preventDefault();
+      this.pinchActive = true;
+      this.pinchStartDistance = this.getTouchDistance(e.touches);
+      this.isPanning = false;
+      return;
+    }
+
+    if (e.touches.length === 1) {
+      e.preventDefault();
+      const touch = e.touches[0];
+      this.touchStartPos = { x: touch.clientX, y: touch.clientY };
+      this.touchMoved = false;
+      this.lastPanX = touch.clientX;
+    }
+  };
+
+  private handleTouchMove = (e: TouchEvent): void => {
+    if (this.pinchActive && e.touches.length === 2) {
+      e.preventDefault();
+      const newDistance = this.getTouchDistance(e.touches);
+      const scaleFactor = newDistance / this.pinchStartDistance;
+      const canvas = this.renderer?.getInteractionCanvas();
+      if (canvas) {
+        const centerX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+        const rect = canvas.getBoundingClientRect();
+        this.handlePinchZoom(scaleFactor, centerX - rect.left);
+      }
+      this.pinchStartDistance = newDistance;
+      return;
+    }
+
+    if (e.touches.length === 1) {
+      e.preventDefault();
+      const touch = e.touches[0];
+      const dx = touch.clientX - this.touchStartPos.x;
+      const dy = touch.clientY - this.touchStartPos.y;
+
+      if (!this.isPanning && (Math.abs(dx) > 5 || Math.abs(dy) > 5)) {
+        this.isPanning = true;
+        this.touchMoved = true;
+      }
+
+      if (this.isPanning) {
+        const deltaX = touch.clientX - this.lastPanX;
+        this.lastPanX = touch.clientX;
+        this.panByPixels(deltaX);
+      }
+    }
+  };
+
+  private handleTouchEnd = (e: TouchEvent): void => {
+    if (this.pinchActive) {
+      if (e.touches.length < 2) {
+        this.pinchActive = false;
+      }
+      return;
+    }
+
+    if (this.isPanning) {
+      this.isPanning = false;
+      return;
+    }
+
+    // Tap (no movement)
+    if (!this.touchMoved && e.changedTouches.length > 0) {
+      const touch = e.changedTouches[0];
+      const { x, y } = this.getCanvasCoordsFromTouch(touch);
+      const hits = this.findLinesAtPoint(x, y);
+
+      if (hits.length > 0) {
+        if (hits.length === 1) {
+          this.selectLine(hits[0].rd.lineId);
+        } else {
+          const items = hits.map(h => ({
+            lineId: h.rd.lineId,
+            label: this.lineMetadata.get(h.rd.lineId)?.label ?? h.rd.lineId,
+            color: h.rd.color,
+          }));
+          this.disambiguation?.show(x, y, items);
+        }
+      } else {
+        this.clearSelection();
+      }
+    }
+
+    this.touchMoved = false;
+  };
+
   // --- Private: Interaction handlers ---
 
   private handleResize = (): void => {
@@ -735,157 +1182,7 @@ export class LineChartController {
     this.requestFrame();
   };
 
-  private handleHover = (lineId: string | null, x: number, y: number, allHits?: string[]): void => {
-    // Don't update hover while disambiguation or popover is open
-    if (this.disambiguation?.isVisible()) return;
-    if (this.popoverOpen) return;
-
-    if (!lineId || !allHits || allHits.length === 0) {
-      this.tooltip?.hide();
-      this.eventBus.emit("line:hover", null);
-      return;
-    }
-
-    // Multiple lines at this point — show cluster hint (prototype behavior)
-    if (allHits.length > 1 && this.state.selectedLineIds.length === 0) {
-      this.tooltip?.showClusterHint(allHits.length, x, y);
-      this.eventBus.emit("line:hover", { lineId, label: "", x, y });
-      return;
-    }
-
-    const meta = this.lineMetadata.get(lineId);
-    if (!meta) {
-      this.tooltip?.hide();
-      return;
-    }
-
-    // Get artist info for rich tooltip
-    const artist = this.dataStore?.artists.get(meta.artistId);
-    const color = artist ? ARTIST_TYPE_COLORS[artist.artistType] : "#666";
-    const artistTypeLabel = artist ? ARTIST_TYPE_LABELS[artist.artistType] ?? "" : "";
-    const genLabel = artist ? `Gen ${artist.generation}` : "";
-
-    // Reverse-map x → date index to get value at hovered point
-    const { width } = this.renderer!.getSize();
-    const chartW = width - PADDING.left - PADDING.right;
-    const xRatio = Math.max(0, Math.min(1, (x - PADDING.left) / chartW));
-    const viewRange = this.state.viewportEnd - this.state.viewportStart;
-    const dateIndex = Math.round(this.state.viewportStart + xRatio * viewRange);
-    const hoveredDate = this.state.dates[dateIndex] ?? "";
-
-    // Look up cumulative value at this date
-    let cumulativeValue: number | undefined;
-    let dailyGain: number | undefined;
-    if (artist && meta.releaseId) {
-      const release = artist.releases.find(r => r.id === meta.releaseId);
-      if (release) {
-        let total = 0;
-        let todayValue = 0;
-        for (const [d, entry] of release.dailyValues) {
-          if (d <= hoveredDate) {
-            total += entry.value;
-            if (d === hoveredDate) todayValue = entry.value;
-          }
-        }
-        if (total > 0) {
-          cumulativeValue = total;
-          dailyGain = todayValue > 0 ? todayValue : undefined;
-        }
-      }
-    }
-
-    // Get chart source for this date
-    let sourceLabel: string | undefined;
-    let sourceLogoUrl: string | undefined;
-    if (artist && meta.releaseId) {
-      const release = artist.releases.find(r => r.id === meta.releaseId);
-      const entry = release?.dailyValues.get(hoveredDate);
-      if (entry?.source) {
-        sourceLabel = SOURCE_LABELS[entry.source] ?? entry.source;
-        sourceLogoUrl = SOURCE_LOGO_URLS[entry.source];
-      }
-    }
-
-    const formattedDate = this.formatDateLabel(hoveredDate);
-
-    this.tooltip?.show({
-      label: meta.label,
-      artistName: artist?.name ?? meta.label,
-      songTitle: meta.releaseId ? this.getReleaseTitleFromMeta(meta) : undefined,
-      color,
-      artistTypeLabel,
-      generationLabel: genLabel,
-      logoUrl: artist?.logoUrl,
-      date: formattedDate,
-      value: cumulativeValue,
-      dailyGain,
-      sourceLabel,
-      sourceLogoUrl,
-    }, x, y);
-
-    this.eventBus.emit("line:hover", { lineId, label: meta?.label ?? lineId, x, y });
-  };
-
-  private handleClick = (lineId: string | null, multiSelect: boolean, x?: number, y?: number, allHits?: string[]): void => {
-    // If disambiguation is open, hide it
-    if (this.disambiguation?.isVisible()) {
-      this.disambiguation.hide();
-      return;
-    }
-
-    if (lineId) {
-      // If popover is open, close it first (stay in highlight)
-      if (this.popoverOpen) {
-        this.hidePopover();
-        return;
-      }
-
-      // If already selected, clicking deselects
-      if (this.state.selectedLineIds.length > 0 && !multiSelect) {
-        this.clearSelection();
-        return;
-      }
-
-      // Multiple lines at this point — show disambiguation popup
-      if (allHits && allHits.length > 1 && x !== undefined && y !== undefined) {
-        const items = allHits.map(id => {
-          const meta = this.lineMetadata.get(id);
-          const artist = this.dataStore?.artists.get(meta?.artistId ?? "");
-          return {
-            lineId: id,
-            label: meta?.label ?? id,
-            color: artist ? ARTIST_TYPE_COLORS[artist.artistType] : "#666",
-          };
-        });
-        this.disambiguation?.show(x, y, items);
-        return;
-      }
-
-      // Select this line
-      this.selectLine(lineId, multiSelect);
-    } else {
-      // Clicked empty space
-      if (this.popoverOpen) {
-        this.hidePopover();
-        return;
-      }
-      this.clearSelection();
-    }
-  };
-
-  private handlePanStart = (): void => {
-    // No-op
-  };
-
-  private handlePan = (deltaX: number): void => {
-    this.panByPixels(deltaX);
-  };
-
-  private handlePanEnd = (): void => {
-    // No-op
-  };
-
-  private handlePinchZoom = (scaleFactor: number, centerX: number): void => {
+  private handlePinchZoom(scaleFactor: number, centerX: number): void {
     if (this.state.playing) return;
 
     const { width } = this.renderer!.getSize();
@@ -910,7 +1207,7 @@ export class LineChartController {
     this.state.viewportEnd = newEnd;
     this.backgroundDirty = true;
     this.requestFrame();
-  };
+  }
 
   // --- Private: Keyboard handling ---
 
@@ -927,9 +1224,164 @@ export class LineChartController {
 
   // --- Private: Popover management ---
 
+  private showPopoverForDot(dotHit: { lineId: string; dateIndex: number; eventTypes: string[] }): void {
+    const meta = this.lineMetadata.get(dotHit.lineId);
+    if (!meta || !this.dataStore) return;
+
+    const artist = this.dataStore.artists.get(meta.artistId);
+    if (!artist) return;
+
+    const hoveredDate = this.state.dates[dotHit.dateIndex] ?? "";
+    const formattedDate = this.formatDateLabel(hoveredDate);
+    const color = ARTIST_TYPE_COLORS[artist.artistType];
+    const artistTypeLabel = ARTIST_TYPE_LABELS[artist.artistType] ?? "";
+    const genLabel = `Gen ${artist.generation}`;
+
+    // Compute cumulative value
+    let cumulativeValue = 0;
+    let dailyGain = 0;
+    if (meta.releaseId) {
+      const release = artist.releases.find(r => r.id === meta.releaseId);
+      if (release) {
+        let total = 0;
+        let todayValue = 0;
+        for (const [d, entry] of release.dailyValues) {
+          if (d <= hoveredDate) {
+            total += entry.value;
+            if (d === hoveredDate) todayValue = entry.value;
+          }
+        }
+        cumulativeValue = total;
+        dailyGain = todayValue;
+      }
+    }
+
+    // Get source for this date
+    let sourceLabel: string | undefined;
+    let sourceLogoUrl: string | undefined;
+    if (meta.releaseId) {
+      const release = artist.releases.find(r => r.id === meta.releaseId);
+      const entry = release?.dailyValues.get(hoveredDate);
+      if (entry?.source) {
+        sourceLabel = SOURCE_LABELS[entry.source] ?? entry.source;
+        sourceLogoUrl = SOURCE_LOGO_URLS[entry.source];
+      }
+    }
+
+    const eventLabel = dotHit.eventTypes.map(t => {
+      const labels: Record<string, string> = {
+        win: "Chart Win", live_performance: "Live Performance",
+        chart_appearance: "Chart Appearance", mv: "Music Video", release: "Comeback",
+      };
+      return labels[t] ?? t;
+    }).join(" \u00B7 ");
+
+    // Get position from tooltip
+    const position = this.tooltip?.getPosition() ?? { left: "0px", top: "0px" };
+
+    this.popover?.show({
+      artistName: artist.name,
+      songTitle: this.getReleaseTitleFromMeta(meta) ?? meta.label,
+      color,
+      value: cumulativeValue > 0 ? cumulativeValue : undefined,
+      dailyGain: dailyGain > 0 ? dailyGain : undefined,
+      date: formattedDate,
+      sourceLogoUrl,
+      sourceLabel,
+      eventLabel,
+      artistTypeLabel,
+      generationLabel: genLabel,
+      logoUrl: artist.logoUrl,
+      hasVideo: false,
+      hasRelease: false,
+    }, position);
+
+    this.tooltip?.hide();
+    this.popoverOpen = true;
+  }
+
   private hidePopover(): void {
     this.popover?.hide();
     this.popoverOpen = false;
+  }
+
+  // --- Private: Rich tooltip (matching prototype showTooltip) ---
+
+  private showRichTooltip(x: number, y: number, rd: RenderLineData, nearestIndex: number, eventLabel?: string, showEmbed?: boolean): void {
+    const meta = this.lineMetadata.get(rd.lineId);
+    if (!meta) return;
+
+    const artist = this.dataStore?.artists.get(meta.artistId);
+    const color = rd.color;
+    const artistTypeLabel = artist ? ARTIST_TYPE_LABELS[artist.artistType] ?? "" : "";
+    const genLabel = artist ? `Gen ${artist.generation}` : "";
+
+    // Get value at nearest point
+    const value = rd.values[nearestIndex] ?? 0;
+    let dailyGain: number | undefined;
+    if (nearestIndex > 0 && rd.values[nearestIndex - 1] !== undefined) {
+      const gain = value - rd.values[nearestIndex - 1];
+      if (gain > 0) dailyGain = gain;
+    }
+
+    // Reverse-map nearest point x → date for display
+    const { width } = this.renderer!.getSize();
+    const chartW = width - PADDING.left - PADDING.right;
+    const ptX = rd.points[nearestIndex]?.x ?? x;
+    const xRatio = Math.max(0, Math.min(1, (ptX - PADDING.left) / chartW));
+    const viewRange = this.state.viewportEnd - this.state.viewportStart;
+    const dateIndex = Math.round(this.state.viewportStart + xRatio * viewRange);
+    const hoveredDate = this.state.dates[dateIndex] ?? "";
+    const formattedDate = this.formatDateLabel(hoveredDate);
+
+    // Get chart source for this date
+    let sourceLabel: string | undefined;
+    let sourceLogoUrl: string | undefined;
+    if (artist && meta.releaseId) {
+      const release = artist.releases.find(r => r.id === meta.releaseId);
+      const entry = release?.dailyValues.get(hoveredDate);
+      if (entry?.source) {
+        sourceLabel = SOURCE_LABELS[entry.source] ?? entry.source;
+        sourceLogoUrl = SOURCE_LOGO_URLS[entry.source];
+      }
+    }
+
+    this.tooltip?.show({
+      label: meta.label,
+      artistName: artist?.name ?? meta.label,
+      songTitle: meta.releaseId ? this.getReleaseTitleFromMeta(meta) : undefined,
+      color,
+      artistTypeLabel,
+      generationLabel: genLabel,
+      logoUrl: artist?.logoUrl,
+      date: formattedDate,
+      value: value > 0 ? value : undefined,
+      dailyGain,
+      sourceLabel,
+      sourceLogoUrl,
+      eventLabel,
+      showEmbed,
+    }, x, y);
+  }
+
+  /** Get nearest point index on a line given an x coordinate */
+  private getNearestPointIndex(rd: RenderLineData, x: number): number {
+    let bestIdx = 0;
+    let bestDist = Infinity;
+    for (let i = 0; i < rd.points.length; i++) {
+      const d = Math.abs(rd.points[i].x - x);
+      if (d < bestDist) {
+        bestDist = d;
+        bestIdx = i;
+      }
+    }
+    return bestIdx;
+  }
+
+  /** Get win count for a given line */
+  private getWinCount(lineId: string): number {
+    const winDates = this.dataStore?.releaseWinDates?.get(lineId);
+    return winDates?.length ?? 0;
   }
 
   // --- Private: Utility ---

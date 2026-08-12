@@ -21,6 +21,8 @@ export interface PixelPoint {
 export interface LineDrawCommand {
   lineId: string;
   points: PixelPoint[];
+  /** Cumulative value at each point (parallel to points[]) */
+  values: number[];
   color: string;
   opacity: number;
   lineWidth: number;

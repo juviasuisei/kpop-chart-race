@@ -698,9 +698,11 @@ export class LineChartController {
     this.renderer.drawForeground(result.foreground);
 
     // Draw endpoint labels on foreground (prototype-style stagger)
+    // Draw endpoint labels on foreground — include ALL visible lines for top-10 selection
     const fgCtx = this.renderer.getContext("foreground");
-    if (fgCtx && result.foreground.length > 0) {
-      this.drawEndpointLabels(fgCtx, result.foreground);
+    const allVisibleCmds = [...result.background, ...result.foreground];
+    if (fgCtx && allVisibleCmds.length > 0) {
+      this.drawEndpointLabels(fgCtx, allVisibleCmds);
     }
 
     // Draw highlight layer + event dots

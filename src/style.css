@@ -4,7 +4,7 @@
   font-family: system-ui, -apple-system, sans-serif;
   line-height: 1.5;
   color: #213547;
-  background-color: #ffffff;
+  background-color: #f8f9fa;
 }
 
 *,
@@ -1573,14 +1573,20 @@ body {
 .line-chart-container {
   position: relative;
   width: 100%;
-  overflow: hidden;
+  max-width: 1200px;
+  height: 600px;
   background: #ffffff;
   border-radius: 8px;
+  overflow: hidden;
   border: 1px solid #e0e0e0;
 }
 
 .line-chart-container canvas {
-  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
 }
 
 /* --- Tooltip --- */
@@ -1598,6 +1604,43 @@ body {
   z-index: 100;
   max-width: 340px;
   min-width: 180px;
+}
+
+.line-chart-tooltip .tooltip-click-hint {
+  margin-top: 6px;
+  font-size: 0.6rem;
+  color: rgba(255, 255, 255, 0.5);
+  text-align: center;
+}
+
+.line-chart-tooltip .tooltip-embed {
+  margin-top: 10px;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.line-chart-tooltip .tooltip-embed--video {
+  background: #000;
+  aspect-ratio: 16/9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  opacity: 0.6;
+  color: #fff;
+}
+
+.line-chart-tooltip .tooltip-embed--apple {
+  background: #fafafa;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  height: 180px;
+  overflow-y: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #666;
+  font-size: 0.7rem;
 }
 
 .line-chart-tooltip .tooltip-date-row {
@@ -1623,6 +1666,13 @@ body {
   justify-content: center;
   flex-shrink: 0;
   background: rgba(255, 255, 255, 0.2);
+}
+
+.line-chart-tooltip .tooltip-logo img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
 }
 
 .line-chart-tooltip .tooltip-logo-initials {
@@ -1652,42 +1702,6 @@ body {
   font-size: 0.7rem;
   color: rgba(255, 255, 255, 0.8);
   font-weight: 500;
-}
-
-.line-chart-tooltip .tooltip-embed {
-  margin-top: 10px;
-  border-radius: 6px;
-  overflow: hidden;
-}
-
-.line-chart-tooltip .tooltip-embed--video {
-  background: #000;
-  aspect-ratio: 16/9;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 2rem;
-  opacity: 0.6;
-  color: #fff;
-}
-
-.line-chart-tooltip .tooltip-embed--apple {
-  background: #fafafa;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  height: 180px;
-  overflow-y: auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #666;
-  font-size: 0.7rem;
-}
-
-.line-chart-tooltip .tooltip-click-hint {
-  margin-top: 6px;
-  font-size: 0.6rem;
-  color: rgba(255, 255, 255, 0.5);
-  text-align: center;
 }
 
 /* --- Disambiguation popup --- */
@@ -1742,6 +1756,130 @@ body {
   z-index: 300;
   max-width: 340px;
   min-width: 180px;
+}
+
+.line-chart-popover .tooltip-date-row {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.line-chart-popover .tooltip-event-badge {
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.line-chart-popover .tooltip-logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.line-chart-popover .tooltip-logo img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+}
+
+.line-chart-popover .tooltip-logo-initials {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: white;
+}
+
+.line-chart-popover .tooltip-artist-name {
+  font-weight: 600;
+  font-size: 0.85rem;
+  margin-bottom: 2px;
+}
+
+.line-chart-popover .tooltip-meta {
+  font-size: 0.65rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 6px;
+}
+
+.line-chart-popover .tooltip-song {
+  font-size: 0.75rem;
+  margin-bottom: 2px;
+}
+
+.line-chart-popover .tooltip-stats {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 500;
+}
+
+.line-chart-popover .tooltip-embed {
+  margin-top: 10px;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.line-chart-popover .tooltip-embed--video {
+  background: #000;
+  aspect-ratio: 16/9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  opacity: 0.6;
+  color: #fff;
+}
+
+.line-chart-popover .tooltip-embed--apple {
+  background: #fafafa;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  height: 180px;
+  overflow-y: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #666;
+  font-size: 0.7rem;
+}
+
+/* --- Legend --- */
+
+.line-chart-legend {
+  margin-top: 1rem;
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.line-chart-legend__item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #555;
+  font-size: 0.75rem;
+}
+
+.line-chart-legend__swatch {
+  width: 20px;
+  height: 3px;
+  border-radius: 2px;
+}
+
+.line-chart-legend__dot {
+  width: 10px;
+  height: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.6rem;
 }
 
 /* --- Search Overlay --- */

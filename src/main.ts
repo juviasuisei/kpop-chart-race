@@ -20,11 +20,8 @@ import { YearlyView } from "./yearly-view.ts";
 import { LineChartController } from "./views/line-chart-controller.ts";
 import { TimeNavigation } from "./canvas/time-navigation.ts";
 import { SearchOverlay } from "./canvas/search-overlay.ts";
-import { Tooltip } from "./canvas/tooltip.ts";
-import { ARTIST_TYPE_COLORS } from "./colors.ts";
 import type { DataStore } from "./models.ts";
 import type { FilterState } from "./types.ts";
-import type { LineHoverEvent } from "./event-bus.ts";
 
 async function main(): Promise<void> {
   const app = document.getElementById("app");
@@ -111,9 +108,6 @@ async function main(): Promise<void> {
     lineChart.selectLine(lineId, multiSelect);
   };
 
-  // --- Mount Tooltip ---
-  const tooltip = new Tooltip(chartContainer);
-
   // --- Accessibility ---
   const liveRegion = new LiveRegionAnnouncer();
   liveRegion.mount(app);
@@ -195,15 +189,9 @@ async function main(): Promise<void> {
     lineChart.setDateIndex(0);
   });
 
-  // line:hover → show/hide tooltip
-  eventBus.on("line:hover", (event: LineHoverEvent | null) => {
-    if (event) {
-      const meta = lineChart.getLineMetadata(event.lineId);
-      const color = meta ? ARTIST_TYPE_COLORS[dataStore.artists.get(meta.artistId)?.artistType ?? "boy_group"] ?? "#666" : "#666";
-      tooltip.showSimple(event.label, color, event.x, event.y);
-    } else {
-      tooltip.hide();
-    }
+  // line:hover → controller handles tooltip internally now
+  eventBus.on("line:hover", () => {
+    // Tooltip managed by LineChartController
   });
 
   // line:select → announce for screen readers

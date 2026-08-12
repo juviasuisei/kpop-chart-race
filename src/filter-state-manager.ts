@@ -13,6 +13,7 @@ const DEFAULT_STATE: FilterState = {
   displayMode: "songs",
   generation: "all",
   source: "all",
+  artist: "all",
   zoom: 10,
   view: "line",
   metric: "points",

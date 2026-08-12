@@ -163,6 +163,8 @@ export class LineChartController {
   private currentGenFilter: number | "all" = "all";
   /** Current source filter */
   private currentSourceFilter: string = "all";
+  /** Current artist filter */
+  private currentArtistFilter: string = "all";
   /** Pan gesture state */
   private isPanning = false;
   private lastPanX = 0;
@@ -340,17 +342,20 @@ export class LineChartController {
     let filterCount = 0;
     if (filterState.generation !== "all") filterCount++;
     if (filterState.source !== "all") filterCount++;
+    if (filterState.artist !== "all") filterCount++;
 
     this.state.filterCount = filterCount;
-    this.state.artistFilterActive = false;
+    this.state.artistFilterActive = filterState.artist !== "all";
 
-    // Rebuild line data if any filter changed (generation, source, or displayMode)
+    // Rebuild line data if any filter changed (generation, source, artist, or displayMode)
     const filtersChanged = this.currentGenFilter !== filterState.generation ||
       this.currentSourceFilter !== filterState.source ||
+      this.currentArtistFilter !== filterState.artist ||
       filterState.displayMode !== this.state.displayMode;
 
     this.currentGenFilter = filterState.generation;
     this.currentSourceFilter = filterState.source;
+    this.currentArtistFilter = filterState.artist;
 
     if (filterState.displayMode !== this.state.displayMode) {
       this.state.displayMode = filterState.displayMode;
@@ -472,6 +477,8 @@ export class LineChartController {
       for (const artist of dataStore.artists.values()) {
         // Generation filter
         if (this.currentGenFilter !== "all" && artist.generation !== this.currentGenFilter) continue;
+        // Artist filter
+        if (this.currentArtistFilter !== "all" && artist.id !== this.currentArtistFilter) continue;
 
         const color = ARTIST_TYPE_COLORS[artist.artistType];
         for (const release of artist.releases) {
@@ -502,6 +509,8 @@ export class LineChartController {
       for (const artist of dataStore.artists.values()) {
         // Generation filter
         if (this.currentGenFilter !== "all" && artist.generation !== this.currentGenFilter) continue;
+        // Artist filter
+        if (this.currentArtistFilter !== "all" && artist.id !== this.currentArtistFilter) continue;
 
         const color = ARTIST_TYPE_COLORS[artist.artistType];
         const releaseSeries: SparseTimeSeries[] = [];

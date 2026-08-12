@@ -54,12 +54,13 @@ describe('Toolbar — Rendering and Control Order', () => {
     // In DOM order (left-to-right reading), this means:
     // Generation, Source, Points/Wins, View, Zoom, Songs/Artists
     const controls = container.querySelectorAll('[data-control]');
-    expect(controls.length).toBeGreaterThanOrEqual(6);
+    expect(controls.length).toBeGreaterThanOrEqual(7);
 
     const order = Array.from(controls).map(el => el.getAttribute('data-control'));
     expect(order).toEqual([
       'generation',
       'source',
+      'artist',
       'metric',
       'view',
       'zoom',
@@ -413,6 +414,215 @@ describe('Toolbar — Desktop Viewport', () => {
     // Desktop should render controls inline
     const controls = container.querySelectorAll('[data-control]');
     expect(controls.length).toBeGreaterThanOrEqual(6);
+
+    toolbar.unmount();
+  });
+});
+
+describe('Toolbar — Artist Filter Dropdown', () => {
+  let container: HTMLElement;
+
+  beforeEach(() => {
+    container = document.createElement('div');
+    document.body.appendChild(container);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(container);
+  });
+
+  it('renders artist control with "All Artists" trigger button', () => {
+    const { toolbar } = createToolbar();
+    toolbar.mount(container);
+
+    const artistControl = container.querySelector('[data-control="artist"]');
+    expect(artistControl).not.toBeNull();
+
+    const trigger = artistControl!.querySelector('.toolbar__artist-trigger');
+    expect(trigger).not.toBeNull();
+    expect(trigger!.textContent).toBe('All Artists');
+
+    toolbar.unmount();
+  });
+
+  it('opens dropdown on trigger click', () => {
+    const { toolbar } = createToolbar();
+    toolbar.mount(container);
+
+    const trigger = container.querySelector('.toolbar__artist-trigger') as HTMLElement;
+    trigger.click();
+
+    const dropdown = container.querySelector('.toolbar__artist-dropdown--open');
+    expect(dropdown).not.toBeNull();
+
+    toolbar.unmount();
+  });
+
+  it('shows search input and artist list when dropdown is open', () => {
+    const { toolbar } = createToolbar();
+    toolbar.mount(container);
+    toolbar.setArtists([
+      { id: 'bts', name: 'BTS', generation: 3 },
+      { id: 'aespa', name: 'aespa', generation: 4 },
+    ]);
+
+    const trigger = container.querySelector('.toolbar__artist-trigger') as HTMLElement;
+    trigger.click();
+
+    const searchInput = container.querySelector('.toolbar__artist-search');
+    expect(searchInput).not.toBeNull();
+
+    const items = container.querySelectorAll('.toolbar__artist-item');
+    // "All Artists" + 2 artists
+    expect(items.length).toBe(3);
+
+    toolbar.unmount();
+  });
+
+  it('filters artist list by search input', () => {
+    const { toolbar } = createToolbar();
+    toolbar.mount(container);
+    toolbar.setArtists([
+      { id: 'bts', name: 'BTS', generation: 3 },
+      { id: 'aespa', name: 'aespa', generation: 4 },
+      { id: 'blackpink', name: 'BLACKPINK', generation: 3 },
+    ]);
+
+    const trigger = container.querySelector('.toolbar__artist-trigger') as HTMLElement;
+    trigger.click();
+
+    const searchInput = container.querySelector('.toolbar__artist-search') as HTMLInputElement;
+    searchInput.value = 'bts';
+    searchInput.dispatchEvent(new Event('input', { bubbles: true }));
+
+    const items = container.querySelectorAll('.toolbar__artist-item');
+    // "All Artists" + 1 matching artist (BTS)
+    expect(items.length).toBe(2);
+    expect(items[1].textContent).toBe('BTS');
+
+    toolbar.unmount();
+  });
+
+  it('selecting an artist updates filter state', () => {
+    const { toolbar, filterState } = createToolbar();
+    toolbar.mount(container);
+    toolbar.setArtists([
+      { id: 'bts', name: 'BTS', generation: 3 },
+      { id: 'aespa', name: 'aespa', generation: 4 },
+    ]);
+
+    const trigger = container.querySelector('.toolbar__artist-trigger') as HTMLElement;
+    trigger.click();
+
+    // Click "aespa" item (index 2: "All Artists" at 0, "aespa" at 1 alphabetically... wait they're in order passed)
+    const items = container.querySelectorAll('.toolbar__artist-item');
+    // items[0] = All Artists, items[1] = BTS, items[2] = aespa
+    (items[2] as HTMLElement).click();
+
+    expect(filterState.getState().artist).toBe('aespa');
+
+    toolbar.unmount();
+  });
+
+  it('selecting "All Artists" clears artist filter', () => {
+    const { toolbar, filterState } = createToolbar();
+    toolbar.mount(container);
+    toolbar.setArtists([
+      { id: 'bts', name: 'BTS', generation: 3 },
+    ]);
+
+    // Set artist filter first
+    filterState.update({ artist: 'bts' });
+
+    const trigger = container.querySelector('.toolbar__artist-trigger') as HTMLElement;
+    trigger.click();
+
+    const items = container.querySelectorAll('.toolbar__artist-item');
+    (items[0] as HTMLElement).click(); // "All Artists"
+
+    expect(filterState.getState().artist).toBe('all');
+
+    toolbar.unmount();
+  });
+
+  it('filters artists by current generation filter', () => {
+    const { toolbar, filterState } = createToolbar();
+    toolbar.mount(container);
+    toolbar.setArtists([
+      { id: 'bts', name: 'BTS', generation: 3 },
+      { id: 'aespa', name: 'aespa', generation: 4 },
+      { id: 'blackpink', name: 'BLACKPINK', generation: 3 },
+    ]);
+
+    // Set generation filter to 3
+    filterState.update({ generation: 3 });
+
+    const trigger = container.querySelector('.toolbar__artist-trigger') as HTMLElement;
+    trigger.click();
+
+    const items = container.querySelectorAll('.toolbar__artist-item');
+    // "All Artists" + 2 gen-3 artists (BTS, BLACKPINK)
+    expect(items.length).toBe(3);
+
+    toolbar.unmount();
+  });
+
+  it('resets artist to "all" when generation changes and selected artist does not match', () => {
+    const { toolbar, filterState } = createToolbar();
+    toolbar.mount(container);
+    toolbar.setGenerations([3, 4]);
+    toolbar.setArtists([
+      { id: 'bts', name: 'BTS', generation: 3 },
+      { id: 'aespa', name: 'aespa', generation: 4 },
+    ]);
+
+    // Select BTS (gen 3)
+    filterState.update({ artist: 'bts' });
+
+    // Change generation to 4 via the select
+    const genSelect = container.querySelector('[data-control="generation"] select') as HTMLSelectElement;
+    genSelect.value = '4';
+    genSelect.dispatchEvent(new Event('change', { bubbles: true }));
+
+    // Artist should be reset to "all" since BTS is gen 3
+    expect(filterState.getState().artist).toBe('all');
+
+    toolbar.unmount();
+  });
+
+  it('closes dropdown on outside click', () => {
+    const { toolbar } = createToolbar();
+    toolbar.mount(container);
+
+    const trigger = container.querySelector('.toolbar__artist-trigger') as HTMLElement;
+    trigger.click();
+
+    expect(container.querySelector('.toolbar__artist-dropdown--open')).not.toBeNull();
+
+    // Simulate outside click
+    const outsideEvent = new Event('pointerdown', { bubbles: true });
+    document.body.dispatchEvent(outsideEvent);
+
+    expect(container.querySelector('.toolbar__artist-dropdown--open')).toBeNull();
+
+    toolbar.unmount();
+  });
+
+  it('trigger button shows selected artist name', () => {
+    const { toolbar } = createToolbar();
+    toolbar.mount(container);
+    toolbar.setArtists([
+      { id: 'bts', name: 'BTS', generation: 3 },
+      { id: 'aespa', name: 'aespa', generation: 4 },
+    ]);
+
+    const trigger = container.querySelector('.toolbar__artist-trigger') as HTMLElement;
+    trigger.click();
+
+    const items = container.querySelectorAll('.toolbar__artist-item');
+    (items[1] as HTMLElement).click(); // BTS
+
+    expect(trigger.textContent).toBe('BTS');
 
     toolbar.unmount();
   });

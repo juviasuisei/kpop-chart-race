@@ -31,6 +31,15 @@ export class Toolbar {
   // Control elements
   private generationSelect: HTMLSelectElement | null = null;
 
+  // Artist filter state
+  private artists: { id: string; name: string; generation: number }[] = [];
+  private artistDropdownEl: HTMLElement | null = null;
+  private artistListEl: HTMLElement | null = null;
+  private artistSearchEl: HTMLInputElement | null = null;
+  private artistTriggerEl: HTMLButtonElement | null = null;
+  private artistDropdownOpen = false;
+  private artistOutsideClickHandler: ((e: Event) => void) | null = null;
+
   constructor(eventBus: EventBus, filterState: FilterStateManager) {
     // eventBus retained for future direct event subscriptions
     void eventBus;
@@ -55,9 +64,14 @@ export class Toolbar {
       this.container.removeChild(this.wrapper);
     }
     this.removeOutsideClickListener();
+    this.removeArtistOutsideClickListener();
     this.wrapper = null;
     this.container = null;
     this.generationSelect = null;
+    this.artistDropdownEl = null;
+    this.artistListEl = null;
+    this.artistSearchEl = null;
+    this.artistTriggerEl = null;
   }
 
   /** Update available generations from data — sorted descending with "All" first */
@@ -81,6 +95,12 @@ export class Toolbar {
       opt.textContent = `${gen}${getOrdinalSuffix(gen)} Gen`;
       this.generationSelect.appendChild(opt);
     }
+  }
+
+  /** Set the full list of artists available for filtering */
+  setArtists(artists: { id: string; name: string; generation: number }[]): void {
+    this.artists = artists;
+    this.renderArtistList();
   }
 
   /** Show/hide yearly-only controls (Points/Wins metric toggle) */
@@ -160,10 +180,11 @@ export class Toolbar {
   }
 
   private createControls(): HTMLElement[] {
-    // DOM order (left-to-right): generation, source, metric, view, zoom, display-mode
+    // DOM order (left-to-right): generation, source, artist, metric, view, zoom, display-mode
     return [
       this.createGenerationControl(),
       this.createSourceControl(),
+      this.createArtistControl(),
       this.createMetricControl(),
       this.createViewControl(),
       this.createZoomControl(),
@@ -182,6 +203,9 @@ export class Toolbar {
       this.filterState.update({
         generation: val === "all" ? "all" : Number(val),
       });
+      // Reset artist filter if selected artist doesn't match new generation
+      this.resetArtistIfNeeded();
+      this.renderArtistList();
       this.dismissDrawer();
     });
 
@@ -216,6 +240,147 @@ export class Toolbar {
 
     group.appendChild(select);
     return group;
+  }
+
+  private createArtistControl(): HTMLElement {
+    const group = document.createElement("div");
+    group.setAttribute("data-control", "artist");
+    group.className = "toolbar__control toolbar__control--artist";
+
+    // Trigger button
+    const trigger = document.createElement("button");
+    trigger.className = "toolbar__artist-trigger";
+    trigger.textContent = "All Artists";
+    trigger.type = "button";
+    trigger.addEventListener("click", () => this.toggleArtistDropdown());
+    group.appendChild(trigger);
+    this.artistTriggerEl = trigger;
+
+    // Dropdown panel
+    const dropdown = document.createElement("div");
+    dropdown.className = "toolbar__artist-dropdown";
+
+    // Search input
+    const searchInput = document.createElement("input");
+    searchInput.className = "toolbar__artist-search";
+    searchInput.type = "text";
+    searchInput.placeholder = "Search artists...";
+    searchInput.addEventListener("input", () => this.renderArtistList());
+    dropdown.appendChild(searchInput);
+    this.artistSearchEl = searchInput;
+
+    // Artist list
+    const list = document.createElement("div");
+    list.className = "toolbar__artist-list";
+    dropdown.appendChild(list);
+    this.artistListEl = list;
+
+    group.appendChild(dropdown);
+    this.artistDropdownEl = dropdown;
+
+    return group;
+  }
+
+  private toggleArtistDropdown(): void {
+    if (this.artistDropdownOpen) {
+      this.closeArtistDropdown();
+    } else {
+      this.openArtistDropdown();
+    }
+  }
+
+  private openArtistDropdown(): void {
+    this.artistDropdownOpen = true;
+    this.artistDropdownEl?.classList.add("toolbar__artist-dropdown--open");
+    this.renderArtistList();
+    // Focus the search input
+    setTimeout(() => this.artistSearchEl?.focus(), 0);
+    this.addArtistOutsideClickListener();
+  }
+
+  private closeArtistDropdown(): void {
+    this.artistDropdownOpen = false;
+    this.artistDropdownEl?.classList.remove("toolbar__artist-dropdown--open");
+    if (this.artistSearchEl) this.artistSearchEl.value = "";
+    this.removeArtistOutsideClickListener();
+  }
+
+  private addArtistOutsideClickListener(): void {
+    this.artistOutsideClickHandler = (e: Event) => {
+      const target = e.target as Node;
+      const controlEl = this.artistDropdownEl?.parentElement;
+      if (controlEl && !controlEl.contains(target)) {
+        this.closeArtistDropdown();
+      }
+    };
+    document.addEventListener("pointerdown", this.artistOutsideClickHandler);
+  }
+
+  private removeArtistOutsideClickListener(): void {
+    if (this.artistOutsideClickHandler) {
+      document.removeEventListener("pointerdown", this.artistOutsideClickHandler);
+      this.artistOutsideClickHandler = null;
+    }
+  }
+
+  private renderArtistList(): void {
+    if (!this.artistListEl) return;
+    this.artistListEl.innerHTML = "";
+
+    const state = this.filterState.getState();
+    const searchTerm = this.artistSearchEl?.value.toLowerCase() ?? "";
+
+    // Filter artists by current generation
+    let filteredArtists = this.artists;
+    if (state.generation !== "all") {
+      filteredArtists = filteredArtists.filter(a => a.generation === state.generation);
+    }
+
+    // Filter by search term
+    if (searchTerm) {
+      filteredArtists = filteredArtists.filter(a => a.name.toLowerCase().includes(searchTerm));
+    }
+
+    // "All Artists" option at top
+    const allItem = document.createElement("div");
+    allItem.className = "toolbar__artist-item" + (state.artist === "all" ? " toolbar__artist-item--active" : "");
+    allItem.textContent = "All Artists";
+    allItem.addEventListener("click", () => {
+      this.filterState.update({ artist: "all" });
+      if (this.artistTriggerEl) this.artistTriggerEl.textContent = "All Artists";
+      this.closeArtistDropdown();
+      this.dismissDrawer();
+    });
+    this.artistListEl.appendChild(allItem);
+
+    // Artist items
+    for (const artist of filteredArtists) {
+      const item = document.createElement("div");
+      item.className = "toolbar__artist-item" + (state.artist === artist.id ? " toolbar__artist-item--active" : "");
+      item.textContent = artist.name;
+      item.addEventListener("click", () => {
+        this.filterState.update({ artist: artist.id });
+        if (this.artistTriggerEl) this.artistTriggerEl.textContent = artist.name;
+        this.closeArtistDropdown();
+        this.dismissDrawer();
+      });
+      this.artistListEl!.appendChild(item);
+    }
+  }
+
+  private resetArtistIfNeeded(): void {
+    const state = this.filterState.getState();
+    if (state.artist === "all") return;
+
+    const genFilter = state.generation;
+    if (genFilter === "all") return;
+
+    // Check if the currently selected artist belongs to the new generation
+    const selectedArtist = this.artists.find(a => a.id === state.artist);
+    if (!selectedArtist || selectedArtist.generation !== genFilter) {
+      this.filterState.update({ artist: "all" });
+      if (this.artistTriggerEl) this.artistTriggerEl.textContent = "All Artists";
+    }
   }
 
   private createMetricControl(): HTMLElement {

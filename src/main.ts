@@ -38,6 +38,7 @@ async function main(): Promise<void> {
     displayMode: "songs",
     generation: "all",
     source: "all",
+    artist: "all",
     zoom: 10,
     view: "line",
     metric: "points",
@@ -123,6 +124,14 @@ async function main(): Promise<void> {
   const toolbar = new Toolbar(eventBus, filterStateManager);
   toolbar.mount(app);
   toolbar.setGenerations(extractGenerations(dataStore));
+
+  // Provide artist list to toolbar for artist filter dropdown
+  const artistList = Array.from(dataStore.artists.values()).map(a => ({
+    id: a.id,
+    name: a.name,
+    generation: a.generation,
+  })).sort((a, b) => a.name.localeCompare(b.name));
+  toolbar.setArtists(artistList);
 
   // --- Create line chart container ---
   const chartContainer = document.createElement("div");

@@ -74,6 +74,7 @@ export interface FilterState {
   displayMode: "songs" | "artists";
   generation: number | "all";
   source: string; // ChartSource | "all"
+  artist: string; // artist ID | "all"
   zoom: ZoomLevel; // 10 | "all"
   view: "race" | "yearly" | "line";
   metric: "points" | "wins"; // yearly-view only

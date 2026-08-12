@@ -87,6 +87,7 @@ describe('FilterStateManager', () => {
         displayMode: 'songs',
         generation: 'all',
         source: 'music_bank',
+        artist: 'all',
         zoom: 10,
         view: 'line',
         metric: 'points',

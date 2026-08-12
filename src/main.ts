@@ -63,6 +63,20 @@ async function main(): Promise<void> {
     dataStore.chartWins = chartWinsResult.chartWins;
     dataStore.releaseWinDates = chartWinsResult.releaseWinDates;
 
+    // Inject a synthetic zero-day (one day before first real data) into the dates array.
+    // This gives the scrubber an empty starting position and allows every line
+    // to animate from 0 to its first value naturally.
+    const firstRealDate = dataStore.dates[0];
+    if (firstRealDate) {
+      try {
+        const d = new Date(firstRealDate + "T00:00:00");
+        d.setDate(d.getDate() - 1);
+        const zeroDay = d.toISOString().split("T")[0];
+        dataStore.dates.unshift(zeroDay);
+        dataStore.startDate = zeroDay;
+      } catch { /* leave as-is */ }
+    }
+
     await loadingScreen.onComplete();
   } catch (_err) {
     loadingScreen.onError(

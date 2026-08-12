@@ -226,27 +226,16 @@ export class LineChartController {
    */
   async initData(dataStore: DataStore): Promise<void> {
     this.dataStore = dataStore;
-
-    // Prepend a synthetic zero-day (one day before the first real date)
-    // so that scrubbing to position 0 shows an empty chart and animation
-    // naturally rises from zero to the first values
-    const firstDate = dataStore.dates[0];
-    let zeroDay = firstDate;
-    try {
-      const d = new Date(firstDate + "T00:00:00");
-      d.setDate(d.getDate() - 1);
-      zeroDay = d.toISOString().split("T")[0];
-    } catch { /* keep original */ }
-    this.state.dates = [zeroDay, ...dataStore.dates];
+    this.state.dates = dataStore.dates;
 
     // Default: show most recent 90 days, paused at the last date
     this.state.currentDateIndex = this.state.dates.length - 1;
     this.applyTimeZoom("90d");
 
-    // Build serialized line data for the worker (uses original dataStore dates for change-points)
+    // Build serialized line data for the worker
     const lines = this.buildLineData(dataStore, this.state.displayMode);
 
-    // Send to worker with the extended dates array (includes zero-day)
+    // Send to worker
     await this.workerClient.initData(lines, this.state.dates);
     this.initialized = true;
 

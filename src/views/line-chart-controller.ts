@@ -876,9 +876,12 @@ export class LineChartController {
     const dotSize = EVENT_DOT_SIZE * 1.8;
 
     if (img && img.complete && img.naturalWidth > 0) {
-      // Draw crown SVG image centered on the point
+      // Draw crown SVG image centered on the point, colored white
       const imgSize = dotSize * 2.5;
+      ctx.save();
+      ctx.filter = "brightness(0) invert(1)";
       ctx.drawImage(img, x - imgSize / 2, y - imgSize / 2, imgSize, imgSize);
+      ctx.restore();
     } else {
       // Fallback: white circle if image not loaded yet
       ctx.save();

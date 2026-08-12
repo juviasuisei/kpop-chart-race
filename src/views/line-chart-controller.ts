@@ -122,6 +122,9 @@ export class LineChartController {
   private popover: Popover | null = null;
   private legend: Legend | null = null;
 
+  /** Pre-loaded crown SVG images (crown-1 through crown-12) */
+  private crownImages: Map<number, HTMLImageElement> = new Map();
+
   /** Cached render data from last frame (mirrors prototype's renderDataCache) */
   private renderDataCache: RenderLineData[] = [];
   /** Label hit boxes for click detection */
@@ -217,6 +220,13 @@ export class LineChartController {
     // Initialize worker
     await this.workerClient.init();
     this.workerClient.onFrame(this.handleFrameResult);
+
+    // Pre-load crown SVGs (1-12)
+    for (let i = 1; i <= 12; i++) {
+      const img = new Image();
+      img.src = `assets/crowns/crown-${i}.svg`;
+      this.crownImages.set(i, img);
+    }
   }
 
   /**
@@ -820,7 +830,6 @@ export class LineChartController {
   }
 
   private drawEventDotsForLine(ctx: CanvasRenderingContext2D, cmd: LineDrawCommand): void {
-    // Look up events from the DataStore for this line
     if (!this.dataStore) return;
 
     const meta = this.lineMetadata.get(cmd.lineId);
@@ -829,63 +838,95 @@ export class LineChartController {
     const artist = this.dataStore.artists.get(meta.artistId);
     if (!artist) return;
 
-    // Get win dates for this release
+    // Get win dates for this release (sorted chronologically)
     const releaseWinDates = this.dataStore.releaseWinDates?.get(cmd.lineId);
     if (!releaseWinDates || releaseWinDates.length === 0) return;
 
-    // Map win dates to point indices within the current viewport
+    // Map win dates to point positions within the current viewport
     const viewStart = this.state.viewportStart;
     const viewEnd = this.state.viewportEnd;
-    const viewRange = viewEnd - viewStart;
-    const totalPoints = cmd.points.length;
+    const totalDateSpan = viewEnd + 1 - viewStart;
+    const { width } = this.renderer!.getSize();
+    const chartW = width - PADDING.left - PADDING.right;
 
-    const drawnIndices = new Set<number>();
-
-    for (const winDate of releaseWinDates) {
+    for (let winIdx = 0; winIdx < releaseWinDates.length; winIdx++) {
+      const winDate = releaseWinDates[winIdx];
       const dateIdx = this.state.dates.indexOf(winDate);
       if (dateIdx < viewStart || dateIdx > viewEnd) continue;
 
-      // Map date index to point index
-      const pointIdx = Math.round(((dateIdx - viewStart) / viewRange) * (totalPoints - 1));
-      if (pointIdx < 0 || pointIdx >= totalPoints) continue;
-      if (drawnIndices.has(pointIdx)) continue;
-      drawnIndices.add(pointIdx);
+      // Map date to x position (matching worker's dateToX)
+      const xRatio = (dateIdx - viewStart) / totalDateSpan;
+      const x = PADDING.left + xRatio * chartW;
 
-      const pt = cmd.points[pointIdx];
-      this.drawEventDot(ctx, pt.x, pt.y, "win", EVENT_DOT_SIZE);
+      // Get y from the line's value at this date
+      const value = this.getValueAtDateForLine(cmd, dateIdx);
+      const frameMax = this.getCurrentFrameMax();
+      const chartH = (this.renderer!.getSize().height) - PADDING.top - PADDING.bottom;
+      const y = PADDING.top + chartH - (value / (frameMax || 1)) * chartH;
+
+      // Win number is 1-indexed (winIdx + 1)
+      const winNumber = winIdx + 1;
+      this.drawCrownDot(ctx, x, y, winNumber);
     }
   }
 
-  private drawEventDot(ctx: CanvasRenderingContext2D, x: number, y: number, type: string, size: number): void {
-    ctx.save();
-    const s = size * 1.8; // larger dots (prototype: 8 * 1.8)
+  private drawCrownDot(ctx: CanvasRenderingContext2D, x: number, y: number, winNumber: number): void {
+    const crownLevel = Math.min(winNumber, 12); // levels 13+ reuse crown-12
+    const img = this.crownImages.get(crownLevel);
+    const dotSize = EVENT_DOT_SIZE * 1.8;
 
-    if (type === "win") {
-      // Crown shape — white fill
-      ctx.fillStyle = "#ffffff";
-      ctx.strokeStyle = "rgba(0, 0, 0, 0.15)";
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(x, y - s);
-      ctx.lineTo(x - s, y + s * 0.4);
-      ctx.lineTo(x - s * 0.5, y);
-      ctx.lineTo(x, y + s * 0.4);
-      ctx.lineTo(x + s * 0.5, y);
-      ctx.lineTo(x + s, y + s * 0.4);
-      ctx.closePath();
-      ctx.fill();
-      ctx.stroke();
+    if (img && img.complete && img.naturalWidth > 0) {
+      // Draw crown SVG image centered on the point
+      const imgSize = dotSize * 2.5;
+      ctx.drawImage(img, x - imgSize / 2, y - imgSize / 2, imgSize, imgSize);
     } else {
-      // White filled circle for all other types
+      // Fallback: white circle if image not loaded yet
+      ctx.save();
       ctx.fillStyle = "#ffffff";
       ctx.strokeStyle = "rgba(0, 0, 0, 0.15)";
       ctx.lineWidth = 1;
       ctx.beginPath();
-      ctx.arc(x, y, s * 0.45, 0, Math.PI * 2);
+      ctx.arc(x, y, dotSize * 0.45, 0, Math.PI * 2);
       ctx.fill();
       ctx.stroke();
+      ctx.restore();
     }
-    ctx.restore();
+  }
+
+  /** Get cumulative value at a date index for a line (from cached render data) */
+  private getValueAtDateForLine(cmd: LineDrawCommand, dateIdx: number): number {
+    // Find the closest point in the command's values array
+    const viewStart = this.state.viewportStart;
+    const viewEnd = this.state.viewportEnd;
+    const totalDateSpan = viewEnd + 1 - viewStart;
+    const targetRatio = (dateIdx - viewStart) / totalDateSpan;
+
+    // Find the point closest to this ratio
+    const { width } = this.renderer!.getSize();
+    const chartW = width - PADDING.left - PADDING.right;
+    const targetX = PADDING.left + targetRatio * chartW;
+
+    let closestIdx = 0;
+    let closestDist = Infinity;
+    for (let i = 0; i < cmd.points.length; i++) {
+      const dist = Math.abs(cmd.points[i].x - targetX);
+      if (dist < closestDist) {
+        closestDist = dist;
+        closestIdx = i;
+      }
+    }
+    return cmd.values[closestIdx] ?? 0;
+  }
+
+  /** Get the current frame's max value (for Y-axis scaling) */
+  private getCurrentFrameMax(): number {
+    let max = 0;
+    for (const rd of this.renderDataCache) {
+      for (const v of rd.values) {
+        if (v > max) max = v;
+      }
+    }
+    return max || 1;
   }
 
   // --- Private: Viewport management (handled in setDateIndex during playback) ---

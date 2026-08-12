@@ -887,13 +887,13 @@ export class LineChartController {
     const dotSize = EVENT_DOT_SIZE * 1.8;
 
     if (img && img.complete && img.naturalWidth > 0) {
-      const imgSize = dotSize * 2.5;
+      const imgSize = dotSize * 1.25;
       ctx.save();
-      // White background square with 50% opacity
-      ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
-      const bgSize = imgSize + 4;
+      // White background square with 80% opacity
+      ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+      const bgSize = imgSize + 3;
       ctx.beginPath();
-      ctx.roundRect(x - bgSize / 2, y - bgSize / 2, bgSize, bgSize, 3);
+      ctx.roundRect(x - bgSize / 2, y - bgSize / 2, bgSize, bgSize, 2);
       ctx.fill();
       // Draw crown SVG in original red
       ctx.drawImage(img, x - imgSize / 2, y - imgSize / 2, imgSize, imgSize);

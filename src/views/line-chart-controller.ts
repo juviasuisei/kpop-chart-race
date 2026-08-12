@@ -1635,14 +1635,28 @@ export class LineChartController {
 
       // Build song breakdown for artists mode
       if (!meta.releaseId) {
-        const breakdown: { title: string; value: number; isWin?: boolean }[] = [];
+        const breakdown: { title: string; value: number; isWin?: boolean; crownLevel?: number }[] = [];
         for (const release of releasesToCheck) {
           const entry = release.dailyValues.get(hoveredDate);
           if (entry && (this.currentSourceFilter === "all" || entry.source === this.currentSourceFilter)) {
             // Check if this release won on this date
             const releaseKey = `${meta.artistId}::${release.id}`;
             const isWin = this.dataStore?.releaseWinDates?.get(releaseKey)?.includes(hoveredDate) ?? false;
-            breakdown.push({ title: release.title, value: entry.value, isWin });
+            // Get crown level for this win from chartWins
+            let crownLevel: number | undefined;
+            if (isWin) {
+              const dateWins = this.dataStore?.chartWins.get(hoveredDate);
+              if (dateWins) {
+                for (const [source, winData] of dateWins) {
+                  if (this.currentSourceFilter !== "all" && source !== this.currentSourceFilter) continue;
+                  if (winData.artistIds.includes(meta.artistId)) {
+                    crownLevel = winData.crownLevels.get(meta.artistId) ?? 1;
+                    break;
+                  }
+                }
+              }
+            }
+            breakdown.push({ title: release.title, value: entry.value, isWin, crownLevel });
           }
         }
         if (breakdown.length > 0) songBreakdown = breakdown;

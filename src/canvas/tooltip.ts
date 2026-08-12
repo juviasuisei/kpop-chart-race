@@ -37,7 +37,7 @@ export interface TooltipData {
   /** Multiple embed URLs (artists mode: multiple live performances) */
   embedUrls?: string[];
   /** Song breakdown for artists mode (which songs contributed on this date) */
-  songBreakdown?: { title: string; value: number; isWin?: boolean }[];
+  songBreakdown?: { title: string; value: number; isWin?: boolean; crownLevel?: number }[];
 }
 
 export class Tooltip {
@@ -113,8 +113,10 @@ export class Tooltip {
     if (data.songBreakdown && data.songBreakdown.length > 0) {
       html += `<div style="margin-top:6px;border-top:1px solid rgba(255,255,255,0.15);padding-top:6px;">`;
       for (const song of data.songBreakdown) {
-        const winBadge = song.isWin ? ` <span style="font-size:0.6rem;">👑</span>` : "";
-        html += `<div style="font-size:0.65rem;color:rgba(255,255,255,0.8);margin-bottom:2px;">${song.title}${winBadge} <span style="color:rgba(255,255,255,0.5);">+${song.value.toLocaleString()}</span></div>`;
+        const crownHtml = song.isWin && song.crownLevel
+          ? ` <span style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;background:rgba(255,255,255,0.8);border-radius:3px;vertical-align:middle;margin-left:4px;"><img src="assets/crowns/crown-${Math.min(song.crownLevel, 12)}.svg" style="width:11px;height:11px;" alt="Win"></span>`
+          : "";
+        html += `<div style="font-size:0.65rem;color:rgba(255,255,255,0.8);margin-bottom:2px;">${song.title} <span style="color:rgba(255,255,255,0.5);">+${song.value.toLocaleString()}</span>${crownHtml}</div>`;
       }
       html += `</div>`;
     }

@@ -887,9 +887,24 @@ export class LineChartController {
     const artist = this.dataStore.artists.get(meta.artistId);
     if (!artist) return;
 
-    // Get win dates for this release (sorted chronologically)
+    // Get win dates for this release, filtered by current source
     const releaseWinDates = this.dataStore.releaseWinDates?.get(cmd.lineId);
     if (!releaseWinDates || releaseWinDates.length === 0) return;
+
+    // Filter win dates by source
+    const filteredWinDates = this.currentSourceFilter === "all"
+      ? releaseWinDates
+      : releaseWinDates.filter(winDate => {
+          const dateWins = this.dataStore!.chartWins.get(winDate);
+          if (!dateWins) return false;
+          for (const [source, winData] of dateWins) {
+            if (source === this.currentSourceFilter && winData.artistIds.includes(meta!.artistId)) {
+              return true;
+            }
+          }
+          return false;
+        });
+    if (filteredWinDates.length === 0) return;
 
     const viewStart = this.state.viewportStart;
     const viewEnd = this.state.viewportEnd;
@@ -897,7 +912,7 @@ export class LineChartController {
     const { width } = this.renderer!.getSize();
     const chartW = width - PADDING.left - PADDING.right;
 
-    for (const winDate of releaseWinDates) {
+    for (const winDate of filteredWinDates) {
       const dateIdx = this.state.dates.indexOf(winDate);
       if (dateIdx < viewStart || dateIdx > viewEnd) continue;
 
@@ -911,11 +926,12 @@ export class LineChartController {
       const chartH = (this.renderer!.getSize().height) - PADDING.top - PADDING.bottom;
       const y = PADDING.top + chartH - (value / (frameMax || 1)) * chartH;
 
-      // Look up crown level from chartWins (per-show win count)
+      // Look up crown level from chartWins (per-show win count, respecting source filter)
       let crownLevel = 1;
       const dateWins = this.dataStore.chartWins.get(winDate);
       if (dateWins) {
-        for (const [, winData] of dateWins) {
+        for (const [source, winData] of dateWins) {
+          if (this.currentSourceFilter !== "all" && source !== this.currentSourceFilter) continue;
           if (winData.artistIds.includes(meta.artistId)) {
             const level = winData.crownLevels.get(meta.artistId);
             if (level !== undefined) {
@@ -956,6 +972,13 @@ export class LineChartController {
     for (const [date, embeds] of release.embeds) {
       if (!embeds || embeds.length === 0) continue;
       if (winDates.has(date)) continue; // crown already drawn for this date
+
+      // When source filter is active, only show embeds on dates where the release
+      // appeared on the filtered show (keeps dots relevant to the filtered view)
+      if (this.currentSourceFilter !== "all") {
+        const entry = release.dailyValues.get(date);
+        if (!entry || entry.source !== this.currentSourceFilter) continue;
+      }
 
       // Only show dots for dates within the visible time range
       const viewStartDate = this.state.dates[Math.max(0, viewStart)] ?? "";
@@ -1101,9 +1124,22 @@ export class LineChartController {
     // Collect all dot dates (wins + embeds)
     const dotDates: { date: string; dateIdx: number; eventTypes: string[] }[] = [];
 
-    // Win dates
+    // Win dates (filtered by source)
     const releaseWinDates = this.dataStore.releaseWinDates?.get(selectedId) ?? [];
     for (const winDate of releaseWinDates) {
+      // Apply source filter
+      if (this.currentSourceFilter !== "all") {
+        const dateWins = this.dataStore.chartWins.get(winDate);
+        if (!dateWins) continue;
+        let matchesSource = false;
+        for (const [source, winData] of dateWins) {
+          if (source === this.currentSourceFilter && winData.artistIds.includes(meta.artistId)) {
+            matchesSource = true;
+            break;
+          }
+        }
+        if (!matchesSource) continue;
+      }
       const dateIdx = this.state.dates.indexOf(winDate);
       if (dateIdx >= viewStart && dateIdx <= viewEnd) {
         dotDates.push({ date: winDate, dateIdx, eventTypes: ["win"] });
@@ -1580,12 +1616,13 @@ export class LineChartController {
       }
     }
 
-    // Check if this date is a chart win for this release
+    // Check if this date is a chart win for this release (respecting source filter)
     let winInfo: { crownLevel: number; crownLabel: string; crownSvgUrl: string } | undefined;
     if (this.dataStore && meta.artistId) {
       const dateWins = this.dataStore.chartWins.get(hoveredDate);
       if (dateWins) {
-        for (const [, winData] of dateWins) {
+        for (const [source, winData] of dateWins) {
+          if (this.currentSourceFilter !== "all" && source !== this.currentSourceFilter) continue;
           if (winData.artistIds.includes(meta.artistId)) {
             const level = winData.crownLevels.get(meta.artistId) ?? 1;
             winInfo = {
@@ -1657,17 +1694,25 @@ export class LineChartController {
     return bestIdx;
   }
 
-  /** Get win count for a given line up to the current animation date */
+  /** Get win count for a given line up to the current animation date, respecting source filter */
   private getWinCount(lineId: string): number {
-    const winDates = this.dataStore?.releaseWinDates?.get(lineId);
-    if (!winDates || winDates.length === 0) return 0;
+    if (!this.dataStore) return 0;
+    const meta = this.lineMetadata.get(lineId);
+    if (!meta) return 0;
+
     const currentDate = this.state.dates[this.state.currentDateIndex] ?? "";
     if (!currentDate) return 0;
-    // winDates is sorted chronologically — count entries <= currentDate
+
     let count = 0;
-    for (const d of winDates) {
-      if (d <= currentDate) count++;
-      else break;
+    for (const [date, sourceMap] of this.dataStore.chartWins) {
+      if (date > currentDate) continue;
+      for (const [source, winData] of sourceMap) {
+        // Apply source filter
+        if (this.currentSourceFilter !== "all" && source !== this.currentSourceFilter) continue;
+        if (winData.artistIds.includes(meta.artistId)) {
+          count++;
+        }
+      }
     }
     return count;
   }

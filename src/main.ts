@@ -104,7 +104,7 @@ async function main(): Promise<void> {
   titleText.textContent = "K-Pop Chart Race";
   const versionBadge = document.createElement("span");
   versionBadge.className = "chart-race__version-badge";
-  versionBadge.textContent = "v1.29.0";
+  versionBadge.textContent = "v2.0.0";
   const dataNote = document.createElement("span");
   dataNote.className = "chart-race__data-note";
   let totalPoints = 0;

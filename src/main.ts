@@ -166,6 +166,8 @@ async function main(): Promise<void> {
 
   // date:change → update line chart date index
   eventBus.on("date:change", (date: string) => {
+    // When the line chart is driving its own animation, don't accept external date changes
+    if (lineChart.isPlaying()) return;
     const index = dataStore.dates.indexOf(date);
     if (index >= 0) {
       lineChart.setDateIndex(index);

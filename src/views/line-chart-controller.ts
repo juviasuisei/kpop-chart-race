@@ -148,6 +148,10 @@ export class LineChartController {
   private rafId: number | null = null;
   /** Last frame timestamp for throttling */
   private lastFrameTime = 0;
+  /** Smooth animation position (fractional date index) */
+  private animationPosition = 0;
+  /** Animation speed: date indices per second */
+  private animationSpeed = 2.0;
   /** Whether initial data has been sent to worker */
   private initialized = false;
   /** Background layer needs full redraw */
@@ -363,6 +367,10 @@ export class LineChartController {
     return [...this.state.selectedLineIds];
   }
 
+  isPlaying(): boolean {
+    return this.state.playing;
+  }
+
   getLineMetadata(lineId: string): { label: string; artistId: string; releaseId?: string } | undefined {
     return this.lineMetadata.get(lineId);
   }
@@ -473,6 +481,7 @@ export class LineChartController {
 
   private startAnimationLoop(): void {
     if (this.rafId !== null) return;
+    this.animationPosition = this.state.currentDateIndex;
     this.lastFrameTime = performance.now();
     this.rafLoop();
   }
@@ -487,8 +496,42 @@ export class LineChartController {
   private rafLoop = (): void => {
     this.rafId = requestAnimationFrame(this.rafLoop);
     const now = performance.now();
-    if (now - this.lastFrameTime < 16) return;
+    const deltaMs = now - this.lastFrameTime;
+    if (deltaMs < 16) return; // cap at ~60fps
     this.lastFrameTime = now;
+
+    // Advance position smoothly
+    const advance = (deltaMs / 1000) * this.animationSpeed;
+    this.animationPosition += advance;
+
+    // Check if we've reached the end
+    const maxIndex = this.state.dates.length - 1;
+    if (this.animationPosition >= maxIndex) {
+      this.animationPosition = maxIndex;
+      this.state.currentDateIndex = maxIndex;
+      this.stopAnimationLoop();
+      this.state.playing = false;
+      this.eventBus.emit("pause");
+    }
+
+    // Update the integer date index (for scrubber sync and data lookups)
+    const newIndex = Math.floor(this.animationPosition);
+    if (newIndex !== this.state.currentDateIndex) {
+      this.state.currentDateIndex = newIndex;
+      // Emit date:change so PlaybackController's scrubber stays in sync
+      this.eventBus.emit("date:change", this.state.dates[newIndex]);
+    }
+
+    // Update viewport with fractional position for smooth scrolling
+    const zoomWindow = PRESET_DAYS[this.state.timeZoom] === Infinity
+      ? this.state.dates.length
+      : PRESET_DAYS[this.state.timeZoom];
+
+    this.state.viewportEnd = Math.floor(this.animationPosition);
+    const dataStart = Math.max(0, this.state.viewportEnd - zoomWindow);
+    this.state.viewportStart = dataStart > 0 ? dataStart : -1;
+    this.backgroundDirty = true;
+
     this.requestFrame();
   };
 

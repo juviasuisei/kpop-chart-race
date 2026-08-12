@@ -151,7 +151,7 @@ export class LineChartController {
   /** Smooth animation position (fractional date index) */
   private animationPosition = 0;
   /** Animation speed: date indices per second */
-  private animationSpeed = 2.0;
+  private animationSpeed = 1.6;
   /** Whether initial data has been sent to worker */
   private initialized = false;
   /** Background layer needs full redraw */

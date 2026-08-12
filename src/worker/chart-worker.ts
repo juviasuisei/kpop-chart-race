@@ -234,6 +234,12 @@ function buildPixelPoints(
     }
   }
 
+  // Clamp all Y values to stay within chart bounds (never below x-axis)
+  const maxY = padding.top + chartH;
+  for (const pt of points) {
+    if (pt.y > maxY) pt.y = maxY;
+  }
+
   return { points, values };
 }
 

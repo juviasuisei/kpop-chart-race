@@ -888,14 +888,26 @@ export class LineChartController {
     const artist = this.dataStore.artists.get(meta.artistId);
     if (!artist) return;
 
-    // Get win dates for this release, filtered by current source
-    const releaseWinDates = this.dataStore.releaseWinDates?.get(cmd.lineId);
-    if (!releaseWinDates || releaseWinDates.length === 0) return;
+    // Get win dates — in songs mode from releaseWinDates, in artists mode aggregate all releases
+    let allWinDates: string[] = [];
+    if (meta.releaseId) {
+      // Songs mode: win dates for this specific release
+      allWinDates = this.dataStore.releaseWinDates?.get(cmd.lineId) ?? [];
+    } else {
+      // Artists mode: collect win dates across all releases for this artist
+      for (const release of artist.releases) {
+        const releaseKey = `${meta.artistId}::${release.id}`;
+        const dates = this.dataStore.releaseWinDates?.get(releaseKey);
+        if (dates) allWinDates.push(...dates);
+      }
+      allWinDates.sort();
+    }
+    if (allWinDates.length === 0) return;
 
     // Filter win dates by source
     const filteredWinDates = this.currentSourceFilter === "all"
-      ? releaseWinDates
-      : releaseWinDates.filter(winDate => {
+      ? allWinDates
+      : allWinDates.filter(winDate => {
           const dateWins = this.dataStore!.chartWins.get(winDate);
           if (!dateWins) return false;
           for (const [source, winData] of dateWins) {
@@ -1534,13 +1546,27 @@ export class LineChartController {
 
     // Compute cumulative value at the hovered date (from DataStore, respects source filter)
     let value = 0;
-    if (artist && meta.releaseId) {
-      const release = artist.releases.find(r => r.id === meta.releaseId);
-      if (release) {
-        for (const [d, entry] of release.dailyValues) {
-          if (d <= hoveredDate) {
-            if (this.currentSourceFilter === "all" || entry.source === this.currentSourceFilter) {
-              value += entry.value;
+    if (artist) {
+      if (meta.releaseId) {
+        // Songs mode: single release
+        const release = artist.releases.find(r => r.id === meta.releaseId);
+        if (release) {
+          for (const [d, entry] of release.dailyValues) {
+            if (d <= hoveredDate) {
+              if (this.currentSourceFilter === "all" || entry.source === this.currentSourceFilter) {
+                value += entry.value;
+              }
+            }
+          }
+        }
+      } else {
+        // Artists mode: sum across all releases
+        for (const release of artist.releases) {
+          for (const [d, entry] of release.dailyValues) {
+            if (d <= hoveredDate) {
+              if (this.currentSourceFilter === "all" || entry.source === this.currentSourceFilter) {
+                value += entry.value;
+              }
             }
           }
         }
@@ -1551,23 +1577,28 @@ export class LineChartController {
     let sourceLabel: string | undefined;
     let sourceLogoUrl: string | undefined;
     let dailyGain: number | undefined;
-    if (artist && meta.releaseId) {
-      const release = artist.releases.find(r => r.id === meta.releaseId);
-      if (release) {
+    if (artist) {
+      // Check all releases for data at this date (artists mode sums them)
+      const releasesToCheck = meta.releaseId
+        ? [artist.releases.find(r => r.id === meta.releaseId)].filter(Boolean) as typeof artist.releases
+        : artist.releases;
+
+      let totalDailyGain = 0;
+      for (const release of releasesToCheck) {
         const entry = release.dailyValues.get(hoveredDate);
         if (entry) {
-          // Only show source/gain if it matches the active source filter
           if (this.currentSourceFilter === "all" || entry.source === this.currentSourceFilter) {
-            if (entry.source) {
+            if (entry.source && !sourceLabel) {
               sourceLabel = SOURCE_LABELS[entry.source] ?? entry.source;
               sourceLogoUrl = SOURCE_LOGO_URLS[entry.source];
             }
             if (entry.value > 0) {
-              dailyGain = entry.value;
+              totalDailyGain += entry.value;
             }
           }
         }
       }
+      if (totalDailyGain > 0) dailyGain = totalDailyGain;
     }
 
     // Check if this date is a chart win for this release (respecting source filter)

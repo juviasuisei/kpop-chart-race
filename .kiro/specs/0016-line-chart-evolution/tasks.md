@@ -48,10 +48,10 @@
 
 ## Phase 4: Line Chart — Artists Mode
 
-- [ ] 4.1 Implement aggregate cumulative computation per artist (sum all releases)
-- [ ] 4.2 Wire artist mode toggle to use same canvas infrastructure with artist-level data
-- [ ] 4.3 Implement artist filter override (all lines visible at 100% when specific artist selected)
-- [ ] 4.4* Add artist logo rendering near line endpoint or on hover
+- [x] 4.1 Implement aggregate cumulative computation per artist (sum all releases)
+- [x] 4.2 Wire artist mode toggle to use same canvas infrastructure with artist-level data
+- [x] 4.3 Implement artist filter override (all lines visible at 100% when specific artist selected)
+- [x] 4.4* Add artist logo rendering near line endpoint or on hover
 
 ## Phase 5: Episode Browser
 

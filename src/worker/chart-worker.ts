@@ -179,17 +179,13 @@ function buildPixelPoints(
     }
   } else {
     // Line starts within the viewport — add zero-origin point
-    // Only during animation (progressToNext > 0) to show the rise from zero.
-    // On static views, skip zero-origin so lines start at their first value (no below-axis lines).
-    if (progressToNext > 0) {
-      const zeroDateIdx = firstChangeIdx - 1;
-      if (zeroDateIdx >= startDateIndex) {
-        points.push({ x: dateToX(zeroDateIdx), y: padding.top + chartH });
-      } else {
-        points.push({ x: padding.left, y: padding.top + chartH });
-      }
-      values.push(0);
+    const zeroDateIdx = firstChangeIdx - 1;
+    if (zeroDateIdx >= startDateIndex) {
+      points.push({ x: dateToX(zeroDateIdx), y: padding.top + chartH });
+    } else {
+      points.push({ x: padding.left, y: padding.top + chartH });
     }
+    values.push(0);
   }
 
   // Add each change-point up to and including endDateIndex

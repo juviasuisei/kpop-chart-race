@@ -60,6 +60,26 @@ const ARTIST_TYPE_LABELS: Record<string, string> = {
   mixed_group: "Mixed Group",
 };
 
+/** Chart source human-readable labels */
+const SOURCE_LABELS: Record<string, string> = {
+  inkigayo: "Inkigayo",
+  the_show: "The Show",
+  show_champion: "Show Champion",
+  music_bank: "Music Bank",
+  m_countdown: "M Countdown",
+  show_music_core: "Show Music Core",
+};
+
+/** Chart source logo URLs */
+const SOURCE_LOGO_URLS: Record<string, string> = {
+  inkigayo: "assets/sources/inkigayo.png",
+  the_show: "assets/sources/the_show.png",
+  show_champion: "assets/sources/show_champion.png",
+  music_bank: "assets/sources/music_bank.png",
+  m_countdown: "assets/sources/m_countdown.png",
+  show_music_core: "assets/sources/show_music_core.png",
+};
+
 /** State for the line chart view */
 interface LineChartState {
   dates: string[];
@@ -715,38 +735,98 @@ export class LineChartController {
     this.requestFrame();
   };
 
-  private handleHover = (lineId: string | null, x: number, y: number): void => {
+  private handleHover = (lineId: string | null, x: number, y: number, allHits?: string[]): void => {
     // Don't update hover while disambiguation or popover is open
     if (this.disambiguation?.isVisible()) return;
     if (this.popoverOpen) return;
 
-    if (lineId) {
-      const meta = this.lineMetadata.get(lineId);
-      if (meta) {
-        // Get artist info for rich tooltip
-        const artist = this.dataStore?.artists.get(meta.artistId);
-        const color = artist ? ARTIST_TYPE_COLORS[artist.artistType] : "#666";
-        const artistTypeLabel = artist ? ARTIST_TYPE_LABELS[artist.artistType] ?? "" : "";
-        const genLabel = artist ? `Gen ${artist.generation}` : "";
-
-        this.tooltip?.show({
-          label: meta.label,
-          artistName: artist?.name ?? meta.label,
-          songTitle: meta.releaseId ? this.getReleaseTitleFromMeta(meta) : undefined,
-          color,
-          artistTypeLabel,
-          generationLabel: genLabel,
-          logoUrl: artist?.logoUrl,
-        }, x, y);
-      }
-      this.eventBus.emit("line:hover", { lineId, label: meta?.label ?? lineId, x, y });
-    } else {
+    if (!lineId || !allHits || allHits.length === 0) {
       this.tooltip?.hide();
       this.eventBus.emit("line:hover", null);
+      return;
     }
+
+    // Multiple lines at this point — show cluster hint (prototype behavior)
+    if (allHits.length > 1 && this.state.selectedLineIds.length === 0) {
+      this.tooltip?.showClusterHint(allHits.length, x, y);
+      this.eventBus.emit("line:hover", { lineId, label: "", x, y });
+      return;
+    }
+
+    const meta = this.lineMetadata.get(lineId);
+    if (!meta) {
+      this.tooltip?.hide();
+      return;
+    }
+
+    // Get artist info for rich tooltip
+    const artist = this.dataStore?.artists.get(meta.artistId);
+    const color = artist ? ARTIST_TYPE_COLORS[artist.artistType] : "#666";
+    const artistTypeLabel = artist ? ARTIST_TYPE_LABELS[artist.artistType] ?? "" : "";
+    const genLabel = artist ? `Gen ${artist.generation}` : "";
+
+    // Reverse-map x → date index to get value at hovered point
+    const { width } = this.renderer!.getSize();
+    const chartW = width - PADDING.left - PADDING.right;
+    const xRatio = Math.max(0, Math.min(1, (x - PADDING.left) / chartW));
+    const viewRange = this.state.viewportEnd - this.state.viewportStart;
+    const dateIndex = Math.round(this.state.viewportStart + xRatio * viewRange);
+    const hoveredDate = this.state.dates[dateIndex] ?? "";
+
+    // Look up cumulative value at this date
+    let cumulativeValue: number | undefined;
+    let dailyGain: number | undefined;
+    if (artist && meta.releaseId) {
+      const release = artist.releases.find(r => r.id === meta.releaseId);
+      if (release) {
+        let total = 0;
+        let todayValue = 0;
+        for (const [d, entry] of release.dailyValues) {
+          if (d <= hoveredDate) {
+            total += entry.value;
+            if (d === hoveredDate) todayValue = entry.value;
+          }
+        }
+        if (total > 0) {
+          cumulativeValue = total;
+          dailyGain = todayValue > 0 ? todayValue : undefined;
+        }
+      }
+    }
+
+    // Get chart source for this date
+    let sourceLabel: string | undefined;
+    let sourceLogoUrl: string | undefined;
+    if (artist && meta.releaseId) {
+      const release = artist.releases.find(r => r.id === meta.releaseId);
+      const entry = release?.dailyValues.get(hoveredDate);
+      if (entry?.source) {
+        sourceLabel = SOURCE_LABELS[entry.source] ?? entry.source;
+        sourceLogoUrl = SOURCE_LOGO_URLS[entry.source];
+      }
+    }
+
+    const formattedDate = this.formatDateLabel(hoveredDate);
+
+    this.tooltip?.show({
+      label: meta.label,
+      artistName: artist?.name ?? meta.label,
+      songTitle: meta.releaseId ? this.getReleaseTitleFromMeta(meta) : undefined,
+      color,
+      artistTypeLabel,
+      generationLabel: genLabel,
+      logoUrl: artist?.logoUrl,
+      date: formattedDate,
+      value: cumulativeValue,
+      dailyGain,
+      sourceLabel,
+      sourceLogoUrl,
+    }, x, y);
+
+    this.eventBus.emit("line:hover", { lineId, label: meta?.label ?? lineId, x, y });
   };
 
-  private handleClick = (lineId: string | null, multiSelect: boolean): void => {
+  private handleClick = (lineId: string | null, multiSelect: boolean, x?: number, y?: number, allHits?: string[]): void => {
     // If disambiguation is open, hide it
     if (this.disambiguation?.isVisible()) {
       this.disambiguation.hide();
@@ -766,16 +846,29 @@ export class LineChartController {
         return;
       }
 
+      // Multiple lines at this point — show disambiguation popup
+      if (allHits && allHits.length > 1 && x !== undefined && y !== undefined) {
+        const items = allHits.map(id => {
+          const meta = this.lineMetadata.get(id);
+          const artist = this.dataStore?.artists.get(meta?.artistId ?? "");
+          return {
+            lineId: id,
+            label: meta?.label ?? id,
+            color: artist ? ARTIST_TYPE_COLORS[artist.artistType] : "#666",
+          };
+        });
+        this.disambiguation?.show(x, y, items);
+        return;
+      }
+
       // Select this line
       this.selectLine(lineId, multiSelect);
     } else {
       // Clicked empty space
       if (this.popoverOpen) {
-        // First click outside: close popover, stay in highlight mode
         this.hidePopover();
         return;
       }
-      // Second click outside: deselect
       this.clearSelection();
     }
   };

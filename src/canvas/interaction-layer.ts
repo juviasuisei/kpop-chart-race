@@ -25,8 +25,8 @@ export class InteractionLayer {
   private hoveredLineId: string | null = null;
 
   // Callbacks
-  onHover: ((lineId: string | null, x: number, y: number) => void) | null = null;
-  onClick: ((lineId: string | null, multiSelect: boolean) => void) | null = null;
+  onHover: ((lineId: string | null, x: number, y: number, allHits?: string[]) => void) | null = null;
+  onClick: ((lineId: string | null, multiSelect: boolean, x?: number, y?: number, allHits?: string[]) => void) | null = null;
   onPanStart: (() => void) | null = null;
   onPan: ((deltaX: number) => void) | null = null;
   onPanEnd: (() => void) | null = null;
@@ -86,13 +86,14 @@ export class InteractionLayer {
     const { x, y } = this.getCanvasCoords(e);
     const hits = this.spatialIndex.query(x, y);
     const topHit = hits.length > 0 ? hits[0].lineId : null;
+    const allHitIds = hits.map(h => h.lineId);
 
     if (topHit !== this.hoveredLineId) {
       this.hoveredLineId = topHit;
       this.canvas.style.cursor = topHit ? "pointer" : "grab";
     }
 
-    this.onHover?.(topHit, x, y);
+    this.onHover?.(topHit, x, y, allHitIds);
   };
 
   private handleMouseDown = (e: MouseEvent): void => {
@@ -126,11 +127,12 @@ export class InteractionLayer {
     const { x, y } = this.getCanvasCoords(e);
     const hits = this.spatialIndex.query(x, y);
     const multiSelect = e.shiftKey || e.ctrlKey || e.metaKey;
+    const allHitIds = hits.map(h => h.lineId);
 
     if (hits.length > 0) {
-      this.onClick?.(hits[0].lineId, multiSelect);
+      this.onClick?.(hits[0].lineId, multiSelect, x, y, allHitIds);
     } else {
-      this.onClick?.(null, false);
+      this.onClick?.(null, false, x, y);
     }
   };
 
@@ -222,11 +224,12 @@ export class InteractionLayer {
       const touch = e.changedTouches[0];
       const { x, y } = this.getCanvasCoordsFromTouch(touch);
       const hits = this.spatialIndex.query(x, y);
+      const allHitIds = hits.map(h => h.lineId);
 
       if (hits.length > 0) {
-        this.onClick?.(hits[0].lineId, false);
+        this.onClick?.(hits[0].lineId, false, x, y, allHitIds);
       } else {
-        this.onClick?.(null, false);
+        this.onClick?.(null, false, x, y);
       }
     }
 

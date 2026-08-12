@@ -125,7 +125,6 @@ function buildPixelPoints(
   maxValue: number,
 ): { points: PixelPoint[]; values: number[] } {
   const { startDateIndex, endDateIndex, width, height, progressToNext } = viewport;
-  const dateRange = endDateIndex - startDateIndex;
 
   // Compute chart area in CSS pixels (canvas context has DPR transform applied)
   const padding = { top: 40, right: 160, bottom: 40, left: 0 };
@@ -134,19 +133,31 @@ function buildPixelPoints(
 
   const effectiveMax = maxValue || 1;
 
-  // Special case: single date (first day) — draw line from 0 at left to value at right
-  if (dateRange <= 0) {
+  // The x-axis maps [startDateIndex, endDateIndex + 1] to [0, chartW].
+  // This reserves space at the right edge for the animated line tip.
+  // endDateIndex maps to a position slightly LEFT of the right edge.
+  // The tip extends from endDateIndex toward endDateIndex+1 by progressToNext.
+  const totalDateSpan = endDateIndex + 1 - startDateIndex;
+
+  // Special case: first frame (totalDateSpan <= 1)
+  if (totalDateSpan <= 1) {
     const val = getValueAtDate(changePoints, endDateIndex);
     if (val <= 0) return { points: [], values: [] };
-    const leftX = padding.left;
-    const rightX = padding.left + chartW;
-    const bottomY = padding.top + chartH; // Y = 0
+    // Draw from left (0) to wherever progressToNext puts the tip
+    const tipX = padding.left + progressToNext * chartW;
+    const bottomY = padding.top + chartH;
     const valueY = padding.top + chartH - (val / effectiveMax) * chartH;
     return {
-      points: [{ x: leftX, y: bottomY }, { x: rightX, y: valueY }],
+      points: [{ x: padding.left, y: bottomY }, { x: Math.max(tipX, padding.left + 2), y: valueY }],
       values: [0, val],
     };
   }
+
+  // Helper: map a date index to x pixel position
+  const dateToX = (dateIdx: number): number => {
+    const ratio = (dateIdx - startDateIndex) / totalDateSpan;
+    return padding.left + ratio * chartW;
+  };
 
   // Collect points within viewport range
   const points: PixelPoint[] = [];
@@ -157,7 +168,6 @@ function buildPixelPoints(
   const lineStartsBeforeViewport = firstChangeIdx < startDateIndex;
 
   if (lineStartsBeforeViewport) {
-    // Line was active before viewport — start at left edge with accumulated value
     const startValue = getValueAtDate(changePoints, startDateIndex);
     if (startValue > 0) {
       points.push({
@@ -168,64 +178,58 @@ function buildPixelPoints(
     }
   } else {
     // Line starts within the viewport — add zero-origin point
-    // Place the zero at one date index before the first change-point
     const zeroDateIdx = firstChangeIdx - 1;
     if (zeroDateIdx >= startDateIndex) {
-      // Zero point is within the viewport
-      const xRatio = (zeroDateIdx - startDateIndex) / dateRange;
-      points.push({
-        x: padding.left + xRatio * chartW,
-        y: padding.top + chartH,
-      });
+      points.push({ x: dateToX(zeroDateIdx), y: padding.top + chartH });
     } else {
-      // Zero point would be before/at viewport start — put it at left edge
-      points.push({
-        x: padding.left,
-        y: padding.top + chartH,
-      });
+      points.push({ x: padding.left, y: padding.top + chartH });
     }
     values.push(0);
   }
 
-  // Add each change-point within the viewport
+  // Add each change-point up to and including endDateIndex
   for (const [dateIdx, value] of changePoints) {
     if (dateIdx < startDateIndex) continue;
     if (dateIdx > endDateIndex) break;
 
-    const xRatio = (dateIdx - startDateIndex) / dateRange;
     points.push({
-      x: padding.left + xRatio * chartW,
+      x: dateToX(dateIdx),
       y: padding.top + chartH - (value / effectiveMax) * chartH,
     });
     values.push(value);
   }
 
-  // Extend line to the right edge, interpolating toward the next date value
-  // for smooth animation between dates
-  if (points.length > 0) {
+  // Animated tip: extend from endDateIndex value toward endDateIndex+1 value
+  // The tip x-position advances from dateToX(endDateIndex) toward dateToX(endDateIndex+1)
+  if (points.length > 0 && progressToNext > 0) {
     const endValue = getValueAtDate(changePoints, endDateIndex);
     const nextDateIndex = endDateIndex + 1;
     const nextValue = nextDateIndex < allDates.length
       ? getValueAtDate(changePoints, nextDateIndex)
       : endValue;
 
-    // Interpolate between current end value and next date's value
-    const interpolatedValue = endValue + (nextValue - endValue) * progressToNext;
+    // Interpolate value between current end and next
+    const tipValue = endValue + (nextValue - endValue) * progressToNext;
+    // Tip x position: between endDateIndex and endDateIndex+1 positions
+    const tipX = dateToX(endDateIndex) + (dateToX(endDateIndex + 1) - dateToX(endDateIndex)) * progressToNext;
 
-    // The right edge x extends based on progress toward the next date
-    const dateRange = endDateIndex - startDateIndex;
-    const effectiveDateRange = dateRange + progressToNext;
-    const endX = dateRange > 0
-      ? padding.left + (effectiveDateRange / effectiveDateRange) * chartW  // always right edge
-      : padding.left + chartW;
-
-    const lastPoint = points[points.length - 1];
-    if (Math.abs(lastPoint.x - endX) > 0.5) {
+    points.push({
+      x: tipX,
+      y: padding.top + chartH - (tipValue / effectiveMax) * chartH,
+    });
+    values.push(Math.round(tipValue));
+  } else if (points.length > 0 && progressToNext === 0) {
+    // No progress — just extend flat to endDateIndex position (already there from the loop)
+    // Ensure the last point is at endDateIndex position for the label
+    const lastPt = points[points.length - 1];
+    const endX = dateToX(endDateIndex);
+    const endValue = getValueAtDate(changePoints, endDateIndex);
+    if (Math.abs(lastPt.x - endX) > 1) {
       points.push({
         x: endX,
-        y: padding.top + chartH - (interpolatedValue / effectiveMax) * chartH,
+        y: padding.top + chartH - (endValue / effectiveMax) * chartH,
       });
-      values.push(Math.round(interpolatedValue));
+      values.push(endValue);
     }
   }
 

@@ -58,11 +58,11 @@ describe('Toolbar — Rendering and Control Order', () => {
 
     const order = Array.from(controls).map(el => el.getAttribute('data-control'));
     expect(order).toEqual([
+      'view',
       'generation',
       'source',
       'artist',
       'metric',
-      'view',
       'zoom',
       'display-mode',
     ]);

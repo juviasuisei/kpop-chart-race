@@ -104,7 +104,7 @@ export class Toolbar {
   }
 
   /** Show/hide yearly-only controls (Points/Wins metric toggle) */
-  setViewMode(view: "race" | "yearly" | "line"): void {
+  setViewMode(view: "race" | "episodes" | "yearly" | "line"): void {
     if (!this.wrapper) return;
     const metricControl = this.wrapper.querySelector(
       '[data-control="metric"]',
@@ -113,12 +113,27 @@ export class Toolbar {
       '[data-control="zoom"]',
     ) as HTMLElement | null;
 
-    if (view === "race" || view === "line") {
-      metricControl?.classList.add("toolbar__control--hidden");
-      zoomControl?.classList.add("toolbar__control--hidden");
-    } else {
+    if (view === "yearly") {
       metricControl?.classList.remove("toolbar__control--hidden");
       zoomControl?.classList.remove("toolbar__control--hidden");
+    } else {
+      metricControl?.classList.add("toolbar__control--hidden");
+      zoomControl?.classList.add("toolbar__control--hidden");
+    }
+
+    // Update segmented button active states
+    const viewControl = this.wrapper.querySelector('[data-control="view"]');
+    if (viewControl) {
+      const buttons = viewControl.querySelectorAll(".toolbar__view-btn");
+      // Map "line" to "race" button value
+      const activeValue = view === "line" ? "race" : view;
+      buttons.forEach((btn) => {
+        const btnEl = btn as HTMLElement;
+        btnEl.classList.toggle(
+          "toolbar__view-btn--active",
+          btnEl.dataset.view === activeValue,
+        );
+      });
     }
   }
 
@@ -180,13 +195,13 @@ export class Toolbar {
   }
 
   private createControls(): HTMLElement[] {
-    // DOM order (left-to-right): generation, source, artist, metric, view, zoom, display-mode
+    // DOM order (left-to-right): view (segmented), generation, source, artist, metric, zoom, display-mode
     return [
+      this.createViewControl(),
       this.createGenerationControl(),
       this.createSourceControl(),
       this.createArtistControl(),
       this.createMetricControl(),
-      this.createViewControl(),
       this.createZoomControl(),
       this.createDisplayModeControl(),
     ];
@@ -429,43 +444,38 @@ export class Toolbar {
   private createViewControl(): HTMLElement {
     const group = document.createElement("div");
     group.setAttribute("data-control", "view");
-    group.className = "toolbar__control view-switcher";
-    group.setAttribute("role", "switch");
+    group.className = "toolbar__control toolbar__view-group";
+    group.setAttribute("role", "group");
     group.setAttribute("aria-label", "View mode");
-    group.tabIndex = 0;
 
-    const yearlyLabel = document.createElement("span");
-    yearlyLabel.className = "view-switcher__label";
-    yearlyLabel.textContent = "Yearly";
+    const views: { value: string; label: string; filterValue: string }[] = [
+      { value: "race", label: "Race", filterValue: "line" },
+      { value: "episodes", label: "Episodes", filterValue: "episodes" },
+      { value: "yearly", label: "Yearly", filterValue: "yearly" },
+    ];
 
-    const track = document.createElement("div");
-    track.className = "view-switcher__track view-switcher__track--on";
-    const thumb = document.createElement("div");
-    thumb.className = "view-switcher__thumb";
-    track.appendChild(thumb);
+    const state = this.filterState.getState();
+    const currentActive = state.view === "line" || state.view === "race" ? "race" : state.view;
 
-    const raceLabel = document.createElement("span");
-    raceLabel.className = "view-switcher__label view-switcher__label--active";
-    raceLabel.textContent = "Race";
+    for (const v of views) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "toolbar__view-btn" + (v.value === currentActive ? " toolbar__view-btn--active" : "");
+      btn.textContent = v.label;
+      btn.dataset.view = v.value;
+      btn.addEventListener("click", () => {
+        // Remove active from all buttons
+        const buttons = group.querySelectorAll(".toolbar__view-btn");
+        buttons.forEach((b) => b.classList.remove("toolbar__view-btn--active"));
+        btn.classList.add("toolbar__view-btn--active");
 
-    group.appendChild(yearlyLabel);
-    group.appendChild(track);
-    group.appendChild(raceLabel);
-
-    const toggle = () => {
-      const isRace = track.classList.contains("view-switcher__track--on");
-      const newView = isRace ? "yearly" : "race";
-      track.classList.toggle("view-switcher__track--on", !isRace);
-      raceLabel.classList.toggle("view-switcher__label--active", !isRace);
-      yearlyLabel.classList.toggle("view-switcher__label--active", isRace);
-      this.filterState.update({ view: newView });
-      this.setViewMode(newView);
-    };
-
-    group.addEventListener("click", toggle);
-    group.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); }
-    });
+        const newView = v.filterValue as "line" | "episodes" | "yearly";
+        this.filterState.update({ view: newView });
+        this.setViewMode(newView);
+        this.dismissDrawer();
+      });
+      group.appendChild(btn);
+    }
 
     return group;
   }

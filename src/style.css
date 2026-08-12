@@ -2082,3 +2082,227 @@ body {
   background: rgba(0, 100, 200, 0.1);
   font-weight: 600;
 }
+
+
+/* ===== View Segmented Control ===== */
+
+.toolbar__view-group {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.toolbar__view-btn {
+  appearance: none;
+  -webkit-appearance: none;
+  border: none;
+  background: transparent;
+  padding: 4px 10px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #666;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+  white-space: nowrap;
+}
+
+.toolbar__view-btn:not(:last-child) {
+  border-right: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.toolbar__view-btn:hover {
+  background: rgba(0, 0, 0, 0.04);
+  color: #213547;
+}
+
+.toolbar__view-btn--active {
+  background: rgba(0, 100, 200, 0.1);
+  color: #213547;
+}
+
+/* ===== Episode Browser ===== */
+
+.episode-browser {
+  padding: 16px;
+  overflow-y: auto;
+  height: calc(100vh - 120px);
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.episode-card {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  margin-bottom: 16px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.episode-card__header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.episode-card__show-logo {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.episode-card__show-name {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #213547;
+}
+
+.episode-card__episode-num {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #666;
+}
+
+.episode-card__date {
+  font-size: 0.75rem;
+  color: #999;
+  margin-left: auto;
+}
+
+.episode-card__winner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  margin-bottom: 12px;
+  background: rgba(255, 215, 0, 0.08);
+  border: 1px solid rgba(255, 215, 0, 0.25);
+  border-radius: 8px;
+}
+
+.episode-card__crown {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 4px;
+  padding: 2px;
+}
+
+.episode-card__winner-text {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #213547;
+}
+
+.episode-card__chart {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.episode-card__chart-entry {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.78rem;
+}
+
+.episode-card__chart-entry:hover {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.episode-card__rank {
+  font-weight: 700;
+  color: #666;
+  min-width: 24px;
+  font-size: 0.72rem;
+}
+
+.episode-card__entry-info {
+  flex: 1;
+  color: #213547;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.episode-card__entry-points {
+  font-weight: 600;
+  color: #666;
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.episode-card__performances {
+  margin-top: 12px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  padding-top: 8px;
+}
+
+.episode-card__performances-toggle {
+  appearance: none;
+  -webkit-appearance: none;
+  border: none;
+  background: transparent;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #0072B2;
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.episode-card__performances-toggle:hover {
+  text-decoration: underline;
+}
+
+.episode-card__performances-toggle::before {
+  content: "\25B6 ";
+  font-size: 0.6rem;
+  transition: transform 0.2s ease;
+  display: inline-block;
+}
+
+.episode-card__performances-toggle--open::before {
+  transform: rotate(90deg);
+}
+
+.episode-card__performances-content {
+  display: none;
+  padding-top: 10px;
+  gap: 12px;
+  flex-direction: column;
+}
+
+.episode-card__performances--open .episode-card__performances-content {
+  display: flex;
+}
+
+.episode-card__embed {
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.episode-card__embed-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #213547;
+  padding: 6px 10px;
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.episode-card__embed iframe {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: none;
+  display: block;
+}

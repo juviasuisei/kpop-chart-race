@@ -18,6 +18,7 @@ import { LiveRegionAnnouncer } from "./live-region.ts";
 import { ScreenReaderPacedMode } from "./screen-reader-paced-mode.ts";
 import { YearlyView } from "./yearly-view.ts";
 import { LineChartController } from "./views/line-chart-controller.ts";
+import { EpisodeBrowser } from "./views/episode-browser.ts";
 import { TimeNavigation } from "./canvas/time-navigation.ts";
 import { SearchOverlay } from "./canvas/search-overlay.ts";
 import type { DataStore } from "./models.ts";
@@ -102,7 +103,7 @@ async function main(): Promise<void> {
   titleText.textContent = "K-Pop Chart Race";
   const versionBadge = document.createElement("span");
   versionBadge.className = "chart-race__version-badge";
-  versionBadge.textContent = "v1.26.0";
+  versionBadge.textContent = "v1.28.0";
   const dataNote = document.createElement("span");
   dataNote.className = "chart-race__data-note";
   let totalPoints = 0;
@@ -174,13 +175,22 @@ async function main(): Promise<void> {
   // --- Yearly View ---
   const yearlyView = new YearlyView();
 
-  // --- Helper: switch between line and yearly views ---
-  function switchView(mode: "line" | "yearly"): void {
+  // --- Episode Browser ---
+  const episodeBrowser = new EpisodeBrowser();
+  const episodeContainer = document.createElement("div");
+  episodeContainer.className = "episode-browser-container";
+  episodeContainer.style.display = "none";
+  app.appendChild(episodeContainer);
+
+  // --- Helper: switch between line, yearly, and episodes views ---
+  function switchView(mode: "line" | "yearly" | "episodes"): void {
     if (mode === "yearly") {
       if (playbackController.isPlaying()) {
         playbackController.pause();
       }
       chartContainer.style.display = "none";
+      episodeContainer.style.display = "none";
+      episodeBrowser.unmount();
       const playbackControls = app!.querySelector(".playback-controls") as HTMLElement | null;
       if (playbackControls) playbackControls.style.display = "none";
 
@@ -191,8 +201,23 @@ async function main(): Promise<void> {
       yearlyView.setMetric(state.metric);
       yearlyView.setZoom(state.zoom === 10 ? 10 : "all");
       yearlyView.mount(app!, dataStore);
+    } else if (mode === "episodes") {
+      if (playbackController.isPlaying()) {
+        playbackController.pause();
+      }
+      yearlyView.unmount();
+      chartContainer.style.display = "none";
+      const playbackControls = app!.querySelector(".playback-controls") as HTMLElement | null;
+      if (playbackControls) playbackControls.style.display = "none";
+
+      episodeContainer.style.display = "";
+      const state = filterStateManager.getState();
+      episodeBrowser.mount(episodeContainer, dataStore);
+      episodeBrowser.setSourceFilter(state.source);
     } else {
       yearlyView.unmount();
+      episodeBrowser.unmount();
+      episodeContainer.style.display = "none";
       chartContainer.style.display = "";
       const playbackControls = app!.querySelector(".playback-controls") as HTMLElement | null;
       if (playbackControls) playbackControls.style.display = "";
@@ -213,6 +238,12 @@ async function main(): Promise<void> {
       yearlyView.setSourceFilter(state.source);
       yearlyView.setMetric(state.metric);
       yearlyView.setZoom(state.zoom === 10 ? 10 : "all");
+      return;
+    }
+
+    if (currentView === "episodes") {
+      switchView("episodes");
+      episodeBrowser.setSourceFilter(state.source);
       return;
     }
 

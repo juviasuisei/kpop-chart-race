@@ -289,12 +289,18 @@ function computeFrame(msg: ComputeFrameMessage): void {
     const lastActivity = getLastActivityDateIndex(line.changePoints);
     if (lastActivity < 0) continue; // No data
 
-    // Skip lines that haven't started yet
-    if (line.changePoints[0][0] > effectiveDateIndex) continue;
+    // Include lines that haven't started yet but WILL start at the next date
+    // (so we can interpolate their tip from 0 toward their first value)
+    const firstAppearance = line.changePoints[0][0];
+    const isUpcoming = firstAppearance === effectiveDateIndex + 1 && viewport.progressToNext > 0;
+
+    if (firstAppearance > effectiveDateIndex && !isUpcoming) continue;
 
     const daysSinceActivity = calendarDaysBetween(lastActivity, effectiveDateIndex);
     const lifetimePoints = getValueAtDate(line.changePoints, effectiveDateIndex);
-    if (lifetimePoints <= 0) continue;
+
+    // Skip lines with 0 lifetime points UNLESS they're upcoming (about to appear)
+    if (lifetimePoints <= 0 && !isUpcoming) continue;
 
     const isSelected = selectedLineIds.has(line.lineId);
 

@@ -1487,6 +1487,25 @@ export class LineChartController {
       }
     }
 
+    // Check if this date is a chart win for this release
+    let winInfo: { crownLevel: number; crownLabel: string; crownSvgUrl: string } | undefined;
+    if (this.dataStore && meta.artistId) {
+      const dateWins = this.dataStore.chartWins.get(hoveredDate);
+      if (dateWins) {
+        for (const [, winData] of dateWins) {
+          if (winData.artistIds.includes(meta.artistId)) {
+            const level = winData.crownLevels.get(meta.artistId) ?? 1;
+            winInfo = {
+              crownLevel: level,
+              crownLabel: this.getCrownLabel(level),
+              crownSvgUrl: `assets/crowns/crown-${Math.min(level, 12)}.svg`,
+            };
+            break;
+          }
+        }
+      }
+    }
+
     this.tooltip?.show({
       label: meta.label,
       artistName: artist?.name ?? meta.label,
@@ -1502,6 +1521,7 @@ export class LineChartController {
       sourceLogoUrl,
       eventLabel,
       showEmbed,
+      winInfo,
     }, x, y);
   }
 
@@ -1542,6 +1562,22 @@ export class LineChartController {
     if (!artist) return undefined;
     const release = artist.releases.find(r => r.id === meta.releaseId);
     return release?.title;
+  }
+
+  private getCrownLabel(level: number): string {
+    if (level === 1) return "Win";
+    if (level % 3 === 0) {
+      const tripleCrownCount = level / 3;
+      if (tripleCrownCount === 1) return "Triple Crown";
+      return `${this.getOrdinal(tripleCrownCount)} Triple Crown`;
+    }
+    return `${this.getOrdinal(level)} Win`;
+  }
+
+  private getOrdinal(n: number): string {
+    const s = ["th", "st", "nd", "rd"];
+    const v = n % 100;
+    return n + (s[(v - 20) % 10] || s[v] || s[0]);
   }
 
   private formatDateLabel(dateStr: string): string {

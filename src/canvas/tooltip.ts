@@ -30,6 +30,8 @@ export interface TooltipData {
   generationLabel?: string;
   /** Logo image URL (artist SVG) */
   logoUrl?: string;
+  /** Win info (crown level, label, SVG URL) — shown below date row */
+  winInfo?: { crownLevel: number; crownLabel: string; crownSvgUrl: string };
 }
 
 export class Tooltip {
@@ -58,6 +60,11 @@ export class Tooltip {
         html += ` · <span class="tooltip-event-badge">${data.eventLabel}</span>`;
       }
       html += `</div>`;
+    }
+
+    // Win info row (crown icon + label)
+    if (data.winInfo) {
+      html += `<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;"><img src="${data.winInfo.crownSvgUrl}" style="width:16px;height:16px;" alt="Crown"><span style="font-weight:600;font-size:0.8rem;">${data.winInfo.crownLabel}</span></div>`;
     }
 
     // Logo + artist info side by side

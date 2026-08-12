@@ -40,6 +40,7 @@ export class Tooltip {
   private element: HTMLDivElement | null = null;
   private container: HTMLElement;
   private visible = false;
+  private sticky = false;
 
   constructor(container: HTMLElement) {
     this.container = container;
@@ -160,8 +161,32 @@ export class Tooltip {
 
   hide(): void {
     if (!this.element || !this.visible) return;
+    if (this.sticky) return; // Don't hide when sticky (popover mode)
     this.element.style.display = "none";
+    this.element.style.pointerEvents = "none";
     this.visible = false;
+  }
+
+  /** Force hide even when sticky */
+  forceHide(): void {
+    if (!this.element) return;
+    this.sticky = false;
+    this.element.style.display = "none";
+    this.element.style.pointerEvents = "none";
+    this.visible = false;
+  }
+
+  /** Make the tooltip sticky (interactive, won't hide on mousemove) */
+  makeSticky(): void {
+    this.sticky = true;
+    if (this.element) {
+      this.element.style.pointerEvents = "auto";
+    }
+  }
+
+  /** Check if tooltip is in sticky/popover mode */
+  isSticky(): boolean {
+    return this.sticky;
   }
 
   isVisible(): boolean {

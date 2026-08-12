@@ -1448,84 +1448,29 @@ export class LineChartController {
   // --- Private: Popover management ---
 
   private showPopoverForDot(dotHit: { lineId: string; dateIndex: number; eventTypes: string[] }): void {
-    const meta = this.lineMetadata.get(dotHit.lineId);
-    if (!meta || !this.dataStore) return;
+    const rd = this.renderDataCache.find(r => r.lineId === dotHit.lineId);
+    if (!rd) return;
 
-    const artist = this.dataStore.artists.get(meta.artistId);
-    if (!artist) return;
+    // Compute x position from date index for the tooltip
+    const { width } = this.renderer!.getSize();
+    const chartW = width - PADDING.left - PADDING.right;
+    const totalDateSpan = this.state.viewportEnd + 1 - this.state.viewportStart;
+    const xRatio = (dotHit.dateIndex - this.state.viewportStart) / totalDateSpan;
+    const x = PADDING.left + xRatio * chartW;
 
-    const hoveredDate = this.state.dates[dotHit.dateIndex] ?? "";
-    const formattedDate = this.formatDateLabel(hoveredDate);
-    const color = ARTIST_TYPE_COLORS[artist.artistType];
-    const artistTypeLabel = ARTIST_TYPE_LABELS[artist.artistType] ?? "";
-    const genLabel = `Gen ${artist.generation}`;
+    // Get nearest point index for this date
+    const nearestIdx = this.getNearestPointIndex(rd, x);
 
-    // Compute cumulative value
-    let cumulativeValue = 0;
-    let dailyGain = 0;
-    if (meta.releaseId) {
-      const release = artist.releases.find(r => r.id === meta.releaseId);
-      if (release) {
-        let total = 0;
-        let todayValue = 0;
-        for (const [d, entry] of release.dailyValues) {
-          if (d <= hoveredDate) {
-            total += entry.value;
-            if (d === hoveredDate) todayValue = entry.value;
-          }
-        }
-        cumulativeValue = total;
-        dailyGain = todayValue;
-      }
-    }
+    // Show the same rich tooltip content (includes embeds, win info, etc.)
+    this.showRichTooltip(x, rd.points[nearestIdx]?.y ?? 200, rd, nearestIdx);
 
-    // Get source for this date
-    let sourceLabel: string | undefined;
-    let sourceLogoUrl: string | undefined;
-    if (meta.releaseId) {
-      const release = artist.releases.find(r => r.id === meta.releaseId);
-      const entry = release?.dailyValues.get(hoveredDate);
-      if (entry?.source) {
-        sourceLabel = SOURCE_LABELS[entry.source] ?? entry.source;
-        sourceLogoUrl = SOURCE_LOGO_URLS[entry.source];
-      }
-    }
-
-    const eventLabel = dotHit.eventTypes
-      .filter(t => t !== "win") // win info is shown separately via crown row
-      .map(t => {
-        const labels: Record<string, string> = {
-          live_performance: "Live Performance",
-          chart_appearance: "Chart Appearance", mv: "Music Video", release: "Comeback",
-        };
-        return labels[t] ?? t;
-      }).join(" \u00B7 ") || undefined;
-
-    // Get position from tooltip
-    const position = this.tooltip?.getPosition() ?? { left: "0px", top: "0px" };
-
-    this.popover?.show({
-      artistName: artist.name,
-      songTitle: this.getReleaseTitleFromMeta(meta) ?? meta.label,
-      color,
-      value: cumulativeValue > 0 ? cumulativeValue : undefined,
-      dailyGain: dailyGain > 0 ? dailyGain : undefined,
-      date: formattedDate,
-      sourceLogoUrl,
-      sourceLabel,
-      eventLabel,
-      artistTypeLabel,
-      generationLabel: genLabel,
-      logoUrl: artist.logoUrl,
-      hasVideo: false,
-      hasRelease: false,
-    }, position);
-
-    this.tooltip?.hide();
+    // Make the tooltip sticky (interactive)
+    this.tooltip?.makeSticky();
     this.popoverOpen = true;
   }
 
   private hidePopover(): void {
+    this.tooltip?.forceHide();
     this.popover?.hide();
     this.popoverOpen = false;
   }

@@ -1458,10 +1458,19 @@ export class LineChartController {
     return bestIdx;
   }
 
-  /** Get win count for a given line */
+  /** Get win count for a given line up to the current animation date */
   private getWinCount(lineId: string): number {
     const winDates = this.dataStore?.releaseWinDates?.get(lineId);
-    return winDates?.length ?? 0;
+    if (!winDates || winDates.length === 0) return 0;
+    const currentDate = this.state.dates[this.state.currentDateIndex] ?? "";
+    if (!currentDate) return 0;
+    // winDates is sorted chronologically — count entries <= currentDate
+    let count = 0;
+    for (const d of winDates) {
+      if (d <= currentDate) count++;
+      else break;
+    }
+    return count;
   }
 
   // --- Private: Utility ---

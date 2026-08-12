@@ -102,9 +102,21 @@ async function main(): Promise<void> {
   const versionBadge = document.createElement("span");
   versionBadge.className = "chart-race__version-badge";
   versionBadge.textContent = "v1.26.0";
+  const dataNote = document.createElement("div");
+  dataNote.className = "chart-race__data-note";
+  let totalPoints = 0;
+  for (const artist of dataStore.artists.values()) {
+    for (const release of artist.releases) {
+      for (const entry of release.dailyValues.values()) {
+        totalPoints += entry.value;
+      }
+    }
+  }
+  dataNote.textContent = `${totalPoints.toLocaleString()} total points earned from ${dataStore.startDate} forward. Inactive artists may be hidden.`;
   titleHeader.appendChild(titleText);
   titleHeader.appendChild(versionBadge);
   topBar.appendChild(titleHeader);
+  topBar.appendChild(dataNote);
   app.appendChild(topBar);
 
   // --- Mount Toolbar (filters — at the top, persistent across views) ---

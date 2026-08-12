@@ -283,6 +283,18 @@ function computeFrame(msg: ComputeFrameMessage): void {
   const foreground: LineDrawCommand[] = [];
   const highlight: LineDrawCommand[] = [];
 
+  // Find the #1 line (highest cumulative value at current date) — never dims
+  let firstPlaceLineId: string | null = null;
+  let firstPlaceValue = 0;
+  for (const line of lines) {
+    if (line.changePoints.length === 0) continue;
+    const val = getValueAtDate(line.changePoints, effectiveDateIndex);
+    if (val > firstPlaceValue) {
+      firstPlaceValue = val;
+      firstPlaceLineId = line.lineId;
+    }
+  }
+
   interface ScoredLine {
     cmd: LineDrawCommand;
     layer: CanvasLayer;
@@ -312,8 +324,11 @@ function computeFrame(msg: ComputeFrameMessage): void {
 
     // Compute visibility
     let opacity: number;
+    const isFirstPlace = line.lineId === firstPlaceLineId;
     if (isSelected) {
       opacity = 1.0;
+    } else if (isFirstPlace) {
+      opacity = 1.0; // #1 never dims from inactivity
     } else if (visibility.artistFilterActive) {
       opacity = 1.0;
     } else {

@@ -764,7 +764,7 @@ export class LineChartController {
 
     // Collect label candidates (only visible lines, opacity > 0.5)
     const labeled = commands
-      .filter(cmd => cmd.points.length >= 2 && cmd.opacity > 0.5)
+      .filter(cmd => cmd.points.length >= 2 && cmd.opacity > 0.05)
       .map(cmd => ({
         lineId: cmd.lineId,
         endPoint: cmd.points[cmd.points.length - 1],
@@ -772,8 +772,11 @@ export class LineChartController {
         opacity: cmd.opacity,
         finalValue: cmd.values.length > 0 ? cmd.values[cmd.values.length - 1] : 0,
       }))
-      .sort((a, b) => a.endPoint.y - b.endPoint.y)
+      .sort((a, b) => b.finalValue - a.finalValue)
       .slice(0, 10);
+
+    // Sort by Y position for stagger layout
+    labeled.sort((a, b) => a.endPoint.y - b.endPoint.y);
 
     // Stagger to avoid overlap (MIN_GAP = 18px)
     const resolvedPositions: { y: number; lineId: string; endPoint: PixelPoint; color: string; opacity: number; finalValue: number }[] = [];

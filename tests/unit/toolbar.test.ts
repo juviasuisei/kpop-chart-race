@@ -303,18 +303,14 @@ describe('Toolbar — Mobile Drawer Behavior', () => {
     toolbar.unmount();
   });
 
-  it('shows chip summary of active non-default filters in mobile mode', () => {
-    const { toolbar, filterState } = createToolbar();
-    // Set a non-default filter so a chip appears
-    filterState.update({ generation: 4 });
-
+  it('shows hamburger icon button in mobile mode', () => {
+    const { toolbar } = createToolbar();
     toolbar.mount(container);
 
-    // Should show chip summary reflecting active filters
-    const chips = container.querySelector('.toolbar__chips') ||
-      container.querySelector('.toolbar__summary');
-    expect(chips).not.toBeNull();
-    expect(chips!.textContent).toContain('4');
+    const trigger = container.querySelector('.toolbar__drawer-trigger');
+    expect(trigger).not.toBeNull();
+    expect(trigger!.querySelector('svg')).not.toBeNull();
+    expect(trigger!.getAttribute('aria-label')).toBe('Open controls');
 
     toolbar.unmount();
   });

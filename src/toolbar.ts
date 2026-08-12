@@ -168,16 +168,11 @@ export class Toolbar {
     const drawer = document.createElement("div");
     drawer.className = "toolbar__drawer";
 
-    // Chip summary
-    const chips = document.createElement("div");
-    chips.className = "toolbar__chips";
-    chips.textContent = this.buildChipSummary();
-    drawer.appendChild(chips);
-
-    // Trigger button
+    // Trigger button (hamburger icon)
     const trigger = document.createElement("button");
     trigger.className = "toolbar__drawer-trigger";
-    trigger.textContent = "Controls";
+    trigger.setAttribute("aria-label", "Open controls");
+    trigger.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>`;
     trigger.addEventListener("click", () => this.toggleDrawer());
     drawer.appendChild(trigger);
 
@@ -635,25 +630,7 @@ export class Toolbar {
     }
   }
 
-  private buildChipSummary(): string {
-    const state = this.filterState.getState();
-    const chips: string[] = [];
 
-    if (state.generation !== "all") {
-      chips.push(`Gen ${state.generation}`);
-    }
-    if (state.source !== "all") {
-      chips.push(state.source);
-    }
-    if (state.displayMode !== "songs") {
-      chips.push("Artists");
-    }
-    if (state.zoom !== 10) {
-      chips.push("All zoom");
-    }
-
-    return chips.length > 0 ? chips.join(", ") : "Default controls";
-  }
 }
 
 /** Returns ordinal suffix for a number (1st, 2nd, 3rd, 4th, etc.) */

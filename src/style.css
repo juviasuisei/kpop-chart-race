@@ -1461,16 +1461,6 @@ body {
     width: 100%;
   }
 
-  .toolbar__chips {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.4rem 1rem;
-    font-size: 0.7rem;
-    color: #666;
-    border-bottom: 1px solid #e0e0e0;
-  }
-
   .toolbar__drawer-trigger {
     display: flex;
     align-items: center;
@@ -1479,8 +1469,6 @@ body {
     background: none;
     border: none;
     border-bottom: 1px solid #e0e0e0;
-    font-size: 0.75rem;
-    font-weight: 600;
     color: #0072B2;
     cursor: pointer;
   }
@@ -1508,8 +1496,7 @@ body {
 
 /* Desktop: hide mobile-only elements */
 @media (min-width: 768px) {
-  .toolbar__drawer-trigger,
-  .toolbar__chips {
+  .toolbar__drawer-trigger {
     display: none;
   }
 

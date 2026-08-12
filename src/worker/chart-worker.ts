@@ -188,15 +188,25 @@ function buildPixelPoints(
     values.push(0);
   }
 
-  // Add each change-point up to and including endDateIndex
+  // Add each change-point up to and including endDateIndex (stair-step pattern)
   for (const [dateIdx, value] of changePoints) {
     if (dateIdx < startDateIndex) continue;
     if (dateIdx > endDateIndex) break;
 
-    points.push({
-      x: dateToX(dateIdx),
-      y: padding.top + chartH - (value / effectiveMax) * chartH,
-    });
+    const x = dateToX(dateIdx);
+    const y = padding.top + chartH - (value / effectiveMax) * chartH;
+
+    // Insert a horizontal step: extend the previous value to the current X
+    // before jumping up to the new value (creates stair-step shape)
+    if (points.length > 0) {
+      const prevY = points[points.length - 1].y;
+      if (Math.abs(prevY - y) > 0.5) {
+        points.push({ x, y: prevY });
+        values.push(values[values.length - 1]);
+      }
+    }
+
+    points.push({ x, y });
     values.push(value);
   }
 

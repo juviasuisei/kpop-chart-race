@@ -887,7 +887,7 @@ export class LineChartController {
     const dotSize = EVENT_DOT_SIZE * 1.8;
 
     if (img && img.complete && img.naturalWidth > 0) {
-      const imgSize = dotSize * 1.25;
+      const imgSize = dotSize * 1.5;
       ctx.save();
       // White background square with 80% opacity
       ctx.fillStyle = "rgba(255, 255, 255, 0.8)";

@@ -432,7 +432,7 @@ export class LineChartController {
           const series = buildSeriesFromDailyValues(release.dailyValues, dateToIndex);
           if (series.length === 0) continue;
 
-          const label = `${artist.name} \u2014 ${release.title}`;
+          const label = `${release.title} \u2014 ${artist.name}`;
           serialized.push({ lineId, label, color, changePoints: series.toArray() });
           this.lineMetadata.set(lineId, { label, artistId: artist.id, releaseId: release.id });
         }
@@ -685,7 +685,7 @@ export class LineChartController {
       if (finalValue > 0) {
         const wins = this.getWinCount(lineId);
         const statsText = wins > 0
-          ? `${finalValue.toLocaleString()} \u00B7 ${wins}W`
+          ? `${finalValue.toLocaleString()} \u00B7 ${wins} Wins`
           : `${finalValue.toLocaleString()}`;
         ctx.font = "8px system-ui, -apple-system, sans-serif";
         ctx.globalAlpha = opacity * 0.7;
@@ -731,7 +731,7 @@ export class LineChartController {
         if (finalValue > 0) {
           const wins = this.getWinCount(cmd.lineId);
           const statsText = wins > 0
-            ? `${finalValue.toLocaleString()} \u00B7 ${wins}W`
+            ? `${finalValue.toLocaleString()} \u00B7 ${wins} Wins`
             : `${finalValue.toLocaleString()}`;
           ctx.font = "8px system-ui, -apple-system, sans-serif";
           ctx.globalAlpha = 0.7;

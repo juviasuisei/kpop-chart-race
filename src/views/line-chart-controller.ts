@@ -226,17 +226,28 @@ export class LineChartController {
    */
   async initData(dataStore: DataStore): Promise<void> {
     this.dataStore = dataStore;
-    this.state.dates = dataStore.dates;
+
+    // Prepend a synthetic zero-day (one day before the first real date)
+    // so that scrubbing to position 0 shows an empty chart and animation
+    // naturally rises from zero to the first values
+    const firstDate = dataStore.dates[0];
+    let zeroDay = firstDate;
+    try {
+      const d = new Date(firstDate + "T00:00:00");
+      d.setDate(d.getDate() - 1);
+      zeroDay = d.toISOString().split("T")[0];
+    } catch { /* keep original */ }
+    this.state.dates = [zeroDay, ...dataStore.dates];
 
     // Default: show most recent 90 days, paused at the last date
-    this.state.currentDateIndex = dataStore.dates.length - 1;
+    this.state.currentDateIndex = this.state.dates.length - 1;
     this.applyTimeZoom("90d");
 
-    // Build serialized line data for the worker
+    // Build serialized line data for the worker (uses original dataStore dates for change-points)
     const lines = this.buildLineData(dataStore, this.state.displayMode);
 
-    // Send to worker
-    await this.workerClient.initData(lines, dataStore.dates);
+    // Send to worker with the extended dates array (includes zero-day)
+    await this.workerClient.initData(lines, this.state.dates);
     this.initialized = true;
 
     // Request initial frame
@@ -402,6 +413,11 @@ export class LineChartController {
     };
   }
 
+  /** Find date index in the controller's (extended) dates array */
+  getDateIndex(date: string): number {
+    return this.state.dates.indexOf(date);
+  }
+
   destroy(): void {
     this.stopAnimationLoop();
     document.removeEventListener("keydown", this.handleKeydown);
@@ -432,9 +448,10 @@ export class LineChartController {
   // --- Private: Data preparation ---
 
   private buildLineData(dataStore: DataStore, mode: "songs" | "artists"): SerializedLineData[] {
+    // Use the extended dates array (includes synthetic zero-day at index 0)
     const dateIndex = new Map<string, number>();
-    for (let i = 0; i < dataStore.dates.length; i++) {
-      dateIndex.set(dataStore.dates[i], i);
+    for (let i = 0; i < this.state.dates.length; i++) {
+      dateIndex.set(this.state.dates[i], i);
     }
     const dateToIndex = (d: string) => dateIndex.get(d) ?? -1;
 

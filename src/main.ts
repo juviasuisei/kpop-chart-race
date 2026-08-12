@@ -167,11 +167,10 @@ async function main(): Promise<void> {
   // date:change → update line chart date index
   eventBus.on("date:change", (date: string) => {
     if (lineChart.isPlaying()) {
-      // During animation, just sync the scrubber position (no feedback loop)
       playbackController.syncTo(date);
       return;
     }
-    const index = dataStore.dates.indexOf(date);
+    const index = lineChart.getDateIndex(date);
     if (index >= 0) {
       lineChart.setDateIndex(index);
     }

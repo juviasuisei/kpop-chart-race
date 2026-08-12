@@ -5,6 +5,14 @@
 import type { ChartSnapshot } from "./models.ts";
 import type { FilterState, ZoomLevel } from "./types.ts";
 
+/** Hover event payload for line chart */
+export interface LineHoverEvent {
+  lineId: string;
+  label: string;
+  x: number;
+  y: number;
+}
+
 /** Map of event names to their handler signatures */
 export interface EventMap {
   "data:loaded": () => void;
@@ -23,6 +31,10 @@ export interface EventMap {
   "loading:complete": () => void;
   "loading:error": (message: string) => void;
   "filter:change": (state: FilterState) => void;
+  // Line chart events (Phase 2/3)
+  "line:hover": (event: LineHoverEvent | null) => void;
+  "line:select": (lineIds: string[]) => void;
+  "time:zoom": (preset: string) => void;
 }
 
 type Handler = (...args: never[]) => void;

@@ -1,26 +1,29 @@
 /**
  * K-Pop Chart Race — Application Entry Point
  *
- * Wires all components together: data loading, chart engine, renderer,
- * playback controls, toolbar, filter state, detail panel, and accessibility features.
+ * Wires all components together: data loading, line chart controller,
+ * playback controls, toolbar, filter state, and accessibility features.
  */
 
 import "./style.css";
 
 import { EventBus } from "./event-bus.ts";
 import { loadFromAirtable } from "./airtable/data-adapter.ts";
-import { computeSnapshot, computeSnapshotSongs, computeChartWins, extractGenerations, applyGenerationFilter } from "./chart-engine.ts";
+import { computeChartWins, extractGenerations } from "./chart-engine.ts";
 import { FilterStateManager } from "./filter-state-manager.ts";
 import { Toolbar } from "./toolbar.ts";
 import { LoadingScreen } from "./loading-screen.ts";
-import { ChartRaceRenderer } from "./chart-race-renderer.ts";
 import { PlaybackController } from "./playback-controller.ts";
-import { DetailPanel } from "./detail-panel.ts";
 import { LiveRegionAnnouncer } from "./live-region.ts";
 import { ScreenReaderPacedMode } from "./screen-reader-paced-mode.ts";
 import { YearlyView } from "./yearly-view.ts";
-import type { ChartSnapshot, DataStore } from "./models.ts";
+import { LineChartController } from "./views/line-chart-controller.ts";
+import { TimeNavigation } from "./canvas/time-navigation.ts";
+import { SearchOverlay } from "./canvas/search-overlay.ts";
+import { Tooltip } from "./canvas/tooltip.ts";
+import type { DataStore } from "./models.ts";
 import type { FilterState } from "./types.ts";
+import type { LineHoverEvent } from "./event-bus.ts";
 
 async function main(): Promise<void> {
   const app = document.getElementById("app");
@@ -31,16 +34,14 @@ async function main(): Promise<void> {
 
   // --- Shared state ---
   const eventBus = new EventBus();
-  let currentSnapshot: ChartSnapshot | undefined;
-  let previousSnapshot: ChartSnapshot | undefined;
 
-  // --- Initialize FilterStateManager with defaults (Songs mode, all gen, all source, zoom 10) ---
+  // --- Initialize FilterStateManager with defaults ---
   const filterStateManager = new FilterStateManager(eventBus, {
     displayMode: "songs",
     generation: "all",
     source: "all",
     zoom: 10,
-    view: "race",
+    view: "line",
     metric: "points",
   });
 
@@ -72,21 +73,17 @@ async function main(): Promise<void> {
     return;
   }
 
-  // --- Mount UI components ---
-  const renderer = new ChartRaceRenderer(eventBus);
-  renderer.mount(app);
+  // --- Create line chart container ---
+  const chartContainer = document.createElement("div");
+  chartContainer.className = "line-chart-container";
+  app.appendChild(chartContainer);
 
-  // Compute total points across all artists and all dates
-  let totalPoints = 0;
-  for (const artist of dataStore.artists.values()) {
-    for (const release of artist.releases) {
-      for (const entry of release.dailyValues.values()) {
-        totalPoints += entry.value;
-      }
-    }
-  }
-  renderer.setDataNote(dataStore.startDate, totalPoints);
+  // --- Mount Line Chart Controller ---
+  const lineChart = new LineChartController(eventBus);
+  await lineChart.mount(chartContainer);
+  await lineChart.initData(dataStore);
 
+  // --- Mount Playback Controller ---
   const playbackController = new PlaybackController(eventBus, dataStore.dates);
   playbackController.mount(app);
 
@@ -95,8 +92,25 @@ async function main(): Promise<void> {
   toolbar.mount(app);
   toolbar.setGenerations(extractGenerations(dataStore));
 
-  const detailPanel = new DetailPanel(eventBus);
+  // --- Mount Time Navigation ---
+  const timeNav = new TimeNavigation();
+  timeNav.mount(app);
+  timeNav.onPresetSelect = (preset) => {
+    lineChart.applyTimeZoom(preset);
+    eventBus.emit("time:zoom", preset);
+  };
 
+  // --- Mount Search Overlay ---
+  const search = new SearchOverlay(chartContainer);
+  search.setItems(lineChart.getAllLines());
+  search.onSelect = (lineId, multiSelect) => {
+    lineChart.selectLine(lineId, multiSelect);
+  };
+
+  // --- Mount Tooltip ---
+  const tooltip = new Tooltip(chartContainer);
+
+  // --- Accessibility ---
   const liveRegion = new LiveRegionAnnouncer();
   liveRegion.mount(app);
 
@@ -106,104 +120,40 @@ async function main(): Promise<void> {
   // --- Yearly View ---
   const yearlyView = new YearlyView();
 
-  // --- Helper: compute snapshot based on current filter state ---
-  function computeCurrentSnapshot(date: string): ChartSnapshot {
-    const filterState = filterStateManager.getState();
-    let snapshot: ChartSnapshot;
-
-    if (filterState.displayMode === "songs") {
-      snapshot = computeSnapshotSongs(date, dataStore, filterState, previousSnapshot);
-    } else {
-      snapshot = computeSnapshot(date, dataStore, previousSnapshot, filterState.source);
-    }
-
-    // Apply generation filter
-    const filteredEntries = applyGenerationFilter(snapshot.entries, filterState.generation);
-    return { date: snapshot.date, entries: filteredEntries };
-  }
-
-  // --- Helper: switch between race and yearly views ---
-  function switchView(mode: "race" | "yearly"): void {
-    // Note: FilterStateManager already has the new view set by the time this fires
-    // via the toolbar. We use DOM state (not filter state) to avoid double-switching.
-    toolbar.setViewMode(mode);
-
+  // --- Helper: switch between line and yearly views ---
+  function switchView(mode: "line" | "yearly"): void {
     if (mode === "yearly") {
-      // Pause playback if running
       if (playbackController.isPlaying()) {
         playbackController.pause();
       }
-      if (detailPanel.isOpen()) {
-        detailPanel.close();
-      }
-      // Update date display to show year range
-      const dateDisplay = app!.querySelector(".chart-race__date") as HTMLElement | null;
-      const startYear = dataStore.startDate.substring(0, 4);
-      const endYear = dataStore.endDate.substring(0, 4);
-      if (dateDisplay) {
-        dateDisplay.textContent = `${startYear} – ${endYear}`;
-      }
-      // Hide race-specific elements
-      const barsContainer = app!.querySelector(".chart-race__bars") as HTMLElement | null;
+      chartContainer.style.display = "none";
       const playbackControls = app!.querySelector(".playback-controls") as HTMLElement | null;
-      if (barsContainer) barsContainer.style.display = "none";
       if (playbackControls) playbackControls.style.display = "none";
-      // Mount yearly view with ALL current filter state applied immediately (no flash)
+
       const state = filterStateManager.getState();
       yearlyView.setDisplayMode(state.displayMode);
       yearlyView.setGenerationFilter(state.generation);
       yearlyView.setSourceFilter(state.source);
       yearlyView.setMetric(state.metric);
       yearlyView.setZoom(state.zoom === 10 ? 10 : "all");
-      const chartRaceWrapper = app!.querySelector(".chart-race") as HTMLElement | null;
-      if (chartRaceWrapper) {
-        yearlyView.mount(chartRaceWrapper, dataStore);
-      }
+      yearlyView.mount(app!, dataStore);
     } else {
-      // Unmount yearly view
       yearlyView.unmount();
-      // Restore date display to current snapshot date
-      const dateDisplay = app!.querySelector(".chart-race__date") as HTMLElement | null;
-      if (dateDisplay && currentSnapshot) {
-        dateDisplay.textContent = currentSnapshot.date;
-      }
-      // Show race elements
-      const barsContainer = app!.querySelector(".chart-race__bars") as HTMLElement | null;
+      chartContainer.style.display = "";
       const playbackControls = app!.querySelector(".playback-controls") as HTMLElement | null;
-      if (barsContainer) barsContainer.style.display = "";
       if (playbackControls) playbackControls.style.display = "";
-      // Re-compute snapshot with current filters applied (no flash of stale data)
-      if (currentSnapshot) {
-        const date = currentSnapshot.date;
-        previousSnapshot = currentSnapshot;
-        currentSnapshot = computeCurrentSnapshot(date);
-      }
-      // Re-render race view with current filter state
-      const currentZoom = filterStateManager.getState().zoom;
-      if (currentSnapshot) {
-        renderer.update(currentSnapshot, currentZoom, dataStore);
-      }
-      renderer.recheckOverflow();
     }
   }
 
   // --- EventBus wiring ---
 
-  // filter:change → re-compute snapshot and handle view/zoom changes
+  // filter:change → update line chart filters, handle view switching
   eventBus.on("filter:change", (state: FilterState) => {
     const currentView = state.view;
 
     // Handle view switching
-    const barsContainer = app!.querySelector(".chart-race__bars") as HTMLElement | null;
-    const isCurrentlyRace = barsContainer ? barsContainer.style.display !== "none" : true;
-    const shouldBeRace = currentView === "race";
-
-    if (shouldBeRace !== isCurrentlyRace) {
-      switchView(currentView);
-    }
-
-    // Handle filter changes in yearly view — pass all relevant state
     if (currentView === "yearly") {
+      switchView("yearly");
       yearlyView.setDisplayMode(state.displayMode);
       yearlyView.setGenerationFilter(state.generation);
       yearlyView.setSourceFilter(state.source);
@@ -212,158 +162,77 @@ async function main(): Promise<void> {
       return;
     }
 
-    // For race view: re-compute snapshot with current date
-    if (currentSnapshot) {
-      const date = currentSnapshot.date;
-      previousSnapshot = currentSnapshot;
-      currentSnapshot = computeCurrentSnapshot(date);
-      eventBus.emit("state:updated", currentSnapshot);
+    // Line view active — pass filter state to controller
+    if (currentView === "line" || currentView === "race") {
+      switchView("line");
+      lineChart.setFilters(state);
     }
   });
 
-  // date:change → compute snapshot → emit state:updated
+  // date:change → update line chart date index
   eventBus.on("date:change", (date: string) => {
-    if (detailPanel.isOpen()) {
-      detailPanel.close();
-    }
-    previousSnapshot = currentSnapshot;
-    currentSnapshot = computeCurrentSnapshot(date);
-    eventBus.emit("state:updated", currentSnapshot);
-  });
-
-  // reset → clear snapshot history so next date starts fresh
-  eventBus.on("reset", () => {
-    console.log("[DEBUG] main.ts reset: clearing snapshots");
-    previousSnapshot = undefined;
-    currentSnapshot = undefined;
-  });
-
-  // state:updated → update renderer + announce for screen readers
-  eventBus.on("state:updated", (snapshot: ChartSnapshot) => {
-    const currentZoom = filterStateManager.getState().zoom;
-    renderer.update(snapshot, currentZoom, dataStore);
-
-    // Screen reader announcement
-    if (pacedMode.isActive()) {
-      const message = pacedMode.formatAnnouncement(snapshot);
-      liveRegion.announce(message);
-    } else {
-      const top = snapshot.entries[0];
-      if (top) {
-        liveRegion.announce(
-          `${snapshot.date}: #1 ${top.artistName} (${top.cumulativeValue.toLocaleString()})`,
-        );
-      }
+    const index = dataStore.dates.indexOf(date);
+    if (index >= 0) {
+      lineChart.setDateIndex(index);
     }
   });
 
-  // zoom:change → update filter state (which triggers filter:change → re-render)
-  eventBus.on("zoom:change", (level) => {
-    if (detailPanel.isOpen()) {
-      detailPanel.close();
-    }
-    // Update filter state — this will trigger filter:change and re-render
-    filterStateManager.update({ zoom: level });
-  });
-
-  // bar:click → freeze-then-resolve: pause if playing, then open detail panel
-  eventBus.on("bar:click", (artistId: string, releaseKey?: string) => {
-    if (playbackController.isPlaying()) {
-      playbackController.pause();
-    }
-    // In Songs mode, the emitted ID is the actual artist ID (from coArtists),
-    // but entries are keyed by composite releaseKey. Find the entry that contains
-    // this artist in its coArtists array.
-    let entry = currentSnapshot?.entries.find(e => e.artistId === artistId);
-    if (!entry && releaseKey) {
-      // Precise lookup by releaseKey (songs mode)
-      entry = currentSnapshot?.entries.find(e => e.releaseKey === releaseKey);
-    }
-    if (!entry) {
-      entry = currentSnapshot?.entries.find(e =>
-        e.coArtists?.some(a => a.id === artistId)
-      );
-    }
-    const coArtists = entry?.coArtists;
-
-    // Always compute artist rank from artist-mode snapshot so the detail panel
-    // shows consistent ranking regardless of display mode
-    let rank: number | undefined;
-    if (currentSnapshot?.date) {
-      const artistSnapshot = computeSnapshot(currentSnapshot.date, dataStore);
-      const artistEntry = artistSnapshot.entries.find(e => e.artistId === artistId);
-      rank = artistEntry?.rank;
-    }
-
-    detailPanel.open(artistId, dataStore, currentSnapshot?.date, rank, coArtists);
-    renderer.recheckOverflow();
-  });
-
-  // pause → auto-open detail panel for top-ranked artist
-  eventBus.on("pause", () => {
-    if (currentSnapshot && currentSnapshot.entries.length > 0) {
-      const topEntry = currentSnapshot.entries[0];
-      const coArtists = topEntry.coArtists;
-      // In Songs mode, get the first co-artist's actual ID for the detail panel
-      const actualArtistId = coArtists && coArtists.length > 0
-        ? coArtists[0].id
-        : topEntry.artistId;
-      // Compute artist rank from artist-mode snapshot
-      const artistSnapshot = computeSnapshot(currentSnapshot.date, dataStore);
-      const artistEntry = artistSnapshot.entries.find(e => e.artistId === actualArtistId);
-      const rank = artistEntry?.rank ?? 1;
-      detailPanel.open(actualArtistId, dataStore, currentSnapshot.date, rank, coArtists);
-      renderer.recheckOverflow();
-    }
-  });
-
-  // play → auto-close detail panel
+  // play/pause → inform line chart controller
   eventBus.on("play", () => {
-    if (detailPanel.isOpen()) {
-      detailPanel.close();
+    lineChart.setPlaying(true);
+  });
+
+  eventBus.on("pause", () => {
+    lineChart.setPlaying(false);
+  });
+
+  // reset → line chart handles internally via date index
+  eventBus.on("reset", () => {
+    lineChart.setDateIndex(0);
+  });
+
+  // line:hover → show/hide tooltip
+  eventBus.on("line:hover", (event: LineHoverEvent | null) => {
+    if (event) {
+      tooltip.show(event.label, event.x, event.y);
+    } else {
+      tooltip.hide();
     }
   });
 
-  // panel:close → recheck overflow since main area width changes
-  eventBus.on("panel:close", () => {
-    renderer.recheckOverflow();
+  // line:select → announce for screen readers
+  eventBus.on("line:select", (lineIds: string[]) => {
+    if (lineIds.length > 0) {
+      const labels = lineIds.map(id => lineChart.getLineMetadata(id)?.label ?? id);
+      liveRegion.announce(`Selected: ${labels.join(", ")}`);
+    } else {
+      liveRegion.announce("Selection cleared");
+    }
   });
 
-  // click-outside → close detail panel when clicking empty chart space
-  const chartRaceEl = app.querySelector(".chart-race");
-  if (chartRaceEl) {
-    chartRaceEl.addEventListener("click", (event) => {
-      const target = event.target as HTMLElement;
-      const wrapper = target.closest(".chart-race__bar-wrapper");
-      if (wrapper && target !== wrapper) return;
-      if (target.closest(".detail-panel")) return;
-      if (detailPanel.isOpen()) {
-        detailPanel.close();
-      }
-    });
-  }
+  // zoom:change → update filter state (legacy event from toolbar)
+  eventBus.on("zoom:change", () => {
+    // Handled via filter:change
+  });
+
+  // Keyboard: Ctrl+F or / to open search
+  document.addEventListener("keydown", (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === "f") {
+      e.preventDefault();
+      search.show();
+    }
+    if (e.key === "/" && !search.isVisible() && document.activeElement === document.body) {
+      e.preventDefault();
+      search.show();
+    }
+  });
 
   // --- Initial render ---
-  // Defer the first date:change so the browser completes layout after mount().
-  // Without this, clientHeight is 0 and bars render with zero height.
+  // Start at the last date (current state, no animation)
   if (dataStore.dates.length > 0) {
     requestAnimationFrame(() => {
-      eventBus.emit("date:change", dataStore.dates[dataStore.dates.length - 1]);
-
-      // On non-mobile, auto-open the detail panel for the #1 artist after animation completes
-      if (window.innerWidth >= 768) {
-        const onInitialComplete = () => {
-          eventBus.off("update:complete", onInitialComplete);
-          if (currentSnapshot && currentSnapshot.entries.length > 0) {
-            const topEntry = currentSnapshot.entries[0];
-            const topArtistId = topEntry.artistId;
-            const coArtists = topEntry.coArtists;
-            detailPanel.open(topArtistId, dataStore, currentSnapshot.date, 1, coArtists);
-            renderer.recheckOverflow();
-          }
-        };
-        eventBus.on("update:complete", onInitialComplete);
-      }
+      const lastDate = dataStore.dates[dataStore.dates.length - 1];
+      eventBus.emit("date:change", lastDate);
     });
   }
 }

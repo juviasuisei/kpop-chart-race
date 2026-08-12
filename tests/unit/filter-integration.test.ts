@@ -196,7 +196,7 @@ describe('Integration: Full filter-compute-render pipeline', () => {
       generation: 4,
       source: 'inkigayo',
       zoom: 'all',
-      view: 'race',
+      view: 'line',
       metric: 'wins',
     });
 
@@ -215,7 +215,7 @@ describe('Integration: Full filter-compute-render pipeline', () => {
     expect(stateAfterYearly.view).toBe('yearly');
 
     // Switch back to race view
-    fsm.update({ view: 'race' });
+    fsm.update({ view: 'line' });
     const stateAfterRace = fsm.getState();
 
     // All fields should match original state
@@ -234,7 +234,7 @@ describe('Integration: Full filter-compute-render pipeline', () => {
       generation: 4,
       source: 'inkigayo',
       zoom: 10,
-      view: 'race',
+      view: 'line',
       metric: 'points',
     });
 
@@ -294,7 +294,7 @@ describe('Integration: Full filter-compute-render pipeline', () => {
     const state = fsm.getState();
 
     expect(state.displayMode).toBe('songs');
-    expect(state.view).toBe('race');
+    expect(state.view).toBe('line');
     expect(state.zoom).toBe(10);
     expect(state.generation).toBe('all');
     expect(state.source).toBe('all');

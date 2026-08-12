@@ -84,14 +84,14 @@ export class Toolbar {
   }
 
   /** Show/hide yearly-only controls (Points/Wins metric toggle) */
-  setViewMode(view: "race" | "yearly"): void {
+  setViewMode(view: "race" | "yearly" | "line"): void {
     if (!this.wrapper) return;
     const metricControl = this.wrapper.querySelector(
       '[data-control="metric"]',
     ) as HTMLElement | null;
     if (!metricControl) return;
 
-    if (view === "race") {
+    if (view === "race" || view === "line") {
       metricControl.classList.add("toolbar__control--hidden");
     } else {
       metricControl.classList.remove("toolbar__control--hidden");

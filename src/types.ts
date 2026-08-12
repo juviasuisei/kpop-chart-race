@@ -75,6 +75,6 @@ export interface FilterState {
   generation: number | "all";
   source: string; // ChartSource | "all"
   zoom: ZoomLevel; // 10 | "all"
-  view: "race" | "yearly";
+  view: "race" | "yearly" | "line";
   metric: "points" | "wins"; // yearly-view only
 }

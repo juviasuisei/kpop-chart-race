@@ -13,14 +13,14 @@
 
 ## Phase 1: Performance Foundation
 
-- [ ] 1.1 Create Web Worker infrastructure with typed message passing between main thread and worker
-- [ ] 1.2 Implement CanvasRenderer with 3-layer canvas system (background, foreground, highlight)
-- [ ] 1.3 Build spatial index for canvas hit detection (grid-based, 8px tolerance)
-- [ ] 1.4 Implement basic line drawing on canvas with polyline path rendering
-- [ ] 1.5 Add OffscreenCanvas support with fallback for browsers that don't support it
-- [ ] 1.6 Implement sparse change-point data structure for cumulative values
-- [ ] 1.7 Build lazy time-range loader (fetch ranges on demand, LRU eviction, ≤30MB budget)
-- [ ] 1.8* Set up performance benchmarks (measure frame time with 1K, 5K, 10K lines)
+- [x] 1.1 Create Web Worker infrastructure with typed message passing between main thread and worker
+- [x] 1.2 Implement CanvasRenderer with 3-layer canvas system (background, foreground, highlight)
+- [x] 1.3 Build spatial index for canvas hit detection (grid-based, 8px tolerance)
+- [x] 1.4 Implement basic line drawing on canvas with polyline path rendering
+- [x] 1.5 Add OffscreenCanvas support with fallback for browsers that don't support it
+- [x] 1.6 Implement sparse change-point data structure for cumulative values
+- [x] 1.7 Build lazy time-range loader (fetch ranges on demand, LRU eviction, ≤30MB budget)
+- [x] 1.8* Set up performance benchmarks (measure frame time with 1K, 5K, 10K lines)
 
 ## Phase 2: Line Chart — Songs Mode
 

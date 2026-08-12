@@ -18,7 +18,7 @@ describe('FilterStateManager', () => {
       expect(state.generation).toBe('all');
       expect(state.source).toBe('all');
       expect(state.zoom).toBe(10);
-      expect(state.view).toBe('race');
+      expect(state.view).toBe('line');
       expect(state.metric).toBe('points');
     });
 
@@ -34,7 +34,7 @@ describe('FilterStateManager', () => {
       // defaults preserved for unspecified fields
       expect(state.generation).toBe('all');
       expect(state.source).toBe('all');
-      expect(state.view).toBe('race');
+      expect(state.view).toBe('line');
       expect(state.metric).toBe('points');
     });
   });
@@ -49,7 +49,7 @@ describe('FilterStateManager', () => {
       expect(state.generation).toBe('all');
       expect(state.source).toBe('all');
       expect(state.zoom).toBe(10);
-      expect(state.view).toBe('race');
+      expect(state.view).toBe('line');
       expect(state.metric).toBe('points');
     });
 
@@ -62,7 +62,7 @@ describe('FilterStateManager', () => {
       expect(state.zoom).toBe('all');
       // others preserved
       expect(state.displayMode).toBe('songs');
-      expect(state.view).toBe('race');
+      expect(state.view).toBe('line');
       expect(state.metric).toBe('points');
     });
 
@@ -88,7 +88,7 @@ describe('FilterStateManager', () => {
         generation: 'all',
         source: 'music_bank',
         zoom: 10,
-        view: 'race',
+        view: 'line',
         metric: 'points',
       });
     });
@@ -112,7 +112,7 @@ describe('FilterStateManager', () => {
       expect(state.generation).toBe('all');
       expect(state.source).toBe('all');
       expect(state.zoom).toBe(10);
-      expect(state.view).toBe('race');
+      expect(state.view).toBe('line');
       expect(state.metric).toBe('points');
     });
 
@@ -176,7 +176,7 @@ describe('FilterStateManager', () => {
       expect(afterSwitch.metric).toBe(beforeSwitch.metric);
     });
 
-    it('should preserve all filter values when switching from yearly to race', () => {
+    it('should preserve all filter values when switching from yearly to line', () => {
       manager.update({
         view: 'yearly',
         displayMode: 'artists',
@@ -187,10 +187,10 @@ describe('FilterStateManager', () => {
       });
 
       const beforeSwitch = manager.getState();
-      manager.update({ view: 'race' });
+      manager.update({ view: 'line' });
       const afterSwitch = manager.getState();
 
-      expect(afterSwitch.view).toBe('race');
+      expect(afterSwitch.view).toBe('line');
       // All other values preserved
       expect(afterSwitch.displayMode).toBe(beforeSwitch.displayMode);
       expect(afterSwitch.generation).toBe(beforeSwitch.generation);
@@ -199,10 +199,10 @@ describe('FilterStateManager', () => {
       expect(afterSwitch.metric).toBe(beforeSwitch.metric);
     });
 
-    it('should preserve metric value through race→yearly→race round-trip', () => {
+    it('should preserve metric value through line→yearly→line round-trip', () => {
       manager.update({ metric: 'wins' });
       manager.update({ view: 'yearly' });
-      manager.update({ view: 'race' });
+      manager.update({ view: 'line' });
 
       expect(manager.getState().metric).toBe('wins');
     });

@@ -14,7 +14,7 @@ const DEFAULT_STATE: FilterState = {
   generation: "all",
   source: "all",
   zoom: 10,
-  view: "race",
+  view: "line",
   metric: "points",
 };
 

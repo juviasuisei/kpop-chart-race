@@ -158,8 +158,11 @@ export class LineChartController {
     await this.workerClient.initData(lines, dataStore.dates);
     this.initialized = true;
 
-    // Request initial frame
-    this.requestFrame();
+    // Request initial frame (defer to next frame to ensure layout is settled)
+    requestAnimationFrame(() => {
+      this.backgroundDirty = true;
+      this.requestFrame();
+    });
   }
 
   /**
@@ -453,7 +456,11 @@ export class LineChartController {
     if (!this.initialized || !this.renderer) return;
 
     const { width, height, dpr } = this.renderer.getSize();
-    if (width === 0 || height === 0) return;
+    if (width === 0 || height === 0) {
+      // Container not laid out yet — retry next frame
+      requestAnimationFrame(() => this.requestFrame());
+      return;
+    }
 
     const viewport: Viewport = {
       startDateIndex: this.state.viewportStart,

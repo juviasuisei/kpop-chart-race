@@ -102,14 +102,14 @@ function buildPixelPoints(
   changePoints: [number, number][],
   viewport: Viewport,
 ): PixelPoint[] {
-  const { startDateIndex, endDateIndex, width, height, dpr } = viewport;
+  const { startDateIndex, endDateIndex, width, height } = viewport;
   const dateRange = endDateIndex - startDateIndex;
   if (dateRange <= 0) return [];
 
-  // Compute chart area (with padding)
-  const padding = { top: 40 * dpr, right: 60 * dpr, bottom: 40 * dpr, left: 10 * dpr };
-  const chartW = width * dpr - padding.left - padding.right;
-  const chartH = height * dpr - padding.top - padding.bottom;
+  // Compute chart area in CSS pixels (canvas context has DPR transform applied)
+  const padding = { top: 40, right: 60, bottom: 40, left: 10 };
+  const chartW = width - padding.left - padding.right;
+  const chartH = height - padding.top - padding.bottom;
 
   // Find max value across all visible lines for Y scaling
   // (We use a pre-computed global max — simplified here, will be refined)
@@ -227,7 +227,7 @@ function computeFrame(msg: ComputeFrameMessage): void {
     const points = buildPixelPoints(line.changePoints, viewport);
     if (points.length < 2) continue;
 
-    const lineWidth = isSelected ? 3 * viewport.dpr : 1.5 * viewport.dpr;
+    const lineWidth = isSelected ? 3 : 1.5;
 
     scored.push({
       cmd: {

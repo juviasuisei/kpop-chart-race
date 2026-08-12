@@ -159,6 +159,10 @@ export class LineChartController {
   private backgroundDirty = true;
   /** Whether popover is currently open */
   private popoverOpen = false;
+  /** Current generation filter */
+  private currentGenFilter: number | "all" = "all";
+  /** Current source filter */
+  private currentSourceFilter: string = "all";
   /** Pan gesture state */
   private isPanning = false;
   private lastPanX = 0;
@@ -340,11 +344,20 @@ export class LineChartController {
     this.state.filterCount = filterCount;
     this.state.artistFilterActive = false;
 
+    // Rebuild line data if any filter changed (generation, source, or displayMode)
+    const filtersChanged = this.currentGenFilter !== filterState.generation ||
+      this.currentSourceFilter !== filterState.source ||
+      filterState.displayMode !== this.state.displayMode;
+
+    this.currentGenFilter = filterState.generation;
+    this.currentSourceFilter = filterState.source;
+
     if (filterState.displayMode !== this.state.displayMode) {
       this.state.displayMode = filterState.displayMode;
-      if (this.dataStore && this.initialized) {
-        this.rebuildLineData();
-      }
+    }
+
+    if (filtersChanged && this.dataStore && this.initialized) {
+      this.rebuildLineData();
     }
 
     this.backgroundDirty = true;
@@ -457,11 +470,27 @@ export class LineChartController {
 
     if (mode === "songs") {
       for (const artist of dataStore.artists.values()) {
+        // Generation filter
+        if (this.currentGenFilter !== "all" && artist.generation !== this.currentGenFilter) continue;
+
         const color = ARTIST_TYPE_COLORS[artist.artistType];
         for (const release of artist.releases) {
           if (release.dailyValues.size === 0) continue;
+
+          // Source filter: only include dailyValues from the selected source
+          let filteredDailyValues = release.dailyValues;
+          if (this.currentSourceFilter !== "all") {
+            filteredDailyValues = new Map();
+            for (const [date, entry] of release.dailyValues) {
+              if (entry.source === this.currentSourceFilter) {
+                filteredDailyValues.set(date, entry);
+              }
+            }
+            if (filteredDailyValues.size === 0) continue;
+          }
+
           const lineId = `${artist.id}::${release.id}`;
-          const series = buildSeriesFromDailyValues(release.dailyValues, dateToIndex);
+          const series = buildSeriesFromDailyValues(filteredDailyValues, dateToIndex);
           if (series.length === 0) continue;
 
           const label = `${release.title} \u2014 ${artist.name}`;
@@ -471,12 +500,26 @@ export class LineChartController {
       }
     } else {
       for (const artist of dataStore.artists.values()) {
+        // Generation filter
+        if (this.currentGenFilter !== "all" && artist.generation !== this.currentGenFilter) continue;
+
         const color = ARTIST_TYPE_COLORS[artist.artistType];
         const releaseSeries: SparseTimeSeries[] = [];
 
         for (const release of artist.releases) {
           if (release.dailyValues.size === 0) continue;
-          releaseSeries.push(buildSeriesFromDailyValues(release.dailyValues, dateToIndex));
+          // Source filter
+          let filteredDailyValues = release.dailyValues;
+          if (this.currentSourceFilter !== "all") {
+            filteredDailyValues = new Map();
+            for (const [date, entry] of release.dailyValues) {
+              if (entry.source === this.currentSourceFilter) {
+                filteredDailyValues.set(date, entry);
+              }
+            }
+            if (filteredDailyValues.size === 0) continue;
+          }
+          releaseSeries.push(buildSeriesFromDailyValues(filteredDailyValues, dateToIndex));
         }
 
         if (releaseSeries.length === 0) continue;

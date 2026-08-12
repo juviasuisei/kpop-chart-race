@@ -89,12 +89,16 @@ export class Toolbar {
     const metricControl = this.wrapper.querySelector(
       '[data-control="metric"]',
     ) as HTMLElement | null;
-    if (!metricControl) return;
+    const zoomControl = this.wrapper.querySelector(
+      '[data-control="zoom"]',
+    ) as HTMLElement | null;
 
     if (view === "race" || view === "line") {
-      metricControl.classList.add("toolbar__control--hidden");
+      metricControl?.classList.add("toolbar__control--hidden");
+      zoomControl?.classList.add("toolbar__control--hidden");
     } else {
-      metricControl.classList.remove("toolbar__control--hidden");
+      metricControl?.classList.remove("toolbar__control--hidden");
+      zoomControl?.classList.remove("toolbar__control--hidden");
     }
   }
 

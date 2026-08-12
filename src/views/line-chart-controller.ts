@@ -245,7 +245,14 @@ export class LineChartController {
   setDateIndex(index: number): void {
     this.state.currentDateIndex = index;
     if (this.state.playing) {
-      this.autoScrollViewport();
+      // During playback: viewport right edge IS the current date (progressive reveal)
+      const zoomWindow = PRESET_DAYS[this.state.timeZoom] === Infinity
+        ? this.state.dates.length
+        : PRESET_DAYS[this.state.timeZoom];
+
+      this.state.viewportEnd = index;
+      this.state.viewportStart = Math.max(0, index - zoomWindow);
+      this.backgroundDirty = true;
     }
     this.requestFrame();
   }
@@ -792,21 +799,7 @@ export class LineChartController {
     ctx.restore();
   }
 
-  // --- Private: Viewport management ---
-
-  private autoScrollViewport(): void {
-    const current = this.state.currentDateIndex;
-    const viewportRange = this.state.viewportEnd - this.state.viewportStart;
-
-    const threshold = this.state.viewportStart + Math.floor(viewportRange * 0.8);
-    if (current > threshold) {
-      const shift = current - threshold;
-      const totalDates = this.state.dates.length;
-      this.state.viewportStart = Math.min(totalDates - viewportRange - 1, this.state.viewportStart + shift);
-      this.state.viewportEnd = Math.min(totalDates - 1, this.state.viewportStart + viewportRange);
-      this.backgroundDirty = true;
-    }
-  }
+  // --- Private: Viewport management (handled in setDateIndex during playback) ---
 
   // --- Private: Hit detection (matching prototype exactly) ---
 

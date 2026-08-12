@@ -122,19 +122,27 @@ function assignLayer(opacity: number, isSelected: boolean): CanvasLayer {
 function buildPixelPoints(
   changePoints: [number, number][],
   viewport: Viewport,
+  maxValue: number,
 ): { points: PixelPoint[]; values: number[] } {
   const { startDateIndex, endDateIndex, width, height } = viewport;
   const dateRange = endDateIndex - startDateIndex;
-  if (dateRange <= 0) return { points: [], values: [] };
 
   // Compute chart area in CSS pixels (canvas context has DPR transform applied)
   const padding = { top: 40, right: 160, bottom: 40, left: 0 };
   const chartW = width - padding.left - padding.right;
   const chartH = height - padding.top - padding.bottom;
 
-  // Find max value across all visible lines for Y scaling
-  // (We use a pre-computed global max — simplified here, will be refined)
-  const maxValue = globalMaxValue || 1;
+  const effectiveMax = maxValue || 1;
+
+  // Special case: single date (day 1) — render as a dot at the right edge
+  if (dateRange <= 0) {
+    const val = getValueAtDate(changePoints, endDateIndex);
+    if (val <= 0) return { points: [], values: [] };
+    const x = padding.left + chartW; // right edge
+    const y = padding.top + chartH - (val / effectiveMax) * chartH;
+    // Return two very close points so it renders as a visible dot
+    return { points: [{ x: x - 0.5, y }, { x, y }], values: [val, val] };
+  }
 
   // Collect points within viewport range
   const points: PixelPoint[] = [];
@@ -145,7 +153,7 @@ function buildPixelPoints(
   if (startValue > 0 || changePoints.length > 0) {
     points.push({
       x: padding.left,
-      y: padding.top + chartH - (startValue / maxValue) * chartH,
+      y: padding.top + chartH - (startValue / effectiveMax) * chartH,
     });
     values.push(startValue);
   }
@@ -158,7 +166,7 @@ function buildPixelPoints(
     const xRatio = (dateIdx - startDateIndex) / dateRange;
     points.push({
       x: padding.left + xRatio * chartW,
-      y: padding.top + chartH - (value / maxValue) * chartH,
+      y: padding.top + chartH - (value / effectiveMax) * chartH,
     });
     values.push(value);
   }
@@ -172,7 +180,7 @@ function buildPixelPoints(
     if (!lastPoint || Math.abs(lastPoint.x - endX) > 1) {
       points.push({
         x: endX,
-        y: padding.top + chartH - (endValue / maxValue) * chartH,
+        y: padding.top + chartH - (endValue / effectiveMax) * chartH,
       });
       values.push(endValue);
     }
@@ -181,17 +189,24 @@ function buildPixelPoints(
   return { points, values };
 }
 
-// Global max value for Y-axis scaling (updated on init and viewport changes)
-let globalMaxValue = 0;
+// Y-axis max recomputed per frame via computeMaxAtDate()
 
 function recomputeGlobalMax(): void {
+  // Called on init; kept for potential static-view use
+}
+
+/**
+ * Compute the max cumulative value across all lines up to a given date index.
+ * This is used for dynamic Y-axis scaling during animation.
+ */
+function computeMaxAtDate(dateIndex: number): number {
   let max = 0;
   for (const line of lines) {
     if (line.changePoints.length === 0) continue;
-    const lastValue = line.changePoints[line.changePoints.length - 1][1];
-    if (lastValue > max) max = lastValue;
+    const val = getValueAtDate(line.changePoints, dateIndex);
+    if (val > max) max = val;
   }
-  globalMaxValue = max;
+  return max || 1;
 }
 
 // --- Frame computation ---
@@ -202,6 +217,9 @@ function computeFrame(msg: ComputeFrameMessage): void {
 
   // Clamp currentDateIndex to available range
   const effectiveDateIndex = Math.min(currentDateIndex, allDates.length - 1);
+
+  // Dynamic Y-axis: compute max only from data up to current date
+  const frameMaxValue = computeMaxAtDate(effectiveDateIndex);
 
   const background: LineDrawCommand[] = [];
   const foreground: LineDrawCommand[] = [];
@@ -249,7 +267,7 @@ function computeFrame(msg: ComputeFrameMessage): void {
     const zIndex = isSelected ? Infinity : computeZIndex(daysSinceActivity, lifetimePoints);
 
     // Build pixel coordinates
-    const { points, values } = buildPixelPoints(line.changePoints, viewport);
+    const { points, values } = buildPixelPoints(line.changePoints, viewport, frameMaxValue);
     if (points.length < 2) continue;
 
     const lineWidth = isSelected ? 3 : 1.5;

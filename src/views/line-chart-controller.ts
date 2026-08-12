@@ -23,14 +23,14 @@ import type { DataStore } from "../models.ts";
 import type { FilterState } from "../types.ts";
 import type { SerializedLineData, FrameResultMessage, Viewport, VisibilityParams, LineDrawCommand, PixelPoint } from "../worker/messages.ts";
 
-/** Time zoom presets with their date range widths */
-export type TimeZoomPreset = "90d" | "quarter" | "year" | "decade" | "all";
+/** Time zoom presets — each has a different data aggregation level */
+export type TimeZoomPreset = "daily" | "year" | "decade" | "all";
 
-const PRESET_DAYS: Record<TimeZoomPreset, number> = {
-  "90d": 90,
-  "quarter": 90,
-  "year": 365,
-  "decade": 3650,
+/** Viewport window size for each preset (in aggregated units) */
+const PRESET_WINDOW: Record<TimeZoomPreset, number> = {
+  "daily": 90,     // 90 days
+  "year": 52,      // ~52 weeks
+  "decade": 120,   // ~120 months (10 years)
   "all": Infinity,
 };
 
@@ -133,7 +133,7 @@ export class LineChartController {
     currentDateIndex: 0,
     viewportStart: 0,
     viewportEnd: 0,
-    timeZoom: "90d",
+    timeZoom: "daily",
     playing: false,
     speed: 1,
     selectedLineIds: [],
@@ -238,7 +238,7 @@ export class LineChartController {
 
     // Default: show most recent 90 days, paused at the last date
     this.state.currentDateIndex = this.state.dates.length - 1;
-    this.applyTimeZoom("90d");
+    this.applyTimeZoom("daily");
 
     // Build serialized line data for the worker
     const lines = this.buildLineData(dataStore, this.state.displayMode);
@@ -258,9 +258,9 @@ export class LineChartController {
     this.state.currentDateIndex = index;
 
     // Viewport right edge always tracks the current date
-    const zoomWindow = PRESET_DAYS[this.state.timeZoom] === Infinity
+    const zoomWindow = PRESET_WINDOW[this.state.timeZoom] === Infinity
       ? this.state.dates.length
-      : PRESET_DAYS[this.state.timeZoom];
+      : PRESET_WINDOW[this.state.timeZoom];
 
     this.state.viewportEnd = index;
     const dataStart = Math.max(0, index - zoomWindow);
@@ -294,11 +294,11 @@ export class LineChartController {
     this.state.timeZoom = preset;
     const totalDates = this.state.dates.length;
 
-    if (preset === "all" || PRESET_DAYS[preset] >= totalDates) {
+    if (preset === "all" || PRESET_WINDOW[preset] >= totalDates) {
       this.state.viewportStart = 0;
       this.state.viewportEnd = totalDates - 1;
     } else {
-      const windowSize = PRESET_DAYS[preset];
+      const windowSize = PRESET_WINDOW[preset];
       const center = this.state.currentDateIndex;
       this.state.viewportStart = Math.max(0, center - Math.floor(windowSize / 2));
       this.state.viewportEnd = Math.min(totalDates - 1, this.state.viewportStart + windowSize);
@@ -598,9 +598,9 @@ export class LineChartController {
     }
 
     // Update viewport with fractional position for smooth scrolling
-    const zoomWindow = PRESET_DAYS[this.state.timeZoom] === Infinity
+    const zoomWindow = PRESET_WINDOW[this.state.timeZoom] === Infinity
       ? this.state.dates.length
-      : PRESET_DAYS[this.state.timeZoom];
+      : PRESET_WINDOW[this.state.timeZoom];
 
     // Use fractional viewportEnd for smooth line extension
     this.state.viewportEnd = Math.max(0, Math.floor(this.animationPosition));

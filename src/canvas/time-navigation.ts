@@ -7,16 +7,15 @@
 import type { TimeZoomPreset } from "../views/line-chart-controller.ts";
 
 const PRESETS: { label: string; value: TimeZoomPreset; minDays: number }[] = [
-  { label: "90d", value: "90d", minDays: 90 },
-  { label: "Year", value: "year", minDays: 365 },
-  { label: "Decade", value: "decade", minDays: 3650 },
-  { label: "All", value: "all", minDays: 0 },
+  { label: "Year", value: "year", minDays: 270 },
+  { label: "Decade", value: "decade", minDays: 2555 },  // ~7 years
+  { label: "All", value: "all", minDays: 3650 },        // ~10 years
 ];
 
 export class TimeNavigation {
   private wrapper: HTMLDivElement | null = null;
   private buttons: HTMLButtonElement[] = [];
-  private activePreset: TimeZoomPreset = "90d";
+  private activePreset: TimeZoomPreset = "daily";
   private totalDays = 0;
 
   /** Called when a preset is selected */

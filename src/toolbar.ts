@@ -177,7 +177,7 @@ export class Toolbar {
     // Trigger button
     const trigger = document.createElement("button");
     trigger.className = "toolbar__drawer-trigger";
-    trigger.textContent = "Filters";
+    trigger.textContent = "Controls";
     trigger.addEventListener("click", () => this.toggleDrawer());
     drawer.appendChild(trigger);
 
@@ -652,7 +652,7 @@ export class Toolbar {
       chips.push("All zoom");
     }
 
-    return chips.length > 0 ? chips.join(", ") : "Default filters";
+    return chips.length > 0 ? chips.join(", ") : "Default controls";
   }
 }
 

@@ -64,16 +64,16 @@
 
 ## Phase 6: Artist Timeline
 
-- [ ] 6.1 Build artist picker/search (select an artist to view their timeline)
-- [ ] 6.2 Create timeline layout: horizontal scroll (landscape) / vertical scroll (portrait)
-- [ ] 6.3 Render release cards (album/single artwork placeholder, title, date, Apple Music link)
-- [ ] 6.4 Render MV cards (YouTube embed, title, date)
-- [ ] 6.5 Render chart appearance entries (show logo, episode, points earned, date)
-- [ ] 6.6 Render chart wins with crown icons (show logo, crown level, date)
-- [ ] 6.7 Group entries chronologically with date headers/markers
-- [ ] 6.8 Add cumulative stats summary (total points, total wins per show, active period)
-- [ ] 6.9 Link from line chart highlight → artist timeline (clicking artist name opens this view)
-- [ ] 6.10* Add deep-linking (URL encodes artist ID)
+- [x] 6.1 Build artist picker/search (select an artist to view their timeline)
+- [x] 6.2 Create timeline layout: horizontal scroll (landscape) / vertical scroll (portrait)
+- [x] 6.3 Render release cards (album/single artwork placeholder, title, date, Apple Music link)
+- [x] 6.4 Render MV cards (YouTube embed, title, date)
+- [x] 6.5 Render chart appearance entries (show logo, episode, points earned, date)
+- [x] 6.6 Render chart wins with crown icons (show logo, crown level, date)
+- [x] 6.7 Group entries chronologically with date headers/markers
+- [x] 6.8 Add cumulative stats summary (total points, total wins per show, active period)
+- [x] 6.9 Link from line chart highlight → artist timeline (clicking artist name opens this view)
+- [x] 6.10* Add deep-linking (URL encodes artist ID)
 
 ## Phase 7: Polish
 

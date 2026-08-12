@@ -19,6 +19,7 @@ import { ScreenReaderPacedMode } from "./screen-reader-paced-mode.ts";
 import { YearlyView } from "./yearly-view.ts";
 import { LineChartController } from "./views/line-chart-controller.ts";
 import { EpisodeBrowser } from "./views/episode-browser.ts";
+import { ArtistTimeline } from "./views/artist-timeline.ts";
 import { TimeNavigation } from "./canvas/time-navigation.ts";
 import { SearchOverlay } from "./canvas/search-overlay.ts";
 import type { DataStore } from "./models.ts";
@@ -103,7 +104,7 @@ async function main(): Promise<void> {
   titleText.textContent = "K-Pop Chart Race";
   const versionBadge = document.createElement("span");
   versionBadge.className = "chart-race__version-badge";
-  versionBadge.textContent = "v1.28.0";
+  versionBadge.textContent = "v1.29.0";
   const dataNote = document.createElement("span");
   dataNote.className = "chart-race__data-note";
   let totalPoints = 0;
@@ -182,15 +183,24 @@ async function main(): Promise<void> {
   episodeContainer.style.display = "none";
   app.appendChild(episodeContainer);
 
-  // --- Helper: switch between line, yearly, and episodes views ---
-  function switchView(mode: "line" | "yearly" | "episodes"): void {
+  // --- Artist Timeline ---
+  const artistTimeline = new ArtistTimeline();
+  const artistTimelineContainer = document.createElement("div");
+  artistTimelineContainer.className = "artist-timeline-container";
+  artistTimelineContainer.style.display = "none";
+  app.appendChild(artistTimelineContainer);
+
+  // --- Helper: switch between line, yearly, episodes, and artist-timeline views ---
+  function switchView(mode: "line" | "yearly" | "episodes" | "artist-timeline"): void {
     if (mode === "yearly") {
       if (playbackController.isPlaying()) {
         playbackController.pause();
       }
       chartContainer.style.display = "none";
       episodeContainer.style.display = "none";
+      artistTimelineContainer.style.display = "none";
       episodeBrowser.unmount();
+      artistTimeline.unmount();
       const playbackControls = app!.querySelector(".playback-controls") as HTMLElement | null;
       if (playbackControls) playbackControls.style.display = "none";
 
@@ -206,7 +216,9 @@ async function main(): Promise<void> {
         playbackController.pause();
       }
       yearlyView.unmount();
+      artistTimeline.unmount();
       chartContainer.style.display = "none";
+      artistTimelineContainer.style.display = "none";
       const playbackControls = app!.querySelector(".playback-controls") as HTMLElement | null;
       if (playbackControls) playbackControls.style.display = "none";
 
@@ -214,10 +226,34 @@ async function main(): Promise<void> {
       const state = filterStateManager.getState();
       episodeBrowser.mount(episodeContainer, dataStore);
       episodeBrowser.setSourceFilter(state.source);
-    } else {
+      episodeBrowser.onArtistClick = (artistId: string) => {
+        filterStateManager.update({ artist: artistId, view: "artist-timeline" });
+      };
+    } else if (mode === "artist-timeline") {
+      if (playbackController.isPlaying()) {
+        playbackController.pause();
+      }
       yearlyView.unmount();
       episodeBrowser.unmount();
       episodeContainer.style.display = "none";
+      chartContainer.style.display = "none";
+      const playbackControls = app!.querySelector(".playback-controls") as HTMLElement | null;
+      if (playbackControls) playbackControls.style.display = "none";
+
+      artistTimelineContainer.style.display = "";
+      const state = filterStateManager.getState();
+      if (state.artist !== "all") {
+        artistTimeline.mount(artistTimelineContainer, dataStore, state.artist);
+      } else {
+        artistTimeline.unmount();
+        artistTimelineContainer.innerHTML = `<div class="artist-timeline__prompt">Select an artist from the dropdown above to view their timeline.</div>`;
+      }
+    } else {
+      yearlyView.unmount();
+      episodeBrowser.unmount();
+      artistTimeline.unmount();
+      episodeContainer.style.display = "none";
+      artistTimelineContainer.style.display = "none";
       chartContainer.style.display = "";
       const playbackControls = app!.querySelector(".playback-controls") as HTMLElement | null;
       if (playbackControls) playbackControls.style.display = "";
@@ -244,6 +280,11 @@ async function main(): Promise<void> {
     if (currentView === "episodes") {
       switchView("episodes");
       episodeBrowser.setSourceFilter(state.source);
+      return;
+    }
+
+    if (currentView === "artist-timeline") {
+      switchView("artist-timeline");
       return;
     }
 

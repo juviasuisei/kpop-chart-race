@@ -2260,3 +2260,235 @@ body {
 }
 
 /* Old performances section removed — embeds are now inline */
+
+
+/* ===== Artist Timeline ===== */
+
+.artist-timeline-container {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.artist-timeline {
+  padding: 16px;
+  overflow-y: auto;
+  height: calc(100vh - 120px);
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.artist-timeline__header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 24px 16px;
+  margin-bottom: 24px;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.artist-timeline__logo {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  background: #213547;
+  border-radius: 12px;
+  padding: 8px;
+}
+
+.artist-timeline__name {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #213547;
+}
+
+.artist-timeline__meta {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.artist-timeline__stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-top: 12px;
+  width: 100%;
+  max-width: 500px;
+}
+
+.artist-timeline__stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.artist-timeline__stat-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #213547;
+}
+
+.artist-timeline__stat-label {
+  font-size: 0.7rem;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.artist-timeline__date-group {
+  margin-bottom: 16px;
+}
+
+.artist-timeline__date-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: #f8f9fa;
+  padding: 8px 12px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #0072B2;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  margin-bottom: 8px;
+}
+
+.artist-timeline__entry {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 8px;
+}
+
+.artist-timeline__entry--win {
+  border-color: rgba(218, 165, 32, 0.4);
+  background: rgba(255, 248, 220, 0.5);
+}
+
+.artist-timeline__entry-source {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.artist-timeline__source-logo {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  border-radius: 3px;
+}
+
+.artist-timeline__show-text {
+  font-size: 0.72rem;
+  color: #666;
+}
+
+.artist-timeline__entry-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.artist-timeline__song-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #213547;
+}
+
+.artist-timeline__entry-points {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #666;
+  font-variant-numeric: tabular-nums;
+}
+
+.artist-timeline__crown {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.artist-timeline__crown img {
+  width: 24px;
+  height: 24px;
+}
+
+.artist-timeline__crown-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #b8860b;
+}
+
+.artist-timeline__embed-type {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 4px;
+}
+
+.artist-timeline__embed-song {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #213547;
+  margin-bottom: 8px;
+}
+
+.artist-timeline__embed {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.artist-timeline__embed iframe {
+  width: 100%;
+  aspect-ratio: 16/9;
+  border: none;
+  border-radius: 8px;
+}
+
+.artist-timeline__prompt {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  font-size: 1rem;
+  color: #888;
+  text-align: center;
+  padding: 2rem;
+}
+
+/* Episode browser artist link */
+.episode-card__artist-link {
+  color: #0072B2;
+  text-decoration: none;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.episode-card__artist-link:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 767px) {
+  .artist-timeline__stats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .artist-timeline__name {
+    font-size: 1.2rem;
+  }
+
+  .artist-timeline {
+    padding: 12px;
+  }
+}

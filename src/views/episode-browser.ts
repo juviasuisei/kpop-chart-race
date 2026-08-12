@@ -61,6 +61,9 @@ export class EpisodeBrowser {
   private scrollContainer: HTMLElement | null = null;
   private readonly PAGE_SIZE = 20;
 
+  /** Callback when an artist name is clicked */
+  onArtistClick: ((artistId: string) => void) | null = null;
+
   mount(container: HTMLElement, dataStore: DataStore): void {
     this.container = container;
     this.dataStore = dataStore;
@@ -316,7 +319,22 @@ export class EpisodeBrowser {
 
       const info = document.createElement("span");
       info.className = "episode-card__entry-info";
-      info.textContent = `${entry.artistName} \u2014 ${entry.releaseTitle}`;
+
+      const artistLink = document.createElement("a");
+      artistLink.className = "episode-card__artist-link";
+      artistLink.textContent = entry.artistName;
+      artistLink.href = "#";
+      artistLink.addEventListener("click", (e) => {
+        e.preventDefault();
+        if (this.onArtistClick) {
+          this.onArtistClick(entry.artistId);
+        }
+      });
+      info.appendChild(artistLink);
+
+      const separator = document.createTextNode(" \u2014 " + entry.releaseTitle);
+      info.appendChild(separator);
+
       row.appendChild(info);
 
       const points = document.createElement("span");

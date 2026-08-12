@@ -76,6 +76,6 @@ export interface FilterState {
   source: string; // ChartSource | "all"
   artist: string; // artist ID | "all"
   zoom: ZoomLevel; // 10 | "all"
-  view: "race" | "episodes" | "yearly" | "line";
+  view: "race" | "episodes" | "yearly" | "line" | "artist-timeline";
   metric: "points" | "wins"; // yearly-view only
 }

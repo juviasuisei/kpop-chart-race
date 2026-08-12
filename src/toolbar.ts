@@ -104,7 +104,7 @@ export class Toolbar {
   }
 
   /** Show/hide yearly-only controls (Points/Wins metric toggle) */
-  setViewMode(view: "race" | "episodes" | "yearly" | "line"): void {
+  setViewMode(view: "race" | "episodes" | "yearly" | "line" | "artist-timeline"): void {
     if (!this.wrapper) return;
     const metricControl = this.wrapper.querySelector(
       '[data-control="metric"]',
@@ -126,7 +126,7 @@ export class Toolbar {
     if (viewControl) {
       const buttons = viewControl.querySelectorAll(".toolbar__view-btn");
       // Map "line" to "race" button value
-      const activeValue = view === "line" ? "race" : view;
+      const activeValue = view === "line" ? "race" : view === "artist-timeline" ? "artist-timeline" : view;
       buttons.forEach((btn) => {
         const btnEl = btn as HTMLElement;
         btnEl.classList.toggle(
@@ -135,6 +135,11 @@ export class Toolbar {
         );
       });
     }
+  }
+
+  /** Programmatically open the artist dropdown (used when switching to artist-timeline without a selection) */
+  openArtistFilter(): void {
+    this.openArtistDropdown();
   }
 
   // ─── Private rendering methods ───────────────────────────────────────
@@ -451,6 +456,7 @@ export class Toolbar {
     const views: { value: string; label: string; filterValue: string }[] = [
       { value: "race", label: "Race", filterValue: "line" },
       { value: "episodes", label: "Episodes", filterValue: "episodes" },
+      { value: "artist-timeline", label: "Artist", filterValue: "artist-timeline" },
       { value: "yearly", label: "Yearly", filterValue: "yearly" },
     ];
 
@@ -469,10 +475,18 @@ export class Toolbar {
         buttons.forEach((b) => b.classList.remove("toolbar__view-btn--active"));
         btn.classList.add("toolbar__view-btn--active");
 
-        const newView = v.filterValue as "line" | "episodes" | "yearly";
+        const newView = v.filterValue as "line" | "episodes" | "yearly" | "artist-timeline";
         this.filterState.update({ view: newView });
         this.setViewMode(newView);
         this.dismissDrawer();
+
+        // If switching to artist-timeline and no artist selected, open the dropdown
+        if (newView === "artist-timeline") {
+          const currentState = this.filterState.getState();
+          if (currentState.artist === "all") {
+            setTimeout(() => this.openArtistDropdown(), 100);
+          }
+        }
       });
       group.appendChild(btn);
     }

@@ -1417,24 +1417,13 @@ export class LineChartController {
     const hoveredDate = this.state.dates[clampedIndex] ?? "";
     const formattedDate = this.formatDateLabel(hoveredDate);
 
-    // Get chart source for this date (or nearest date with data)
+    // Get chart source — only show on dates that actually have data
     let sourceLabel: string | undefined;
     let sourceLogoUrl: string | undefined;
     if (artist && meta.releaseId) {
       const release = artist.releases.find(r => r.id === meta.releaseId);
       if (release) {
-        // Try the exact hovered date first
-        let entry = release.dailyValues.get(hoveredDate);
-        // If no entry at this date, find the nearest earlier date with data
-        if (!entry) {
-          for (let i = clampedIndex - 1; i >= Math.max(0, clampedIndex - 5); i--) {
-            const d = this.state.dates[i];
-            if (d) {
-              entry = release.dailyValues.get(d);
-              if (entry) break;
-            }
-          }
-        }
+        const entry = release.dailyValues.get(hoveredDate);
         if (entry?.source) {
           sourceLabel = SOURCE_LABELS[entry.source] ?? entry.source;
           sourceLogoUrl = SOURCE_LOGO_URLS[entry.source];

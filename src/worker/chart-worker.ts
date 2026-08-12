@@ -152,28 +152,38 @@ function buildPixelPoints(
   const points: PixelPoint[] = [];
   const values: number[] = [];
 
-  // Only add a starting point at the left edge if the line was already active
-  // BEFORE the viewport start (i.e., it has accumulated value from prior activity)
-  const startValue = getValueAtDate(changePoints, startDateIndex);
-  const lineStartsBeforeViewport = changePoints.length > 0 && changePoints[0][0] < startDateIndex;
-  if (startValue > 0 && lineStartsBeforeViewport) {
-    points.push({
-      x: padding.left,
-      y: padding.top + chartH - (startValue / effectiveMax) * chartH,
-    });
-    values.push(startValue);
-  }
+  // Determine where this line starts relative to the viewport
+  const firstChangeIdx = changePoints[0][0];
+  const lineStartsBeforeViewport = firstChangeIdx < startDateIndex;
 
-  // If the line starts WITHIN the viewport, add a zero point just before
-  // its first change-point so it animates up from the bottom
-  const firstInViewport = changePoints.find(([idx]) => idx >= startDateIndex && idx <= endDateIndex);
-  if (firstInViewport && !lineStartsBeforeViewport) {
-    const zeroDateIdx = Math.max(startDateIndex, firstInViewport[0] - 1);
-    const xRatio = (zeroDateIdx - startDateIndex) / dateRange;
-    points.push({
-      x: padding.left + xRatio * chartW,
-      y: padding.top + chartH, // Y = 0 value = bottom of chart
-    });
+  if (lineStartsBeforeViewport) {
+    // Line was active before viewport — start at left edge with accumulated value
+    const startValue = getValueAtDate(changePoints, startDateIndex);
+    if (startValue > 0) {
+      points.push({
+        x: padding.left,
+        y: padding.top + chartH - (startValue / effectiveMax) * chartH,
+      });
+      values.push(startValue);
+    }
+  } else {
+    // Line starts within the viewport — add zero-origin point
+    // Place the zero at one date index before the first change-point
+    const zeroDateIdx = firstChangeIdx - 1;
+    if (zeroDateIdx >= startDateIndex) {
+      // Zero point is within the viewport
+      const xRatio = (zeroDateIdx - startDateIndex) / dateRange;
+      points.push({
+        x: padding.left + xRatio * chartW,
+        y: padding.top + chartH,
+      });
+    } else {
+      // Zero point would be before/at viewport start — put it at left edge
+      points.push({
+        x: padding.left,
+        y: padding.top + chartH,
+      });
+    }
     values.push(0);
   }
 

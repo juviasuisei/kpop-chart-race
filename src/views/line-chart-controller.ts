@@ -1506,7 +1506,7 @@ export class LineChartController {
 
   // --- Private: Rich tooltip (matching prototype showTooltip) ---
 
-  private showRichTooltip(x: number, y: number, rd: RenderLineData, nearestIndex: number, eventLabel?: string, _showEmbed?: boolean): void {
+  private showRichTooltip(x: number, y: number, rd: RenderLineData, _nearestIndex: number, eventLabel?: string, _showEmbed?: boolean): void {
     const meta = this.lineMetadata.get(rd.lineId);
     if (!meta) return;
 
@@ -1515,8 +1515,7 @@ export class LineChartController {
     const artistTypeLabel = artist ? ARTIST_TYPE_LABELS[artist.artistType] ?? "" : "";
     const genLabel = artist ? `Gen ${artist.generation}` : "";
 
-    // Get value at nearest point
-    const value = rd.values[nearestIndex] ?? 0;
+    // dailyGain is computed later, only for dates with actual chart data
     // dailyGain is computed later, only for dates with actual chart data
 
     // Reverse-map nearest point x → date for display
@@ -1530,6 +1529,21 @@ export class LineChartController {
     const clampedIndex = Math.max(0, Math.min(this.state.dates.length - 1, dateIndex));
     const hoveredDate = this.state.dates[clampedIndex] ?? "";
     const formattedDate = this.formatDateLabel(hoveredDate);
+
+    // Compute cumulative value at the hovered date (from DataStore, respects source filter)
+    let value = 0;
+    if (artist && meta.releaseId) {
+      const release = artist.releases.find(r => r.id === meta.releaseId);
+      if (release) {
+        for (const [d, entry] of release.dailyValues) {
+          if (d <= hoveredDate) {
+            if (this.currentSourceFilter === "all" || entry.source === this.currentSourceFilter) {
+              value += entry.value;
+            }
+          }
+        }
+      }
+    }
 
     // Get chart source and daily gain — only for dates with actual chart data matching the filter
     let sourceLabel: string | undefined;
@@ -1574,11 +1588,12 @@ export class LineChartController {
       }
     }
 
-    // Check for live performance embeds at this date (chart-related only)
+    // Check for live performance embeds — only on dates matching source filter
     let hasVideo = false;
     let hasRelease = false;
     let embedUrl: string | undefined;
-    if (artist && meta.releaseId) {
+    if (artist && meta.releaseId && sourceLabel) {
+      // Only show embeds when the date has chart data from the filtered source
       const release = artist.releases.find(r => r.id === meta.releaseId);
       if (release) {
         const embeds = release.embeds.get(hoveredDate);

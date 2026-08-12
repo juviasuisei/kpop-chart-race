@@ -1624,8 +1624,11 @@ body {
   align-items: center;
   justify-content: center;
   font-size: 2rem;
-  opacity: 0.6;
+  opacity: 1;
   color: #fff;
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
 }
 
 .line-chart-tooltip .tooltip-embed--apple {

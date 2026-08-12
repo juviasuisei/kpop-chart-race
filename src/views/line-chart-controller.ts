@@ -1072,8 +1072,7 @@ export class LineChartController {
       if (hlCanvas) hlCanvas.style.cursor = "pointer";
       const rd = this.renderDataCache.find(r => r.lineId === dotHit.lineId);
       if (rd) {
-        const eventLabel = "Chart Win";
-        this.showRichTooltip(x, y, rd, this.getNearestPointIndex(rd, x), eventLabel, true);
+        this.showRichTooltip(x, y, rd, this.getNearestPointIndex(rd, x), undefined, true);
       }
       return;
     }
@@ -1405,13 +1404,15 @@ export class LineChartController {
       }
     }
 
-    const eventLabel = dotHit.eventTypes.map(t => {
-      const labels: Record<string, string> = {
-        win: "Chart Win", live_performance: "Live Performance",
-        chart_appearance: "Chart Appearance", mv: "Music Video", release: "Comeback",
-      };
-      return labels[t] ?? t;
-    }).join(" \u00B7 ");
+    const eventLabel = dotHit.eventTypes
+      .filter(t => t !== "win") // win info is shown separately via crown row
+      .map(t => {
+        const labels: Record<string, string> = {
+          live_performance: "Live Performance",
+          chart_appearance: "Chart Appearance", mv: "Music Video", release: "Comeback",
+        };
+        return labels[t] ?? t;
+      }).join(" \u00B7 ") || undefined;
 
     // Get position from tooltip
     const position = this.tooltip?.getPosition() ?? { left: "0px", top: "0px" };
@@ -1565,7 +1566,6 @@ export class LineChartController {
   }
 
   private getCrownLabel(level: number): string {
-    if (level === 1) return "Win";
     if (level % 3 === 0) {
       const tripleCrownCount = level / 3;
       if (tripleCrownCount === 1) return "Triple Crown";

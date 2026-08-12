@@ -258,6 +258,9 @@ export class CanvasRenderer {
   private drawCommands(ctx: CanvasRenderingContext2D, commands: LineDrawCommand[]): void {
     for (const cmd of commands) {
       if (cmd.points.length < 2) continue;
+      // Skip lines with any point below the chart area (rendering artifacts)
+      const maxAllowedY = this.height - 40; // padding.bottom = 40
+      if (cmd.points.some(p => p.y > maxAllowedY + 2)) continue;
       this.drawLine(ctx, cmd);
     }
   }

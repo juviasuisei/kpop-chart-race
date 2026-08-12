@@ -605,13 +605,22 @@ export class LineChartController {
     ctx.stroke();
 
     // Date labels
-    const startDate = this.state.dates[this.state.viewportStart] ?? "";
+    let startDateStr = this.state.dates[this.state.viewportStart] ?? "";
     const endDate = this.state.dates[this.state.viewportEnd] ?? "";
+
+    // On the very first day (viewport start == end), show the day before as left label
+    if (this.state.viewportStart === this.state.viewportEnd && startDateStr) {
+      try {
+        const d = new Date(startDateStr + "T00:00:00");
+        d.setDate(d.getDate() - 1);
+        startDateStr = d.toISOString().split("T")[0];
+      } catch { /* keep original */ }
+    }
 
     ctx.fillStyle = "rgba(0, 0, 0, 0.45)";
     ctx.font = "10px system-ui, -apple-system, sans-serif";
     ctx.textAlign = "left";
-    ctx.fillText(this.formatDateLabel(startDate), chart.x + 8, chart.y + chart.h + 20);
+    ctx.fillText(this.formatDateLabel(startDateStr), chart.x + 8, chart.y + chart.h + 20);
     ctx.textAlign = "right";
     ctx.fillText(this.formatDateLabel(endDate), chart.x + chart.w, chart.y + chart.h + 20);
   }

@@ -134,14 +134,18 @@ function buildPixelPoints(
 
   const effectiveMax = maxValue || 1;
 
-  // Special case: single date (day 1) — render as a dot at the right edge
+  // Special case: single date (first day) — draw line from 0 at left to value at right
   if (dateRange <= 0) {
     const val = getValueAtDate(changePoints, endDateIndex);
     if (val <= 0) return { points: [], values: [] };
-    const x = padding.left + chartW; // right edge
-    const y = padding.top + chartH - (val / effectiveMax) * chartH;
-    // Return two very close points so it renders as a visible dot
-    return { points: [{ x: x - 0.5, y }, { x, y }], values: [val, val] };
+    const leftX = padding.left;
+    const rightX = padding.left + chartW;
+    const bottomY = padding.top + chartH; // Y = 0
+    const valueY = padding.top + chartH - (val / effectiveMax) * chartH;
+    return {
+      points: [{ x: leftX, y: bottomY }, { x: rightX, y: valueY }],
+      values: [0, val],
+    };
   }
 
   // Collect points within viewport range

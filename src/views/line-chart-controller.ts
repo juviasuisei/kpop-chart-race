@@ -824,8 +824,9 @@ export class LineChartController {
         }
       }
 
-      // Draw event dots on the highlighted line
+      // Draw event dots on the highlighted line (wins + embeds)
       this.drawEventDotsForLine(ctx, cmd);
+      this.drawEmbedDotsForLine(ctx, cmd);
     }
   }
 
@@ -878,6 +879,54 @@ export class LineChartController {
       }
 
       this.drawCrownDot(ctx, x, y, crownLevel);
+    }
+  }
+
+  private drawEmbedDotsForLine(ctx: CanvasRenderingContext2D, cmd: LineDrawCommand): void {
+    if (!this.dataStore) return;
+
+    const meta = this.lineMetadata.get(cmd.lineId);
+    if (!meta || !meta.releaseId) return;
+
+    const artist = this.dataStore.artists.get(meta.artistId);
+    if (!artist) return;
+
+    const release = artist.releases.find(r => r.id === meta.releaseId);
+    if (!release) return;
+
+    const viewStart = this.state.viewportStart;
+    const viewEnd = this.state.viewportEnd;
+    const totalDateSpan = viewEnd + 1 - viewStart;
+    const { width } = this.renderer!.getSize();
+    const chartW = width - PADDING.left - PADDING.right;
+    const chartH = this.renderer!.getSize().height - PADDING.top - PADDING.bottom;
+    const frameMax = this.getCurrentFrameMax();
+
+    // Also collect win dates to avoid drawing a white dot on top of a crown
+    const winDates = new Set(this.dataStore.releaseWinDates?.get(cmd.lineId) ?? []);
+
+    for (const [date, embeds] of release.embeds) {
+      if (!embeds || embeds.length === 0) continue;
+      if (winDates.has(date)) continue; // crown already drawn for this date
+
+      const dateIdx = this.state.dates.indexOf(date);
+      if (dateIdx < viewStart || dateIdx > viewEnd) continue;
+
+      const xRatio = (dateIdx - viewStart) / totalDateSpan;
+      const x = PADDING.left + xRatio * chartW;
+      const value = this.getValueAtDateForLine(cmd, dateIdx);
+      const y = PADDING.top + chartH - (value / (frameMax || 1)) * chartH;
+
+      // White circle dot
+      ctx.save();
+      ctx.fillStyle = "#ffffff";
+      ctx.strokeStyle = "rgba(0, 0, 0, 0.2)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(x, y, 4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
     }
   }
 

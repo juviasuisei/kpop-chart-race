@@ -1011,7 +1011,7 @@ export class LineChartController {
     const hits: { rd: RenderLineData; nearestIndex: number }[] = [];
 
     for (const rd of this.renderDataCache) {
-      if (rd.opacity <= 0) continue;
+      if (rd.opacity <= 0.05) continue; // Skip hidden/nearly-invisible lines
       for (let i = 0; i < rd.points.length - 1; i++) {
         const dist = this.pointToSegmentDistance(x, y, rd.points[i], rd.points[i + 1]);
         if (dist <= HIT_RADIUS) {

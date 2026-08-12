@@ -1445,7 +1445,7 @@ export class LineChartController {
 
   // --- Private: Rich tooltip (matching prototype showTooltip) ---
 
-  private showRichTooltip(x: number, y: number, rd: RenderLineData, nearestIndex: number, eventLabel?: string, showEmbed?: boolean): void {
+  private showRichTooltip(x: number, y: number, rd: RenderLineData, nearestIndex: number, eventLabel?: string, _showEmbed?: boolean): void {
     const meta = this.lineMetadata.get(rd.lineId);
     if (!meta) return;
 
@@ -1507,6 +1507,28 @@ export class LineChartController {
       }
     }
 
+    // Check for embeds (live performance / MV / release) at this date
+    let hasVideo = false;
+    let hasRelease = false;
+    let embedUrl: string | undefined;
+    if (artist && meta.releaseId) {
+      const release = artist.releases.find(r => r.id === meta.releaseId);
+      if (release) {
+        const embeds = release.embeds.get(hoveredDate);
+        if (embeds) {
+          for (const embed of embeds) {
+            if (embed.type === "live_performance" || embed.type === "mv") {
+              hasVideo = true;
+              embedUrl = embed.url;
+            }
+            if (embed.type === "release_date") {
+              hasRelease = true;
+            }
+          }
+        }
+      }
+    }
+
     this.tooltip?.show({
       label: meta.label,
       artistName: artist?.name ?? meta.label,
@@ -1521,7 +1543,10 @@ export class LineChartController {
       sourceLabel,
       sourceLogoUrl,
       eventLabel,
-      showEmbed,
+      showEmbed: hasVideo || hasRelease,
+      hasVideo,
+      hasRelease,
+      embedUrl,
       winInfo,
     }, x, y);
   }

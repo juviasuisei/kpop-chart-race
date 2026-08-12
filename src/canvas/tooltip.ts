@@ -32,6 +32,8 @@ export interface TooltipData {
   logoUrl?: string;
   /** Win info (crown level, label, SVG URL) — shown below date row */
   winInfo?: { crownLevel: number; crownLabel: string; crownSvgUrl: string };
+  /** Embed URL for video (YouTube) */
+  embedUrl?: string;
 }
 
 export class Tooltip {
@@ -104,7 +106,15 @@ export class Tooltip {
 
     // Embed placeholders (when hovering event dots)
     if (data.showEmbed) {
-      if (data.hasVideo) {
+      if (data.hasVideo && data.embedUrl) {
+        // Extract YouTube video ID and render iframe
+        const videoId = this.extractYoutubeId(data.embedUrl);
+        if (videoId) {
+          html += `<div class="tooltip-embed tooltip-embed--video"><iframe src="https://www.youtube.com/embed/${videoId}" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="width:100%;height:100%;border:none;border-radius:6px;"></iframe></div>`;
+        } else {
+          html += `<div class="tooltip-embed tooltip-embed--video">\u25B6</div>`;
+        }
+      } else if (data.hasVideo) {
         html += `<div class="tooltip-embed tooltip-embed--video">\u25B6</div>`;
       }
       if (data.hasRelease) {
@@ -177,6 +187,18 @@ export class Tooltip {
     this.element.style.display = "none";
     this.element.setAttribute("role", "tooltip");
     this.container.appendChild(this.element);
+  }
+
+  private extractYoutubeId(url: string): string | null {
+    const patterns = [
+      /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/,
+      /youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/,
+    ];
+    for (const pattern of patterns) {
+      const match = url.match(pattern);
+      if (match) return match[1];
+    }
+    return null;
   }
 
   private positionElement(x: number, y: number): void {

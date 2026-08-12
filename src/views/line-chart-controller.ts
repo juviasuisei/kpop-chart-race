@@ -255,10 +255,16 @@ export class LineChartController {
       : PRESET_DAYS[this.state.timeZoom];
 
     this.state.viewportEnd = index;
-    // viewportStart is one extra index to the left so that the first data point
-    // isn't flush against the left edge (leaves room for the zero-origin)
     const dataStart = Math.max(0, index - zoomWindow);
-    this.state.viewportStart = dataStart > 0 ? dataStart : -1;
+
+    // During the first 7 days, keep data compressed near the right edge
+    const revealedDates = index - dataStart;
+    const minViewportSpan = 7;
+    if (revealedDates < minViewportSpan && dataStart === 0) {
+      this.state.viewportStart = -(minViewportSpan - revealedDates);
+    } else {
+      this.state.viewportStart = dataStart > 0 ? dataStart : -1;
+    }
     this.backgroundDirty = true;
     this.requestFrame();
   }
@@ -530,7 +536,16 @@ export class LineChartController {
     // Use fractional viewportEnd for smooth line extension
     this.state.viewportEnd = Math.floor(this.animationPosition);
     const dataStart = Math.max(0, this.state.viewportEnd - zoomWindow);
-    this.state.viewportStart = dataStart > 0 ? dataStart : -1;
+
+    // During the first 7 days, keep data compressed near the right edge
+    // by making the viewport much wider than the actual data range
+    const revealedDates = this.state.viewportEnd - dataStart;
+    const minViewportSpan = 7; // minimum "virtual" days of viewport width
+    if (revealedDates < minViewportSpan && dataStart === 0) {
+      this.state.viewportStart = -(minViewportSpan - revealedDates);
+    } else {
+      this.state.viewportStart = dataStart > 0 ? dataStart : -1;
+    }
     this.backgroundDirty = true;
 
     this.requestFrame();

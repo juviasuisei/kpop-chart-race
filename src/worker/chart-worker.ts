@@ -27,8 +27,8 @@ let lines: SerializedLineData[] = [];
 let selectedLineIds: Set<string> = new Set();
 
 // --- Constants ---
-const FADE_START_DAYS = 1;
-const BASE_FADE_END_DAYS = 7;
+const FADE_START_DAYS = 7;
+const BASE_FADE_END_DAYS = 28;
 const Z_INDEX_DAY_MULTIPLIER = 1_000_000_000;
 const MAX_DAYS = 36500;
 

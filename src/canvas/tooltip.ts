@@ -1,7 +1,18 @@
 /**
- * Tooltip — Lightweight floating label shown on line hover.
- * Shows the song/artist name and current cumulative value.
+ * Tooltip — Rich floating tooltip shown on line hover.
+ * Matches the prototype's style: colored background matching the line,
+ * artist initials, date row, song name, cumulative points.
  */
+
+export interface TooltipData {
+  label: string;
+  artistName: string;
+  songTitle?: string;
+  color: string;
+  value?: number;
+  dailyGain?: number;
+  date?: string;
+}
 
 export class Tooltip {
   private element: HTMLDivElement | null = null;
@@ -12,27 +23,84 @@ export class Tooltip {
     this.container = container;
   }
 
-  show(label: string, x: number, y: number): void {
+  show(data: TooltipData, x: number, y: number): void {
     if (!this.element) this.createElement();
 
-    this.element!.textContent = label;
+    const initials = data.artistName.slice(0, 2).toUpperCase();
+
+    let html = "";
+
+    // Date row
+    if (data.date) {
+      html += `<div class="tooltip-date-row">${data.date}</div>`;
+    }
+
+    // Logo + artist info
+    html += `
+      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+        <div class="tooltip-logo">
+          <span class="tooltip-logo-initials">${initials}</span>
+        </div>
+        <div>
+          <div class="tooltip-artist-name">${data.artistName}</div>
+        </div>
+      </div>
+    `;
+
+    // Song title
+    if (data.songTitle) {
+      html += `<div class="tooltip-song">${data.songTitle}</div>`;
+    }
+
+    // Stats
+    if (data.value !== undefined && data.value > 0) {
+      if (data.dailyGain && data.dailyGain > 0) {
+        html += `<div class="tooltip-stats">${data.value.toLocaleString()} <span style="font-size: 0.6rem; color: rgba(255,255,255,0.5);">+ ${data.dailyGain.toLocaleString()}</span></div>`;
+      } else {
+        html += `<div class="tooltip-stats">${data.value.toLocaleString()} pts</div>`;
+      }
+    }
+
+    this.element!.innerHTML = html;
+    this.element!.style.background = data.color;
+    this.element!.style.borderColor = data.color;
     this.element!.style.display = "block";
     this.visible = true;
 
-    // Position above the cursor with a small offset
-    const offset = 12;
-    let left = x + offset;
-    let top = y - 30;
+    // Position with edge detection (14px gap like prototype)
+    const containerRect = this.container.getBoundingClientRect();
+    const elRect = this.element!.getBoundingClientRect();
+    const tw = elRect.width || 200;
+    const th = elRect.height || 100;
 
-    // Avoid overflow
-    const rect = this.container.getBoundingClientRect();
-    const elWidth = this.element!.offsetWidth || 150;
-    if (left + elWidth > rect.width) {
-      left = x - elWidth - offset;
-    }
-    if (top < 0) {
-      top = y + offset;
-    }
+    let left = x + 14;
+    let top = y - 10;
+
+    if (left + tw > containerRect.width - 8) left = x - tw - 14;
+    if (left < 8) left = 8;
+    if (top + th > containerRect.height - 8) top = containerRect.height - th - 8;
+    if (top < 8) top = 8;
+
+    this.element!.style.left = `${left}px`;
+    this.element!.style.top = `${top}px`;
+  }
+
+  /** Simple text-only show (fallback for basic hover) */
+  showSimple(label: string, color: string, x: number, y: number): void {
+    if (!this.element) this.createElement();
+
+    this.element!.innerHTML = `<div class="tooltip-artist-name">${label}</div>`;
+    this.element!.style.background = color;
+    this.element!.style.borderColor = color;
+    this.element!.style.display = "block";
+    this.visible = true;
+
+    const containerRect = this.container.getBoundingClientRect();
+    let left = x + 14;
+    let top = y - 10;
+    if (left + 200 > containerRect.width - 8) left = x - 200 - 14;
+    if (left < 8) left = 8;
+    if (top < 8) top = 8;
 
     this.element!.style.left = `${left}px`;
     this.element!.style.top = `${top}px`;
@@ -59,9 +127,6 @@ export class Tooltip {
     this.element = document.createElement("div");
     this.element.className = "line-chart-tooltip";
     this.element.style.display = "none";
-    this.element.style.position = "absolute";
-    this.element.style.pointerEvents = "none";
-    this.element.style.zIndex = "900";
     this.element.setAttribute("role", "tooltip");
     this.container.appendChild(this.element);
   }

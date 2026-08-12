@@ -153,6 +153,7 @@ export class LineChartController {
 
     // Build serialized line data for the worker
     const lines = this.buildLineData(dataStore, this.state.displayMode);
+    console.log("[LineChart] Built", lines.length, "lines for worker. First:", lines[0]?.lineId, "points:", lines[0]?.changePoints.length);
 
     // Send to worker
     await this.workerClient.initData(lines, dataStore.dates);
@@ -458,6 +459,7 @@ export class LineChartController {
     const { width, height, dpr } = this.renderer.getSize();
     if (width === 0 || height === 0) {
       // Container not laid out yet — retry next frame
+      console.log("[LineChart] requestFrame: size is 0, retrying...", width, height);
       requestAnimationFrame(() => this.requestFrame());
       return;
     }
@@ -485,13 +487,28 @@ export class LineChartController {
 
   private handleFrameResult = (result: FrameResultMessage): void => {
     if (!this.renderer) return;
+    console.log("[LineChart] Frame result:", result.totalLines, "lines, bg:", result.background.length, "fg:", result.foreground.length, "hl:", result.highlight.length, "compute:", result.computeTimeMs.toFixed(1), "ms");
+
+    const { width, height } = this.renderer.getSize();
 
     // Draw layers
     if (this.backgroundDirty) {
       this.renderer.drawBackground(result.background);
+      // Draw grid on background
+      const bgCtx = this.renderer.getContext("background");
+      if (bgCtx) {
+        this.drawGrid(bgCtx, width, height);
+      }
       this.backgroundDirty = false;
     }
     this.renderer.drawForeground(result.foreground);
+
+    // Draw endpoint labels on foreground
+    const fgCtx = this.renderer.getContext("foreground");
+    if (fgCtx && result.foreground.length > 0) {
+      this.drawEndpointLabels(fgCtx, result.foreground);
+    }
+
     this.renderer.drawHighlight(result.highlight);
 
     // Update spatial index with foreground + highlight lines for hit detection
@@ -607,6 +624,99 @@ export class LineChartController {
   private handleKeydown(e: KeyboardEvent): void {
     if (e.key === "Escape") {
       this.clearSelection();
+    }
+  }
+
+  // --- Private: Visual elements ---
+
+  private drawGrid(ctx: CanvasRenderingContext2D, width: number, height: number): void {
+    const padding = { top: 40, right: 160, bottom: 40, left: 0 };
+    const chartW = width - padding.left - padding.right;
+    const chartH = height - padding.top - padding.bottom;
+
+    // X-axis line
+    ctx.strokeStyle = "rgba(0, 0, 0, 0.12)";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(padding.left, padding.top + chartH);
+    ctx.lineTo(padding.left + chartW, padding.top + chartH);
+    ctx.stroke();
+
+    // Date labels
+    const startDate = this.state.dates[this.state.viewportStart] ?? "";
+    const endDate = this.state.dates[this.state.viewportEnd] ?? "";
+
+    ctx.fillStyle = "rgba(0, 0, 0, 0.45)";
+    ctx.font = "10px system-ui, -apple-system, sans-serif";
+    ctx.textAlign = "left";
+    ctx.fillText(this.formatDateLabel(startDate), padding.left + 8, padding.top + chartH + 20);
+    ctx.textAlign = "right";
+    ctx.fillText(this.formatDateLabel(endDate), padding.left + chartW, padding.top + chartH + 20);
+  }
+
+  private drawEndpointLabels(ctx: CanvasRenderingContext2D, commands: import("../worker/messages.ts").LineDrawCommand[]): void {
+    // Draw labels at the right endpoint of visible lines (prototype style: staggered, two-line)
+    const labeled = commands
+      .filter(cmd => cmd.points.length >= 2 && cmd.opacity > 0.5)
+      .map(cmd => ({
+        lineId: cmd.lineId,
+        endPoint: cmd.points[cmd.points.length - 1],
+        color: cmd.color,
+        opacity: cmd.opacity,
+      }))
+      .sort((a, b) => a.endPoint.y - b.endPoint.y);
+
+    // Stagger to avoid overlap (min 18px gap like prototype)
+    const MIN_GAP = 18;
+    const resolvedPositions: { y: number; lineId: string; endPoint: { x: number; y: number }; color: string; opacity: number }[] = [];
+
+    for (const item of labeled) {
+      let labelY = item.endPoint.y;
+      for (const placed of resolvedPositions) {
+        if (Math.abs(labelY - placed.y) < MIN_GAP) {
+          labelY = placed.y + MIN_GAP;
+        }
+      }
+      resolvedPositions.push({ ...item, y: labelY });
+    }
+
+    for (const { y: labelY, lineId, endPoint, color, opacity } of resolvedPositions) {
+      const meta = this.lineMetadata.get(lineId);
+      if (!meta) continue;
+
+      ctx.globalAlpha = opacity;
+
+      // Line 1: bold artist — song name (truncated to fit 130px)
+      ctx.font = "bold 9px system-ui, -apple-system, sans-serif";
+      ctx.fillStyle = color;
+      ctx.textAlign = "left";
+
+      const maxLabelWidth = 130;
+      let displayText = meta.label;
+      if (ctx.measureText(displayText).width > maxLabelWidth) {
+        while (displayText.length > 3 && ctx.measureText(displayText + "...").width > maxLabelWidth) {
+          displayText = displayText.slice(0, -1);
+        }
+        displayText += "...";
+      }
+      ctx.fillText(displayText, endPoint.x + 6, labelY - 1);
+
+      // Line 2: points (smaller, lighter)
+      ctx.font = "8px system-ui, -apple-system, sans-serif";
+      ctx.globalAlpha = opacity * 0.7;
+      // We don't have the value here directly — skip stats line for now
+      // (would need worker to include value in draw command or metadata)
+      ctx.globalAlpha = 1;
+    }
+  }
+
+  private formatDateLabel(dateStr: string): string {
+    if (!dateStr) return "";
+    try {
+      const d = new Date(dateStr + "T00:00:00");
+      return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+    } catch {
+      return dateStr;
     }
   }
 }

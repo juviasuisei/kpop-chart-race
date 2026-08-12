@@ -107,7 +107,7 @@ function buildPixelPoints(
   if (dateRange <= 0) return [];
 
   // Compute chart area in CSS pixels (canvas context has DPR transform applied)
-  const padding = { top: 40, right: 60, bottom: 40, left: 10 };
+  const padding = { top: 40, right: 160, bottom: 40, left: 0 };
   const chartW = width - padding.left - padding.right;
   const chartH = height - padding.top - padding.bottom;
 
@@ -261,6 +261,7 @@ function computeFrame(msg: ComputeFrameMessage): void {
   }
 
   const computeTimeMs = performance.now() - startTime;
+  console.log("[Worker] computeFrame: scored", scored.length, "bg:", background.length, "fg:", foreground.length, "hl:", highlight.length, "time:", computeTimeMs.toFixed(1), "ms viewport:", viewport.startDateIndex, "-", viewport.endDateIndex, "currentDate:", effectiveDateIndex);
 
   const result: WorkerToMainMessage = {
     type: "frame-result",
@@ -277,6 +278,10 @@ function computeFrame(msg: ComputeFrameMessage): void {
 
 // --- Message handler ---
 
+// Signal ready immediately on worker startup
+const startupReady: WorkerToMainMessage = { type: "worker-ready" };
+self.postMessage(startupReady);
+
 self.onmessage = (event: MessageEvent<MainToWorkerMessage>) => {
   const msg = event.data;
 
@@ -286,6 +291,7 @@ self.onmessage = (event: MessageEvent<MainToWorkerMessage>) => {
       lines = msg.lines;
       selectedLineIds = new Set();
       recomputeGlobalMax();
+      console.log("[Worker] init-data:", lines.length, "lines,", allDates.length, "dates, globalMax:", globalMaxValue);
 
       const ready: WorkerToMainMessage = { type: "worker-ready" };
       self.postMessage(ready);

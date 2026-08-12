@@ -21,6 +21,7 @@ import { LineChartController } from "./views/line-chart-controller.ts";
 import { TimeNavigation } from "./canvas/time-navigation.ts";
 import { SearchOverlay } from "./canvas/search-overlay.ts";
 import { Tooltip } from "./canvas/tooltip.ts";
+import { ARTIST_TYPE_COLORS } from "./colors.ts";
 import type { DataStore } from "./models.ts";
 import type { FilterState } from "./types.ts";
 import type { LineHoverEvent } from "./event-bus.ts";
@@ -77,11 +78,14 @@ async function main(): Promise<void> {
   const chartContainer = document.createElement("div");
   chartContainer.className = "line-chart-container";
   app.appendChild(chartContainer);
+  console.log("[main] Chart container appended, size:", chartContainer.offsetWidth, "x", chartContainer.offsetHeight);
 
   // --- Mount Line Chart Controller ---
   const lineChart = new LineChartController(eventBus);
   await lineChart.mount(chartContainer);
+  console.log("[main] LineChartController mounted");
   await lineChart.initData(dataStore);
+  console.log("[main] LineChartController initData complete, lines:", lineChart.getAllLines().length);
 
   // --- Mount Playback Controller ---
   const playbackController = new PlaybackController(eventBus, dataStore.dates);
@@ -194,7 +198,9 @@ async function main(): Promise<void> {
   // line:hover → show/hide tooltip
   eventBus.on("line:hover", (event: LineHoverEvent | null) => {
     if (event) {
-      tooltip.show(event.label, event.x, event.y);
+      const meta = lineChart.getLineMetadata(event.lineId);
+      const color = meta ? ARTIST_TYPE_COLORS[dataStore.artists.get(meta.artistId)?.artistType ?? "boy_group"] ?? "#666" : "#666";
+      tooltip.showSimple(event.label, color, event.x, event.y);
     } else {
       tooltip.hide();
     }

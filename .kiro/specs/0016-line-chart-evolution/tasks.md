@@ -24,27 +24,27 @@
 
 ## Phase 2: Line Chart — Songs Mode
 
-- [ ] 2.1 Implement cumulative value computation in worker (change-point based, sparse)
-- [ ] 2.2 Implement visibility/dimming computation (7-day grace, linear fade to ceiling, filter multiplier)
-- [ ] 2.3 Implement z-index draw ordering (recency primary, LTD points tie-break)
-- [ ] 2.4 Build level-of-detail system (monthly/weekly/daily resolution based on zoom)
-- [ ] 2.5 Implement viewport culling (only compute/draw visible time window)
-- [ ] 2.6 Build animation loop with sliding time window (auto-scroll during playback)
-- [ ] 2.7 Integrate playback controls (play/pause/speed/scrubber) with canvas line view
-- [ ] 2.8 Implement time navigation: zoom presets (All/Decade/Year/Quarter/90d) and pan-on-drag
-- [ ] 2.9 Wire up existing filters (generation, source) to line chart with visibility ceiling adjustment
-- [ ] 2.10* Add pinch-to-zoom on touch devices
+- [x] 2.1 Implement cumulative value computation in worker (change-point based, sparse)
+- [x] 2.2 Implement visibility/dimming computation (7-day grace, linear fade to ceiling, filter multiplier)
+- [x] 2.3 Implement z-index draw ordering (recency primary, LTD points tie-break)
+- [x] 2.4 Build level-of-detail system (monthly/weekly/daily resolution based on zoom)
+- [x] 2.5 Implement viewport culling (only compute/draw visible time window)
+- [x] 2.6 Build animation loop with sliding time window (auto-scroll during playback)
+- [x] 2.7 Integrate playback controls (play/pause/speed/scrubber) with canvas line view
+- [x] 2.8 Implement time navigation: zoom presets (All/Decade/Year/Quarter/90d) and pan-on-drag
+- [x] 2.9 Wire up existing filters (generation, source) to line chart with visibility ceiling adjustment
+- [x] 2.10* Add pinch-to-zoom on touch devices
 
 ## Phase 3: Inline Interaction (replaces detail drawer)
 
-- [ ] 3.1 Implement click-to-highlight: selected line thickens, others drop to 20% opacity
-- [ ] 3.2 Render event dots on highlighted line (release, MV, live performance, chart win)
-- [ ] 3.3 Build popover component for event dots (date, type, embedded YouTube/Apple Music)
-- [ ] 3.4 Add search/autocomplete to find and highlight specific songs
-- [ ] 3.5 Support multiple simultaneous highlights (compare mode)
-- [ ] 3.6 Implement Escape/click-away to deselect
-- [ ] 3.7 Remove old detail-panel.ts and drawer infrastructure
-- [ ] 3.8 Remove old bar race renderer (chart-race-renderer.ts) and related DOM code
+- [x] 3.1 Implement click-to-highlight: selected line thickens, others drop to 20% opacity
+- [x] 3.2 Render event dots on highlighted line (release, MV, live performance, chart win)
+- [x] 3.3 Build popover component for event dots (date, type, embedded YouTube/Apple Music)
+- [x] 3.4 Add search/autocomplete to find and highlight specific songs
+- [x] 3.5 Support multiple simultaneous highlights (compare mode)
+- [x] 3.6 Implement Escape/click-away to deselect
+- [x] 3.7 Remove old detail-panel.ts and drawer infrastructure
+- [x] 3.8 Remove old bar race renderer (chart-race-renderer.ts) and related DOM code
 
 ## Phase 4: Line Chart — Artists Mode
 

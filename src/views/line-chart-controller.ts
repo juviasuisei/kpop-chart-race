@@ -678,15 +678,15 @@ export class LineChartController {
   // --- Private: Spatial index ---
 
   private rebuildSpatialIndex(result: FrameResultMessage): void {
-    const { width, height, dpr } = this.renderer!.getSize();
+    const { width, height } = this.renderer!.getSize();
     this.spatialIndex.resize(width, height);
     this.spatialIndex.clear();
 
     const indexable = [...result.foreground, ...result.highlight];
     for (const cmd of indexable) {
       if (cmd.points.length < 2) continue;
-      const cssPoints = cmd.points.map(p => ({ x: p.x / dpr, y: p.y / dpr }));
-      this.spatialIndex.insert({ lineId: cmd.lineId, points: cssPoints });
+      // Points are already in CSS pixel space (worker outputs CSS pixels)
+      this.spatialIndex.insert({ lineId: cmd.lineId, points: cmd.points });
     }
   }
 

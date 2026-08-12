@@ -16,7 +16,6 @@ import { CanvasRenderer } from "../canvas/canvas-renderer.ts";
 import { Tooltip } from "../canvas/tooltip.ts";
 import { Disambiguation } from "../canvas/disambiguation.ts";
 import { Popover } from "../canvas/popover.ts";
-import { Legend } from "../canvas/legend.ts";
 import { buildSeriesFromDailyValues, mergeSeries, SparseTimeSeries } from "../worker/sparse-time-series.ts";
 import { ARTIST_TYPE_COLORS } from "../colors.ts";
 import type { EventBus } from "../event-bus.ts";
@@ -120,7 +119,6 @@ export class LineChartController {
   private tooltip: Tooltip | null = null;
   private disambiguation: Disambiguation | null = null;
   private popover: Popover | null = null;
-  private legend: Legend | null = null;
 
   /** Pre-loaded crown SVG images (crown-1 through crown-12) */
   private crownImages: Map<number, HTMLImageElement> = new Map();
@@ -201,10 +199,6 @@ export class LineChartController {
       this.selectLine(lineId);
     };
     this.popover = new Popover(container);
-
-    // Mount legend below chart container
-    this.legend = new Legend();
-    this.legend.mount(container);
 
     // Attach direct event listeners on the highlight canvas (like prototype)
     const hlCanvas = this.renderer.getInteractionCanvas()!;
@@ -456,7 +450,6 @@ export class LineChartController {
     this.tooltip?.destroy();
     this.disambiguation?.destroy();
     this.popover?.destroy();
-    this.legend?.destroy();
     this.initialized = false;
   }
 

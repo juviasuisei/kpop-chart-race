@@ -118,12 +118,13 @@ async function main(): Promise<void> {
   titleHeader.appendChild(versionBadge);
   titleHeader.appendChild(dataNote);
   topBar.appendChild(titleHeader);
-  app.appendChild(topBar);
 
-  // --- Mount Toolbar (filters — at the top, persistent across views) ---
+  // --- Mount Toolbar (filters — on the same line as title) ---
   const toolbar = new Toolbar(eventBus, filterStateManager);
-  toolbar.mount(app);
+  toolbar.mount(topBar);
   toolbar.setGenerations(extractGenerations(dataStore));
+
+  app.appendChild(topBar);
 
   // Provide artist list to toolbar for artist filter dropdown
   const artistList = Array.from(dataStore.artists.values()).map(a => ({
@@ -147,8 +148,9 @@ async function main(): Promise<void> {
   const playbackController = new PlaybackController(eventBus, dataStore.dates);
   playbackController.mount(app);
 
-  // --- Mount Time Navigation ---
+  // --- Mount Time Navigation (below scrubber, centered) ---
   const timeNav = new TimeNavigation();
+  timeNav.setTotalDays(dataStore.dates.length);
   timeNav.mount(app);
   timeNav.onPresetSelect = (preset) => {
     lineChart.applyTimeZoom(preset);

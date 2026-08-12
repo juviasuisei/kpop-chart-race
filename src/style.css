@@ -834,10 +834,11 @@ body {
 
 .chart-race__top-bar {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
   padding: 0.5rem 1rem;
   flex-shrink: 0;
+  gap: 1rem;
 }
 
 .chart-race__right-group {
@@ -1950,16 +1951,22 @@ body {
 
 .time-navigation {
   display: flex;
-  gap: 4px;
-  padding: 4px;
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 8px;
-  border: 1px solid #e0e0e0;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 0;
+}
+
+.time-navigation__label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #666;
+  margin-right: 4px;
 }
 
 .time-navigation__btn {
   padding: 4px 12px;
-  border: none;
+  border: 1px solid rgba(0, 0, 0, 0.12);
   border-radius: 6px;
   background: transparent;
   color: #666;
@@ -1977,6 +1984,7 @@ body {
 .time-navigation__btn--active {
   color: #213547;
   background: rgba(0, 100, 200, 0.1);
+  border-color: rgba(0, 100, 200, 0.3);
 }
 
 /* ===== Artist Filter Dropdown ===== */

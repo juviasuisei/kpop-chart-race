@@ -150,8 +150,6 @@ export class LineChartController {
   private lastFrameTime = 0;
   /** Smooth animation position (fractional date index) */
   private animationPosition = 0;
-  /** Animation speed: date indices per second */
-  private animationSpeed = 1.0;
   /** Whether initial data has been sent to worker */
   private initialized = false;
   /** Background layer needs full redraw */
@@ -518,7 +516,10 @@ export class LineChartController {
     this.lastFrameTime = now;
 
     // Advance position smoothly
-    const advance = (deltaMs / 1000) * this.animationSpeed;
+    // First step (D0→D1) is 2x faster, all others are 20% slower
+    const isFirstStep = this.animationPosition < 1;
+    const speed = isFirstStep ? 2.0 : 0.8;
+    const advance = (deltaMs / 1000) * speed;
     this.animationPosition += advance;
 
     // Check if we've reached the end

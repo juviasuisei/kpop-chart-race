@@ -413,19 +413,26 @@ export class ArtistTimeline {
         el.appendChild(songRow);
       }
     } else if (entry.type === "album-release") {
-      // Album/single release entry
+      // Album/single release entry with Apple Music embed
       const typeLabel = document.createElement("div");
       typeLabel.className = "artist-timeline__embed-type";
       typeLabel.textContent = entry.isSingle ? "Single" : "Release";
       el.appendChild(typeLabel);
 
-      const link = document.createElement("a");
-      link.className = "artist-timeline__apple-music-link";
-      link.href = entry.appleMusicUrl;
-      link.target = "_blank";
-      link.rel = "noopener noreferrer";
-      link.textContent = "Listen on Apple Music";
-      el.appendChild(link);
+      if (entry.appleMusicUrl) {
+        // Convert Apple Music URL to embed URL
+        const embedUrl = entry.appleMusicUrl.replace("music.apple.com", "embed.music.apple.com");
+        const embedContainer = document.createElement("div");
+        embedContainer.className = "artist-timeline__embed artist-timeline__embed--apple";
+        const iframe = document.createElement("iframe");
+        iframe.src = embedUrl;
+        iframe.allow = "autoplay *; encrypted-media *; fullscreen *; clipboard-write";
+        iframe.setAttribute("sandbox", "allow-forms allow-popups allow-same-origin allow-scripts allow-top-navigation-by-user-activation");
+        iframe.loading = "lazy";
+        iframe.title = entry.isSingle ? "Single on Apple Music" : "Album on Apple Music";
+        embedContainer.appendChild(iframe);
+        el.appendChild(embedContainer);
+      }
     } else {
       // Embed entry
       const typeLabel = document.createElement("div");

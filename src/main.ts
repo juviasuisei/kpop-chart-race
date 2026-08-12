@@ -190,6 +190,11 @@ async function main(): Promise<void> {
   artistTimelineContainer.style.display = "none";
   app.appendChild(artistTimelineContainer);
 
+  // Wire episode link clicks from artist timeline → switch to episodes view
+  artistTimeline.onEpisodeClick = (source, _episode, _date) => {
+    filterStateManager.update({ view: "episodes", source });
+  };
+
   // --- Helper: switch between line, yearly, episodes, and artist-timeline views ---
   function switchView(mode: "line" | "yearly" | "episodes" | "artist-timeline"): void {
     if (mode === "yearly") {

@@ -2475,6 +2475,14 @@ body {
   border-radius: 8px;
 }
 
+.artist-timeline__embed--apple iframe {
+  width: 100%;
+  height: 450px;
+  aspect-ratio: auto;
+  border: none;
+  border-radius: 10px;
+}
+
 .artist-timeline__prompt {
   display: flex;
   align-items: center;

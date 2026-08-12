@@ -91,6 +91,27 @@ async function main(): Promise<void> {
     return;
   }
 
+  // --- Title header ---
+  const topBar = document.createElement("div");
+  topBar.className = "chart-race__top-bar";
+  const titleHeader = document.createElement("div");
+  titleHeader.className = "chart-race__title-header";
+  const titleText = document.createElement("span");
+  titleText.className = "chart-race__title-text";
+  titleText.textContent = "K-Pop Chart Race";
+  const versionBadge = document.createElement("span");
+  versionBadge.className = "chart-race__version-badge";
+  versionBadge.textContent = "v1.26.0";
+  titleHeader.appendChild(titleText);
+  titleHeader.appendChild(versionBadge);
+  topBar.appendChild(titleHeader);
+  app.appendChild(topBar);
+
+  // --- Mount Toolbar (filters — at the top, persistent across views) ---
+  const toolbar = new Toolbar(eventBus, filterStateManager);
+  toolbar.mount(app);
+  toolbar.setGenerations(extractGenerations(dataStore));
+
   // --- Create line chart container ---
   const chartContainer = document.createElement("div");
   chartContainer.className = "line-chart-container";
@@ -101,14 +122,9 @@ async function main(): Promise<void> {
   await lineChart.mount(chartContainer);
   await lineChart.initData(dataStore);
 
-  // --- Mount Playback Controller ---
+  // --- Mount Playback Controller (scrubber — stays at bottom) ---
   const playbackController = new PlaybackController(eventBus, dataStore.dates);
   playbackController.mount(app);
-
-  // --- Mount Toolbar ---
-  const toolbar = new Toolbar(eventBus, filterStateManager);
-  toolbar.mount(app);
-  toolbar.setGenerations(extractGenerations(dataStore));
 
   // --- Mount Time Navigation ---
   const timeNav = new TimeNavigation();

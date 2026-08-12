@@ -35,6 +35,26 @@ const MAX_DAYS = 36500;
 // --- Helpers ---
 
 /**
+ * Compute the number of calendar days between two date indices.
+ * Uses the actual date strings from allDates for accurate day counting.
+ */
+function calendarDaysBetween(fromIndex: number, toIndex: number): number {
+  if (fromIndex >= toIndex) return 0;
+  if (fromIndex < 0 || toIndex >= allDates.length) return 0;
+
+  const fromDate = allDates[fromIndex];
+  const toDate = allDates[toIndex];
+  if (!fromDate || !toDate) return 0;
+
+  // Parse YYYY-MM-DD strings to compute day difference
+  const from = Date.parse(fromDate);
+  const to = Date.parse(toDate);
+  if (isNaN(from) || isNaN(to)) return toIndex - fromIndex; // fallback to index diff
+
+  return Math.round((to - from) / 86400000);
+}
+
+/**
  * Binary search for the last change-point at or before a given date index.
  * Returns the cumulative value at that point (flat-line interpolation).
  */
@@ -202,7 +222,7 @@ function computeFrame(msg: ComputeFrameMessage): void {
     // Skip lines that haven't started yet
     if (line.changePoints[0][0] > effectiveDateIndex) continue;
 
-    const daysSinceActivity = Math.max(0, effectiveDateIndex - lastActivity);
+    const daysSinceActivity = calendarDaysBetween(lastActivity, effectiveDateIndex);
     const lifetimePoints = getValueAtDate(line.changePoints, effectiveDateIndex);
     if (lifetimePoints <= 0) continue;
 

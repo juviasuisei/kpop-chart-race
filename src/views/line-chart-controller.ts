@@ -623,7 +623,8 @@ export class LineChartController {
         opacity: cmd.opacity,
         finalValue: cmd.values.length > 0 ? cmd.values[cmd.values.length - 1] : 0,
       }))
-      .sort((a, b) => a.endPoint.y - b.endPoint.y);
+      .sort((a, b) => a.endPoint.y - b.endPoint.y)
+      .slice(0, 10);
 
     // Stagger to avoid overlap (MIN_GAP = 18px)
     const resolvedPositions: { y: number; lineId: string; endPoint: PixelPoint; color: string; opacity: number; finalValue: number }[] = [];

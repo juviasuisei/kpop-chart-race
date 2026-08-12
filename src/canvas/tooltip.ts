@@ -64,7 +64,7 @@ export class Tooltip {
 
     // Win info row (crown icon + label)
     if (data.winInfo) {
-      html += `<div style="display:flex;align-items:center;gap:5px;margin-bottom:4px;"><span style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;background:rgba(255,255,255,0.8);border-radius:3px;"><img src="${data.winInfo.crownSvgUrl}" style="width:13px;height:13px;" alt="Crown"></span><span style="font-size:0.7rem;">${data.winInfo.crownLabel}</span></div>`;
+      html += `<div style="display:flex;align-items:center;gap:5px;margin-bottom:8px;"><span style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;background:rgba(255,255,255,0.8);border-radius:3px;"><img src="${data.winInfo.crownSvgUrl}" style="width:13px;height:13px;" alt="Crown"></span><span style="font-size:0.7rem;">${data.winInfo.crownLabel}</span></div>`;
     }
 
     // Logo + artist info side by side

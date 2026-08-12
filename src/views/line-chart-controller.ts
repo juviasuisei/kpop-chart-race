@@ -135,7 +135,7 @@ export class LineChartController {
     viewportEnd: 0,
     timeZoom: "daily",
     playing: false,
-    speed: 1,
+    speed: 0.8,
     selectedLineIds: [],
     filterCount: 0,
     artistFilterActive: false,
@@ -288,6 +288,14 @@ export class LineChartController {
     } else {
       this.stopAnimationLoop();
     }
+  }
+
+  /**
+   * Set animation speed (dates per second) for the rAF loop.
+   * Default is 0.8. Higher values = faster playback.
+   */
+  setSpeed(datesPerSecond: number): void {
+    this.state.speed = datesPerSecond;
   }
 
   applyTimeZoom(preset: TimeZoomPreset): void {
@@ -571,9 +579,9 @@ export class LineChartController {
     this.lastFrameTime = now;
 
     // Advance position smoothly
-    // First step (D0→D1) is 2x faster, all others are 20% slower
+    // First step (D0→D1) is 2x faster, all others use configurable speed
     const isFirstStep = this.animationPosition < 1;
-    const speed = isFirstStep ? 2.0 : 0.8;
+    const speed = isFirstStep ? 2.0 : this.state.speed;
     const advance = (deltaMs / 1000) * speed;
     this.animationPosition += advance;
 

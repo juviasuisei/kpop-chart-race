@@ -77,8 +77,8 @@
 
 ## Phase 7: Polish
 
-- [ ] 7.1 Refresh yearly view styling to match new design language
-- [ ] 7.2 Add keyboard shortcuts (Space: play/pause, arrows: step, Escape: deselect, number keys: speed)
-- [ ] 7.3 Encode view state in URL (view, filters, time window, highlighted lines)
-- [ ] 7.4 Mobile touch gesture polish (swipe timeline, responsive layout)
-- [ ] 7.5* Accessibility: screen reader announcements for line chart state changes
+- [x] 7.1 Refresh yearly view styling to match new design language
+- [x] 7.2 Add keyboard shortcuts (Space: play/pause, arrows: step, Escape: deselect, number keys: speed)
+- [x] 7.3 Encode view state in URL (view, filters, time window, highlighted lines)
+- [x] 7.4 Mobile touch gesture polish (swipe timeline, responsive layout)
+- [x] 7.5* Accessibility: screen reader announcements for line chart state changes

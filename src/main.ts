@@ -367,6 +367,198 @@ async function main(): Promise<void> {
       eventBus.emit("date:change", lastDate);
     });
   }
+
+  // =========================================================
+  // Phase 7: Polish — Keyboard Shortcuts
+  // =========================================================
+
+  const SPEED_PRESETS: Record<string, number> = {
+    "1": 0.5,
+    "2": 0.8,
+    "3": 1.0,
+    "4": 1.5,
+    "5": 2.0,
+  };
+
+  document.addEventListener("keydown", (e) => {
+    // Don't trigger shortcuts when typing in inputs/textareas
+    const target = e.target as HTMLElement;
+    if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) {
+      return;
+    }
+
+    switch (e.key) {
+      case " ": {
+        e.preventDefault();
+        if (playbackController.isPlaying()) {
+          playbackController.pause();
+        } else {
+          playbackController.play();
+        }
+        break;
+      }
+      case "ArrowLeft": {
+        if (!playbackController.isPlaying()) {
+          e.preventDefault();
+          const currentIdx = lineChart.getDateIndex(
+            lineChart.getViewportState().currentDate
+          );
+          if (currentIdx > 0) {
+            lineChart.setDateIndex(currentIdx - 1);
+            const newDate = dataStore.dates[currentIdx - 1];
+            if (newDate) {
+              playbackController.syncTo(newDate);
+            }
+          }
+        }
+        break;
+      }
+      case "ArrowRight": {
+        if (!playbackController.isPlaying()) {
+          e.preventDefault();
+          const currentIdx = lineChart.getDateIndex(
+            lineChart.getViewportState().currentDate
+          );
+          if (currentIdx < dataStore.dates.length - 1) {
+            lineChart.setDateIndex(currentIdx + 1);
+            const newDate = dataStore.dates[currentIdx + 1];
+            if (newDate) {
+              playbackController.syncTo(newDate);
+            }
+          }
+        }
+        break;
+      }
+      case "Escape": {
+        // Close popover / disambiguation at main level
+        lineChart.clearSelection();
+        break;
+      }
+      default: {
+        // Speed control: 1-5 keys while playing
+        if (SPEED_PRESETS[e.key] !== undefined && playbackController.isPlaying()) {
+          lineChart.setSpeed(SPEED_PRESETS[e.key]);
+        }
+        break;
+      }
+    }
+  });
+
+  // =========================================================
+  // Phase 7: Polish — URL State Encoding
+  // =========================================================
+
+  const DEFAULT_FILTER_VALUES: Partial<FilterState> = {
+    view: "line",
+    generation: "all",
+    source: "all",
+    artist: "all",
+    displayMode: "songs",
+  };
+
+  /** Encode current filter state into URL hash */
+  function encodeStateToHash(state: FilterState): string {
+    const params: string[] = [];
+    if (state.view !== DEFAULT_FILTER_VALUES.view) params.push(`view=${state.view}`);
+    if (state.generation !== DEFAULT_FILTER_VALUES.generation) params.push(`gen=${state.generation}`);
+    if (state.source !== DEFAULT_FILTER_VALUES.source) params.push(`source=${state.source}`);
+    if (state.artist !== DEFAULT_FILTER_VALUES.artist) params.push(`artist=${state.artist}`);
+    if (state.displayMode !== DEFAULT_FILTER_VALUES.displayMode) params.push(`mode=${state.displayMode}`);
+    return params.length > 0 ? `#${params.join("&")}` : "";
+  }
+
+  /** Parse URL hash into partial filter state */
+  function parseHashToState(hash: string): Partial<FilterState> {
+    const partial: Partial<FilterState> = {};
+    if (!hash || hash === "#") return partial;
+
+    const raw = hash.startsWith("#") ? hash.slice(1) : hash;
+    const pairs = raw.split("&");
+    for (const pair of pairs) {
+      const [key, value] = pair.split("=");
+      if (!key || !value) continue;
+      switch (key) {
+        case "view":
+          if (["line", "race", "yearly", "episodes", "artist-timeline"].includes(value)) {
+            partial.view = value as FilterState["view"];
+          }
+          break;
+        case "gen":
+          partial.generation = value === "all" ? "all" : parseInt(value, 10);
+          break;
+        case "source":
+          partial.source = value;
+          break;
+        case "artist":
+          partial.artist = value;
+          break;
+        case "mode":
+          if (value === "songs" || value === "artists") {
+            partial.displayMode = value;
+          }
+          break;
+      }
+    }
+    return partial;
+  }
+
+  // On load: apply hash state
+  const initialHashState = parseHashToState(window.location.hash);
+  if (Object.keys(initialHashState).length > 0) {
+    filterStateManager.update(initialHashState);
+  }
+
+  // On filter:change: update URL hash
+  eventBus.on("filter:change", (state: FilterState) => {
+    const newHash = encodeStateToHash(state);
+    const currentPath = window.location.pathname + window.location.search;
+    history.replaceState(null, "", currentPath + newHash);
+  });
+
+  // =========================================================
+  // Phase 7: Polish — Accessibility Announcements
+  // =========================================================
+
+  /** Human-readable labels for views */
+  const VIEW_LABELS: Record<string, string> = {
+    line: "Line Chart",
+    race: "Race",
+    yearly: "Yearly Summary",
+    episodes: "Episode Browser",
+    "artist-timeline": "Artist Timeline",
+  };
+
+  let previousView: string = filterStateManager.getState().view;
+  let previousGeneration: number | "all" = filterStateManager.getState().generation;
+  let previousSource: string = filterStateManager.getState().source;
+
+  eventBus.on("filter:change", (state: FilterState) => {
+    // Announce view changes
+    if (state.view !== previousView) {
+      const label = VIEW_LABELS[state.view] ?? state.view;
+      liveRegion.announce(`Switched to ${label} view`);
+      previousView = state.view;
+    }
+    // Announce generation filter changes
+    if (state.generation !== previousGeneration) {
+      if (state.generation === "all") {
+        liveRegion.announce("Showing all generations");
+      } else {
+        liveRegion.announce(`Filtered to Gen ${state.generation}`);
+      }
+      previousGeneration = state.generation;
+    }
+    // Announce source filter changes
+    if (state.source !== previousSource) {
+      if (state.source === "all") {
+        liveRegion.announce("Showing all sources");
+      } else {
+        const sourceLabel = state.source.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+        liveRegion.announce(`Source: ${sourceLabel}`);
+      }
+      previousSource = state.source;
+    }
+  });
 }
 
 main();

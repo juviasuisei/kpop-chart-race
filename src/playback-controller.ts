@@ -107,14 +107,17 @@ export class PlaybackController {
     if (isWrapping) {
       this.currentIndex = 0;
       this.updateScrubberAndLabel();
-      // Clear all bars so day 1 starts fresh with bars rising from bottom
-      this.eventBus.emit("reset");
-      this.eventBus.emit("date:change", this.dates[0]);
     }
 
     this.updateButtonToPause();
     this.playing = true;
+    // Emit play FIRST so the line chart controller starts its animation loop
+    // before any date:change events (which it will ignore while playing)
     this.eventBus.emit("play");
+
+    if (isWrapping) {
+      this.eventBus.emit("reset");
+    }
 
     // Use event-driven advancement: wait for update:complete before advancing
     let waitingForComplete = false;

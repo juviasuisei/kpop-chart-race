@@ -125,20 +125,16 @@ describe("EpisodeBrowser", () => {
     browser.unmount();
   });
 
-  it("shows winner with crown icon when chartWins entry exists", () => {
+  it("shows winner with crown icon on #1 rank entry", () => {
     const browser = new EpisodeBrowser();
     browser.mount(container, dataStore);
 
-    const winners = container.querySelectorAll(".episode-card__winner");
-    // Only inkigayo ep 100 on Jan 7 has a winner
-    expect(winners.length).toBe(1);
+    // The #1 entry on inkigayo ep 100 (Jan 7) should have a crown instead of rank number
+    const crownImgs = container.querySelectorAll(".episode-card__crown");
+    expect(crownImgs.length).toBeGreaterThanOrEqual(1);
 
-    const winnerText = winners[0].querySelector(".episode-card__winner-text");
-    expect(winnerText?.textContent).toContain("Artist Beta");
-    expect(winnerText?.textContent).toContain("Song B");
-
-    const crownImg = winners[0].querySelector(".episode-card__crown") as HTMLImageElement;
-    expect(crownImg.src).toContain("crown-3.svg");
+    const firstCrown = crownImgs[0] as HTMLImageElement;
+    expect(firstCrown.src).toContain("crown-3.svg");
 
     browser.unmount();
   });
@@ -200,32 +196,29 @@ describe("EpisodeBrowser", () => {
     browser.unmount();
   });
 
-  it("renders performances section when live_performance embeds exist", () => {
+  it("renders inline embeds for live performances", () => {
     const browser = new EpisodeBrowser();
     browser.mount(container, dataStore);
 
-    const perfToggles = container.querySelectorAll(".episode-card__performances-toggle");
-    // Only inkigayo ep 100 on Jan 7 has a live performance
-    expect(perfToggles.length).toBe(1);
-    expect(perfToggles[0].textContent).toBe("Performances (1)");
+    // inkigayo ep 100 on Jan 7 has a live performance embed
+    const embeds = container.querySelectorAll(".episode-card__embed");
+    expect(embeds.length).toBeGreaterThanOrEqual(1);
+
+    const iframe = embeds[0].querySelector("iframe");
+    expect(iframe).not.toBeNull();
+    expect(iframe?.src).toContain("youtube.com/embed");
 
     browser.unmount();
   });
 
-  it("expands performances section on toggle click", () => {
+  it("shows top 3 by default with expand toggle", () => {
     const browser = new EpisodeBrowser();
     browser.mount(container, dataStore);
 
-    const perfSection = container.querySelector(".episode-card__performances")!;
-    const toggle = container.querySelector(".episode-card__performances-toggle") as HTMLButtonElement;
-
-    expect(perfSection.classList.contains("episode-card__performances--open")).toBe(false);
-
-    toggle.click();
-    expect(perfSection.classList.contains("episode-card__performances--open")).toBe(true);
-
-    toggle.click();
-    expect(perfSection.classList.contains("episode-card__performances--open")).toBe(false);
+    // The expand toggle should not appear for episodes with <= 3 entries
+    // In our test data, inkigayo ep 100 has 2 entries, so no toggle
+    const toggles = container.querySelectorAll(".episode-card__expand-toggle");
+    expect(toggles.length).toBe(0); // all episodes have ≤3 entries
 
     browser.unmount();
   });

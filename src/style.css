@@ -2175,32 +2175,6 @@ body {
   margin-left: auto;
 }
 
-.episode-card__winner {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  margin-bottom: 12px;
-  background: rgba(255, 215, 0, 0.08);
-  border: 1px solid rgba(255, 215, 0, 0.25);
-  border-radius: 8px;
-}
-
-.episode-card__crown {
-  width: 20px;
-  height: 20px;
-  flex-shrink: 0;
-  background: rgba(255, 255, 255, 0.5);
-  border-radius: 4px;
-  padding: 2px;
-}
-
-.episode-card__winner-text {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: #213547;
-}
-
 .episode-card__chart {
   display: flex;
   flex-direction: column;
@@ -2223,8 +2197,51 @@ body {
 .episode-card__rank {
   font-weight: 700;
   color: #666;
-  min-width: 24px;
+  min-width: 32px;
   font-size: 0.72rem;
+  display: flex;
+  align-items: flex-end;
+}
+
+.episode-card__rank--crown {
+  display: flex;
+  align-items: flex-end;
+  min-width: 32px;
+}
+
+.episode-card__crown {
+  display: block;
+}
+
+.episode-card__chart-entry--hidden {
+  display: none;
+}
+
+.episode-card__expand-toggle {
+  border: none;
+  background: none;
+  color: #0072B2;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 8px 0 4px;
+}
+
+.episode-card__expand-toggle:hover {
+  text-decoration: underline;
+}
+
+.episode-card__embed {
+  margin: 4px 0 8px 32px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.episode-card__embed iframe {
+  width: 100%;
+  aspect-ratio: 16/9;
+  border: none;
+  border-radius: 8px;
 }
 
 .episode-card__entry-info {
@@ -2242,67 +2259,4 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-.episode-card__performances {
-  margin-top: 12px;
-  border-top: 1px solid rgba(0, 0, 0, 0.06);
-  padding-top: 8px;
-}
-
-.episode-card__performances-toggle {
-  appearance: none;
-  -webkit-appearance: none;
-  border: none;
-  background: transparent;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #0072B2;
-  cursor: pointer;
-  padding: 4px 0;
-}
-
-.episode-card__performances-toggle:hover {
-  text-decoration: underline;
-}
-
-.episode-card__performances-toggle::before {
-  content: "\25B6 ";
-  font-size: 0.6rem;
-  transition: transform 0.2s ease;
-  display: inline-block;
-}
-
-.episode-card__performances-toggle--open::before {
-  transform: rotate(90deg);
-}
-
-.episode-card__performances-content {
-  display: none;
-  padding-top: 10px;
-  gap: 12px;
-  flex-direction: column;
-}
-
-.episode-card__performances--open .episode-card__performances-content {
-  display: flex;
-}
-
-.episode-card__embed {
-  border-radius: 8px;
-  overflow: hidden;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-}
-
-.episode-card__embed-label {
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: #213547;
-  padding: 6px 10px;
-  background: rgba(0, 0, 0, 0.02);
-}
-
-.episode-card__embed iframe {
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  border: none;
-  display: block;
-}
+/* Old performances section removed — embeds are now inline */

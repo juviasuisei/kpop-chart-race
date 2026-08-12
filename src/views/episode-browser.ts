@@ -275,41 +275,44 @@ export class EpisodeBrowser {
 
     card.appendChild(header);
 
-    // Winner
-    if (episode.winner) {
-      const winnerRow = document.createElement("div");
-      winnerRow.className = "episode-card__winner";
-
-      const crownLevel = Math.min(episode.winner.crownLevel, 12);
-      const crownImg = document.createElement("img");
-      crownImg.className = "episode-card__crown";
-      crownImg.src = `assets/crowns/crown-${crownLevel}.svg`;
-      crownImg.alt = `Crown level ${episode.winner.crownLevel}`;
-      crownImg.width = 20;
-      crownImg.height = 20;
-      winnerRow.appendChild(crownImg);
-
-      const winnerText = document.createElement("span");
-      winnerText.className = "episode-card__winner-text";
-      winnerText.textContent = `${episode.winner.artistName} \u2014 ${episode.winner.releaseTitle}`;
-      winnerRow.appendChild(winnerText);
-
-      card.appendChild(winnerRow);
-    }
-
-    // Chart entries
+    // Chart entries — show top 3 by default, expandable to full list
     const chart = document.createElement("div");
     chart.className = "episode-card__chart";
+
+    // Build a map of performances by artistId+releaseTitle for inline embeds
+    const perfMap = new Map<string, string>(); // key → url
+    for (const perf of episode.performances) {
+      perfMap.set(`${perf.artistName}::${perf.releaseTitle}`, perf.url);
+    }
 
     for (let i = 0; i < episode.entries.length; i++) {
       const entry = episode.entries[i];
       const row = document.createElement("div");
       row.className = "episode-card__chart-entry";
+      if (i >= 3) row.classList.add("episode-card__chart-entry--hidden");
 
-      const rank = document.createElement("span");
-      rank.className = "episode-card__rank";
-      rank.textContent = `#${i + 1}`;
-      row.appendChild(rank);
+      // Rank: #1 gets crown SVG, others get rank number
+      if (i === 0 && episode.winner) {
+        const crownLevel = Math.min(episode.winner.crownLevel, 12);
+        // Crown height scales with level: levels 1-6 → 24px, 7-9 → 36px, 10+ → 48px
+        const crownHeight = crownLevel >= 10 ? 48 : crownLevel >= 7 ? 36 : 24;
+        const crownContainer = document.createElement("span");
+        crownContainer.className = "episode-card__rank episode-card__rank--crown";
+        crownContainer.style.height = `${crownHeight}px`;
+        const crownImg = document.createElement("img");
+        crownImg.className = "episode-card__crown";
+        crownImg.src = `assets/crowns/crown-${crownLevel}.svg`;
+        crownImg.alt = `${episode.winner.crownLevel} win(s)`;
+        crownImg.style.height = `${crownHeight}px`;
+        crownImg.style.width = "auto";
+        crownContainer.appendChild(crownImg);
+        row.appendChild(crownContainer);
+      } else {
+        const rank = document.createElement("span");
+        rank.className = "episode-card__rank";
+        rank.textContent = `#${i + 1}`;
+        row.appendChild(rank);
+      }
 
       const info = document.createElement("span");
       info.className = "episode-card__entry-info";
@@ -322,52 +325,56 @@ export class EpisodeBrowser {
       row.appendChild(points);
 
       chart.appendChild(row);
+
+      // Inline live performance embed below this entry (if exists)
+      const perfKey = `${entry.artistName}::${entry.releaseTitle}`;
+      const perfUrl = perfMap.get(perfKey);
+      if (perfUrl) {
+        const embedContainer = document.createElement("div");
+        embedContainer.className = "episode-card__embed";
+        if (i >= 3) embedContainer.classList.add("episode-card__chart-entry--hidden");
+
+        const iframe = document.createElement("iframe");
+        const videoId = this.extractYoutubeId(perfUrl);
+        iframe.src = videoId ? `https://www.youtube.com/embed/${videoId}` : perfUrl.replace("watch?v=", "embed/");
+        iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+        iframe.allowFullscreen = true;
+        iframe.loading = "lazy";
+        iframe.title = `${entry.artistName} - ${entry.releaseTitle}`;
+        embedContainer.appendChild(iframe);
+
+        chart.appendChild(embedContainer);
+      }
+    }
+
+    // "Show all" toggle if more than 3 entries
+    if (episode.entries.length > 3) {
+      const toggle = document.createElement("button");
+      toggle.type = "button";
+      toggle.className = "episode-card__expand-toggle";
+      toggle.textContent = `Show all (${episode.entries.length})`;
+      toggle.addEventListener("click", () => {
+        const hidden = chart.querySelectorAll(".episode-card__chart-entry--hidden");
+        hidden.forEach(el => el.classList.remove("episode-card__chart-entry--hidden"));
+        toggle.style.display = "none";
+      });
+      chart.appendChild(toggle);
     }
 
     card.appendChild(chart);
 
-    // Performances (expandable)
-    if (episode.performances.length > 0) {
-      const perfSection = document.createElement("div");
-      perfSection.className = "episode-card__performances";
-
-      const perfToggle = document.createElement("button");
-      perfToggle.type = "button";
-      perfToggle.className = "episode-card__performances-toggle";
-      perfToggle.textContent = `Performances (${episode.performances.length})`;
-      perfToggle.addEventListener("click", () => {
-        perfSection.classList.toggle("episode-card__performances--open");
-        perfToggle.classList.toggle("episode-card__performances-toggle--open");
-      });
-      perfSection.appendChild(perfToggle);
-
-      const perfContent = document.createElement("div");
-      perfContent.className = "episode-card__performances-content";
-
-      for (const perf of episode.performances) {
-        const embedContainer = document.createElement("div");
-        embedContainer.className = "episode-card__embed";
-
-        const embedLabel = document.createElement("div");
-        embedLabel.className = "episode-card__embed-label";
-        embedLabel.textContent = `${perf.artistName} \u2014 ${perf.releaseTitle}`;
-        embedContainer.appendChild(embedLabel);
-
-        const iframe = document.createElement("iframe");
-        iframe.src = perf.url.replace("watch?v=", "embed/");
-        iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
-        iframe.allowFullscreen = true;
-        iframe.loading = "lazy";
-        iframe.title = `${perf.artistName} - ${perf.releaseTitle} live performance`;
-        embedContainer.appendChild(iframe);
-
-        perfContent.appendChild(embedContainer);
-      }
-
-      perfSection.appendChild(perfContent);
-      card.appendChild(perfSection);
-    }
-
     return card;
+  }
+
+  private extractYoutubeId(url: string): string | null {
+    const patterns = [
+      /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/,
+      /youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/,
+    ];
+    for (const pattern of patterns) {
+      const match = url.match(pattern);
+      if (match) return match[1];
+    }
+    return null;
   }
 }

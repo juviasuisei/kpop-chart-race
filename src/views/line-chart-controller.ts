@@ -872,9 +872,8 @@ export class LineChartController {
         }
       }
 
-      // Draw event dots on the highlighted line (wins + embeds)
+      // Draw win dots on the highlighted line (chart performance only)
       this.drawEventDotsForLine(ctx, cmd);
-      this.drawEmbedDotsForLine(ctx, cmd);
     }
   }
 
@@ -943,70 +942,6 @@ export class LineChartController {
       }
 
       this.drawCrownDot(ctx, x, y, crownLevel);
-    }
-  }
-
-  private drawEmbedDotsForLine(ctx: CanvasRenderingContext2D, cmd: LineDrawCommand): void {
-    if (!this.dataStore) return;
-
-    const meta = this.lineMetadata.get(cmd.lineId);
-    if (!meta || !meta.releaseId) return;
-
-    const artist = this.dataStore.artists.get(meta.artistId);
-    if (!artist) return;
-
-    const release = artist.releases.find(r => r.id === meta.releaseId);
-    if (!release) return;
-
-    const viewStart = this.state.viewportStart;
-    const viewEnd = this.state.viewportEnd;
-    const totalDateSpan = viewEnd + 1 - viewStart;
-    const { width } = this.renderer!.getSize();
-    const chartW = width - PADDING.left - PADDING.right;
-    const chartH = this.renderer!.getSize().height - PADDING.top - PADDING.bottom;
-    const frameMax = this.getCurrentFrameMax();
-
-    // Also collect win dates to avoid drawing a white dot on top of a crown
-    const winDates = new Set(this.dataStore.releaseWinDates?.get(cmd.lineId) ?? []);
-
-    for (const [date, embeds] of release.embeds) {
-      if (!embeds || embeds.length === 0) continue;
-      if (winDates.has(date)) continue; // crown already drawn for this date
-
-      // When source filter is active, only show embeds on dates where the release
-      // appeared on the filtered show (keeps dots relevant to the filtered view)
-      if (this.currentSourceFilter !== "all") {
-        const entry = release.dailyValues.get(date);
-        if (!entry || entry.source !== this.currentSourceFilter) continue;
-      }
-
-      // Only show dots for dates within the visible time range
-      const viewStartDate = this.state.dates[Math.max(0, viewStart)] ?? "";
-      const viewEndDate = this.state.dates[Math.min(this.state.dates.length - 1, viewEnd)] ?? "";
-      if (date < viewStartDate || date > viewEndDate) continue;
-
-      // Find the date index — if not in dates array, find nearest
-      let dateIdx = this.state.dates.indexOf(date);
-      if (dateIdx === -1) {
-        dateIdx = this.findNearestDateIndex(date);
-      }
-      if (dateIdx < 0 || dateIdx < viewStart || dateIdx > viewEnd) continue;
-
-      const xRatio = (dateIdx - viewStart) / totalDateSpan;
-      const x = PADDING.left + xRatio * chartW;
-      const value = this.getValueAtDateForLine(cmd, dateIdx);
-      const y = PADDING.top + chartH - (value / (frameMax || 1)) * chartH;
-
-      // White circle dot
-      ctx.save();
-      ctx.fillStyle = "#ffffff";
-      ctx.strokeStyle = "rgba(0, 0, 0, 0.2)";
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.arc(x, y, 4, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.stroke();
-      ctx.restore();
     }
   }
 
@@ -1596,7 +1531,7 @@ export class LineChartController {
     const hoveredDate = this.state.dates[clampedIndex] ?? "";
     const formattedDate = this.formatDateLabel(hoveredDate);
 
-    // Get chart source and daily gain — only for dates with actual chart data
+    // Get chart source and daily gain — only for dates with actual chart data matching the filter
     let sourceLabel: string | undefined;
     let sourceLogoUrl: string | undefined;
     let dailyGain: number | undefined;
@@ -1605,12 +1540,15 @@ export class LineChartController {
       if (release) {
         const entry = release.dailyValues.get(hoveredDate);
         if (entry) {
-          if (entry.source) {
-            sourceLabel = SOURCE_LABELS[entry.source] ?? entry.source;
-            sourceLogoUrl = SOURCE_LOGO_URLS[entry.source];
-          }
-          if (entry.value > 0) {
-            dailyGain = entry.value;
+          // Only show source/gain if it matches the active source filter
+          if (this.currentSourceFilter === "all" || entry.source === this.currentSourceFilter) {
+            if (entry.source) {
+              sourceLabel = SOURCE_LABELS[entry.source] ?? entry.source;
+              sourceLogoUrl = SOURCE_LOGO_URLS[entry.source];
+            }
+            if (entry.value > 0) {
+              dailyGain = entry.value;
+            }
           }
         }
       }
@@ -1636,7 +1574,7 @@ export class LineChartController {
       }
     }
 
-    // Check for embeds (live performance / MV / release) at this date
+    // Check for live performance embeds at this date (chart-related only)
     let hasVideo = false;
     let hasRelease = false;
     let embedUrl: string | undefined;
@@ -1646,12 +1584,9 @@ export class LineChartController {
         const embeds = release.embeds.get(hoveredDate);
         if (embeds) {
           for (const embed of embeds) {
-            if (embed.type === "live_performance" || embed.type === "mv") {
+            if (embed.type === "live_performance") {
               hasVideo = true;
               embedUrl = embed.url;
-            }
-            if (embed.type === "release_date") {
-              hasRelease = true;
             }
           }
         }

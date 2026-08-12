@@ -1408,8 +1408,8 @@ export class LineChartController {
     // Reverse-map nearest point x → date for display
     const { width } = this.renderer!.getSize();
     const chartW = width - PADDING.left - PADDING.right;
-    const ptX = rd.points[nearestIndex]?.x ?? x;
-    const xRatio = Math.max(0, Math.min(1, (ptX - PADDING.left) / chartW));
+    // Use mouse x position (not nearest point) for accurate date at any position on the line
+    const xRatio = Math.max(0, Math.min(1, (x - PADDING.left) / chartW));
     // Worker maps [startDateIndex, endDateIndex+1] to [0, chartW]
     const totalDateSpan = this.state.viewportEnd + 1 - this.state.viewportStart;
     const dateIndex = Math.round(this.state.viewportStart + xRatio * totalDateSpan);

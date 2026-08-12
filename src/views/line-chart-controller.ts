@@ -1621,20 +1621,42 @@ export class LineChartController {
       }
     }
 
-    // Check for live performance embeds — only on dates matching source filter
+    // Check for live performance embeds and build song breakdown (artists mode)
     let hasVideo = false;
-    let hasRelease = false;
+    const hasRelease = false;
     let embedUrl: string | undefined;
-    if (artist && meta.releaseId && sourceLabel) {
-      // Only show embeds when the date has chart data from the filtered source
-      const release = artist.releases.find(r => r.id === meta.releaseId);
-      if (release) {
+    const embedUrls: string[] = [];
+    let songBreakdown: { title: string; value: number; isWin?: boolean }[] | undefined;
+
+    if (artist && sourceLabel) {
+      const releasesToCheck = meta.releaseId
+        ? [artist.releases.find(r => r.id === meta.releaseId)].filter(Boolean) as typeof artist.releases
+        : artist.releases;
+
+      // Build song breakdown for artists mode
+      if (!meta.releaseId) {
+        const breakdown: { title: string; value: number; isWin?: boolean }[] = [];
+        for (const release of releasesToCheck) {
+          const entry = release.dailyValues.get(hoveredDate);
+          if (entry && (this.currentSourceFilter === "all" || entry.source === this.currentSourceFilter)) {
+            // Check if this release won on this date
+            const releaseKey = `${meta.artistId}::${release.id}`;
+            const isWin = this.dataStore?.releaseWinDates?.get(releaseKey)?.includes(hoveredDate) ?? false;
+            breakdown.push({ title: release.title, value: entry.value, isWin });
+          }
+        }
+        if (breakdown.length > 0) songBreakdown = breakdown;
+      }
+
+      // Collect live performance embeds
+      for (const release of releasesToCheck) {
         const embeds = release.embeds.get(hoveredDate);
         if (embeds) {
           for (const embed of embeds) {
             if (embed.type === "live_performance") {
               hasVideo = true;
-              embedUrl = embed.url;
+              if (!embedUrl) embedUrl = embed.url;
+              embedUrls.push(embed.url);
             }
           }
         }
@@ -1659,7 +1681,9 @@ export class LineChartController {
       hasVideo,
       hasRelease,
       embedUrl,
+      embedUrls: embedUrls.length > 1 ? embedUrls : undefined,
       winInfo,
+      songBreakdown,
     }, x, y);
   }
 

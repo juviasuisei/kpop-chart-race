@@ -34,6 +34,10 @@ export interface TooltipData {
   winInfo?: { crownLevel: number; crownLabel: string; crownSvgUrl: string };
   /** Embed URL for video (YouTube) */
   embedUrl?: string;
+  /** Multiple embed URLs (artists mode: multiple live performances) */
+  embedUrls?: string[];
+  /** Song breakdown for artists mode (which songs contributed on this date) */
+  songBreakdown?: { title: string; value: number; isWin?: boolean }[];
 }
 
 export class Tooltip {
@@ -105,21 +109,27 @@ export class Tooltip {
       }
     }
 
-    // Embed placeholders (when hovering event dots)
+    // Song breakdown (artists mode: shows which songs contributed)
+    if (data.songBreakdown && data.songBreakdown.length > 0) {
+      html += `<div style="margin-top:6px;border-top:1px solid rgba(255,255,255,0.15);padding-top:6px;">`;
+      for (const song of data.songBreakdown) {
+        const winBadge = song.isWin ? ` <span style="font-size:0.6rem;">👑</span>` : "";
+        html += `<div style="font-size:0.65rem;color:rgba(255,255,255,0.8);margin-bottom:2px;">${song.title}${winBadge} <span style="color:rgba(255,255,255,0.5);">+${song.value.toLocaleString()}</span></div>`;
+      }
+      html += `</div>`;
+    }
+
+    // Embed (live performances)
     if (data.showEmbed) {
-      if (data.hasVideo && data.embedUrl) {
-        // Extract YouTube video ID and render iframe
-        const videoId = this.extractYoutubeId(data.embedUrl);
+      const urls = data.embedUrls ?? (data.embedUrl ? [data.embedUrl] : []);
+      for (const url of urls) {
+        const videoId = this.extractYoutubeId(url);
         if (videoId) {
           html += `<div class="tooltip-embed tooltip-embed--video"><iframe src="https://www.youtube.com/embed/${videoId}" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="width:100%;height:100%;border:none;border-radius:6px;"></iframe></div>`;
-        } else {
-          html += `<div class="tooltip-embed tooltip-embed--video">\u25B6</div>`;
         }
-      } else if (data.hasVideo) {
-        html += `<div class="tooltip-embed tooltip-embed--video">\u25B6</div>`;
       }
-      if (data.hasRelease) {
-        html += `<div class="tooltip-embed tooltip-embed--apple"><div style="text-align:center;padding:12px;font-size:0.65rem;color:#999;">\uD83C\uDFB5 Apple Music<br>Album embed here<br>(scrollable)</div></div>`;
+      if (urls.length === 0 && data.hasVideo) {
+        html += `<div class="tooltip-embed tooltip-embed--video">\u25B6</div>`;
       }
       html += `<div class="tooltip-click-hint">click to engage</div>`;
     }

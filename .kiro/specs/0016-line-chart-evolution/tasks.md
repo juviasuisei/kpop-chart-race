@@ -55,12 +55,12 @@
 
 ## Phase 5: Episode Browser
 
-- [ ] 5.1 Extract episode data from existing dailyValues (group by source + episode number + date)
-- [ ] 5.2 Build virtualized scrollable episode list component
-- [ ] 5.3 Implement show source tabs/filter with show logos
-- [ ] 5.4 Build expandable episode cards (winner, top chart, embedded performances)
-- [ ] 5.5 Link episode entries to performance videos from embeds data
-- [ ] 5.6* Add episode deep-linking (URL encodes show + episode number)
+- [x] 5.1 Extract episode data from existing dailyValues (group by source + episode number + date)
+- [x] 5.2 Build virtualized scrollable episode list component
+- [x] 5.3 Implement show source tabs/filter with show logos
+- [x] 5.4 Build expandable episode cards (winner, top chart, embedded performances)
+- [x] 5.5 Link episode entries to performance videos from embeds data
+- [x] 5.6* Add episode deep-linking (URL encodes show + episode number)
 
 ## Phase 6: Artist Timeline
 

@@ -889,23 +889,21 @@ export class LineChartController {
     if (img && img.complete && img.naturalWidth > 0) {
       const imgSize = dotSize * 2.5;
       ctx.save();
-      // Draw black border layer (slightly larger, behind)
-      ctx.filter = "brightness(0)";
-      const borderSize = imgSize + 2;
-      ctx.drawImage(img, x - borderSize / 2, y - borderSize / 2, borderSize, borderSize);
-      // Draw white crown on top
-      ctx.filter = "brightness(0) invert(1)";
+      // White background square with 50% opacity
+      ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+      const bgSize = imgSize + 4;
+      ctx.beginPath();
+      ctx.roundRect(x - bgSize / 2, y - bgSize / 2, bgSize, bgSize, 3);
+      ctx.fill();
+      // Draw crown SVG in original red
       ctx.drawImage(img, x - imgSize / 2, y - imgSize / 2, imgSize, imgSize);
       ctx.restore();
     } else {
       ctx.save();
-      ctx.fillStyle = "#ffffff";
-      ctx.strokeStyle = "rgba(0, 0, 0, 0.3)";
-      ctx.lineWidth = 1;
+      ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
       ctx.beginPath();
-      ctx.arc(x, y, dotSize * 0.45, 0, Math.PI * 2);
+      ctx.arc(x, y, dotSize * 0.6, 0, Math.PI * 2);
       ctx.fill();
-      ctx.stroke();
       ctx.restore();
     }
   }

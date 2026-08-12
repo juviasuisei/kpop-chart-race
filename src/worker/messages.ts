@@ -35,8 +35,10 @@ export type CanvasLayer = "background" | "foreground" | "highlight";
 export interface Viewport {
   /** Start date index (inclusive) */
   startDateIndex: number;
-  /** End date index (inclusive) */
+  /** End date index (inclusive, integer — the last fully revealed date) */
   endDateIndex: number;
+  /** Fractional progress toward the NEXT date (0.0 = just arrived at endDateIndex, 1.0 = about to reach endDateIndex+1) */
+  progressToNext: number;
   /** Canvas pixel width */
   width: number;
   /** Canvas pixel height */

@@ -124,7 +124,7 @@ function buildPixelPoints(
   viewport: Viewport,
   maxValue: number,
 ): { points: PixelPoint[]; values: number[] } {
-  const { startDateIndex, endDateIndex, width, height } = viewport;
+  const { startDateIndex, endDateIndex, width, height, progressToNext } = viewport;
   const dateRange = endDateIndex - startDateIndex;
 
   // Compute chart area in CSS pixels (canvas context has DPR transform applied)
@@ -200,19 +200,32 @@ function buildPixelPoints(
     values.push(value);
   }
 
-  // Add the value at viewport end (extend flat line to the right edge)
-  // Only if the line already has points drawn in the viewport
+  // Extend line to the right edge, interpolating toward the next date value
+  // for smooth animation between dates
   if (points.length > 0) {
     const endValue = getValueAtDate(changePoints, endDateIndex);
+    const nextDateIndex = endDateIndex + 1;
+    const nextValue = nextDateIndex < allDates.length
+      ? getValueAtDate(changePoints, nextDateIndex)
+      : endValue;
+
+    // Interpolate between current end value and next date's value
+    const interpolatedValue = endValue + (nextValue - endValue) * progressToNext;
+
+    // The right edge x extends based on progress toward the next date
+    const dateRange = endDateIndex - startDateIndex;
+    const effectiveDateRange = dateRange + progressToNext;
+    const endX = dateRange > 0
+      ? padding.left + (effectiveDateRange / effectiveDateRange) * chartW  // always right edge
+      : padding.left + chartW;
+
     const lastPoint = points[points.length - 1];
-    const endX = padding.left + chartW;
-    // Only add end point if it differs from the last plotted point
-    if (Math.abs(lastPoint.x - endX) > 1) {
+    if (Math.abs(lastPoint.x - endX) > 0.5) {
       points.push({
         x: endX,
-        y: padding.top + chartH - (endValue / effectiveMax) * chartH,
+        y: padding.top + chartH - (interpolatedValue / effectiveMax) * chartH,
       });
-      values.push(endValue);
+      values.push(Math.round(interpolatedValue));
     }
   }
 
@@ -248,8 +261,12 @@ function computeFrame(msg: ComputeFrameMessage): void {
   // Clamp currentDateIndex to available range
   const effectiveDateIndex = Math.min(currentDateIndex, allDates.length - 1);
 
-  // Dynamic Y-axis: compute max only from data up to current date
-  const frameMaxValue = computeMaxAtDate(effectiveDateIndex);
+  // Dynamic Y-axis: compute max interpolated between current and next date
+  const currentMax = computeMaxAtDate(effectiveDateIndex);
+  const nextMax = effectiveDateIndex + 1 < allDates.length
+    ? computeMaxAtDate(effectiveDateIndex + 1)
+    : currentMax;
+  const frameMaxValue = currentMax + (nextMax - currentMax) * viewport.progressToNext;
 
   const background: LineDrawCommand[] = [];
   const foreground: LineDrawCommand[] = [];

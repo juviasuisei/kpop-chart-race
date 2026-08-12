@@ -527,6 +527,7 @@ export class LineChartController {
       ? this.state.dates.length
       : PRESET_DAYS[this.state.timeZoom];
 
+    // Use fractional viewportEnd for smooth line extension
     this.state.viewportEnd = Math.floor(this.animationPosition);
     const dataStart = Math.max(0, this.state.viewportEnd - zoomWindow);
     this.state.viewportStart = dataStart > 0 ? dataStart : -1;
@@ -549,6 +550,7 @@ export class LineChartController {
     const viewport: Viewport = {
       startDateIndex: this.state.viewportStart,
       endDateIndex: this.state.viewportEnd,
+      progressToNext: this.state.playing ? (this.animationPosition - Math.floor(this.animationPosition)) : 0,
       width,
       height,
       dpr,

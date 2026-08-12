@@ -100,7 +100,7 @@ export class PlaybackController {
   }
 
   play(): void {
-    if (this.intervalId !== null) return;
+    if (this.playing) return;
 
     // If at the last date, reset to the beginning before starting playback
     const isWrapping = this.currentIndex >= this.dates.length - 1;
@@ -111,49 +111,15 @@ export class PlaybackController {
 
     this.updateButtonToPause();
     this.playing = true;
-    // Emit play FIRST so the line chart controller starts its animation loop
-    // before any date:change events (which it will ignore while playing)
     this.eventBus.emit("play");
 
     if (isWrapping) {
       this.eventBus.emit("reset");
     }
 
-    // Use event-driven advancement: wait for update:complete before advancing
-    let waitingForComplete = false;
-
-    const advance = () => {
-      if (this.currentIndex >= this.dates.length - 1) {
-        this.pause();
-        return;
-      }
-
-      this.currentIndex++;
-      this.updateScrubberAndLabel();
-      waitingForComplete = true;
-      this.eventBus.emit("date:change", this.dates[this.currentIndex]);
-    };
-
-    // Listen for update:complete to schedule next advance
-    const onComplete = () => {
-      if (!this.playing) return; // paused
-      if (!waitingForComplete) return; // ignore spurious completions
-      waitingForComplete = false;
-      this.intervalId = setTimeout(() => {
-        advance();
-      }, 500) as unknown as ReturnType<typeof setInterval>; // 500ms between each step
-    };
-
-    this.eventBus.on("update:complete", onComplete);
-    this.updateCompleteHandler = onComplete;
-
-    // Start the first advance — but if wrapping, day 1 is already emitted,
-    // so wait for its update:complete to trigger the first advance naturally
-    if (!isWrapping) {
-      advance();
-    } else {
-      waitingForComplete = true;
-    }
+    // LineChartController now owns the animation loop entirely.
+    // This controller only manages the UI (button state, scrubber position).
+    // Listen for date:change to keep scrubber in sync with the animation.
   }
 
   pause(): void {
@@ -179,6 +145,14 @@ export class PlaybackController {
     this.currentIndex = index;
     this.updateScrubberAndLabel();
     this.eventBus.emit("date:change", this.dates[this.currentIndex]);
+  }
+
+  /** Update scrubber position without emitting date:change (for animation sync) */
+  syncTo(date: string): void {
+    const index = this.dates.indexOf(date);
+    if (index === -1) return;
+    this.currentIndex = index;
+    this.updateScrubberAndLabel();
   }
 
   isPlaying(): boolean {

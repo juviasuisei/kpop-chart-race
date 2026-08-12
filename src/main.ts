@@ -166,8 +166,11 @@ async function main(): Promise<void> {
 
   // date:change → update line chart date index
   eventBus.on("date:change", (date: string) => {
-    // When the line chart is driving its own animation, don't accept external date changes
-    if (lineChart.isPlaying()) return;
+    if (lineChart.isPlaying()) {
+      // During animation, just sync the scrubber position (no feedback loop)
+      playbackController.syncTo(date);
+      return;
+    }
     const index = dataStore.dates.indexOf(date);
     if (index >= 0) {
       lineChart.setDateIndex(index);
@@ -183,9 +186,11 @@ async function main(): Promise<void> {
     lineChart.setPlaying(false);
   });
 
-  // reset → line chart handles internally via date index
+  // reset → handled by animation (starts from -1)
   eventBus.on("reset", () => {
-    lineChart.setDateIndex(0);
+    if (!lineChart.isPlaying()) {
+      lineChart.setDateIndex(0);
+    }
   });
 
   // line:hover → controller handles tooltip internally now

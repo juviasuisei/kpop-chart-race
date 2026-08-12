@@ -1498,11 +1498,7 @@ export class LineChartController {
 
     // Get value at nearest point
     const value = rd.values[nearestIndex] ?? 0;
-    let dailyGain: number | undefined;
-    if (nearestIndex > 0 && rd.values[nearestIndex - 1] !== undefined) {
-      const gain = value - rd.values[nearestIndex - 1];
-      if (gain > 0) dailyGain = gain;
-    }
+    // dailyGain is computed later, only for dates with actual chart data
 
     // Reverse-map nearest point x → date for display
     const { width } = this.renderer!.getSize();
@@ -1516,16 +1512,22 @@ export class LineChartController {
     const hoveredDate = this.state.dates[clampedIndex] ?? "";
     const formattedDate = this.formatDateLabel(hoveredDate);
 
-    // Get chart source — only show on dates that actually have data
+    // Get chart source and daily gain — only for dates with actual chart data
     let sourceLabel: string | undefined;
     let sourceLogoUrl: string | undefined;
+    let dailyGain: number | undefined;
     if (artist && meta.releaseId) {
       const release = artist.releases.find(r => r.id === meta.releaseId);
       if (release) {
         const entry = release.dailyValues.get(hoveredDate);
-        if (entry?.source) {
-          sourceLabel = SOURCE_LABELS[entry.source] ?? entry.source;
-          sourceLogoUrl = SOURCE_LOGO_URLS[entry.source];
+        if (entry) {
+          if (entry.source) {
+            sourceLabel = SOURCE_LABELS[entry.source] ?? entry.source;
+            sourceLogoUrl = SOURCE_LOGO_URLS[entry.source];
+          }
+          if (entry.value > 0) {
+            dailyGain = entry.value;
+          }
         }
       }
     }

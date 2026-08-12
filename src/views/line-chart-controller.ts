@@ -909,8 +909,13 @@ export class LineChartController {
       if (!embeds || embeds.length === 0) continue;
       if (winDates.has(date)) continue; // crown already drawn for this date
 
-      const dateIdx = this.state.dates.indexOf(date);
-      if (dateIdx < viewStart || dateIdx > viewEnd) continue;
+      // Find the date index — if not in dates array, find nearest
+      let dateIdx = this.state.dates.indexOf(date);
+      if (dateIdx === -1) {
+        // Binary search for nearest date
+        dateIdx = this.findNearestDateIndex(date);
+      }
+      if (dateIdx < 0 || dateIdx < viewStart || dateIdx > viewEnd) continue;
 
       const xRatio = (dateIdx - viewStart) / totalDateSpan;
       const x = PADDING.left + xRatio * chartW;
@@ -1059,7 +1064,8 @@ export class LineChartController {
       if (release) {
         for (const [date, embeds] of release.embeds) {
           if (!embeds || embeds.length === 0) continue;
-          const dateIdx = this.state.dates.indexOf(date);
+          let dateIdx = this.state.dates.indexOf(date);
+          if (dateIdx === -1) dateIdx = this.findNearestDateIndex(date);
           if (dateIdx >= viewStart && dateIdx <= viewEnd) {
             const types = embeds.map(e => e.type as string);
             // Merge with existing if same date
@@ -1635,6 +1641,25 @@ export class LineChartController {
     const s = ["th", "st", "nd", "rd"];
     const v = n % 100;
     return n + (s[(v - 20) % 10] || s[v] || s[0]);
+  }
+
+  /** Find the nearest date index for a date string not in the dates array */
+  private findNearestDateIndex(date: string): number {
+    const dates = this.state.dates;
+    // Binary search for insertion point
+    let lo = 0;
+    let hi = dates.length - 1;
+    while (lo <= hi) {
+      const mid = (lo + hi) >> 1;
+      if (dates[mid] < date) lo = mid + 1;
+      else if (dates[mid] > date) hi = mid - 1;
+      else return mid;
+    }
+    // lo is the insertion point — return the closest existing index
+    if (lo >= dates.length) return dates.length - 1;
+    if (lo === 0) return 0;
+    // Pick whichever neighbor is closer in time
+    return lo;
   }
 
   private formatDateLabel(dateStr: string): string {

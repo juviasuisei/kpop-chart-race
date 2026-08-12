@@ -2291,13 +2291,19 @@ body {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
+.artist-timeline__logo-bg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  border-radius: 16px;
+}
+
 .artist-timeline__logo {
   width: 64px;
   height: 64px;
   object-fit: contain;
-  background: #213547;
-  border-radius: 12px;
-  padding: 8px;
 }
 
 .artist-timeline__name {
@@ -2313,7 +2319,7 @@ body {
 
 .artist-timeline__stats {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 16px;
   margin-top: 12px;
   width: 100%;
@@ -2352,7 +2358,7 @@ body {
   padding: 8px 12px;
   font-size: 0.8rem;
   font-weight: 700;
-  color: #0072B2;
+  text-align: center;
   border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   margin-bottom: 8px;
 }
@@ -2363,11 +2369,6 @@ body {
   border-radius: 8px;
   padding: 12px;
   margin-bottom: 8px;
-}
-
-.artist-timeline__entry--win {
-  border-color: rgba(218, 165, 32, 0.4);
-  background: rgba(255, 248, 220, 0.5);
 }
 
 .artist-timeline__entry-source {
@@ -2389,17 +2390,39 @@ body {
   color: #666;
 }
 
-.artist-timeline__entry-info {
+.artist-timeline__show-link {
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.artist-timeline__show-link:hover {
+  text-decoration: underline;
+  color: #0072B2;
+}
+
+.artist-timeline__song-line {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+  padding: 4px 0;
 }
 
 .artist-timeline__song-title {
   font-size: 0.85rem;
   font-weight: 600;
   color: #213547;
+}
+
+.artist-timeline__points-wrap {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.artist-timeline__inline-crown {
+  width: 16px;
+  height: 16px;
 }
 
 .artist-timeline__entry-points {
@@ -2409,22 +2432,19 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-.artist-timeline__crown {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 8px;
-}
-
-.artist-timeline__crown img {
-  width: 24px;
-  height: 24px;
-}
-
-.artist-timeline__crown-label {
-  font-size: 0.75rem;
+.artist-timeline__apple-music-link {
+  display: inline-block;
+  padding: 6px 12px;
+  font-size: 0.78rem;
   font-weight: 600;
-  color: #b8860b;
+  color: #ffffff;
+  background: #fc3c44;
+  border-radius: 6px;
+  text-decoration: none;
+}
+
+.artist-timeline__apple-music-link:hover {
+  opacity: 0.9;
 }
 
 .artist-timeline__embed-type {
@@ -2480,7 +2500,7 @@ body {
 
 @media (max-width: 767px) {
   .artist-timeline__stats {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 12px;
   }
 

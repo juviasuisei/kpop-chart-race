@@ -4,6 +4,7 @@
  */
 
 import type { DataStore, ParsedArtist } from "../models.ts";
+import { ARTIST_TYPE_COLORS } from "../colors.ts";
 
 /** Source key → logo path mapping */
 const SOURCE_LOGOS: Record<string, string> = {
@@ -34,25 +35,47 @@ const ARTIST_TYPE_LABELS: Record<string, string> = {
   mixed_group: "Mixed Group",
 };
 
-/** A single timeline entry for a date */
-interface TimelineEntry {
-  type: "chart" | "embed";
+/** A single song line within a merged show card */
+interface SongLine {
   releaseTitle: string;
-  // Chart fields
-  source?: string;
-  episode?: number;
-  value?: number;
-  isWin?: boolean;
-  crownLevel?: number;
-  // Embed fields
-  embedType?: string;
-  embedUrl?: string;
+  value: number;
+  isWin: boolean;
+  crownLevel: number;
 }
+
+/** A merged show card (multiple songs on the same show episode) */
+interface MergedShowEntry {
+  type: "chart";
+  source: string;
+  episode: number;
+  date: string;
+  songs: SongLine[];
+}
+
+/** An embed timeline entry */
+interface EmbedEntry {
+  type: "embed";
+  releaseTitle: string;
+  embedType: string;
+  embedUrl: string;
+}
+
+/** An album release timeline entry */
+interface AlbumReleaseEntry {
+  type: "album-release";
+  isSingle: boolean;
+  appleMusicUrl: string;
+}
+
+type TimelineEntry = MergedShowEntry | EmbedEntry | AlbumReleaseEntry;
 
 export class ArtistTimeline {
   private container: HTMLElement | null = null;
   private dataStore: DataStore | null = null;
   private artistId: string | null = null;
+
+  /** Callback fired when a show episode link is clicked */
+  onEpisodeClick: ((source: string, episode: number, date: string) => void) | null = null;
 
   mount(container: HTMLElement, dataStore: DataStore, artistId: string): void {
     this.container = container;
@@ -86,11 +109,13 @@ export class ArtistTimeline {
       return;
     }
 
+    const typeColor = ARTIST_TYPE_COLORS[artist.artistType] ?? "#213547";
+
     const wrapper = document.createElement("div");
     wrapper.className = "artist-timeline";
 
     // Header
-    wrapper.appendChild(this.createHeader(artist));
+    wrapper.appendChild(this.createHeader(artist, typeColor));
 
     // Build date-grouped entries
     const dateMap = this.buildDateMap(artist);
@@ -100,25 +125,30 @@ export class ArtistTimeline {
 
     for (const date of sortedDates) {
       const entries = dateMap.get(date)!;
-      const group = this.createDateGroup(date, entries);
+      const group = this.createDateGroup(date, entries, typeColor);
       wrapper.appendChild(group);
     }
 
     this.container.appendChild(wrapper);
   }
 
-  private createHeader(artist: ParsedArtist): HTMLElement {
+  private createHeader(artist: ParsedArtist, typeColor: string): HTMLElement {
     const header = document.createElement("div");
     header.className = "artist-timeline__header";
 
-    // Logo
+    // Logo with colored background
+    const logoBg = document.createElement("div");
+    logoBg.className = "artist-timeline__logo-bg";
+    logoBg.style.backgroundColor = typeColor;
+
     const logo = document.createElement("img");
     logo.className = "artist-timeline__logo";
     logo.src = artist.logoUrl;
     logo.alt = artist.name;
     logo.width = 64;
     logo.height = 64;
-    header.appendChild(logo);
+    logoBg.appendChild(logo);
+    header.appendChild(logoBg);
 
     // Name
     const name = document.createElement("div");
@@ -126,14 +156,21 @@ export class ArtistTimeline {
     name.textContent = artist.name;
     header.appendChild(name);
 
-    // Type + Generation
+    // Type + Generation + Debut
     const meta = document.createElement("div");
     meta.className = "artist-timeline__meta";
     const typeLabel = ARTIST_TYPE_LABELS[artist.artistType] ?? artist.artistType;
-    meta.textContent = `${typeLabel} · Gen ${artist.generation}`;
+    let metaText = `${typeLabel} · Gen ${artist.generation}`;
+    if (artist.debut) {
+      const debutPrefix = artist.artistType === "solo_male" || artist.artistType === "solo_female"
+        ? "Solo Debut"
+        : "Debut";
+      metaText += ` · ${debutPrefix}: ${artist.debut}`;
+    }
+    meta.textContent = metaText;
     header.appendChild(meta);
 
-    // Stats
+    // Stats (without Active)
     const stats = this.computeStats(artist);
     const statsEl = document.createElement("div");
     statsEl.className = "artist-timeline__stats";
@@ -141,7 +178,6 @@ export class ArtistTimeline {
       <div class="artist-timeline__stat"><span class="artist-timeline__stat-value">${stats.totalPoints.toLocaleString()}</span><span class="artist-timeline__stat-label">Points</span></div>
       <div class="artist-timeline__stat"><span class="artist-timeline__stat-value">${stats.totalWins}</span><span class="artist-timeline__stat-label">Wins</span></div>
       <div class="artist-timeline__stat"><span class="artist-timeline__stat-value">${stats.releaseCount}</span><span class="artist-timeline__stat-label">Releases</span></div>
-      <div class="artist-timeline__stat"><span class="artist-timeline__stat-value">${stats.activePeriod}</span><span class="artist-timeline__stat-label">Active</span></div>
     `;
     header.appendChild(statsEl);
 
@@ -152,18 +188,13 @@ export class ArtistTimeline {
     totalPoints: number;
     totalWins: number;
     releaseCount: number;
-    activePeriod: string;
   } {
     let totalPoints = 0;
     let totalWins = 0;
-    let firstDate = "";
-    let lastDate = "";
 
     for (const release of artist.releases) {
-      for (const [date, dv] of release.dailyValues) {
+      for (const [, dv] of release.dailyValues) {
         totalPoints += dv.value;
-        if (!firstDate || date < firstDate) firstDate = date;
-        if (!lastDate || date > lastDate) lastDate = date;
       }
     }
 
@@ -179,21 +210,24 @@ export class ArtistTimeline {
     }
 
     const releaseCount = artist.releases.length;
-    const activePeriod = firstDate && lastDate
-      ? `${firstDate.slice(0, 7)} → ${lastDate.slice(0, 7)}`
-      : "—";
 
-    return { totalPoints, totalWins, releaseCount, activePeriod };
+    return { totalPoints, totalWins, releaseCount };
   }
 
   private buildDateMap(artist: ParsedArtist): Map<string, TimelineEntry[]> {
     const dateMap = new Map<string, TimelineEntry[]>();
 
+    // Intermediate structure: group chart entries by show key within each date
+    // Key: date → showKey → SongLine[]
+    const chartGrouped = new Map<string, Map<string, { source: string; episode: number; songs: SongLine[] }>>();
+
     for (const release of artist.releases) {
       // Chart appearances (dailyValues)
       for (const [date, dv] of release.dailyValues) {
-        if (!dateMap.has(date)) dateMap.set(date, []);
-        const entries = dateMap.get(date)!;
+        if (!chartGrouped.has(date)) chartGrouped.set(date, new Map());
+        const dateShows = chartGrouped.get(date)!;
+
+        const showKey = `${dv.source}::${dv.episode}::${date}`;
 
         // Check if this is a win
         let isWin = false;
@@ -209,11 +243,11 @@ export class ArtistTimeline {
           }
         }
 
-        entries.push({
-          type: "chart",
+        if (!dateShows.has(showKey)) {
+          dateShows.set(showKey, { source: dv.source, episode: dv.episode, songs: [] });
+        }
+        dateShows.get(showKey)!.songs.push({
           releaseTitle: release.title,
-          source: dv.source,
-          episode: dv.episode,
           value: dv.value,
           isWin,
           crownLevel,
@@ -236,18 +270,57 @@ export class ArtistTimeline {
       }
     }
 
-    // Sort entries within each date: wins first, chart by value desc, then embeds
+    // Convert chartGrouped into merged show entries
+    for (const [date, showMap] of chartGrouped) {
+      if (!dateMap.has(date)) dateMap.set(date, []);
+      const entries = dateMap.get(date)!;
+
+      for (const [, show] of showMap) {
+        // Sort songs within show: wins first, then by value desc
+        show.songs.sort((a, b) => {
+          if (a.isWin && !b.isWin) return -1;
+          if (!a.isWin && b.isWin) return 1;
+          return b.value - a.value;
+        });
+
+        entries.push({
+          type: "chart",
+          source: show.source,
+          episode: show.episode,
+          date,
+          songs: show.songs,
+        });
+      }
+    }
+
+    // Add album releases to the dateMap
+    for (const albumRelease of artist.albumReleases) {
+      const date = albumRelease.date;
+      if (!dateMap.has(date)) dateMap.set(date, []);
+      dateMap.get(date)!.push({
+        type: "album-release",
+        isSingle: albumRelease.isSingle,
+        appleMusicUrl: albumRelease.appleMusicUrl,
+      });
+    }
+
+    // Sort entries within each date: chart (with wins first) → album releases → embeds
     for (const [, entries] of dateMap) {
       entries.sort((a, b) => {
-        // Wins first
-        if (a.isWin && !b.isWin) return -1;
-        if (!a.isWin && b.isWin) return 1;
-        // Chart entries before embeds
-        if (a.type === "chart" && b.type === "embed") return -1;
-        if (a.type === "embed" && b.type === "chart") return 1;
-        // Within chart: sort by value desc
+        const order = { chart: 0, "album-release": 1, embed: 2 };
+        const aOrder = order[a.type] ?? 99;
+        const bOrder = order[b.type] ?? 99;
+        if (aOrder !== bOrder) return aOrder - bOrder;
+        // Within chart: entries with a win come first
         if (a.type === "chart" && b.type === "chart") {
-          return (b.value ?? 0) - (a.value ?? 0);
+          const aHasWin = a.songs.some((s) => s.isWin);
+          const bHasWin = b.songs.some((s) => s.isWin);
+          if (aHasWin && !bHasWin) return -1;
+          if (!aHasWin && bHasWin) return 1;
+          // Then by total value desc
+          const aTotal = a.songs.reduce((sum, s) => sum + s.value, 0);
+          const bTotal = b.songs.reduce((sum, s) => sum + s.value, 0);
+          return bTotal - aTotal;
         }
         return 0;
       });
@@ -256,13 +329,14 @@ export class ArtistTimeline {
     return dateMap;
   }
 
-  private createDateGroup(date: string, entries: TimelineEntry[]): HTMLElement {
+  private createDateGroup(date: string, entries: TimelineEntry[], typeColor: string): HTMLElement {
     const group = document.createElement("div");
     group.className = "artist-timeline__date-group";
 
     const dateHeader = document.createElement("div");
     dateHeader.className = "artist-timeline__date-header";
     dateHeader.textContent = this.formatDate(date);
+    dateHeader.style.color = typeColor;
     group.appendChild(dateHeader);
 
     for (const entry of entries) {
@@ -275,14 +349,13 @@ export class ArtistTimeline {
   private createEntry(entry: TimelineEntry): HTMLElement {
     const el = document.createElement("div");
     el.className = "artist-timeline__entry";
-    if (entry.isWin) el.classList.add("artist-timeline__entry--win");
 
     if (entry.type === "chart") {
-      // Source logo + show name
+      // Source logo + show name + episode (clickable)
       const sourceRow = document.createElement("div");
       sourceRow.className = "artist-timeline__entry-source";
 
-      if (entry.source && SOURCE_LOGOS[entry.source]) {
+      if (SOURCE_LOGOS[entry.source]) {
         const logo = document.createElement("img");
         logo.src = SOURCE_LOGOS[entry.source];
         logo.alt = SOURCE_LABELS[entry.source] ?? entry.source;
@@ -292,53 +365,72 @@ export class ArtistTimeline {
         sourceRow.appendChild(logo);
       }
 
-      const showText = document.createElement("span");
-      showText.className = "artist-timeline__show-text";
-      showText.textContent = `${SOURCE_LABELS[entry.source ?? ""] ?? entry.source} Ep.${entry.episode}`;
+      const showText = document.createElement("a");
+      showText.className = "artist-timeline__show-text artist-timeline__show-link";
+      showText.textContent = `${SOURCE_LABELS[entry.source] ?? entry.source} Ep.${entry.episode}`;
+      showText.href = "#";
+      showText.addEventListener("click", (e) => {
+        e.preventDefault();
+        if (this.onEpisodeClick) {
+          this.onEpisodeClick(entry.source, entry.episode, entry.date);
+        }
+      });
       sourceRow.appendChild(showText);
 
       el.appendChild(sourceRow);
 
-      // Song title + points
-      const infoRow = document.createElement("div");
-      infoRow.className = "artist-timeline__entry-info";
+      // Song lines
+      for (const song of entry.songs) {
+        const songRow = document.createElement("div");
+        songRow.className = "artist-timeline__song-line";
 
-      const songTitle = document.createElement("span");
-      songTitle.className = "artist-timeline__song-title";
-      songTitle.textContent = entry.releaseTitle;
-      infoRow.appendChild(songTitle);
+        const songTitle = document.createElement("span");
+        songTitle.className = "artist-timeline__song-title";
+        songTitle.textContent = song.releaseTitle;
+        songRow.appendChild(songTitle);
 
-      const points = document.createElement("span");
-      points.className = "artist-timeline__entry-points";
-      points.textContent = (entry.value ?? 0).toLocaleString() + " pts";
-      infoRow.appendChild(points);
+        const pointsWrap = document.createElement("span");
+        pointsWrap.className = "artist-timeline__points-wrap";
 
-      el.appendChild(infoRow);
+        // Crown to the left of the point value if this song won
+        if (song.isWin && song.crownLevel) {
+          const crownLevel = Math.min(song.crownLevel, 12);
+          const crownImg = document.createElement("img");
+          crownImg.src = `assets/crowns/crown-${crownLevel}.svg`;
+          crownImg.alt = `${song.crownLevel} win(s)`;
+          crownImg.width = 16;
+          crownImg.height = 16;
+          crownImg.className = "artist-timeline__inline-crown";
+          pointsWrap.appendChild(crownImg);
+        }
 
-      // Crown if win
-      if (entry.isWin && entry.crownLevel) {
-        const crownRow = document.createElement("div");
-        crownRow.className = "artist-timeline__crown";
-        const crownLevel = Math.min(entry.crownLevel, 12);
-        const crownImg = document.createElement("img");
-        crownImg.src = `assets/crowns/crown-${crownLevel}.svg`;
-        crownImg.alt = `${entry.crownLevel} win(s)`;
-        crownImg.width = 24;
-        crownImg.height = 24;
-        crownRow.appendChild(crownImg);
+        const points = document.createElement("span");
+        points.className = "artist-timeline__entry-points";
+        points.textContent = song.value.toLocaleString() + " pts";
+        pointsWrap.appendChild(points);
 
-        const crownLabel = document.createElement("span");
-        crownLabel.className = "artist-timeline__crown-label";
-        crownLabel.textContent = this.getCrownLabel(entry.crownLevel);
-        crownRow.appendChild(crownLabel);
-
-        el.appendChild(crownRow);
+        songRow.appendChild(pointsWrap);
+        el.appendChild(songRow);
       }
+    } else if (entry.type === "album-release") {
+      // Album/single release entry
+      const typeLabel = document.createElement("div");
+      typeLabel.className = "artist-timeline__embed-type";
+      typeLabel.textContent = entry.isSingle ? "Single" : "Release";
+      el.appendChild(typeLabel);
+
+      const link = document.createElement("a");
+      link.className = "artist-timeline__apple-music-link";
+      link.href = entry.appleMusicUrl;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      link.textContent = "Listen on Apple Music";
+      el.appendChild(link);
     } else {
       // Embed entry
       const typeLabel = document.createElement("div");
       typeLabel.className = "artist-timeline__embed-type";
-      typeLabel.textContent = this.formatEmbedType(entry.embedType ?? "");
+      typeLabel.textContent = this.formatEmbedType(entry.embedType);
       el.appendChild(typeLabel);
 
       const songLabel = document.createElement("div");
@@ -395,27 +487,6 @@ export class ArtistTimeline {
       fan_event: "Fan Event",
     };
     return labels[type] ?? type.replace(/_/g, " ");
-  }
-
-  private getCrownLabel(level: number): string {
-    if (level === 1) return "Win";
-    if (level === 2) return "2nd Win";
-    if (level === 3) return "Triple Crown";
-    if (level % 3 === 0) {
-      const tripleCount = level / 3;
-      if (tripleCount === 1) return "Triple Crown";
-      return `${this.getOrdinal(tripleCount)} Triple Crown`;
-    }
-    return `${this.getOrdinal(level)} Win`;
-  }
-
-  private getOrdinal(n: number): string {
-    const mod10 = n % 10;
-    const mod100 = n % 100;
-    if (mod10 === 1 && mod100 !== 11) return `${n}st`;
-    if (mod10 === 2 && mod100 !== 12) return `${n}nd`;
-    if (mod10 === 3 && mod100 !== 13) return `${n}rd`;
-    return `${n}th`;
   }
 
   private extractYoutubeId(url: string): string | null {

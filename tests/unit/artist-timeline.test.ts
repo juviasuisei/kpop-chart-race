@@ -142,7 +142,7 @@ describe("ArtistTimeline — Rendering", () => {
     timeline.unmount();
   });
 
-  it("renders stats summary with total points, wins, releases, and active period", () => {
+  it("renders stats summary with total points, wins, and releases", () => {
     const artist = createTestArtist();
     const artists = new Map([["aespa", artist]]);
     const dataStore = createMockDataStore(artists);
@@ -182,7 +182,7 @@ describe("ArtistTimeline — Rendering", () => {
     timeline.unmount();
   });
 
-  it("highlights win entries with special class", () => {
+  it("renders inline crown for win entries", () => {
     const artist = createTestArtist();
     const artists = new Map([["aespa", artist]]);
     const dataStore = createMockDataStore(artists);
@@ -190,8 +190,8 @@ describe("ArtistTimeline — Rendering", () => {
     const timeline = new ArtistTimeline();
     timeline.mount(container, dataStore, "aespa");
 
-    const winEntries = container.querySelectorAll(".artist-timeline__entry--win");
-    expect(winEntries.length).toBeGreaterThanOrEqual(1);
+    const inlineCrowns = container.querySelectorAll(".artist-timeline__inline-crown");
+    expect(inlineCrowns.length).toBeGreaterThanOrEqual(1);
 
     timeline.unmount();
   });
@@ -204,7 +204,7 @@ describe("ArtistTimeline — Rendering", () => {
     const timeline = new ArtistTimeline();
     timeline.mount(container, dataStore, "aespa");
 
-    const crownImg = container.querySelector(".artist-timeline__crown img") as HTMLImageElement;
+    const crownImg = container.querySelector(".artist-timeline__inline-crown") as HTMLImageElement;
     expect(crownImg).not.toBeNull();
     expect(crownImg.src).toContain("crown-3.svg");
 
@@ -437,11 +437,11 @@ describe("ArtistTimeline — Entry Sorting", () => {
 
     // The 2024-01-15 date group should have the win entry first
     const dateGroups = container.querySelectorAll(".artist-timeline__date-group");
-    // Find the Jan 15 group (should be first since it's most recent with chart data on same day)
     const jan15Group = dateGroups[0];
     const entries = jan15Group.querySelectorAll(".artist-timeline__entry");
-    // First entry should be the win
-    expect(entries[0].classList.contains("artist-timeline__entry--win")).toBe(true);
+    // First entry should be the win (inkigayo show), verified by its inline crown
+    const firstEntryCrown = entries[0].querySelector(".artist-timeline__inline-crown");
+    expect(firstEntryCrown).not.toBeNull();
 
     timeline.unmount();
   });

@@ -842,19 +842,17 @@ export class LineChartController {
     const releaseWinDates = this.dataStore.releaseWinDates?.get(cmd.lineId);
     if (!releaseWinDates || releaseWinDates.length === 0) return;
 
-    // Map win dates to point positions within the current viewport
     const viewStart = this.state.viewportStart;
     const viewEnd = this.state.viewportEnd;
     const totalDateSpan = viewEnd + 1 - viewStart;
     const { width } = this.renderer!.getSize();
     const chartW = width - PADDING.left - PADDING.right;
 
-    for (let winIdx = 0; winIdx < releaseWinDates.length; winIdx++) {
-      const winDate = releaseWinDates[winIdx];
+    for (const winDate of releaseWinDates) {
       const dateIdx = this.state.dates.indexOf(winDate);
       if (dateIdx < viewStart || dateIdx > viewEnd) continue;
 
-      // Map date to x position (matching worker's dateToX)
+      // Map date to x position
       const xRatio = (dateIdx - viewStart) / totalDateSpan;
       const x = PADDING.left + xRatio * chartW;
 
@@ -864,9 +862,22 @@ export class LineChartController {
       const chartH = (this.renderer!.getSize().height) - PADDING.top - PADDING.bottom;
       const y = PADDING.top + chartH - (value / (frameMax || 1)) * chartH;
 
-      // Win number is 1-indexed (winIdx + 1)
-      const winNumber = winIdx + 1;
-      this.drawCrownDot(ctx, x, y, winNumber);
+      // Look up crown level from chartWins (per-show win count)
+      let crownLevel = 1;
+      const dateWins = this.dataStore.chartWins.get(winDate);
+      if (dateWins) {
+        for (const [, winData] of dateWins) {
+          if (winData.artistIds.includes(meta.artistId)) {
+            const level = winData.crownLevels.get(meta.artistId);
+            if (level !== undefined) {
+              crownLevel = level;
+              break;
+            }
+          }
+        }
+      }
+
+      this.drawCrownDot(ctx, x, y, crownLevel);
     }
   }
 
@@ -876,17 +887,22 @@ export class LineChartController {
     const dotSize = EVENT_DOT_SIZE * 1.8;
 
     if (img && img.complete && img.naturalWidth > 0) {
-      // Draw crown SVG image centered on the point, colored white
       const imgSize = dotSize * 2.5;
+      // Draw thin black border circle behind the crown
       ctx.save();
+      ctx.strokeStyle = "rgba(0, 0, 0, 0.3)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(x, y, imgSize / 2 + 1, 0, Math.PI * 2);
+      ctx.stroke();
+      // Draw crown SVG image centered on the point, colored white
       ctx.filter = "brightness(0) invert(1)";
       ctx.drawImage(img, x - imgSize / 2, y - imgSize / 2, imgSize, imgSize);
       ctx.restore();
     } else {
-      // Fallback: white circle if image not loaded yet
       ctx.save();
       ctx.fillStyle = "#ffffff";
-      ctx.strokeStyle = "rgba(0, 0, 0, 0.15)";
+      ctx.strokeStyle = "rgba(0, 0, 0, 0.3)";
       ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.arc(x, y, dotSize * 0.45, 0, Math.PI * 2);

@@ -7,6 +7,7 @@
 
 import "./style.css";
 
+import pkg from "../package.json";
 import { EventBus } from "./event-bus.ts";
 import { loadFromAirtable } from "./airtable/data-adapter.ts";
 import { computeChartWins, extractGenerations } from "./chart-engine.ts";
@@ -104,7 +105,7 @@ async function main(): Promise<void> {
   titleText.textContent = "K-Pop Chart Race";
   const versionBadge = document.createElement("span");
   versionBadge.className = "chart-race__version-badge";
-  versionBadge.textContent = "v2.0.0";
+  versionBadge.textContent = `v${pkg.version}`;
   const dataNote = document.createElement("span");
   dataNote.className = "chart-race__data-note";
   let totalPoints = 0;

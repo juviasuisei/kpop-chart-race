@@ -63,17 +63,23 @@ async function main(): Promise<void> {
     dataStore.chartWins = chartWinsResult.chartWins;
     dataStore.releaseWinDates = chartWinsResult.releaseWinDates;
 
-    // Inject a synthetic zero-day (one day before first real data) into the dates array.
-    // This gives the scrubber an empty starting position and allows every line
-    // to animate from 0 to its first value naturally.
+    // Fill in ALL calendar days from one day before the first date to the last date.
+    // This ensures every day is represented (consistent x-spacing, hoverable).
     const firstRealDate = dataStore.dates[0];
-    if (firstRealDate) {
+    const lastRealDate = dataStore.dates[dataStore.dates.length - 1];
+    if (firstRealDate && lastRealDate) {
       try {
-        const d = new Date(firstRealDate + "T00:00:00");
-        d.setDate(d.getDate() - 1);
-        const zeroDay = d.toISOString().split("T")[0];
-        dataStore.dates.unshift(zeroDay);
-        dataStore.startDate = zeroDay;
+        const start = new Date(firstRealDate + "T00:00:00");
+        start.setDate(start.getDate() - 1); // zero-day
+        const end = new Date(lastRealDate + "T00:00:00");
+        const allDays: string[] = [];
+        const current = new Date(start);
+        while (current <= end) {
+          allDays.push(current.toISOString().split("T")[0]);
+          current.setDate(current.getDate() + 1);
+        }
+        dataStore.dates = allDays;
+        dataStore.startDate = allDays[0];
       } catch { /* leave as-is */ }
     }
 

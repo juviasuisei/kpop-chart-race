@@ -1410,20 +1410,35 @@ export class LineChartController {
     const chartW = width - PADDING.left - PADDING.right;
     const ptX = rd.points[nearestIndex]?.x ?? x;
     const xRatio = Math.max(0, Math.min(1, (ptX - PADDING.left) / chartW));
-    const viewRange = this.state.viewportEnd - this.state.viewportStart;
-    const dateIndex = Math.round(this.state.viewportStart + xRatio * viewRange);
-    const hoveredDate = this.state.dates[dateIndex] ?? "";
+    // Worker maps [startDateIndex, endDateIndex+1] to [0, chartW]
+    const totalDateSpan = this.state.viewportEnd + 1 - this.state.viewportStart;
+    const dateIndex = Math.round(this.state.viewportStart + xRatio * totalDateSpan);
+    const clampedIndex = Math.max(0, Math.min(this.state.dates.length - 1, dateIndex));
+    const hoveredDate = this.state.dates[clampedIndex] ?? "";
     const formattedDate = this.formatDateLabel(hoveredDate);
 
-    // Get chart source for this date
+    // Get chart source for this date (or nearest date with data)
     let sourceLabel: string | undefined;
     let sourceLogoUrl: string | undefined;
     if (artist && meta.releaseId) {
       const release = artist.releases.find(r => r.id === meta.releaseId);
-      const entry = release?.dailyValues.get(hoveredDate);
-      if (entry?.source) {
-        sourceLabel = SOURCE_LABELS[entry.source] ?? entry.source;
-        sourceLogoUrl = SOURCE_LOGO_URLS[entry.source];
+      if (release) {
+        // Try the exact hovered date first
+        let entry = release.dailyValues.get(hoveredDate);
+        // If no entry at this date, find the nearest earlier date with data
+        if (!entry) {
+          for (let i = clampedIndex - 1; i >= Math.max(0, clampedIndex - 5); i--) {
+            const d = this.state.dates[i];
+            if (d) {
+              entry = release.dailyValues.get(d);
+              if (entry) break;
+            }
+          }
+        }
+        if (entry?.source) {
+          sourceLabel = SOURCE_LABELS[entry.source] ?? entry.source;
+          sourceLogoUrl = SOURCE_LOGO_URLS[entry.source];
+        }
       }
     }
 

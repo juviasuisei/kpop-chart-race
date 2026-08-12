@@ -117,6 +117,8 @@ export class PlaybackController {
     this.eventBus.emit("play");
 
     // Use event-driven advancement: wait for update:complete before advancing
+    let waitingForComplete = false;
+
     const advance = () => {
       if (this.currentIndex >= this.dates.length - 1) {
         this.pause();
@@ -125,15 +127,18 @@ export class PlaybackController {
 
       this.currentIndex++;
       this.updateScrubberAndLabel();
+      waitingForComplete = true;
       this.eventBus.emit("date:change", this.dates[this.currentIndex]);
     };
 
     // Listen for update:complete to schedule next advance
     const onComplete = () => {
       if (!this.playing) return; // paused
+      if (!waitingForComplete) return; // ignore spurious completions
+      waitingForComplete = false;
       this.intervalId = setTimeout(() => {
         advance();
-      }, 900) as unknown as ReturnType<typeof setInterval>; // gap between days
+      }, 500) as unknown as ReturnType<typeof setInterval>; // 500ms between each step
     };
 
     this.eventBus.on("update:complete", onComplete);
@@ -143,6 +148,8 @@ export class PlaybackController {
     // so wait for its update:complete to trigger the first advance naturally
     if (!isWrapping) {
       advance();
+    } else {
+      waitingForComplete = true;
     }
   }
 

@@ -267,7 +267,6 @@ function computeFrame(msg: ComputeFrameMessage): void {
   }
 
   const computeTimeMs = performance.now() - startTime;
-  console.log("[Worker] computeFrame: scored", scored.length, "bg:", background.length, "fg:", foreground.length, "hl:", highlight.length, "time:", computeTimeMs.toFixed(1), "ms viewport:", viewport.startDateIndex, "-", viewport.endDateIndex, "currentDate:", effectiveDateIndex);
 
   const result: WorkerToMainMessage = {
     type: "frame-result",
@@ -297,7 +296,6 @@ self.onmessage = (event: MessageEvent<MainToWorkerMessage>) => {
       lines = msg.lines;
       selectedLineIds = new Set();
       recomputeGlobalMax();
-      console.log("[Worker] init-data:", lines.length, "lines,", allDates.length, "dates, globalMax:", globalMaxValue);
 
       const ready: WorkerToMainMessage = { type: "worker-ready" };
       self.postMessage(ready);

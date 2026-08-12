@@ -75,14 +75,11 @@ async function main(): Promise<void> {
   const chartContainer = document.createElement("div");
   chartContainer.className = "line-chart-container";
   app.appendChild(chartContainer);
-  console.log("[main] Chart container appended, size:", chartContainer.offsetWidth, "x", chartContainer.offsetHeight);
 
   // --- Mount Line Chart Controller ---
   const lineChart = new LineChartController(eventBus);
   await lineChart.mount(chartContainer);
-  console.log("[main] LineChartController mounted");
   await lineChart.initData(dataStore);
-  console.log("[main] LineChartController initData complete, lines:", lineChart.getAllLines().length);
 
   // --- Mount Playback Controller ---
   const playbackController = new PlaybackController(eventBus, dataStore.dates);

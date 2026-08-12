@@ -230,7 +230,6 @@ export class LineChartController {
 
     // Build serialized line data for the worker
     const lines = this.buildLineData(dataStore, this.state.displayMode);
-    console.log("[LineChart] Built", lines.length, "lines for worker. First:", lines[0]?.lineId, "points:", lines[0]?.changePoints.length);
 
     // Send to worker
     await this.workerClient.initData(lines, dataStore.dates);
@@ -491,7 +490,6 @@ export class LineChartController {
 
     const { width, height, dpr } = this.renderer.getSize();
     if (width === 0 || height === 0) {
-      console.log("[LineChart] requestFrame: size is 0, retrying...", width, height);
       requestAnimationFrame(() => this.requestFrame());
       return;
     }

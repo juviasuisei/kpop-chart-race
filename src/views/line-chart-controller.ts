@@ -909,10 +909,14 @@ export class LineChartController {
       if (!embeds || embeds.length === 0) continue;
       if (winDates.has(date)) continue; // crown already drawn for this date
 
+      // Only show dots for dates within the visible time range
+      const viewStartDate = this.state.dates[Math.max(0, viewStart)] ?? "";
+      const viewEndDate = this.state.dates[Math.min(this.state.dates.length - 1, viewEnd)] ?? "";
+      if (date < viewStartDate || date > viewEndDate) continue;
+
       // Find the date index — if not in dates array, find nearest
       let dateIdx = this.state.dates.indexOf(date);
       if (dateIdx === -1) {
-        // Binary search for nearest date
         dateIdx = this.findNearestDateIndex(date);
       }
       if (dateIdx < 0 || dateIdx < viewStart || dateIdx > viewEnd) continue;

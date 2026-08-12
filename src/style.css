@@ -1573,8 +1573,6 @@ body {
 .line-chart-container {
   position: relative;
   width: 100%;
-  max-width: 1200px;
-  height: 600px;
   background: #ffffff;
   border-radius: 8px;
   overflow: hidden;

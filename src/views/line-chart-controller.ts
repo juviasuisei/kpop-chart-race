@@ -251,7 +251,10 @@ export class LineChartController {
       : PRESET_DAYS[this.state.timeZoom];
 
     this.state.viewportEnd = index;
-    this.state.viewportStart = Math.max(0, index - zoomWindow);
+    // viewportStart is one extra index to the left so that the first data point
+    // isn't flush against the left edge (leaves room for the zero-origin)
+    const dataStart = Math.max(0, index - zoomWindow);
+    this.state.viewportStart = dataStart > 0 ? dataStart : -1;
     this.backgroundDirty = true;
     this.requestFrame();
   }
@@ -605,17 +608,21 @@ export class LineChartController {
     ctx.stroke();
 
     // Date labels
-    let startDateStr = this.state.dates[this.state.viewportStart] ?? "";
-    const endDate = this.state.dates[this.state.viewportEnd] ?? "";
-
-    // On the very first day (viewport start == end), show the day before as left label
-    if (this.state.viewportStart === this.state.viewportEnd && startDateStr) {
+    let startDateStr: string;
+    if (this.state.viewportStart < 0) {
+      // Virtual start before first date — show one day before the first date
+      const firstDate = this.state.dates[0] ?? "";
       try {
-        const d = new Date(startDateStr + "T00:00:00");
-        d.setDate(d.getDate() - 1);
+        const d = new Date(firstDate + "T00:00:00");
+        d.setDate(d.getDate() + this.state.viewportStart); // viewportStart is negative
         startDateStr = d.toISOString().split("T")[0];
-      } catch { /* keep original */ }
+      } catch {
+        startDateStr = firstDate;
+      }
+    } else {
+      startDateStr = this.state.dates[this.state.viewportStart] ?? "";
     }
+    const endDate = this.state.dates[this.state.viewportEnd] ?? "";
 
     ctx.fillStyle = "rgba(0, 0, 0, 0.45)";
     ctx.font = "10px system-ui, -apple-system, sans-serif";

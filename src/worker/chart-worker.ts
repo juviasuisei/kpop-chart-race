@@ -143,13 +143,14 @@ function buildPixelPoints(
   if (totalDateSpan <= 1) {
     const val = getValueAtDate(changePoints, endDateIndex);
     if (val <= 0) return { points: [], values: [] };
-    // Draw from left (0) to wherever progressToNext puts the tip
+    // Animate from zero: tip position and value both interpolate with progress
     const tipX = padding.left + progressToNext * chartW;
+    const tipValue = val * progressToNext; // rise from 0 to full value
     const bottomY = padding.top + chartH;
-    const valueY = padding.top + chartH - (val / effectiveMax) * chartH;
+    const tipY = padding.top + chartH - (tipValue / effectiveMax) * chartH;
     return {
-      points: [{ x: padding.left, y: bottomY }, { x: Math.max(tipX, padding.left + 2), y: valueY }],
-      values: [0, val],
+      points: [{ x: padding.left, y: bottomY }, { x: Math.max(tipX, padding.left + 2), y: tipY }],
+      values: [0, Math.round(tipValue)],
     };
   }
 

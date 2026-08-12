@@ -151,7 +151,7 @@ export class LineChartController {
   /** Smooth animation position (fractional date index) */
   private animationPosition = 0;
   /** Animation speed: date indices per second */
-  private animationSpeed = 1.6;
+  private animationSpeed = 1.0;
   /** Whether initial data has been sent to worker */
   private initialized = false;
   /** Background layer needs full redraw */
@@ -487,7 +487,12 @@ export class LineChartController {
 
   private startAnimationLoop(): void {
     if (this.rafId !== null) return;
-    this.animationPosition = this.state.currentDateIndex;
+    // Start at -1 if beginning from the first date, so lines animate from 0 upward
+    if (this.state.currentDateIndex === 0) {
+      this.animationPosition = -1;
+    } else {
+      this.animationPosition = this.state.currentDateIndex;
+    }
     this.lastFrameTime = performance.now();
     this.rafLoop();
   }
@@ -521,11 +526,13 @@ export class LineChartController {
     }
 
     // Update the integer date index (for scrubber sync and data lookups)
-    const newIndex = Math.floor(this.animationPosition);
-    if (newIndex !== this.state.currentDateIndex) {
+    const newIndex = Math.max(0, Math.floor(this.animationPosition));
+    if (newIndex !== this.state.currentDateIndex && newIndex >= 0) {
       this.state.currentDateIndex = newIndex;
       // Emit date:change so PlaybackController's scrubber stays in sync
-      this.eventBus.emit("date:change", this.state.dates[newIndex]);
+      if (this.state.dates[newIndex]) {
+        this.eventBus.emit("date:change", this.state.dates[newIndex]);
+      }
     }
 
     // Update viewport with fractional position for smooth scrolling
@@ -534,7 +541,7 @@ export class LineChartController {
       : PRESET_DAYS[this.state.timeZoom];
 
     // Use fractional viewportEnd for smooth line extension
-    this.state.viewportEnd = Math.floor(this.animationPosition);
+    this.state.viewportEnd = Math.max(0, Math.floor(this.animationPosition));
     const dataStart = Math.max(0, this.state.viewportEnd - zoomWindow);
 
     // During the first 7 days, keep data compressed near the right edge

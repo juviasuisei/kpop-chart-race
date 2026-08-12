@@ -1659,7 +1659,10 @@ export class LineChartController {
             breakdown.push({ title: release.title, value: entry.value, isWin, crownLevel });
           }
         }
-        if (breakdown.length > 0) songBreakdown = breakdown;
+        if (breakdown.length > 0) {
+          breakdown.sort((a, b) => b.value - a.value);
+          songBreakdown = breakdown;
+        }
       }
 
       // Collect live performance embeds

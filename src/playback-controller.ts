@@ -133,7 +133,7 @@ export class PlaybackController {
       if (!this.playing) return; // paused
       this.intervalId = setTimeout(() => {
         advance();
-      }, 300) as unknown as ReturnType<typeof setInterval>; // gap between days
+      }, 900) as unknown as ReturnType<typeof setInterval>; // gap between days
     };
 
     this.eventBus.on("update:complete", onComplete);

@@ -210,12 +210,15 @@ async function main(): Promise<void> {
       if (playbackControls) playbackControls.style.display = "none";
 
       const state = filterStateManager.getState();
+      // Mount only if not already mounted
+      if (!app!.querySelector(".yearly-view")) {
+        yearlyView.mount(app!, dataStore);
+      }
       yearlyView.setDisplayMode(state.displayMode);
       yearlyView.setGenerationFilter(state.generation);
       yearlyView.setSourceFilter(state.source);
       yearlyView.setMetric(state.metric);
       yearlyView.setZoom(state.zoom === 10 ? 10 : "all");
-      yearlyView.mount(app!, dataStore);
     } else if (mode === "episodes") {
       if (playbackController.isPlaying()) {
         playbackController.pause();
@@ -274,11 +277,7 @@ async function main(): Promise<void> {
     // Handle view switching
     if (currentView === "yearly") {
       switchView("yearly");
-      yearlyView.setDisplayMode(state.displayMode);
-      yearlyView.setGenerationFilter(state.generation);
-      yearlyView.setSourceFilter(state.source);
-      yearlyView.setMetric(state.metric);
-      yearlyView.setZoom(state.zoom === 10 ? 10 : "all");
+      // Only update filters (don't re-mount if already in yearly)
       return;
     }
 

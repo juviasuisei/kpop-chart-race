@@ -272,6 +272,10 @@ export class LineChartController {
   setPlaying(playing: boolean): void {
     this.state.playing = playing;
     if (playing) {
+      // If at the end, reset to beginning
+      if (this.state.currentDateIndex >= this.state.dates.length - 1) {
+        this.state.currentDateIndex = 0;
+      }
       this.startAnimationLoop();
     } else {
       this.stopAnimationLoop();

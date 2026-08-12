@@ -72,7 +72,15 @@ export class PlaybackController {
     // Date labels — first and last dates flanking the scrubber
     this.startDateLabel = document.createElement("span");
     this.startDateLabel.className = "playback-controls__date-label";
-    this.startDateLabel.textContent = this.dates[0] ?? "";
+    // Show the day before the first data date (D0 = empty start)
+    const firstDate = this.dates[0] ?? "";
+    let d0Label = firstDate;
+    try {
+      const d = new Date(firstDate + "T00:00:00");
+      d.setDate(d.getDate() - 1);
+      d0Label = d.toISOString().split("T")[0];
+    } catch { /* keep original */ }
+    this.startDateLabel.textContent = d0Label;
     this.startDateLabel.style.cursor = "pointer";
     this.startDateLabel.addEventListener("click", () => {
       if (this.isPlaying()) this.pause();

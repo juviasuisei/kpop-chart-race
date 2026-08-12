@@ -848,7 +848,7 @@ body {
 
 .chart-race__title-header {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: baseline;
   gap: 0.5rem;
 }

@@ -813,17 +813,52 @@ export class LineChartController {
           lastActivityIdx,
         };
       });
-    // Ensure #1 (highest value) is always first in priority, then recent activity > points
+
+    // Detect clusters: group lines whose endpoints are within MIN_GAP of each other
+    // Sort by Y first to find clusters
+    const byY = [...labeled].sort((a, b) => a.endPoint.y - b.endPoint.y);
+    const clusterSizes = new Map<number, number>(); // index in byY → cluster size
+
+    for (let i = 0; i < byY.length; i++) {
+      if (clusterSizes.has(i)) continue;
+      let clusterEnd = i;
+      while (clusterEnd + 1 < byY.length && byY[clusterEnd + 1].endPoint.y - byY[i].endPoint.y < MIN_GAP * 5) {
+        clusterEnd++;
+      }
+      const size = clusterEnd - i + 1;
+      for (let j = i; j <= clusterEnd; j++) {
+        clusterSizes.set(j, size);
+      }
+    }
+
+    // Map each lineId to its cluster size
+    const lineClusterSize = new Map<string, number>();
+    for (let i = 0; i < byY.length; i++) {
+      lineClusterSize.set(byY[i].lineId, clusterSizes.get(i) ?? 1);
+    }
+
+    // Sort: #1 always first, then within small clusters (≤5) prefer highest score,
+    // in large clusters (>5) prefer recency > score
     const maxValue = Math.max(...labeled.map(l => l.finalValue));
     labeled.sort((a, b) => {
+      // #1 always wins
       const aIsTop = a.finalValue === maxValue ? 1 : 0;
       const bIsTop = b.finalValue === maxValue ? 1 : 0;
       if (aIsTop !== bIsTop) return bIsTop - aIsTop;
-      return b.lastActivityIdx - a.lastActivityIdx || b.finalValue - a.finalValue;
+
+      const aCluster = lineClusterSize.get(a.lineId) ?? 1;
+      const bCluster = lineClusterSize.get(b.lineId) ?? 1;
+      const inLargeCluster = aCluster > 5 || bCluster > 5;
+
+      if (inLargeCluster) {
+        // Large cluster: recency first, then score
+        return b.lastActivityIdx - a.lastActivityIdx || b.finalValue - a.finalValue;
+      }
+      // Small cluster: score first
+      return b.finalValue - a.finalValue;
     });
 
-    // Now sort a copy by Y for placement order, but process in priority order
-    // Strategy: process in priority order, place at their Y if no collision
+    // Place labels: process in priority order, place at their Y if no collision
     const resolvedPositions: { y: number; lineId: string; endPoint: PixelPoint; color: string; opacity: number; finalValue: number }[] = [];
 
     for (const item of labeled) {

@@ -575,4 +575,10 @@ async function main(): Promise<void> {
   });
 }
 
-main();
+main().catch((err) => {
+  console.error("[App] Unhandled error:", err);
+  const app = document.getElementById("app");
+  if (app && app.children.length === 0) {
+    app.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100vh;color:#213547;text-align:center;padding:2rem;"><p>Something went wrong. Please refresh the page.</p></div>`;
+  }
+});

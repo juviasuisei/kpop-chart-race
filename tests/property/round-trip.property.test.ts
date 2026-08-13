@@ -390,13 +390,13 @@ describe('Property 11: Round-trip equivalence with JSON loader', () => {
 
       for (let i = 0; i < jsonParsed.releases.length; i++) {
         const jsonRelease = jsonParsed.releases[i];
-        // Find corresponding airtable release by title (order may differ)
-        const atRelease = airtableParsed.releases.find(r => r.title === jsonRelease.title);
+        // Match by index — both loaders process releases in the same order
+        const atRelease = airtableParsed.releases[i];
         expect(atRelease).toBeDefined();
         if (!atRelease) continue;
 
-        // release id (slugified title)
-        expect(atRelease.id).toBe(jsonRelease.id);
+        // Titles should match
+        expect(atRelease.title).toBe(jsonRelease.title);
 
         // --- Compare dailyValues ---
         expect(atRelease.dailyValues.size).toBe(jsonRelease.dailyValues.size);

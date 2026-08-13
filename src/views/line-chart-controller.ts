@@ -1089,17 +1089,26 @@ export class LineChartController {
     const chartW = width - PADDING.left - PADDING.right;
     const targetX = PADDING.left + targetRatio * chartW;
 
-    // Find the closest rendered point by X and use its Y directly
-    let closestIdx = 0;
-    let closestDist = Infinity;
-    for (let i = 0; i < cmd.points.length; i++) {
-      const dist = Math.abs(cmd.points[i].x - targetX);
-      if (dist < closestDist) {
-        closestDist = dist;
-        closestIdx = i;
+    // Find the two points that bracket targetX and interpolate Y
+    const pts = cmd.points;
+    if (pts.length === 0) return 0;
+    if (pts.length === 1) return pts[0].y;
+
+    // If before first or after last point, clamp
+    if (targetX <= pts[0].x) return pts[0].y;
+    if (targetX >= pts[pts.length - 1].x) return pts[pts.length - 1].y;
+
+    // Binary-ish search for the segment containing targetX
+    for (let i = 0; i < pts.length - 1; i++) {
+      if (targetX >= pts[i].x && targetX <= pts[i + 1].x) {
+        const segWidth = pts[i + 1].x - pts[i].x;
+        if (segWidth === 0) return pts[i].y;
+        const t = (targetX - pts[i].x) / segWidth;
+        return pts[i].y + t * (pts[i + 1].y - pts[i].y);
       }
     }
-    return cmd.points[closestIdx]?.y ?? 0;
+
+    return pts[pts.length - 1].y;
   }
 
   /** Get cumulative value at a date index for a line (from cached render data) */

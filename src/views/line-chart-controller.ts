@@ -812,9 +812,15 @@ export class LineChartController {
           finalValue,
           lastActivityIdx,
         };
-      })
-      // Priority: most recent activity first, then points as tiebreaker
-      .sort((a, b) => b.lastActivityIdx - a.lastActivityIdx || b.finalValue - a.finalValue);
+      });
+    // Ensure #1 (highest value) is always first in priority, then recent activity > points
+    const maxValue = Math.max(...labeled.map(l => l.finalValue));
+    labeled.sort((a, b) => {
+      const aIsTop = a.finalValue === maxValue ? 1 : 0;
+      const bIsTop = b.finalValue === maxValue ? 1 : 0;
+      if (aIsTop !== bIsTop) return bIsTop - aIsTop;
+      return b.lastActivityIdx - a.lastActivityIdx || b.finalValue - a.finalValue;
+    });
 
     // Now sort a copy by Y for placement order, but process in priority order
     // Strategy: process in priority order, place at their Y if no collision

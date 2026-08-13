@@ -5,6 +5,8 @@
  * Matches the prototype's showPopover behavior exactly.
  */
 
+import { generateFallbackLogoDataUri } from "../utils.ts";
+
 export interface PopoverData {
   artistName: string;
   songTitle: string;
@@ -24,6 +26,8 @@ export interface PopoverData {
   generationLabel?: string;
   /** Logo URL */
   logoUrl?: string;
+  /** Korean name for logo fallback */
+  koreanName?: string;
   /** Whether event has video content */
   hasVideo?: boolean;
   /** Whether event has a release/album */
@@ -59,8 +63,9 @@ export class Popover {
     }
 
     // Logo + artist info
+    const fallbackSrc = generateFallbackLogoDataUri(data.koreanName ?? data.artistName);
     const logoContent = data.logoUrl
-      ? `<img src="${data.logoUrl}" alt="${data.artistName}">`
+      ? `<img src="${data.logoUrl}" alt="${data.artistName}" onerror="this.onerror=null;this.src='${fallbackSrc.replace(/'/g, "\\'")}';">`
       : `<span class="tooltip-logo-initials">${initials}</span>`;
 
     html += `

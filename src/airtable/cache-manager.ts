@@ -43,7 +43,7 @@ interface SerializedRelease {
   artistIds: string[];
 }
 
-const STORAGE_KEY = "airtable-v1";
+const STORAGE_KEY = "airtable-v2";
 const TTL_MS = 3_600_000; // 1 hour
 
 /**
@@ -54,7 +54,7 @@ const TTL_MS = 3_600_000; // 1 hour
 export class CacheManager {
   private readonly storageKey: string = STORAGE_KEY;
   private readonly ttlMs: number = TTL_MS;
-  private readonly cacheVersion: string = "airtable-v1";
+  private readonly cacheVersion: string = "airtable-v2";
 
   constructor() {}
 
@@ -108,6 +108,7 @@ export class CacheManager {
    * continuing without cache.
    */
   set(store: DataStore): void {
+    if (this.shouldBypass()) return;
     try {
       const serialized: SerializedDataStore = this.serialize(store);
       const json = JSON.stringify(serialized);
@@ -133,6 +134,10 @@ export class CacheManager {
    */
   shouldBypass(): boolean {
     try {
+      // Always bypass cache in development mode (but not in test)
+      if (import.meta.env?.DEV && import.meta.env?.MODE !== "test") {
+        return true;
+      }
       const params = new URLSearchParams(window.location.search);
       return params.has("nocache");
     } catch {

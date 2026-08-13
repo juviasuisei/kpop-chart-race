@@ -35,7 +35,7 @@ const PRESET_WINDOW: Record<TimeZoomPreset, number> = {
 };
 
 // --- Constants matching prototype exactly ---
-const PADDING = { top: 40, right: 160, bottom: 40, left: 0 };
+const PADDING = { top: 40, right: 210, bottom: 40, left: 0 };
 /** @internal Used by worker for line thickness computation */
 export const BASE_LINE_WIDTH = 1.5;
 /** @internal Used by worker for highlighted line thickness */
@@ -46,7 +46,7 @@ export const DIM_MULTIPLIER = 0.2;
 export const HIT_RADIUS = 8;
 const EVENT_DOT_SIZE = 8;
 const MIN_GAP = 18;
-const MAX_LABEL_WIDTH = 130;
+const MAX_LABEL_WIDTH = 175;
 
 /** Artist type display labels */
 const ARTIST_TYPE_LABELS: Record<string, string> = {
@@ -155,6 +155,8 @@ export class LineChartController {
   private initialized = false;
   /** Background layer needs full redraw */
   private backgroundDirty = true;
+  /** Cached set of dates that have chart data (for animation speed-up) */
+  private datesWithData: Set<string> = new Set();
   /** Whether popover is currently open */
   private popoverOpen = false;
   /** Current generation filter */
@@ -235,6 +237,16 @@ export class LineChartController {
   async initData(dataStore: DataStore): Promise<void> {
     this.dataStore = dataStore;
     this.state.dates = dataStore.dates;
+
+    // Precompute dates with chart data for animation speed-up
+    this.datesWithData = new Set<string>();
+    for (const artist of dataStore.artists.values()) {
+      for (const release of artist.releases) {
+        for (const date of release.dailyValues.keys()) {
+          this.datesWithData.add(date);
+        }
+      }
+    }
 
     // Default: show most recent 90 days, paused at the last date
     this.state.currentDateIndex = this.state.dates.length - 1;
@@ -583,7 +595,12 @@ export class LineChartController {
     const isFirstStep = this.animationPosition < 1;
     const speed = isFirstStep ? 2.0 : this.state.speed;
     const advance = (deltaMs / 1000) * speed;
-    this.animationPosition += advance;
+
+    // Speed up 2.5x through dates with no chart data (empty days between shows)
+    const nextDateIdx = Math.min(Math.floor(this.animationPosition) + 1, this.state.dates.length - 1);
+    const nextDate = this.state.dates[nextDateIdx];
+    const emptyDayMultiplier = nextDate && !this.hasChartDataOnDate(nextDate) ? 2.5 : 1.0;
+    this.animationPosition += advance * emptyDayMultiplier;
 
     // Check if we've reached the end
     const maxIndex = this.state.dates.length - 1;
@@ -707,12 +724,10 @@ export class LineChartController {
     }
     this.renderer.drawForeground(result.foreground);
 
-    // Draw endpoint labels on foreground (prototype-style stagger)
-    // Draw endpoint labels on foreground — include ALL visible lines for top-10 selection
+    // Draw endpoint labels on foreground — only for foreground (active) lines
     const fgCtx = this.renderer.getContext("foreground");
-    const allVisibleCmds = [...result.background, ...result.foreground];
-    if (fgCtx && allVisibleCmds.length > 0) {
-      this.drawEndpointLabels(fgCtx, allVisibleCmds);
+    if (fgCtx && result.foreground.length > 0) {
+      this.drawEndpointLabels(fgCtx, result.foreground);
     }
 
     // Draw highlight layer + event dots
@@ -774,7 +789,10 @@ export class LineChartController {
   private drawEndpointLabels(ctx: CanvasRenderingContext2D, commands: LineDrawCommand[]): void {
     this.labelHitBoxes = []; // reset
 
-    // Collect label candidates (only visible lines, opacity > 0.5)
+    const { height } = this.renderer!.getSize();
+    const chartBottom = height - PADDING.bottom;
+
+    // Collect label candidates (only visible lines with sufficient opacity)
     const labeled = commands
       .filter(cmd => cmd.points.length >= 2 && cmd.opacity > 0.05)
       .map(cmd => ({
@@ -784,22 +802,22 @@ export class LineChartController {
         opacity: cmd.opacity,
         finalValue: cmd.values.length > 0 ? cmd.values[cmd.values.length - 1] : 0,
       }))
-      .sort((a, b) => b.finalValue - a.finalValue)
-      .slice(0, 10);
+      .sort((a, b) => b.finalValue - a.finalValue);
 
     // Sort by Y position for stagger layout
     labeled.sort((a, b) => a.endPoint.y - b.endPoint.y);
 
-    // Stagger to avoid overlap (MIN_GAP = 18px)
+    // Place labels only where there's room near their actual line position
+    // Skip labels that would collide with already-placed ones
     const resolvedPositions: { y: number; lineId: string; endPoint: PixelPoint; color: string; opacity: number; finalValue: number }[] = [];
 
     for (const item of labeled) {
-      let labelY = item.endPoint.y;
-      for (const placed of resolvedPositions) {
-        if (Math.abs(labelY - placed.y) < MIN_GAP) {
-          labelY = placed.y + MIN_GAP;
-        }
-      }
+      const labelY = item.endPoint.y;
+      // Skip if outside chart area
+      if (labelY < PADDING.top - 10 || labelY > chartBottom + 10) continue;
+      // Skip if too close to an already-placed label
+      const collides = resolvedPositions.some(placed => Math.abs(labelY - placed.y) < MIN_GAP);
+      if (collides) continue;
       resolvedPositions.push({ ...item, y: labelY });
     }
 
@@ -896,23 +914,67 @@ export class LineChartController {
     const artist = this.dataStore.artists.get(meta.artistId);
     if (!artist) return;
 
-    // Get win dates — in songs mode from releaseWinDates, in artists mode aggregate all releases
+    const viewStart = this.state.viewportStart;
+    const viewEnd = this.state.viewportEnd;
+    const totalDateSpan = viewEnd + 1 - viewStart;
+    const { width } = this.renderer!.getSize();
+    const chartW = width - PADDING.left - PADDING.right;
+    const chartH = (this.renderer!.getSize().height) - PADDING.top - PADDING.bottom;
+    const frameMax = this.getCurrentFrameMax();
+
+    // Collect all chart dates and live performance dates for this line
+    const chartDates = new Set<string>();
+    const livePerfDates = new Set<string>();
+
+    const releases = meta.releaseId
+      ? artist.releases.filter(r => r.id === meta.releaseId)
+      : artist.releases;
+
+    for (const release of releases) {
+      for (const [date, dv] of release.dailyValues) {
+        if (this.currentSourceFilter !== "all" && dv.source !== this.currentSourceFilter) continue;
+        chartDates.add(date);
+      }
+      for (const [date, embeds] of release.embeds) {
+        if (embeds.some(e => e.type === "live_performance")) {
+          livePerfDates.add(date);
+        }
+      }
+    }
+
+    // Draw chart dots (white circle with thin black border) for non-win dates
+    // Get win dates to exclude from simple dot rendering
     let allWinDates: string[] = [];
     if (meta.releaseId) {
-      // Songs mode: win dates for this specific release
       allWinDates = this.dataStore.releaseWinDates?.get(cmd.lineId) ?? [];
     } else {
-      // Artists mode: collect win dates across all releases for this artist
       for (const release of artist.releases) {
         const releaseKey = `${meta.artistId}::${release.id}`;
         const dates = this.dataStore.releaseWinDates?.get(releaseKey);
         if (dates) allWinDates.push(...dates);
       }
-      allWinDates.sort();
     }
-    if (allWinDates.length === 0) return;
+    const winDateSet = new Set(allWinDates);
 
-    // Filter win dates by source
+    for (const date of chartDates) {
+      if (winDateSet.has(date)) continue; // Crowns handle wins
+
+      const dateIdx = this.state.dates.indexOf(date);
+      if (dateIdx < viewStart || dateIdx > viewEnd) continue;
+
+      const xRatio = (dateIdx - viewStart) / totalDateSpan;
+      const x = PADDING.left + xRatio * chartW;
+      const value = this.getValueAtDateForLine(cmd, dateIdx);
+      const y = PADDING.top + chartH - (value / (frameMax || 1)) * chartH;
+
+      if (livePerfDates.has(date)) {
+        this.drawStarDot(ctx, x, y);
+      } else {
+        this.drawChartDot(ctx, x, y);
+      }
+    }
+
+    // Draw crown dots for win dates
     const filteredWinDates = this.currentSourceFilter === "all"
       ? allWinDates
       : allWinDates.filter(winDate => {
@@ -925,29 +987,16 @@ export class LineChartController {
           }
           return false;
         });
-    if (filteredWinDates.length === 0) return;
-
-    const viewStart = this.state.viewportStart;
-    const viewEnd = this.state.viewportEnd;
-    const totalDateSpan = viewEnd + 1 - viewStart;
-    const { width } = this.renderer!.getSize();
-    const chartW = width - PADDING.left - PADDING.right;
 
     for (const winDate of filteredWinDates) {
       const dateIdx = this.state.dates.indexOf(winDate);
       if (dateIdx < viewStart || dateIdx > viewEnd) continue;
 
-      // Map date to x position
       const xRatio = (dateIdx - viewStart) / totalDateSpan;
       const x = PADDING.left + xRatio * chartW;
-
-      // Get y from the line's value at this date
       const value = this.getValueAtDateForLine(cmd, dateIdx);
-      const frameMax = this.getCurrentFrameMax();
-      const chartH = (this.renderer!.getSize().height) - PADDING.top - PADDING.bottom;
       const y = PADDING.top + chartH - (value / (frameMax || 1)) * chartH;
 
-      // Look up crown level from chartWins (per-show win count, respecting source filter)
       let crownLevel = 1;
       const dateWins = this.dataStore.chartWins.get(winDate);
       if (dateWins) {
@@ -965,6 +1014,45 @@ export class LineChartController {
 
       this.drawCrownDot(ctx, x, y, crownLevel);
     }
+  }
+
+  /** Draw a small white circle with thin black border for a regular chart date */
+  private drawChartDot(ctx: CanvasRenderingContext2D, x: number, y: number): void {
+    const radius = 3.5;
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(x, y, radius, 0, Math.PI * 2);
+    ctx.fillStyle = "#ffffff";
+    ctx.fill();
+    ctx.strokeStyle = "rgba(0, 0, 0, 0.5)";
+    ctx.lineWidth = 0.8;
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  /** Draw a small white star with thin black border for a live performance date */
+  private drawStarDot(ctx: CanvasRenderingContext2D, x: number, y: number): void {
+    const outerRadius = 7;
+    const innerRadius = 3;
+    const points = 5;
+
+    ctx.save();
+    ctx.beginPath();
+    for (let i = 0; i < points * 2; i++) {
+      const radius = i % 2 === 0 ? outerRadius : innerRadius;
+      const angle = (i * Math.PI) / points - Math.PI / 2;
+      const px = x + Math.cos(angle) * radius;
+      const py = y + Math.sin(angle) * radius;
+      if (i === 0) ctx.moveTo(px, py);
+      else ctx.lineTo(px, py);
+    }
+    ctx.closePath();
+    ctx.fillStyle = "#ffffff";
+    ctx.fill();
+    ctx.strokeStyle = "rgba(0, 0, 0, 0.5)";
+    ctx.lineWidth = 0.8;
+    ctx.stroke();
+    ctx.restore();
   }
 
   private drawCrownDot(ctx: CanvasRenderingContext2D, x: number, y: number, winNumber: number): void {
@@ -1696,6 +1784,7 @@ export class LineChartController {
       artistTypeLabel,
       generationLabel: genLabel,
       logoUrl: artist?.logoUrl,
+      koreanName: artist?.koreanName,
       date: formattedDate,
       value: value > 0 ? value : undefined,
       dailyGain,
@@ -1735,11 +1824,34 @@ export class LineChartController {
     const currentDate = this.state.dates[this.state.currentDateIndex] ?? "";
     if (!currentDate) return 0;
 
+    // Songs mode: count wins for this specific release only
+    if (meta.releaseId) {
+      const winDates = this.dataStore.releaseWinDates?.get(lineId) ?? [];
+      let count = 0;
+      for (const winDate of winDates) {
+        if (winDate > currentDate) continue;
+        if (this.currentSourceFilter === "all") {
+          count++;
+        } else {
+          const dateWins = this.dataStore.chartWins.get(winDate);
+          if (dateWins) {
+            for (const [source, winData] of dateWins) {
+              if (source === this.currentSourceFilter && winData.artistIds.includes(meta.artistId)) {
+                count++;
+                break;
+              }
+            }
+          }
+        }
+      }
+      return count;
+    }
+
+    // Artists mode: count all wins for the artist
     let count = 0;
     for (const [date, sourceMap] of this.dataStore.chartWins) {
       if (date > currentDate) continue;
       for (const [source, winData] of sourceMap) {
-        // Apply source filter
         if (this.currentSourceFilter !== "all" && source !== this.currentSourceFilter) continue;
         if (winData.artistIds.includes(meta.artistId)) {
           count++;
@@ -1750,6 +1862,11 @@ export class LineChartController {
   }
 
   // --- Private: Utility ---
+
+  /** Check if any artist has chart data on a given date */
+  private hasChartDataOnDate(date: string): boolean {
+    return this.datesWithData.has(date);
+  }
 
   private getReleaseTitleFromMeta(meta: { label: string; artistId: string; releaseId?: string }): string | undefined {
     if (!meta.releaseId || !this.dataStore) return undefined;

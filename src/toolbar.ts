@@ -21,6 +21,7 @@ const SOURCE_OPTIONS: { value: string; label: string }[] = [
 ];
 
 export class Toolbar {
+  private eventBus: EventBus;
   private filterState: FilterStateManager;
   private container: HTMLElement | null = null;
   private wrapper: HTMLElement | null = null;
@@ -30,6 +31,7 @@ export class Toolbar {
 
   // Control elements
   private generationSelect: HTMLSelectElement | null = null;
+  private sourceSelect: HTMLSelectElement | null = null;
 
   // Artist filter state
   private artists: { id: string; name: string; generation: number }[] = [];
@@ -37,12 +39,13 @@ export class Toolbar {
   private artistListEl: HTMLElement | null = null;
   private artistSearchEl: HTMLInputElement | null = null;
   private artistTriggerEl: HTMLButtonElement | null = null;
+  private allArtistsItemEl: HTMLElement | null = null;
   private artistDropdownOpen = false;
   private artistOutsideClickHandler: ((e: Event) => void) | null = null;
+  private artistSelectedIndex = -1;
 
   constructor(eventBus: EventBus, filterState: FilterStateManager) {
-    // eventBus retained for future direct event subscriptions
-    void eventBus;
+    this.eventBus = eventBus;
     this.filterState = filterState;
   }
 
@@ -57,6 +60,9 @@ export class Toolbar {
     } else {
       this.renderDesktop();
     }
+
+    this.syncControlsToState();
+    this.eventBus.on("filter:change", () => this.syncControlsToState());
   }
 
   unmount(): void {
@@ -112,6 +118,9 @@ export class Toolbar {
     const zoomControl = this.wrapper.querySelector(
       '[data-control="zoom"]',
     ) as HTMLElement | null;
+    const generationControl = this.wrapper.querySelector(
+      '[data-control="generation"]',
+    ) as HTMLElement | null;
 
     if (view === "yearly") {
       metricControl?.classList.remove("toolbar__control--hidden");
@@ -119,6 +128,13 @@ export class Toolbar {
     } else {
       metricControl?.classList.add("toolbar__control--hidden");
       zoomControl?.classList.add("toolbar__control--hidden");
+    }
+
+    // Hide generation filter in artist-timeline view (single artist, gen is irrelevant)
+    if (view === "artist-timeline") {
+      generationControl?.classList.add("toolbar__control--hidden");
+    } else {
+      generationControl?.classList.remove("toolbar__control--hidden");
     }
 
     // Update segmented button active states
@@ -140,6 +156,74 @@ export class Toolbar {
   /** Programmatically open the artist dropdown (used when switching to artist-timeline without a selection) */
   openArtistFilter(): void {
     this.openArtistDropdown();
+  }
+
+  /**
+   * Sync all control visuals to the current filter state.
+   * Called on mount and whenever filter:change fires.
+   */
+  private syncControlsToState(): void {
+    if (!this.wrapper) return;
+    const state = this.filterState.getState();
+
+    // Generation select
+    if (this.generationSelect) {
+      this.generationSelect.value = String(state.generation);
+    }
+
+    // Source select
+    if (this.sourceSelect) {
+      this.sourceSelect.value = state.source;
+    }
+
+    // Metric toggle (wins/points)
+    const metricControl = this.wrapper.querySelector('[data-control="metric"]') as HTMLElement | null;
+    if (metricControl) {
+      const track = metricControl.querySelector(".view-switcher__track");
+      const labels = metricControl.querySelectorAll(".view-switcher__label");
+      const isPoints = state.metric === "points";
+      track?.classList.toggle("view-switcher__track--on", isPoints);
+      // labels[0] = Wins, labels[1] = Points
+      labels[0]?.classList.toggle("view-switcher__label--active", !isPoints);
+      labels[1]?.classList.toggle("view-switcher__label--active", isPoints);
+    }
+
+    // Zoom toggle (all/10)
+    const zoomControl = this.wrapper.querySelector('[data-control="zoom"]') as HTMLElement | null;
+    if (zoomControl) {
+      const track = zoomControl.querySelector(".view-switcher__track");
+      const labels = zoomControl.querySelectorAll(".view-switcher__label");
+      const isTen = state.zoom === 10;
+      track?.classList.toggle("view-switcher__track--on", isTen);
+      // labels[0] = All, labels[1] = 10
+      labels[0]?.classList.toggle("view-switcher__label--active", !isTen);
+      labels[1]?.classList.toggle("view-switcher__label--active", isTen);
+    }
+
+    // Display mode toggle (artists/songs)
+    const displayControl = this.wrapper.querySelector('[data-control="display-mode"]') as HTMLElement | null;
+    if (displayControl) {
+      const track = displayControl.querySelector(".view-switcher__track");
+      const labels = displayControl.querySelectorAll(".view-switcher__label");
+      const isSongs = state.displayMode === "songs";
+      track?.classList.toggle("view-switcher__track--on", isSongs);
+      // labels[0] = Artists, labels[1] = Songs
+      labels[0]?.classList.toggle("view-switcher__label--active", !isSongs);
+      labels[1]?.classList.toggle("view-switcher__label--active", isSongs);
+    }
+
+    // View buttons
+    this.setViewMode(state.view);
+
+    // Artist trigger label
+    if (this.artistTriggerEl) {
+      if (state.artist === "all") {
+        this.artistTriggerEl.textContent = "All Artists";
+      } else {
+        const artist = this.artists.find(a => a.id === state.artist);
+        if (artist) this.artistTriggerEl.textContent = artist.name;
+      }
+    }
   }
 
   // ─── Private rendering methods ───────────────────────────────────────
@@ -254,6 +338,7 @@ export class Toolbar {
     });
 
     group.appendChild(select);
+    this.sourceSelect = select;
     return group;
   }
 
@@ -280,11 +365,25 @@ export class Toolbar {
     searchInput.className = "toolbar__artist-search";
     searchInput.type = "text";
     searchInput.placeholder = "Search artists...";
-    searchInput.addEventListener("input", () => this.renderArtistList());
+    searchInput.addEventListener("input", () => {
+      this.artistSelectedIndex = -1;
+      this.renderArtistList();
+    });
+    searchInput.addEventListener("keydown", (e) => this.handleArtistKeydown(e));
     dropdown.appendChild(searchInput);
     this.artistSearchEl = searchInput;
 
-    // Artist list
+    // Fixed "All Artists" option above the scrollable list
+    const allArtistsItem = document.createElement("div");
+    allArtistsItem.className = "toolbar__artist-item toolbar__artist-item--pinned";
+    allArtistsItem.textContent = "All Artists";
+    allArtistsItem.addEventListener("click", () => {
+      this.selectArtistEntry("all", "All Artists");
+    });
+    dropdown.appendChild(allArtistsItem);
+    this.allArtistsItemEl = allArtistsItem;
+
+    // Artist list (scrollable)
     const list = document.createElement("div");
     list.className = "toolbar__artist-list";
     dropdown.appendChild(list);
@@ -345,6 +444,11 @@ export class Toolbar {
     const state = this.filterState.getState();
     const searchTerm = this.artistSearchEl?.value.toLowerCase() ?? "";
 
+    // Update pinned "All Artists" active state
+    if (this.allArtistsItemEl) {
+      this.allArtistsItemEl.classList.toggle("toolbar__artist-item--active", state.artist === "all");
+    }
+
     // Filter artists by current generation
     let filteredArtists = this.artists;
     if (state.generation !== "all") {
@@ -356,31 +460,74 @@ export class Toolbar {
       filteredArtists = filteredArtists.filter(a => a.name.toLowerCase().includes(searchTerm));
     }
 
-    // "All Artists" option at top
-    const allItem = document.createElement("div");
-    allItem.className = "toolbar__artist-item" + (state.artist === "all" ? " toolbar__artist-item--active" : "");
-    allItem.textContent = "All Artists";
-    allItem.addEventListener("click", () => {
-      this.filterState.update({ artist: "all" });
-      if (this.artistTriggerEl) this.artistTriggerEl.textContent = "All Artists";
-      this.closeArtistDropdown();
-      this.dismissDrawer();
-    });
-    this.artistListEl.appendChild(allItem);
+    // Build list of selectable entries (artists only, "All Artists" is pinned above)
+    const entries: { id: string; label: string }[] = filteredArtists.map(a => ({ id: a.id, label: a.name }));
 
-    // Artist items
-    for (const artist of filteredArtists) {
+    for (let i = 0; i < entries.length; i++) {
+      const entry = entries[i];
       const item = document.createElement("div");
-      item.className = "toolbar__artist-item" + (state.artist === artist.id ? " toolbar__artist-item--active" : "");
-      item.textContent = artist.name;
+      item.className = "toolbar__artist-item";
+      if (state.artist === entry.id) {
+        item.classList.add("toolbar__artist-item--active");
+      }
+      if (i === this.artistSelectedIndex) {
+        item.classList.add("toolbar__artist-item--highlighted");
+      }
+      item.textContent = entry.label;
       item.addEventListener("click", () => {
-        this.filterState.update({ artist: artist.id });
-        if (this.artistTriggerEl) this.artistTriggerEl.textContent = artist.name;
-        this.closeArtistDropdown();
-        this.dismissDrawer();
+        this.selectArtistEntry(entry.id, entry.label);
       });
       this.artistListEl!.appendChild(item);
     }
+  }
+
+  private selectArtistEntry(id: string, label: string): void {
+    this.filterState.update({ artist: id });
+    if (this.artistTriggerEl) this.artistTriggerEl.textContent = label;
+    this.closeArtistDropdown();
+    this.dismissDrawer();
+  }
+
+  private handleArtistKeydown(e: KeyboardEvent): void {
+    if (!this.artistListEl) return;
+    const items = this.artistListEl.querySelectorAll(".toolbar__artist-item");
+    const count = items.length;
+    if (count === 0) return;
+
+    switch (e.key) {
+      case "ArrowDown":
+        e.preventDefault();
+        this.artistSelectedIndex = Math.min(this.artistSelectedIndex + 1, count - 1);
+        this.renderArtistList();
+        this.scrollArtistItemIntoView();
+        break;
+
+      case "ArrowUp":
+        e.preventDefault();
+        this.artistSelectedIndex = Math.max(this.artistSelectedIndex - 1, 0);
+        this.renderArtistList();
+        this.scrollArtistItemIntoView();
+        break;
+
+      case "Enter":
+        e.preventDefault();
+        if (this.artistSelectedIndex >= 0 && this.artistSelectedIndex < count) {
+          (items[this.artistSelectedIndex] as HTMLElement).click();
+        }
+        break;
+
+      case "Escape":
+        e.preventDefault();
+        this.closeArtistDropdown();
+        break;
+    }
+  }
+
+  private scrollArtistItemIntoView(): void {
+    if (!this.artistListEl || this.artistSelectedIndex < 0) return;
+    const items = this.artistListEl.querySelectorAll(".toolbar__artist-item");
+    const target = items[this.artistSelectedIndex] as HTMLElement | undefined;
+    target?.scrollIntoView({ block: "nearest" });
   }
 
   private resetArtistIfNeeded(): void {

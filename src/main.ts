@@ -53,9 +53,14 @@ async function main(): Promise<void> {
 
   let dataStore: DataStore;
   try {
-    dataStore = await loadFromAirtable((loaded, total, name) => {
-      loadingScreen.onFileProgress(loaded, total, [name]);
-    });
+    dataStore = await loadFromAirtable(
+      (loaded, total, name) => {
+        loadingScreen.onFileProgress(loaded, total, [name]);
+      },
+      (names) => {
+        loadingScreen.startNameCycle(names);
+      },
+    );
 
     if (dataStore.artists.size === 0) {
       loadingScreen.onError("No chart data available.");
@@ -218,6 +223,7 @@ async function main(): Promise<void> {
       yearlyView.setDisplayMode(state.displayMode);
       yearlyView.setGenerationFilter(state.generation);
       yearlyView.setSourceFilter(state.source);
+      yearlyView.setArtistFilter(state.artist);
       yearlyView.setMetric(state.metric);
       yearlyView.setZoom(state.zoom === 10 ? 10 : "all");
     } else if (mode === "episodes") {
@@ -235,6 +241,8 @@ async function main(): Promise<void> {
       const state = filterStateManager.getState();
       episodeBrowser.mount(episodeContainer, dataStore);
       episodeBrowser.setSourceFilter(state.source);
+      episodeBrowser.setGenerationFilter(state.generation);
+      episodeBrowser.setArtistFilter(state.artist);
       episodeBrowser.onArtistClick = (artistId: string) => {
         filterStateManager.update({ artist: artistId, view: "artist-timeline" });
       };
@@ -253,6 +261,7 @@ async function main(): Promise<void> {
       const state = filterStateManager.getState();
       if (state.artist !== "all") {
         artistTimeline.mount(artistTimelineContainer, dataStore, state.artist);
+        artistTimeline.setSourceFilter(state.source);
       } else {
         artistTimeline.unmount();
         artistTimelineContainer.innerHTML = `<div class="artist-timeline__prompt">Select an artist from the dropdown above to view their timeline.</div>`;
@@ -285,11 +294,15 @@ async function main(): Promise<void> {
     if (currentView === "episodes") {
       switchView("episodes");
       episodeBrowser.setSourceFilter(state.source);
+      episodeBrowser.setGenerationFilter(state.generation);
+      episodeBrowser.setArtistFilter(state.artist);
       return;
     }
 
     if (currentView === "artist-timeline") {
       switchView("artist-timeline");
+      const atState = filterStateManager.getState();
+      artistTimeline.setSourceFilter(atState.source);
       return;
     }
 

@@ -10,6 +10,8 @@ export class LoadingScreen {
   private artistCredits: HTMLElement | null = null;
   private errorArea: HTMLElement | null = null;
   private progressBarContainer: HTMLElement | null = null;
+  private cycleInterval: ReturnType<typeof setInterval> | null = null;
+  private artistNames: string[] = [];
 
   /** Create and append the loading screen UI to the container. */
   mount(container: HTMLElement): void {
@@ -48,22 +50,57 @@ export class LoadingScreen {
     container.appendChild(wrapper);
   }
 
-  /** Update progress for a single artist being loaded. */
-  onFileProgress(loaded: number, total: number, artistNames: string[]): void {
-    if (this.progressText && artistNames.length > 0) {
-      this.progressText.textContent = `Loading ${artistNames[artistNames.length - 1]}`;
-    } else if (this.progressText) {
-      this.progressText.textContent = `Loading artists...`;
+  /**
+   * Start cycling through artist names in random order.
+   * Call this once you have the list of artist names available.
+   */
+  startNameCycle(names: string[]): void {
+    if (names.length === 0) return;
+    // Shuffle
+    this.artistNames = [...names];
+    for (let i = this.artistNames.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [this.artistNames[i], this.artistNames[j]] = [this.artistNames[j], this.artistNames[i]];
     }
 
-    if (this.progressBarFill && total > 0) {
-      const pct = (loaded / total) * 100;
-      this.progressBarFill.style.width = `${pct}%`;
+    let idx = 0;
+    this.cycleInterval = setInterval(() => {
+      if (this.progressText) {
+        this.progressText.textContent = this.artistNames[idx];
+      }
+      // Progress bar tracks how far through the name list we've cycled
+      if (this.progressBarFill && this.artistNames.length > 0) {
+        const pct = Math.min(((idx + 1) / this.artistNames.length) * 100, 100);
+        this.progressBarFill.style.width = `${pct}%`;
+      }
+      idx = (idx + 1) % this.artistNames.length;
+    }, 120);
+  }
+
+  /** Update progress for a single artist being loaded. */
+  onFileProgress(loaded: number, total: number, artistNames: string[]): void {
+    // If cycling is active, let it handle text and progress bar
+    if (!this.cycleInterval) {
+      if (this.progressText && artistNames.length > 0) {
+        this.progressText.textContent = `Loading ${artistNames[artistNames.length - 1]}`;
+      } else if (this.progressText) {
+        this.progressText.textContent = `Loading artists...`;
+      }
+
+      if (this.progressBarFill && total > 0) {
+        const pct = (loaded / total) * 100;
+        this.progressBarFill.style.width = `${pct}%`;
+      }
     }
   }
 
   /** Trigger fade-out transition, then destroy. Returns a promise that resolves when removed. */
   onComplete(): Promise<void> {
+    this.stopNameCycle();
+    // Snap progress bar to 100%
+    if (this.progressBarFill) {
+      this.progressBarFill.style.width = "100%";
+    }
     return new Promise<void>((resolve) => {
       if (!this.root) {
         resolve();
@@ -107,6 +144,7 @@ export class LoadingScreen {
 
   /** Remove the loading screen element from the DOM. */
   destroy(): void {
+    this.stopNameCycle();
     if (this.root) {
       this.root.remove();
       this.root = null;
@@ -116,5 +154,12 @@ export class LoadingScreen {
     this.progressBarContainer = null;
     this.artistCredits = null;
     this.errorArea = null;
+  }
+
+  private stopNameCycle(): void {
+    if (this.cycleInterval) {
+      clearInterval(this.cycleInterval);
+      this.cycleInterval = null;
+    }
   }
 }

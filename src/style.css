@@ -1448,11 +1448,19 @@ body {
 /* ===== Toolbar — Mobile Drawer (< 768px) ===== */
 
 @media (max-width: 767px) {
+  #app {
+    overflow: visible;
+    height: auto;
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+
   .toolbar {
     flex-direction: column;
     align-items: stretch;
     gap: 0;
     padding: 0;
+    position: relative;
   }
 
   .toolbar--mobile .toolbar__drawer {
@@ -1491,6 +1499,17 @@ body {
 
   .toolbar__drawer-content .toolbar__control select {
     width: 100%;
+  }
+
+  .toolbar__artist-dropdown {
+    position: relative;
+    top: auto;
+    left: auto;
+    margin-top: 4px;
+    max-width: none;
+    min-width: 0;
+    width: 100%;
+    border-radius: 4px;
   }
 }
 
@@ -2065,6 +2084,23 @@ body {
   background: rgba(0, 0, 0, 0.05);
 }
 
+.toolbar__artist-item--highlighted {
+  background: rgba(0, 100, 200, 0.08);
+}
+
+.toolbar__artist-item--pinned {
+  padding: 8px 10px;
+  font-size: 0.72rem;
+  color: #213547;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  font-weight: 600;
+}
+
+.toolbar__artist-item--pinned:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
 .toolbar__artist-item--active {
   background: rgba(0, 100, 200, 0.1);
   font-weight: 600;
@@ -2112,10 +2148,15 @@ body {
 
 /* ===== Episode Browser ===== */
 
-.episode-browser {
-  padding: 16px;
+.episode-browser-container {
+  flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
   height: calc(100vh - 120px);
+}
+
+.episode-browser {
+  padding: 16px;
   max-width: 800px;
   margin: 0 auto;
 }
@@ -2254,13 +2295,12 @@ body {
 .artist-timeline-container {
   flex: 1 1 auto;
   min-height: 0;
-  overflow: hidden;
+  overflow-y: auto;
+  height: calc(100vh - 120px);
 }
 
 .artist-timeline {
   padding: 16px;
-  overflow-y: auto;
-  height: calc(100vh - 120px);
   max-width: 800px;
   margin: 0 auto;
 }
@@ -2297,6 +2337,11 @@ body {
   font-size: 1.5rem;
   font-weight: 700;
   color: #213547;
+}
+
+.artist-timeline__name-kr {
+  font-size: 1.2rem;
+  font-weight: 400;
 }
 
 .artist-timeline__meta {

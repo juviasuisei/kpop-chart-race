@@ -4,6 +4,8 @@
  * date row with source logo, artist initials, song name, stats, embed placeholders.
  */
 
+import { generateFallbackLogoDataUri } from "../utils.ts";
+
 export interface TooltipData {
   label: string;
   artistName: string;
@@ -30,6 +32,8 @@ export interface TooltipData {
   generationLabel?: string;
   /** Logo image URL (artist SVG) */
   logoUrl?: string;
+  /** Korean name for logo fallback */
+  koreanName?: string;
   /** Win info (crown level, label, SVG URL) — shown below date row */
   winInfo?: { crownLevel: number; crownLabel: string; crownSvgUrl: string };
   /** Embed URL for video (YouTube) */
@@ -75,8 +79,9 @@ export class Tooltip {
     }
 
     // Logo + artist info side by side
+    const fallbackSrc = generateFallbackLogoDataUri(data.koreanName ?? data.artistName);
     const logoContent = data.logoUrl
-      ? `<img src="${data.logoUrl}" alt="${data.artistName}">`
+      ? `<img src="${data.logoUrl}" alt="${data.artistName}" onerror="this.onerror=null;this.src='${fallbackSrc.replace(/'/g, "\\'")}';">`
       : `<span class="tooltip-logo-initials">${initials}</span>`;
 
     html += `
@@ -133,7 +138,7 @@ export class Tooltip {
       if (urls.length === 0 && data.hasVideo) {
         html += `<div class="tooltip-embed tooltip-embed--video">\u25B6</div>`;
       }
-      html += `<div class="tooltip-click-hint">click to engage</div>`;
+      html += `<div class="tooltip-click-hint">click star to engage</div>`;
     }
 
     this.element!.innerHTML = html;

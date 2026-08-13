@@ -52,6 +52,7 @@ export class YearlyView {
   private zoom: "all" | 10 = 10;
   private displayMode: "songs" | "artists" = "artists";
   private generationFilter: number | "all" = "all";
+  private artistFilter: string = "all";
 
   mount(container: HTMLElement, dataStore: DataStore): void {
     this.dataStore = dataStore;
@@ -117,6 +118,16 @@ export class YearlyView {
 
   getGenerationFilter(): number | "all" {
     return this.generationFilter;
+  }
+
+  setArtistFilter(artist: string): void {
+    if (artist === this.artistFilter) return;
+    this.artistFilter = artist;
+    this.render();
+  }
+
+  getArtistFilter(): string {
+    return this.artistFilter;
   }
 
   private render(): void {
@@ -659,6 +670,12 @@ export class YearlyView {
           if (!matchesGeneration) continue;
         }
 
+        // Apply artist filter
+        if (this.artistFilter !== "all") {
+          const matchesArtist = release.artistIds.includes(this.artistFilter);
+          if (!matchesArtist) continue;
+        }
+
         const logoUrls = resolved.map(a => a.logoUrl);
         const artistNames = resolved.map(a => a.name);
 
@@ -704,8 +721,9 @@ export class YearlyView {
     const artistPoints = new Map<string, number>();
     const artistWins = new Map<string, number>();
 
-    // Sum points per artist for this year (filtered by source if set)
+    // Sum points per artist for this year (filtered by source and artist if set)
     for (const [artistId, artist] of this.dataStore.artists) {
+      if (this.artistFilter !== "all" && artistId !== this.artistFilter) continue;
       let points = 0;
       for (const release of artist.releases) {
         for (const [date, entry] of release.dailyValues) {
@@ -721,12 +739,13 @@ export class YearlyView {
       }
     }
 
-    // Count wins per artist for this year (filtered by source if set)
+    // Count wins per artist for this year (filtered by source and artist if set)
     for (const [date, sourceMap] of this.dataStore.chartWins) {
       if (!date.startsWith(yearStr)) continue;
       for (const [source, winData] of sourceMap) {
         if (this.sourceFilter !== "all" && source !== this.sourceFilter) continue;
         for (const artistId of winData.artistIds) {
+          if (this.artistFilter !== "all" && artistId !== this.artistFilter) continue;
           artistWins.set(artistId, (artistWins.get(artistId) ?? 0) + 1);
         }
       }

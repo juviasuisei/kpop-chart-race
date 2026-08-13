@@ -32,6 +32,8 @@ interface EpisodeChartEntry {
   artistName: string;
   releaseTitle: string;
   value: number;
+  /** Original rank position (1-based), preserved when filtering */
+  originalRank: number;
 }
 
 /** A live performance embed for an episode */
@@ -57,6 +59,8 @@ export class EpisodeBrowser {
   private episodes: Episode[] = [];
   private filteredEpisodes: Episode[] = [];
   private sourceFilter = "all";
+  private generationFilter: number | "all" = "all";
+  private artistFilter = "all";
   private displayedCount = 0;
   private scrollContainer: HTMLElement | null = null;
   private readonly PAGE_SIZE = 20;
@@ -75,6 +79,20 @@ export class EpisodeBrowser {
   setSourceFilter(source: string): void {
     if (this.sourceFilter === source) return;
     this.sourceFilter = source;
+    this.applyFilter();
+    this.render();
+  }
+
+  setGenerationFilter(generation: number | "all"): void {
+    if (this.generationFilter === generation) return;
+    this.generationFilter = generation;
+    this.applyFilter();
+    this.render();
+  }
+
+  setArtistFilter(artist: string): void {
+    if (this.artistFilter === artist) return;
+    this.artistFilter = artist;
     this.applyFilter();
     this.render();
   }
@@ -107,8 +125,13 @@ export class EpisodeBrowser {
     // Convert map to array, resolve winners, sort by date desc
     this.episodes = [];
     for (const ep of episodeMap.values()) {
-      // Sort entries by value desc, take top 10
+      // Sort entries by value desc
       ep.entries.sort((a, b) => b.value - a.value);
+
+      // Assign original ranks (1-based) before any filtering
+      for (let i = 0; i < ep.entries.length; i++) {
+        ep.entries[i].originalRank = i + 1;
+      }
 
       // Resolve winner from chartWins
       let winner: Episode["winner"] = null;
@@ -135,7 +158,7 @@ export class EpisodeBrowser {
         source: ep.source,
         episode: ep.episode,
         date: ep.date,
-        entries: ep.entries.slice(0, 10),
+        entries: ep.entries,
         winner,
         performances: ep.performances,
       });
@@ -168,6 +191,7 @@ export class EpisodeBrowser {
         artistName: artist.name,
         releaseTitle: release.title,
         value: dv.value,
+        originalRank: 0, // Assigned after sorting in extractEpisodes
       });
     }
 
@@ -195,11 +219,28 @@ export class EpisodeBrowser {
   }
 
   private applyFilter(): void {
-    if (this.sourceFilter === "all") {
-      this.filteredEpisodes = this.episodes;
-    } else {
-      this.filteredEpisodes = this.episodes.filter(ep => ep.source === this.sourceFilter);
+    let episodes = this.episodes;
+
+    // Filter by source
+    if (this.sourceFilter !== "all") {
+      episodes = episodes.filter(ep => ep.source === this.sourceFilter);
     }
+
+    // Filter entries within each episode by generation/artist (preserving original rank)
+    if (this.generationFilter !== "all" || this.artistFilter !== "all") {
+      episodes = episodes.map(ep => {
+        const filtered = ep.entries.filter(entry => {
+          const artist = this.dataStore?.artists.get(entry.artistId);
+          if (!artist) return false;
+          if (this.generationFilter !== "all" && artist.generation !== this.generationFilter) return false;
+          if (this.artistFilter !== "all" && entry.artistId !== this.artistFilter) return false;
+          return true;
+        });
+        return { ...ep, entries: filtered };
+      }).filter(ep => ep.entries.length > 0);
+    }
+
+    this.filteredEpisodes = episodes;
     this.displayedCount = 0;
   }
 
@@ -295,7 +336,7 @@ export class EpisodeBrowser {
       if (i >= 3) row.classList.add("episode-card__chart-entry--hidden");
 
       // Rank: #1 gets crown SVG, others get rank number
-      if (i === 0 && episode.winner) {
+      if (entry.originalRank === 1 && episode.winner) {
         const crownLevel = Math.min(episode.winner.crownLevel, 12);
         // Crown height scales with level: levels 1-6 → 24px, 7-9 → 36px, 10+ → 48px
         const crownHeight = crownLevel >= 10 ? 48 : crownLevel >= 7 ? 36 : 24;
@@ -313,7 +354,7 @@ export class EpisodeBrowser {
       } else {
         const rank = document.createElement("span");
         rank.className = "episode-card__rank";
-        rank.textContent = `#${i + 1}`;
+        rank.textContent = `#${entry.originalRank}`;
         row.appendChild(rank);
       }
 

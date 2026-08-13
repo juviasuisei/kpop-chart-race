@@ -96,6 +96,7 @@ function slugify(input: string): string {
  */
 export async function loadFromAirtable(
   onProgress?: ProgressCallback,
+  onArtistNames?: (names: string[]) => void,
 ): Promise<DataStore> {
   const cache = new CacheManager();
 
@@ -106,6 +107,9 @@ export async function loadFromAirtable(
       const totalArtists = cached.artists.size;
       if (onProgress) {
         onProgress(totalArtists, totalArtists, "Cache");
+      }
+      if (onArtistNames) {
+        onArtistNames(Array.from(cached.artists.values()).map(a => a.name));
       }
       return cached;
     }
@@ -120,6 +124,14 @@ export async function loadFromAirtable(
   const artistRecords = await client.fetchAll<ArtistFields>(TABLE_IDS.Artists);
   if (onProgress) {
     onProgress(1, artistRecords.length, "Artists");
+  }
+
+  // Notify caller of artist names for loading animation
+  if (onArtistNames) {
+    const names = artistRecords
+      .map(r => r.fields["Full Name"])
+      .filter((n): n is string => !!n);
+    onArtistNames(names);
   }
 
   const releaseRecords = await client.fetchAll<ReleaseFields>(TABLE_IDS.Releases);
@@ -287,8 +299,10 @@ function assembleDataStore(
       }
     }
 
-    // If no Name, this release only contributes to albumReleases — skip ParsedRelease creation
-    if (!releaseName) {
+    // If no Name and no embeddable content, this release only contributes to albumReleases
+    const mvUrl = fields["MV"];
+    const hasRankings = rankingsByRelease.has(releaseRecord.id);
+    if (!releaseName?.trim() && !mvUrl?.trim() && !hasRankings) {
       continue;
     }
 
@@ -297,9 +311,8 @@ function assembleDataStore(
     const embeds = new Map<string, ParsedEmbedDateEntry[]>();
 
     // Add MV embed (Apple Music is now handled separately via albumReleases)
-    const mvUrl = fields["MV"];
-    if (releaseDate && mvUrl) {
-      addEmbed(embeds, releaseDate, { type: "mv", url: mvUrl });
+    if (releaseDate && mvUrl?.trim()) {
+      addEmbed(embeds, releaseDate, { type: "mv", url: mvUrl.trim() });
     }
 
     // Process rankings for this release
@@ -352,8 +365,14 @@ function assembleDataStore(
       embeds.set(date, sortEmbeds(entries));
     }
 
+    // Skip if release ended up with no content (no chart data and no embeds)
+    if (dailyValues.size === 0 && embeds.size === 0) {
+      continue;
+    }
+
     // Create a ParsedRelease for each linked artist
-    const releaseId = slugify(releaseName);
+    const releaseTitle = releaseName ?? "";
+    const releaseId = slugify(releaseTitle || releaseRecord.id);
     // Resolve all valid artist slugs for this release's artistIds
     const resolvedArtistIds: string[] = [];
     for (const rid of artistLinks) {
@@ -371,7 +390,7 @@ function assembleDataStore(
 
       const parsedRelease: ParsedRelease = {
         id: releaseId,
-        title: releaseName,
+        title: releaseTitle,
         dailyValues: new Map(dailyValues),
         embeds: new Map(embeds.entries()),
         artistIds: resolvedArtistIds.length > 0 ? [...resolvedArtistIds] : [validArtists.get(artistRecordId)!.artistId],

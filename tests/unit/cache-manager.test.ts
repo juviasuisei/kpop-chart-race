@@ -121,11 +121,11 @@ describe("CacheManager", () => {
         },
       };
 
-      sessionStorage.setItem("airtable-v1", JSON.stringify(invalidVersionEntry));
+      sessionStorage.setItem("airtable-v2", JSON.stringify(invalidVersionEntry));
 
       const result = cacheManager.get();
       expect(result).toBeNull();
-      expect(sessionStorage.getItem("airtable-v1")).toBeNull();
+      expect(sessionStorage.getItem("airtable-v2")).toBeNull();
     });
   });
 
@@ -198,7 +198,7 @@ describe("CacheManager", () => {
       const result = cacheManager.get();
       expect(result).toBeNull();
       // Verify the expired entry was cleared
-      expect(sessionStorage.getItem("airtable-v1")).toBeNull();
+      expect(sessionStorage.getItem("airtable-v2")).toBeNull();
     });
 
     it("returns valid data when cache is exactly at the TTL boundary", () => {
@@ -224,16 +224,16 @@ describe("CacheManager", () => {
 
   describe("deserialization failure clears invalid entry", () => {
     it("returns null and clears storage when JSON is malformed", () => {
-      sessionStorage.setItem("airtable-v1", "not valid json {{{");
+      sessionStorage.setItem("airtable-v2", "not valid json {{{");
 
       const result = cacheManager.get();
       expect(result).toBeNull();
-      expect(sessionStorage.getItem("airtable-v1")).toBeNull();
+      expect(sessionStorage.getItem("airtable-v2")).toBeNull();
     });
 
     it("returns null and clears storage when data structure is missing required fields", () => {
       const incompleteEntry = {
-        version: "airtable-v1",
+        version: "airtable-v2",
         timestamp: Date.now(),
         data: {
           artists: [], // empty artists — fails structural validation
@@ -245,16 +245,16 @@ describe("CacheManager", () => {
         },
       };
 
-      sessionStorage.setItem("airtable-v1", JSON.stringify(incompleteEntry));
+      sessionStorage.setItem("airtable-v2", JSON.stringify(incompleteEntry));
 
       const result = cacheManager.get();
       expect(result).toBeNull();
-      expect(sessionStorage.getItem("airtable-v1")).toBeNull();
+      expect(sessionStorage.getItem("airtable-v2")).toBeNull();
     });
 
     it("returns null and clears storage when dates array is empty", () => {
       const noDateEntry = {
-        version: "airtable-v1",
+        version: "airtable-v2",
         timestamp: Date.now(),
         data: {
           artists: [["test", { id: "test", name: "Test", artistType: "boy_group", generation: 5, logoUrl: "x.svg", releases: [] }]],
@@ -266,11 +266,11 @@ describe("CacheManager", () => {
         },
       };
 
-      sessionStorage.setItem("airtable-v1", JSON.stringify(noDateEntry));
+      sessionStorage.setItem("airtable-v2", JSON.stringify(noDateEntry));
 
       const result = cacheManager.get();
       expect(result).toBeNull();
-      expect(sessionStorage.getItem("airtable-v1")).toBeNull();
+      expect(sessionStorage.getItem("airtable-v2")).toBeNull();
     });
   });
 
@@ -292,7 +292,7 @@ describe("CacheManager", () => {
       expect(() => cacheManager.set(store)).not.toThrow();
 
       // Should have attempted to clear
-      expect(removeItemSpy).toHaveBeenCalledWith("airtable-v1");
+      expect(removeItemSpy).toHaveBeenCalledWith("airtable-v2");
 
       setItemSpy.mockRestore();
       removeItemSpy.mockRestore();
@@ -310,7 +310,7 @@ describe("CacheManager", () => {
       const removeItemSpy = vi.spyOn(Storage.prototype, "removeItem");
 
       expect(() => cacheManager.set(store)).not.toThrow();
-      expect(removeItemSpy).toHaveBeenCalledWith("airtable-v1");
+      expect(removeItemSpy).toHaveBeenCalledWith("airtable-v2");
 
       setItemSpy.mockRestore();
       removeItemSpy.mockRestore();
@@ -326,7 +326,7 @@ describe("CacheManager", () => {
       const removeItemSpy = vi.spyOn(Storage.prototype, "removeItem");
 
       expect(() => cacheManager.set(store)).not.toThrow();
-      expect(removeItemSpy).toHaveBeenCalledWith("airtable-v1");
+      expect(removeItemSpy).toHaveBeenCalledWith("airtable-v2");
 
       setItemSpy.mockRestore();
       removeItemSpy.mockRestore();

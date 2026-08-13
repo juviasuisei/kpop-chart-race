@@ -5,6 +5,7 @@
 
 import type { DataStore, ParsedArtist } from "../models.ts";
 import { ARTIST_TYPE_COLORS } from "../colors.ts";
+import { generateFallbackLogoDataUri } from "../utils.ts";
 
 /** Source key → logo path mapping */
 const SOURCE_LOGOS: Record<string, string> = {
@@ -41,6 +42,8 @@ interface SongLine {
   value: number;
   isWin: boolean;
   crownLevel: number;
+  /** Live performance URL for this song (if available) */
+  performanceUrl?: string;
 }
 
 /** A merged show card (multiple songs on the same show episode) */
@@ -73,6 +76,7 @@ export class ArtistTimeline {
   private container: HTMLElement | null = null;
   private dataStore: DataStore | null = null;
   private artistId: string | null = null;
+  private sourceFilter: string = "all";
 
   /** Callback fired when a show episode link is clicked */
   onEpisodeClick: ((source: string, episode: number, date: string) => void) | null = null;
@@ -87,6 +91,12 @@ export class ArtistTimeline {
   setArtist(artistId: string): void {
     if (this.artistId === artistId) return;
     this.artistId = artistId;
+    this.render();
+  }
+
+  setSourceFilter(source: string): void {
+    if (this.sourceFilter === source) return;
+    this.sourceFilter = source;
     this.render();
   }
 
@@ -147,13 +157,26 @@ export class ArtistTimeline {
     logo.alt = artist.name;
     logo.width = 64;
     logo.height = 64;
+    logo.onerror = () => {
+      logo.src = generateFallbackLogoDataUri(artist.koreanName ?? artist.name);
+    };
     logoBg.appendChild(logo);
     header.appendChild(logoBg);
 
     // Name
     const name = document.createElement("div");
     name.className = "artist-timeline__name";
-    name.textContent = artist.name;
+    if (artist.koreanName) {
+      const eng = document.createElement("span");
+      eng.textContent = artist.name;
+      name.appendChild(eng);
+      const kr = document.createElement("span");
+      kr.className = "artist-timeline__name-kr";
+      kr.textContent = ` (${artist.koreanName})`;
+      name.appendChild(kr);
+    } else {
+      name.textContent = artist.name;
+    }
     header.appendChild(name);
 
     // Type + Generation + Debut
@@ -194,6 +217,7 @@ export class ArtistTimeline {
 
     for (const release of artist.releases) {
       for (const [, dv] of release.dailyValues) {
+        if (this.sourceFilter !== "all" && dv.source !== this.sourceFilter) continue;
         totalPoints += dv.value;
       }
     }
@@ -201,7 +225,8 @@ export class ArtistTimeline {
     // Count wins from chartWins
     if (this.dataStore) {
       for (const [, sourceMap] of this.dataStore.chartWins) {
-        for (const [, winData] of sourceMap) {
+        for (const [source, winData] of sourceMap) {
+          if (this.sourceFilter !== "all" && source !== this.sourceFilter) continue;
           if (winData.artistIds.includes(artist.id)) {
             totalWins++;
           }
@@ -209,7 +234,15 @@ export class ArtistTimeline {
       }
     }
 
-    const releaseCount = artist.releases.length;
+    // Count releases that have data for this source
+    let releaseCount: number;
+    if (this.sourceFilter === "all") {
+      releaseCount = artist.releases.length;
+    } else {
+      releaseCount = artist.releases.filter(r =>
+        Array.from(r.dailyValues.values()).some(dv => dv.source === this.sourceFilter)
+      ).length;
+    }
 
     return { totalPoints, totalWins, releaseCount };
   }
@@ -221,9 +254,15 @@ export class ArtistTimeline {
     // Key: date → showKey → SongLine[]
     const chartGrouped = new Map<string, Map<string, { source: string; episode: number; songs: SongLine[] }>>();
 
+    // Collect live performance URLs by date+release to merge into show cards
+    const performancesByDateRelease = new Map<string, string>();
+
     for (const release of artist.releases) {
       // Chart appearances (dailyValues)
       for (const [date, dv] of release.dailyValues) {
+        // Apply source filter
+        if (this.sourceFilter !== "all" && dv.source !== this.sourceFilter) continue;
+
         if (!chartGrouped.has(date)) chartGrouped.set(date, new Map());
         const dateShows = chartGrouped.get(date)!;
 
@@ -256,11 +295,18 @@ export class ArtistTimeline {
 
       // Embeds
       for (const [date, embeds] of release.embeds) {
-        if (!dateMap.has(date)) dateMap.set(date, []);
-        const entries = dateMap.get(date)!;
-
         for (const embed of embeds) {
-          entries.push({
+          // Live performances will be merged into show cards later
+          if (embed.type === "live_performance") {
+            if (embed.url) {
+              const key = `${date}::${release.title}`;
+              performancesByDateRelease.set(key, embed.url);
+            }
+            continue;
+          }
+
+          if (!dateMap.has(date)) dateMap.set(date, []);
+          dateMap.get(date)!.push({
             type: "embed",
             releaseTitle: release.title,
             embedType: embed.type,
@@ -276,6 +322,13 @@ export class ArtistTimeline {
       const entries = dateMap.get(date)!;
 
       for (const [, show] of showMap) {
+        // Attach performance URLs to matching songs
+        for (const song of show.songs) {
+          const key = `${date}::${song.releaseTitle}`;
+          const perfUrl = performancesByDateRelease.get(key);
+          if (perfUrl) song.performanceUrl = perfUrl;
+        }
+
         // Sort songs within show: wins first, then by value desc
         show.songs.sort((a, b) => {
           if (a.isWin && !b.isWin) return -1;
@@ -411,6 +464,23 @@ export class ArtistTimeline {
 
         songRow.appendChild(pointsWrap);
         el.appendChild(songRow);
+
+        // Live performance video under this song
+        if (song.performanceUrl) {
+          const embedContainer = document.createElement("div");
+          embedContainer.className = "artist-timeline__embed";
+          const iframe = document.createElement("iframe");
+          const videoId = this.extractYoutubeId(song.performanceUrl);
+          iframe.src = videoId
+            ? `https://www.youtube.com/embed/${videoId}`
+            : song.performanceUrl.replace("watch?v=", "embed/");
+          iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+          iframe.allowFullscreen = true;
+          iframe.loading = "lazy";
+          iframe.title = `${song.releaseTitle} - Live Performance`;
+          embedContainer.appendChild(iframe);
+          el.appendChild(embedContainer);
+        }
       }
     } else if (entry.type === "album-release") {
       // Album/single release entry with Apple Music embed
@@ -440,10 +510,13 @@ export class ArtistTimeline {
       typeLabel.textContent = this.formatEmbedType(entry.embedType);
       el.appendChild(typeLabel);
 
-      const songLabel = document.createElement("div");
-      songLabel.className = "artist-timeline__embed-song";
-      songLabel.textContent = entry.releaseTitle;
-      el.appendChild(songLabel);
+      // Show song name for non-MV embeds (live performances, etc.) when title exists
+      if (entry.embedType !== "mv" && entry.releaseTitle) {
+        const songLabel = document.createElement("div");
+        songLabel.className = "artist-timeline__embed-song";
+        songLabel.textContent = entry.releaseTitle;
+        el.appendChild(songLabel);
+      }
 
       // YouTube embed for video types
       if (entry.embedUrl && entry.embedType !== "release_date") {
@@ -457,7 +530,9 @@ export class ArtistTimeline {
         iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
         iframe.allowFullscreen = true;
         iframe.loading = "lazy";
-        iframe.title = `${entry.releaseTitle} - ${entry.embedType}`;
+        iframe.title = entry.releaseTitle
+          ? `${entry.releaseTitle} - ${this.formatEmbedType(entry.embedType)}`
+          : this.formatEmbedType(entry.embedType);
         embedContainer.appendChild(iframe);
         el.appendChild(embedContainer);
       }

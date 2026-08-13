@@ -1484,13 +1484,31 @@ body {
   .toolbar__drawer-content {
     display: none;
     flex-direction: column;
-    gap: 0.5rem;
-    padding: 0.75rem 1rem;
-    border-bottom: 1px solid #e0e0e0;
+    gap: 0.75rem;
+    padding: 1.5rem 1rem;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+    background: #ffffff;
+    overflow-y: auto;
+    align-items: stretch;
   }
 
   .toolbar__drawer-content--open {
     display: flex;
+  }
+
+  .toolbar__drawer-close {
+    align-self: flex-end;
+    background: none;
+    border: none;
+    color: #213547;
+    cursor: pointer;
+    padding: 0.25rem;
+    margin-bottom: 0.5rem;
   }
 
   .toolbar__drawer-content .toolbar__control {

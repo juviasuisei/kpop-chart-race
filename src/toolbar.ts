@@ -264,6 +264,14 @@ export class Toolbar {
     const drawerContent = document.createElement("div");
     drawerContent.className = "toolbar__drawer-content";
 
+    // Close button at top of fullscreen drawer
+    const closeBtn = document.createElement("button");
+    closeBtn.className = "toolbar__drawer-close";
+    closeBtn.setAttribute("aria-label", "Close controls");
+    closeBtn.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="6" y1="18" x2="18" y2="6"/></svg>`;
+    closeBtn.addEventListener("click", () => this.dismissDrawer());
+    drawerContent.appendChild(closeBtn);
+
     const controls = this.createControls();
     for (const ctrl of controls) {
       drawerContent.appendChild(ctrl);

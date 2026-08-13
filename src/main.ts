@@ -33,6 +33,9 @@ async function main(): Promise<void> {
     return;
   }
 
+  // Clear any stale content (e.g. from bfcache restore on mobile)
+  app.innerHTML = "";
+
   // --- Shared state ---
   const eventBus = new EventBus();
 
@@ -574,6 +577,13 @@ async function main(): Promise<void> {
     }
   });
 }
+
+// Force full reload when restored from bfcache (mobile refresh issue)
+window.addEventListener("pageshow", (event) => {
+  if (event.persisted) {
+    window.location.reload();
+  }
+});
 
 main().catch((err) => {
   console.error("[App] Unhandled error:", err);

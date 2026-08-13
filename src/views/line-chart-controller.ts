@@ -1558,6 +1558,18 @@ export class LineChartController {
     if (!this.touchMoved && e.changedTouches.length > 0) {
       const touch = e.changedTouches[0];
       const { x, y } = this.getCanvasCoordsFromTouch(touch);
+
+      // Check label tap first
+      const labelHit = this.findLabelAtPoint(x, y);
+      if (labelHit) {
+        if (this.state.selectedLineIds.length > 0) {
+          this.clearSelection();
+        } else {
+          this.selectLine(labelHit);
+        }
+        return;
+      }
+
       const hits = this.findLinesAtPoint(x, y);
 
       if (hits.length > 0) {

@@ -157,6 +157,8 @@ export class LineChartController {
   private backgroundDirty = true;
   /** Cached set of dates that have chart data (for animation speed-up) */
   private datesWithData: Set<string> = new Set();
+  /** Cached last activity date index per lineId (for label priority) */
+  private lastActivityByLine: Map<string, number> = new Map();
   /** Whether popover is currently open */
   private popoverOpen = false;
   /** Current generation filter */
@@ -254,6 +256,9 @@ export class LineChartController {
 
     // Build serialized line data for the worker
     const lines = this.buildLineData(dataStore, this.state.displayMode);
+
+    // Precompute last activity date index per line for label priority
+    this.buildLastActivityCache(dataStore);
 
     // Send to worker
     await this.workerClient.initData(lines, this.state.dates);
@@ -561,6 +566,7 @@ export class LineChartController {
   private async rebuildLineData(): Promise<void> {
     if (!this.dataStore) return;
     const lines = this.buildLineData(this.dataStore, this.state.displayMode);
+    this.buildLastActivityCache(this.dataStore);
     await this.workerClient.initData(lines, this.state.dates);
     this.backgroundDirty = true;
     this.requestFrame();
@@ -795,20 +801,23 @@ export class LineChartController {
     // Collect label candidates (only visible lines with sufficient opacity)
     const labeled = commands
       .filter(cmd => cmd.points.length >= 2 && cmd.opacity > 0.05)
-      .map(cmd => ({
-        lineId: cmd.lineId,
-        endPoint: cmd.points[cmd.points.length - 1],
-        color: cmd.color,
-        opacity: cmd.opacity,
-        finalValue: cmd.values.length > 0 ? cmd.values[cmd.values.length - 1] : 0,
-      }))
-      .sort((a, b) => b.finalValue - a.finalValue);
+      .map(cmd => {
+        const finalValue = cmd.values.length > 0 ? cmd.values[cmd.values.length - 1] : 0;
+        const lastActivityIdx = this.lastActivityByLine.get(cmd.lineId) ?? 0;
+        return {
+          lineId: cmd.lineId,
+          endPoint: cmd.points[cmd.points.length - 1],
+          color: cmd.color,
+          opacity: cmd.opacity,
+          finalValue,
+          lastActivityIdx,
+        };
+      })
+      // Priority: most recent activity first, then points as tiebreaker
+      .sort((a, b) => b.lastActivityIdx - a.lastActivityIdx || b.finalValue - a.finalValue);
 
-    // Sort by Y position for stagger layout
-    labeled.sort((a, b) => a.endPoint.y - b.endPoint.y);
-
-    // Place labels only where there's room near their actual line position
-    // Skip labels that would collide with already-placed ones
+    // Now sort a copy by Y for placement order, but process in priority order
+    // Strategy: process in priority order, place at their Y if no collision
     const resolvedPositions: { y: number; lineId: string; endPoint: PixelPoint; color: string; opacity: number; finalValue: number }[] = [];
 
     for (const item of labeled) {
@@ -1895,6 +1904,26 @@ export class LineChartController {
   /** Check if any artist has chart data on a given date */
   private hasChartDataOnDate(date: string): boolean {
     return this.datesWithData.has(date);
+  }
+
+  /** Precompute last activity date index per line for label prioritization */
+  private buildLastActivityCache(dataStore: DataStore): void {
+    this.lastActivityByLine.clear();
+    for (const [lineId, meta] of this.lineMetadata) {
+      const artist = dataStore.artists.get(meta.artistId);
+      if (!artist) continue;
+      const releases = meta.releaseId
+        ? artist.releases.filter(r => r.id === meta.releaseId)
+        : artist.releases;
+      let lastIdx = 0;
+      for (const release of releases) {
+        for (const date of release.dailyValues.keys()) {
+          const idx = this.state.dates.indexOf(date);
+          if (idx > lastIdx) lastIdx = idx;
+        }
+      }
+      this.lastActivityByLine.set(lineId, lastIdx);
+    }
   }
 
   private getReleaseTitleFromMeta(meta: { label: string; artistId: string; releaseId?: string }): string | undefined {

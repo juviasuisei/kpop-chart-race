@@ -919,8 +919,6 @@ export class LineChartController {
     const totalDateSpan = viewEnd + 1 - viewStart;
     const { width } = this.renderer!.getSize();
     const chartW = width - PADDING.left - PADDING.right;
-    const chartH = (this.renderer!.getSize().height) - PADDING.top - PADDING.bottom;
-    const frameMax = this.getCurrentFrameMax();
 
     // Collect all chart dates and live performance dates for this line
     const chartDates = new Set<string>();
@@ -964,8 +962,7 @@ export class LineChartController {
 
       const xRatio = (dateIdx - viewStart) / totalDateSpan;
       const x = PADDING.left + xRatio * chartW;
-      const value = this.getValueAtDateForLine(cmd, dateIdx);
-      const y = PADDING.top + chartH - (value / (frameMax || 1)) * chartH;
+      const y = this.getPixelYForDateOnLine(cmd, dateIdx);
 
       if (livePerfDates.has(date)) {
         this.drawStarDot(ctx, x, y);
@@ -994,8 +991,7 @@ export class LineChartController {
 
       const xRatio = (dateIdx - viewStart) / totalDateSpan;
       const x = PADDING.left + xRatio * chartW;
-      const value = this.getValueAtDateForLine(cmd, dateIdx);
-      const y = PADDING.top + chartH - (value / (frameMax || 1)) * chartH;
+      const y = this.getPixelYForDateOnLine(cmd, dateIdx);
 
       let crownLevel = 1;
       const dateWins = this.dataStore.chartWins.get(winDate);
@@ -1080,6 +1076,30 @@ export class LineChartController {
       ctx.fill();
       ctx.restore();
     }
+  }
+
+  /** Get the pixel Y position for a date index on a given line command */
+  private getPixelYForDateOnLine(cmd: LineDrawCommand, dateIdx: number): number {
+    const viewStart = this.state.viewportStart;
+    const viewEnd = this.state.viewportEnd;
+    const totalDateSpan = viewEnd + 1 - viewStart;
+    const targetRatio = (dateIdx - viewStart) / totalDateSpan;
+
+    const { width } = this.renderer!.getSize();
+    const chartW = width - PADDING.left - PADDING.right;
+    const targetX = PADDING.left + targetRatio * chartW;
+
+    // Find the closest rendered point by X and use its Y directly
+    let closestIdx = 0;
+    let closestDist = Infinity;
+    for (let i = 0; i < cmd.points.length; i++) {
+      const dist = Math.abs(cmd.points[i].x - targetX);
+      if (dist < closestDist) {
+        closestDist = dist;
+        closestIdx = i;
+      }
+    }
+    return cmd.points[closestIdx]?.y ?? 0;
   }
 
   /** Get cumulative value at a date index for a line (from cached render data) */

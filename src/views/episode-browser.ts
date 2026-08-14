@@ -79,6 +79,7 @@ export class EpisodeBrowser {
   private artistFilter = "all";
   private displayedCount = 0;
   private scrollContainer: HTMLElement | null = null;
+  private scrollHandler: (() => void) | null = null;
   private readonly PAGE_SIZE = 20;
 
   /** Callback when an artist name is clicked */
@@ -114,6 +115,10 @@ export class EpisodeBrowser {
   }
 
   unmount(): void {
+    if (this.container && this.scrollHandler) {
+      this.container.removeEventListener("scroll", this.scrollHandler);
+    }
+    this.scrollHandler = null;
     if (this.container) {
       this.container.innerHTML = "";
     }
@@ -283,6 +288,13 @@ export class EpisodeBrowser {
 
   private render(): void {
     if (!this.container) return;
+
+    // Remove previous scroll listener if re-rendering
+    if (this.scrollHandler) {
+      this.container.removeEventListener("scroll", this.scrollHandler);
+      this.scrollHandler = null;
+    }
+
     this.container.innerHTML = "";
 
     this.scrollContainer = document.createElement("div");
@@ -291,10 +303,9 @@ export class EpisodeBrowser {
     this.displayedCount = 0;
     this.loadMore();
 
-    // Scroll listener for virtual scrolling
-    this.scrollContainer.addEventListener("scroll", () => {
-      this.handleScroll();
-    });
+    // Scroll listener on the actual scrolling container (the parent with overflow-y: auto)
+    this.scrollHandler = () => this.handleScroll();
+    this.container.addEventListener("scroll", this.scrollHandler);
 
     this.container.appendChild(this.scrollContainer);
   }
@@ -313,8 +324,8 @@ export class EpisodeBrowser {
   }
 
   private handleScroll(): void {
-    if (!this.scrollContainer) return;
-    const { scrollTop, scrollHeight, clientHeight } = this.scrollContainer;
+    if (!this.container) return;
+    const { scrollTop, scrollHeight, clientHeight } = this.container;
     // Load more when within 200px of bottom
     if (scrollTop + clientHeight >= scrollHeight - 200) {
       if (this.displayedCount < this.filteredEpisodes.length) {

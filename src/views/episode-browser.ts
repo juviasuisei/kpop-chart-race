@@ -6,6 +6,19 @@
 
 import type { DataStore, ParsedArtist, ParsedRelease } from "../models.ts";
 
+/**
+ * Format an array of names with Oxford comma.
+ * 1 name: "A"
+ * 2 names: "A and B"
+ * 3+ names: "A, B, and C"
+ */
+function formatOxfordComma(names: string[]): string {
+  if (names.length === 0) return "";
+  if (names.length === 1) return names[0];
+  if (names.length === 2) return `${names[0]} and ${names[1]}`;
+  return `${names.slice(0, -1).join(", ")}, and ${names[names.length - 1]}`;
+}
+
 /** Source key → logo path mapping */
 const SOURCE_LOGOS: Record<string, string> = {
   inkigayo: "assets/sources/inkigayo.png",
@@ -28,12 +41,15 @@ const SOURCE_LABELS: Record<string, string> = {
 
 /** A single chart entry within an episode */
 interface EpisodeChartEntry {
+  /** Primary artist ID (first in artistIds) — used for lookups */
   artistId: string;
   artistName: string;
   releaseTitle: string;
   value: number;
   /** Original rank position (1-based), preserved when filtering */
   originalRank: number;
+  /** All artist IDs credited on this release */
+  artistIds: string[];
 }
 
 /** A live performance embed for an episode */
@@ -144,9 +160,9 @@ export class EpisodeBrowser {
             const winnerArtist = this.dataStore.artists.get(winnerArtistId);
             const crownLevel = winData.crownLevels.get(winnerArtistId) ?? 1;
             // Find the release title from the top entry
-            const winnerEntry = ep.entries.find(e => e.artistId === winnerArtistId);
+            const winnerEntry = ep.entries.find(e => e.artistIds.includes(winnerArtistId));
             winner = {
-              artistName: winnerArtist?.name ?? winnerArtistId,
+              artistName: winnerEntry?.artistName ?? winnerArtist?.name ?? winnerArtistId,
               releaseTitle: winnerEntry?.releaseTitle ?? "",
               crownLevel,
             };
@@ -170,10 +186,20 @@ export class EpisodeBrowser {
 
   private extractFromRelease(
     artistId: string,
-    artist: ParsedArtist,
+    _artist: ParsedArtist,
     release: ParsedRelease,
     episodeMap: Map<string, { source: string; episode: number; date: string; entries: EpisodeChartEntry[]; performances: EpisodePerformance[] }>,
   ): void {
+    // Deduplicate multi-artist releases: only process from the first artist in artistIds
+    if (release.artistIds.length > 1 && release.artistIds[0] !== artistId) return;
+
+    // Resolve display name for the combined artists (Oxford comma)
+    const artistNames = release.artistIds.map(id => {
+      const a = this.dataStore?.artists.get(id);
+      return a?.name ?? id;
+    });
+    const displayName = formatOxfordComma(artistNames);
+
     for (const [date, dv] of release.dailyValues) {
       const key = `${dv.source}::${dv.episode}::${date}`;
       if (!episodeMap.has(key)) {
@@ -188,10 +214,11 @@ export class EpisodeBrowser {
       const ep = episodeMap.get(key)!;
       ep.entries.push({
         artistId,
-        artistName: artist.name,
+        artistName: displayName,
         releaseTitle: release.title,
         value: dv.value,
         originalRank: 0, // Assigned after sorting in extractEpisodes
+        artistIds: [...release.artistIds],
       });
     }
 
@@ -210,7 +237,7 @@ export class EpisodeBrowser {
 
       for (const perf of livePerformances) {
         ep.performances.push({
-          artistName: artist.name,
+          artistName: displayName,
           releaseTitle: release.title,
           url: perf.url,
         });
@@ -230,10 +257,20 @@ export class EpisodeBrowser {
     if (this.generationFilter !== "all" || this.artistFilter !== "all") {
       episodes = episodes.map(ep => {
         const filtered = ep.entries.filter(entry => {
-          const artist = this.dataStore?.artists.get(entry.artistId);
-          if (!artist) return false;
-          if (this.generationFilter !== "all" && artist.generation !== this.generationFilter) return false;
-          if (this.artistFilter !== "all" && entry.artistId !== this.artistFilter) return false;
+          // For generation filter, check the primary artist
+          if (this.generationFilter !== "all") {
+            const artist = this.dataStore?.artists.get(entry.artistId);
+            if (!artist || artist.generation !== this.generationFilter) {
+              // Also check co-artists for generation match
+              const anyMatch = entry.artistIds.some(id => {
+                const a = this.dataStore?.artists.get(id);
+                return a && a.generation === this.generationFilter;
+              });
+              if (!anyMatch) return false;
+            }
+          }
+          // For artist filter, match if the filtered artist is ANY of the credited artists
+          if (this.artistFilter !== "all" && !entry.artistIds.includes(this.artistFilter)) return false;
           return true;
         });
         return { ...ep, entries: filtered };
@@ -361,17 +398,32 @@ export class EpisodeBrowser {
       const info = document.createElement("span");
       info.className = "episode-card__entry-info";
 
-      const artistLink = document.createElement("a");
-      artistLink.className = "episode-card__artist-link";
-      artistLink.textContent = entry.artistName;
-      artistLink.href = "#";
-      artistLink.addEventListener("click", (e) => {
-        e.preventDefault();
-        if (this.onArtistClick) {
-          this.onArtistClick(entry.artistId);
+      // Render each credited artist as a separate clickable link with Oxford comma
+      for (let a = 0; a < entry.artistIds.length; a++) {
+        const aId = entry.artistIds[a];
+        const aName = this.dataStore?.artists.get(aId)?.name ?? aId;
+
+        const artistLink = document.createElement("a");
+        artistLink.className = "episode-card__artist-link";
+        artistLink.textContent = aName;
+        artistLink.href = "#";
+        artistLink.addEventListener("click", (e) => {
+          e.preventDefault();
+          if (this.onArtistClick) {
+            this.onArtistClick(aId);
+          }
+        });
+        info.appendChild(artistLink);
+
+        // Add Oxford comma separator between artists
+        if (entry.artistIds.length === 2 && a === 0) {
+          info.appendChild(document.createTextNode(" and "));
+        } else if (entry.artistIds.length > 2 && a < entry.artistIds.length - 2) {
+          info.appendChild(document.createTextNode(", "));
+        } else if (entry.artistIds.length > 2 && a === entry.artistIds.length - 2) {
+          info.appendChild(document.createTextNode(", and "));
         }
-      });
-      info.appendChild(artistLink);
+      }
 
       const separator = document.createTextNode(" \u2014 " + entry.releaseTitle);
       info.appendChild(separator);

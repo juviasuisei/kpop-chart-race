@@ -23,6 +23,19 @@ import type { DataStore } from "../models.ts";
 import type { FilterState } from "../types.ts";
 import type { SerializedLineData, FrameResultMessage, Viewport, VisibilityParams, LineDrawCommand, PixelPoint } from "../worker/messages.ts";
 
+/**
+ * Format an array of names with Oxford comma.
+ * 1 name: "A"
+ * 2 names: "A and B"
+ * 3+ names: "A, B, and C"
+ */
+function formatOxfordComma(names: string[]): string {
+  if (names.length === 0) return "";
+  if (names.length === 1) return names[0];
+  if (names.length === 2) return `${names[0]} and ${names[1]}`;
+  return `${names.slice(0, -1).join(", ")}, and ${names[names.length - 1]}`;
+}
+
 /** Time zoom presets — each has a different data aggregation level */
 export type TimeZoomPreset = "daily" | "year" | "decade" | "all";
 
@@ -492,15 +505,24 @@ export class LineChartController {
     this.lineMetadata.clear();
 
     if (mode === "songs") {
+      const processedReleases = new Set<string>();
       for (const artist of dataStore.artists.values()) {
         // Generation filter
         if (this.currentGenFilter !== "all" && artist.generation !== this.currentGenFilter) continue;
-        // Artist filter
-        if (this.currentArtistFilter !== "all" && artist.id !== this.currentArtistFilter) continue;
 
-        const color = ARTIST_TYPE_COLORS[artist.artistType];
         for (const release of artist.releases) {
           if (release.dailyValues.size === 0) continue;
+
+          // Deduplicate multi-artist releases: only process from the first artist in artistIds
+          if (release.artistIds.length > 1 && release.artistIds[0] !== artist.id) continue;
+          const dedupeKey = `${release.artistIds[0]}::${release.id}`;
+          if (processedReleases.has(dedupeKey)) continue;
+          processedReleases.add(dedupeKey);
+
+          // Artist filter: match if the filtered artist is ANY of the credited artists
+          if (this.currentArtistFilter !== "all" && !release.artistIds.includes(this.currentArtistFilter)) continue;
+
+          const color = ARTIST_TYPE_COLORS[artist.artistType];
 
           // Source filter: only include dailyValues from the selected source
           let filteredDailyValues = release.dailyValues;
@@ -514,13 +536,19 @@ export class LineChartController {
             if (filteredDailyValues.size === 0) continue;
           }
 
-          const lineId = `${artist.id}::${release.id}`;
+          const lineId = `${release.artistIds[0]}::${release.id}`;
           const series = buildSeriesFromDailyValues(filteredDailyValues, dateToIndex);
           if (series.length === 0) continue;
 
-          const label = `${release.title} \u2014 ${artist.name}`;
+          // Build label with all credited artist names (Oxford comma)
+          const artistNames = release.artistIds.map(id => {
+            const a = dataStore.artists.get(id);
+            return a?.name ?? id;
+          });
+          const artistLabel = formatOxfordComma(artistNames);
+          const label = `${release.title} \u2014 ${artistLabel}`;
           serialized.push({ lineId, label, color, changePoints: series.toArray() });
-          this.lineMetadata.set(lineId, { label, artistId: artist.id, releaseId: release.id });
+          this.lineMetadata.set(lineId, { label, artistId: release.artistIds[0], releaseId: release.id });
         }
       }
     } else {
@@ -1010,7 +1038,9 @@ export class LineChartController {
       const dateIdx = this.state.dates.indexOf(date);
       if (dateIdx < viewStart || dateIdx > viewEnd) continue;
 
-      const xRatio = (dateIdx - viewStart) / totalDateSpan;
+      // Position dot at the END of the date's slot (right edge) since it represents
+      // the new cumulative total after that date's data is counted
+      const xRatio = (dateIdx + 1 - viewStart) / totalDateSpan;
       const x = PADDING.left + xRatio * chartW;
       const y = this.getPixelYForDateOnLine(cmd, dateIdx);
 
@@ -1039,7 +1069,8 @@ export class LineChartController {
       const dateIdx = this.state.dates.indexOf(winDate);
       if (dateIdx < viewStart || dateIdx > viewEnd) continue;
 
-      const xRatio = (dateIdx - viewStart) / totalDateSpan;
+      // Position crown at the END of the date's slot (right edge)
+      const xRatio = (dateIdx + 1 - viewStart) / totalDateSpan;
       const x = PADDING.left + xRatio * chartW;
       const y = this.getPixelYForDateOnLine(cmd, dateIdx);
 
@@ -1133,7 +1164,8 @@ export class LineChartController {
     const viewStart = this.state.viewportStart;
     const viewEnd = this.state.viewportEnd;
     const totalDateSpan = viewEnd + 1 - viewStart;
-    const targetRatio = (dateIdx - viewStart) / totalDateSpan;
+    // Use dateIdx + 1 to match dot placement at the END of the date's slot
+    const targetRatio = (dateIdx + 1 - viewStart) / totalDateSpan;
 
     const { width } = this.renderer!.getSize();
     const chartW = width - PADDING.left - PADDING.right;
@@ -1167,7 +1199,8 @@ export class LineChartController {
     const viewStart = this.state.viewportStart;
     const viewEnd = this.state.viewportEnd;
     const totalDateSpan = viewEnd + 1 - viewStart;
-    const targetRatio = (dateIdx - viewStart) / totalDateSpan;
+    // Use dateIdx + 1 to match dot placement at the END of the date's slot
+    const targetRatio = (dateIdx + 1 - viewStart) / totalDateSpan;
 
     // Find the point closest to this ratio
     const { width } = this.renderer!.getSize();
@@ -1294,7 +1327,7 @@ export class LineChartController {
 
     // Hit test each dot
     for (const dot of dotDates) {
-      const xRatio = (dot.dateIdx - viewStart) / totalDateSpan;
+      const xRatio = (dot.dateIdx + 1 - viewStart) / totalDateSpan;
       const dotX = PADDING.left + xRatio * chartW;
       const value = this.getValueAtDateForLine(rd, dot.dateIdx);
       const dotY = PADDING.top + chartH - (value / (frameMax || 1)) * chartH;

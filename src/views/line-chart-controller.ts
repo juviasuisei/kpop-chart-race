@@ -1038,9 +1038,8 @@ export class LineChartController {
       const dateIdx = this.state.dates.indexOf(date);
       if (dateIdx < viewStart || dateIdx > viewEnd) continue;
 
-      // Position dot at the END of the date's slot (right edge) since it represents
-      // the new cumulative total after that date's data is counted
-      const xRatio = (dateIdx + 1 - viewStart) / totalDateSpan;
+      // Position dot on the line's change-point (joint/bend)
+      const xRatio = (dateIdx - viewStart) / totalDateSpan;
       const x = PADDING.left + xRatio * chartW;
       const y = this.getPixelYForDateOnLine(cmd, dateIdx);
 
@@ -1069,8 +1068,8 @@ export class LineChartController {
       const dateIdx = this.state.dates.indexOf(winDate);
       if (dateIdx < viewStart || dateIdx > viewEnd) continue;
 
-      // Position crown at the END of the date's slot (right edge)
-      const xRatio = (dateIdx + 1 - viewStart) / totalDateSpan;
+      // Position crown on the line's change-point (joint/bend)
+      const xRatio = (dateIdx - viewStart) / totalDateSpan;
       const x = PADDING.left + xRatio * chartW;
       const y = this.getPixelYForDateOnLine(cmd, dateIdx);
 
@@ -1164,8 +1163,7 @@ export class LineChartController {
     const viewStart = this.state.viewportStart;
     const viewEnd = this.state.viewportEnd;
     const totalDateSpan = viewEnd + 1 - viewStart;
-    // Use dateIdx + 1 to match dot placement at the END of the date's slot
-    const targetRatio = (dateIdx + 1 - viewStart) / totalDateSpan;
+    const targetRatio = (dateIdx - viewStart) / totalDateSpan;
 
     const { width } = this.renderer!.getSize();
     const chartW = width - PADDING.left - PADDING.right;
@@ -1199,8 +1197,7 @@ export class LineChartController {
     const viewStart = this.state.viewportStart;
     const viewEnd = this.state.viewportEnd;
     const totalDateSpan = viewEnd + 1 - viewStart;
-    // Use dateIdx + 1 to match dot placement at the END of the date's slot
-    const targetRatio = (dateIdx + 1 - viewStart) / totalDateSpan;
+    const targetRatio = (dateIdx - viewStart) / totalDateSpan;
 
     // Find the point closest to this ratio
     const { width } = this.renderer!.getSize();
@@ -1327,7 +1324,7 @@ export class LineChartController {
 
     // Hit test each dot
     for (const dot of dotDates) {
-      const xRatio = (dot.dateIdx + 1 - viewStart) / totalDateSpan;
+      const xRatio = (dot.dateIdx - viewStart) / totalDateSpan;
       const dotX = PADDING.left + xRatio * chartW;
       const value = this.getValueAtDateForLine(rd, dot.dateIdx);
       const dotY = PADDING.top + chartH - (value / (frameMax || 1)) * chartH;

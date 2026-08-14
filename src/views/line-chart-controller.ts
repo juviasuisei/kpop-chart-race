@@ -49,8 +49,6 @@ const PRESET_WINDOW: Record<TimeZoomPreset, number> = {
 
 // --- Constants matching prototype exactly ---
 const PADDING = { top: 40, right: 210, bottom: 40, left: 0 };
-/** Padding used by the worker for line geometry — dots must match this, not PADDING */
-const LINE_PADDING = { top: 40, right: 160, bottom: 40, left: 0 };
 /** @internal Used by worker for line thickness computation */
 export const BASE_LINE_WIDTH = 1.5;
 /** @internal Used by worker for highlighted line thickness */
@@ -962,7 +960,7 @@ export class LineChartController {
           const viewStart = this.state.viewportStart;
           const totalDateSpan = viewEnd + 1 - viewStart;
           const { width } = this.renderer!.getSize();
-          const lineChartW = width - LINE_PADDING.left - LINE_PADDING.right;
+          const lineChartW = width - PADDING.left - PADDING.right;
           // Check dates near the tip (last point x)
           const tipX = lastPt.x;
 
@@ -984,7 +982,7 @@ export class LineChartController {
             const dateIdx = this.state.dates.indexOf(winDate);
             if (dateIdx < viewStart || dateIdx > viewEnd) continue;
             const winXRatio = (dateIdx - viewStart) / totalDateSpan;
-            const winX = LINE_PADDING.left + winXRatio * lineChartW;
+            const winX = PADDING.left + winXRatio * lineChartW;
             // If this win is within a few pixels of the tip, the crown overlaps the label
             if (Math.abs(winX - tipX) < 4) {
               labelXOffset = 20;
@@ -1038,7 +1036,7 @@ export class LineChartController {
     const viewEnd = this.state.viewportEnd;
     const totalDateSpan = viewEnd + 1 - viewStart;
     const { width } = this.renderer!.getSize();
-    const chartW = width - LINE_PADDING.left - LINE_PADDING.right;
+    const chartW = width - PADDING.left - PADDING.right;
 
     // Collect all chart dates and live performance dates for this line
     const chartDates = new Set<string>();
@@ -1087,7 +1085,7 @@ export class LineChartController {
 
       // Position dot on the line's change-point (joint/bend)
       const xRatio = (dateIdx - viewStart) / totalDateSpan;
-      const x = LINE_PADDING.left + xRatio * chartW;
+      const x = PADDING.left + xRatio * chartW;
       const y = this.getPixelYForDateOnLine(cmd, dateIdx);
 
       if (livePerfDates.has(date)) {
@@ -1117,7 +1115,7 @@ export class LineChartController {
 
       // Position crown on the line's change-point (joint/bend)
       const xRatio = (dateIdx - viewStart) / totalDateSpan;
-      const x = LINE_PADDING.left + xRatio * chartW;
+      const x = PADDING.left + xRatio * chartW;
       const y = this.getPixelYForDateOnLine(cmd, dateIdx);
 
       let crownLevel = 1;
@@ -1213,8 +1211,8 @@ export class LineChartController {
     const targetRatio = (dateIdx - viewStart) / totalDateSpan;
 
     const { width } = this.renderer!.getSize();
-    const chartW = width - LINE_PADDING.left - LINE_PADDING.right;
-    const targetX = LINE_PADDING.left + targetRatio * chartW;
+    const chartW = width - PADDING.left - PADDING.right;
+    const targetX = PADDING.left + targetRatio * chartW;
 
     // Find the two points that bracket targetX and interpolate Y
     const pts = cmd.points;
@@ -1248,8 +1246,8 @@ export class LineChartController {
 
     // Find the point closest to this ratio
     const { width } = this.renderer!.getSize();
-    const chartW = width - LINE_PADDING.left - LINE_PADDING.right;
-    const targetX = LINE_PADDING.left + targetRatio * chartW;
+    const chartW = width - PADDING.left - PADDING.right;
+    const targetX = PADDING.left + targetRatio * chartW;
 
     let closestIdx = 0;
     let closestDist = Infinity;
@@ -1318,8 +1316,8 @@ export class LineChartController {
     const viewEnd = this.state.viewportEnd;
     const totalDateSpan = viewEnd + 1 - viewStart;
     const { width } = this.renderer!.getSize();
-    const chartW = width - LINE_PADDING.left - LINE_PADDING.right;
-    const chartH = this.renderer!.getSize().height - LINE_PADDING.top - LINE_PADDING.bottom;
+    const chartW = width - PADDING.left - PADDING.right;
+    const chartH = this.renderer!.getSize().height - PADDING.top - PADDING.bottom;
     const frameMax = this.getCurrentFrameMax();
 
     // Collect all dot dates (wins + embeds)
@@ -1372,9 +1370,9 @@ export class LineChartController {
     // Hit test each dot
     for (const dot of dotDates) {
       const xRatio = (dot.dateIdx - viewStart) / totalDateSpan;
-      const dotX = LINE_PADDING.left + xRatio * chartW;
+      const dotX = PADDING.left + xRatio * chartW;
       const value = this.getValueAtDateForLine(rd, dot.dateIdx);
-      const dotY = LINE_PADDING.top + chartH - (value / (frameMax || 1)) * chartH;
+      const dotY = PADDING.top + chartH - (value / (frameMax || 1)) * chartH;
 
       const dist = Math.hypot(x - dotX, y - dotY);
       if (dist <= 12) {
@@ -1760,10 +1758,10 @@ export class LineChartController {
 
     // Compute x position from date index for the tooltip
     const { width } = this.renderer!.getSize();
-    const chartW = width - LINE_PADDING.left - LINE_PADDING.right;
+    const chartW = width - PADDING.left - PADDING.right;
     const totalDateSpan = this.state.viewportEnd + 1 - this.state.viewportStart;
     const xRatio = (dotHit.dateIndex - this.state.viewportStart) / totalDateSpan;
-    const x = LINE_PADDING.left + xRatio * chartW;
+    const x = PADDING.left + xRatio * chartW;
 
     // Get nearest point index for this date
     const nearestIdx = this.getNearestPointIndex(rd, x);

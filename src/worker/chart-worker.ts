@@ -127,7 +127,7 @@ function buildPixelPoints(
   const { startDateIndex, endDateIndex, width, height, progressToNext } = viewport;
 
   // Compute chart area in CSS pixels (canvas context has DPR transform applied)
-  const padding = { top: 40, right: 160, bottom: 40, left: 0 };
+  const padding = { top: 40, right: 210, bottom: 40, left: 0 };
   const chartW = width - padding.left - padding.right;
   const chartH = height - padding.top - padding.bottom;
 

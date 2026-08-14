@@ -953,6 +953,46 @@ export class LineChartController {
       const lastPt = cmd.points[cmd.points.length - 1];
       const meta = this.lineMetadata.get(cmd.lineId);
       if (meta) {
+        // Check if the line's tip has a crown/win — if so, offset the label
+        // to avoid overlapping the crown icon
+        let labelXOffset = 6;
+        if (this.dataStore) {
+          // Find the last win date for this line that falls at or near the tip
+          const viewEnd = this.state.viewportEnd;
+          const viewStart = this.state.viewportStart;
+          const totalDateSpan = viewEnd + 1 - viewStart;
+          const { width } = this.renderer!.getSize();
+          const lineChartW = width - LINE_PADDING.left - LINE_PADDING.right;
+          // Check dates near the tip (last point x)
+          const tipX = lastPt.x;
+
+          let allWinDates: string[] = [];
+          if (meta.releaseId) {
+            allWinDates = this.dataStore.releaseWinDates?.get(cmd.lineId) ?? [];
+          } else {
+            const artist = this.dataStore.artists.get(meta.artistId);
+            if (artist) {
+              for (const release of artist.releases) {
+                const releaseKey = `${meta.artistId}::${release.id}`;
+                const dates = this.dataStore.releaseWinDates?.get(releaseKey);
+                if (dates) allWinDates.push(...dates);
+              }
+            }
+          }
+
+          for (const winDate of allWinDates) {
+            const dateIdx = this.state.dates.indexOf(winDate);
+            if (dateIdx < viewStart || dateIdx > viewEnd) continue;
+            const winXRatio = (dateIdx - viewStart) / totalDateSpan;
+            const winX = LINE_PADDING.left + winXRatio * lineChartW;
+            // If this win is within a few pixels of the tip, the crown overlaps the label
+            if (Math.abs(winX - tipX) < 4) {
+              labelXOffset = 20;
+              break;
+            }
+          }
+        }
+
         ctx.fillStyle = cmd.color;
         ctx.font = "bold 9px system-ui, -apple-system, sans-serif";
         ctx.textAlign = "left";
@@ -964,7 +1004,7 @@ export class LineChartController {
           }
           displayText += "...";
         }
-        ctx.fillText(displayText, lastPt.x + 6, lastPt.y - 1);
+        ctx.fillText(displayText, lastPt.x + labelXOffset, lastPt.y - 1);
 
         // Stats line with value + wins
         const finalValue = cmd.values.length > 0 ? cmd.values[cmd.values.length - 1] : 0;
@@ -975,7 +1015,7 @@ export class LineChartController {
             : `${finalValue.toLocaleString()}`;
           ctx.font = "8px system-ui, -apple-system, sans-serif";
           ctx.globalAlpha = 0.7;
-          ctx.fillText(statsText, lastPt.x + 6, lastPt.y + 8);
+          ctx.fillText(statsText, lastPt.x + labelXOffset, lastPt.y + 8);
           ctx.globalAlpha = 1;
         }
       }

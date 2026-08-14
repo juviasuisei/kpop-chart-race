@@ -1055,6 +1055,12 @@ export class LineChartController {
       }
       for (const [date, embeds] of release.embeds) {
         if (embeds.some(e => e.type === "live_performance")) {
+          // Only mark as live performance if this date is in the active chart dates
+          // (i.e., has a dailyValue matching the current source filter)
+          if (this.currentSourceFilter !== "all") {
+            const dv = release.dailyValues.get(date);
+            if (!dv || dv.source !== this.currentSourceFilter) continue;
+          }
           livePerfDates.add(date);
         }
       }

@@ -36,6 +36,85 @@ function formatOxfordComma(names: string[]): string {
   return `${names.slice(0, -1).join(", ")}, and ${names[names.length - 1]}`;
 }
 
+/** Minimal shape needed to compute endpoint label display priority. */
+export interface LabelPriorityCandidate {
+  lineId: string;
+  /** Pixel Y position of the label's anchor point. */
+  y: number;
+  finalValue: number;
+  lastActivityIdx: number;
+}
+
+/**
+ * Order label candidates by display priority so that, when two or more
+ * labels collide (endpoints closer together than `minGap`), the correct
+ * one is placed first and wins the slot.
+ *
+ * Rule:
+ *   - The single highest-value ("#1") line always wins, regardless of cluster.
+ *   - Otherwise, group candidates into clusters of endpoints that would
+ *     actually collide (Y-distance < minGap, chained transitively — matching
+ *     the collision check used during placement).
+ *   - In clusters of size <= 5: the largest value wins.
+ *   - In clusters of size > 5: the most recently active line wins, using
+ *     value as a tie-break.
+ *
+ * Cluster size MUST be computed with the same distance/chaining used by the
+ * actual placement collision check, otherwise unrelated non-colliding labels
+ * can inflate a genuine small tie into a "large cluster" and flip which rule
+ * applies.
+ */
+export function orderLabelsByPriority<T extends LabelPriorityCandidate>(
+  candidates: T[],
+  minGap: number = MIN_GAP
+): T[] {
+  if (candidates.length === 0) return [];
+
+  // Sort by Y to find clusters via transitive chaining.
+  const byY = [...candidates].sort((a, b) => a.y - b.y);
+  const clusterSizes = new Map<number, number>(); // index in byY -> cluster size
+
+  for (let i = 0; i < byY.length; i++) {
+    if (clusterSizes.has(i)) continue;
+    let clusterEnd = i;
+    while (clusterEnd + 1 < byY.length && byY[clusterEnd + 1].y - byY[clusterEnd].y < minGap) {
+      clusterEnd++;
+    }
+    const size = clusterEnd - i + 1;
+    for (let j = i; j <= clusterEnd; j++) {
+      clusterSizes.set(j, size);
+    }
+  }
+
+  // Map each lineId to its cluster size
+  const lineClusterSize = new Map<string, number>();
+  for (let i = 0; i < byY.length; i++) {
+    lineClusterSize.set(byY[i].lineId, clusterSizes.get(i) ?? 1);
+  }
+
+  const maxValue = Math.max(...candidates.map(c => c.finalValue));
+  const ordered = [...candidates];
+  ordered.sort((a, b) => {
+    // #1 always wins
+    const aIsTop = a.finalValue === maxValue ? 1 : 0;
+    const bIsTop = b.finalValue === maxValue ? 1 : 0;
+    if (aIsTop !== bIsTop) return bIsTop - aIsTop;
+
+    const aCluster = lineClusterSize.get(a.lineId) ?? 1;
+    const bCluster = lineClusterSize.get(b.lineId) ?? 1;
+    const inLargeCluster = aCluster > 5 || bCluster > 5;
+
+    if (inLargeCluster) {
+      // Large cluster: recency first, then score
+      return b.lastActivityIdx - a.lastActivityIdx || b.finalValue - a.finalValue;
+    }
+    // Small cluster: score first
+    return b.finalValue - a.finalValue;
+  });
+
+  return ordered;
+}
+
 /** Time zoom presets — each has a different data aggregation level */
 export type TimeZoomPreset = "daily" | "year" | "decade" | "all";
 
@@ -842,54 +921,14 @@ export class LineChartController {
         };
       });
 
-    // Detect clusters: group lines whose endpoints are within MIN_GAP of each other
-    // Sort by Y first to find clusters
-    const byY = [...labeled].sort((a, b) => a.endPoint.y - b.endPoint.y);
-    const clusterSizes = new Map<number, number>(); // index in byY → cluster size
-
-    for (let i = 0; i < byY.length; i++) {
-      if (clusterSizes.has(i)) continue;
-      let clusterEnd = i;
-      while (clusterEnd + 1 < byY.length && byY[clusterEnd + 1].endPoint.y - byY[i].endPoint.y < MIN_GAP * 5) {
-        clusterEnd++;
-      }
-      const size = clusterEnd - i + 1;
-      for (let j = i; j <= clusterEnd; j++) {
-        clusterSizes.set(j, size);
-      }
-    }
-
-    // Map each lineId to its cluster size
-    const lineClusterSize = new Map<string, number>();
-    for (let i = 0; i < byY.length; i++) {
-      lineClusterSize.set(byY[i].lineId, clusterSizes.get(i) ?? 1);
-    }
-
-    // Sort: #1 always first, then within small clusters (≤5) prefer highest score,
-    // in large clusters (>5) prefer recency > score
-    const maxValue = Math.max(...labeled.map(l => l.finalValue));
-    labeled.sort((a, b) => {
-      // #1 always wins
-      const aIsTop = a.finalValue === maxValue ? 1 : 0;
-      const bIsTop = b.finalValue === maxValue ? 1 : 0;
-      if (aIsTop !== bIsTop) return bIsTop - aIsTop;
-
-      const aCluster = lineClusterSize.get(a.lineId) ?? 1;
-      const bCluster = lineClusterSize.get(b.lineId) ?? 1;
-      const inLargeCluster = aCluster > 5 || bCluster > 5;
-
-      if (inLargeCluster) {
-        // Large cluster: recency first, then score
-        return b.lastActivityIdx - a.lastActivityIdx || b.finalValue - a.finalValue;
-      }
-      // Small cluster: score first
-      return b.finalValue - a.finalValue;
-    });
+    // Order candidates so that, when endpoints collide, the correct one
+    // wins the slot (see orderLabelsByPriority for the tie-break rule).
+    const prioritized = orderLabelsByPriority(labeled.map(l => ({ ...l, y: l.endPoint.y })));
 
     // Place labels: process in priority order, place at their Y if no collision
     const resolvedPositions: { y: number; lineId: string; endPoint: PixelPoint; color: string; opacity: number; finalValue: number }[] = [];
 
-    for (const item of labeled) {
+    for (const item of prioritized) {
       const labelY = item.endPoint.y;
       // Skip if outside chart area
       if (labelY < PADDING.top - 10 || labelY > chartBottom + 10) continue;

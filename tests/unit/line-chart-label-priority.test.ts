@@ -115,6 +115,33 @@ describe('orderLabelsByPriority', () => {
   it('returns an empty array for no candidates', () => {
     expect(orderLabelsByPriority([], 18)).toEqual([]);
   });
+
+  it('regression: REDRED (higher value, older) must beat Paradise of Rumors (lower value, more recent) in their isolated 2-item cluster', () => {
+    // Reported real-world values (2026-07-22 frame):
+    //   REDRED — CORTIS: 50,346, last activity 2026-07-17 (5 days stale)
+    //   Paradise of Rumors — AKMU: 49,895, last activity 2026-07-20 (2 days stale)
+    // Y positions derived from the actual linear value->pixel mapping used by
+    // chart-worker.ts's buildPixelPoints (y = top + chartH - value/max*chartH),
+    // using the visible max ("Suddenly", 115,936) and the on-screen scale
+    // (~18px per ~2268 value-units). VIRAL and Catch Catch are included,
+    // unchanged, to confirm they do NOT chain into the same cluster.
+    const pxPerUnit = 18 / 2268;
+    const maxValue = 115936;
+    const y = (value: number) => (maxValue - value) * pxPerUnit;
+
+    const candidates = [
+      candidate({ lineId: 'suddenly', y: y(115936), finalValue: 115936, lastActivityIdx: 100 }),
+      candidate({ lineId: 'viral', y: y(56876), finalValue: 56876, lastActivityIdx: 90 }),
+      candidate({ lineId: 'redred', y: y(50346), finalValue: 50346, lastActivityIdx: 17 }),
+      candidate({ lineId: 'paradise', y: y(49895), finalValue: 49895, lastActivityIdx: 20 }),
+      candidate({ lineId: 'catchcatch', y: y(42972), finalValue: 42972, lastActivityIdx: 80 }),
+    ];
+
+    const ordered = orderLabelsByPriority(candidates, 18);
+    const redredIndex = ordered.findIndex(c => c.lineId === 'redred');
+    const paradiseIndex = ordered.findIndex(c => c.lineId === 'paradise');
+    expect(redredIndex).toBeLessThan(paradiseIndex);
+  });
 });
 
 /** Convenience builder for a minimal LineDrawCommand. */

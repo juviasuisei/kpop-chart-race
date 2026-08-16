@@ -115,6 +115,24 @@ export function orderLabelsByPriority<T extends LabelPriorityCandidate>(
   return ordered;
 }
 
+/**
+ * Determine which drawn line commands are eligible to compete for an
+ * endpoint label slot.
+ *
+ * Endpoint labels must include both foreground (opacity > 0.5) AND
+ * background (opacity > 0.5 down to the ~0.05 cutoff `drawEndpointLabels`
+ * itself applies) lines. Restricting this to foreground only would let a
+ * line "win" a label slot merely because its real competitor had already
+ * faded into the background layer, without ever actually comparing them
+ * via the value/recency tie-break rule.
+ */
+export function getLabelCandidateCommands(result: {
+  background: LineDrawCommand[];
+  foreground: LineDrawCommand[];
+}): LineDrawCommand[] {
+  return [...result.background, ...result.foreground];
+}
+
 /** Time zoom presets — each has a different data aggregation level */
 export type TimeZoomPreset = "daily" | "year" | "decade" | "all";
 
@@ -837,10 +855,16 @@ export class LineChartController {
     }
     this.renderer.drawForeground(result.foreground);
 
-    // Draw endpoint labels on foreground — only for foreground (active) lines
+    // Draw endpoint labels for both foreground (opacity > 0.5) and background
+    // (still faintly visible, opacity > 0.05) lines, so a fading-but-recent
+    // line can still win a label slot per the tie-break rule. Excluding
+    // background here would let a foreground line "win" a slot by default
+    // just because its only real competitor had already faded past 0.5,
+    // never actually comparing them.
     const fgCtx = this.renderer.getContext("foreground");
-    if (fgCtx && result.foreground.length > 0) {
-      this.drawEndpointLabels(fgCtx, result.foreground);
+    const labelCandidates = getLabelCandidateCommands(result);
+    if (fgCtx && labelCandidates.length > 0) {
+      this.drawEndpointLabels(fgCtx, labelCandidates);
     }
 
     // Draw highlight layer + event dots

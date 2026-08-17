@@ -52,17 +52,32 @@ export interface LabelPriorityCandidate {
  *
  * Rule:
  *   - The single highest-value ("#1") line always wins, regardless of cluster.
- *   - Otherwise, group candidates into clusters of endpoints that would
- *     actually collide (Y-distance < minGap, chained transitively — matching
- *     the collision check used during placement).
- *   - In clusters of size <= 5: the largest value wins.
- *   - In clusters of size > 5: the most recently active line wins, using
- *     value as a tie-break.
+ *   - Otherwise, each candidate has a "cluster size": the size of the
+ *     LARGEST group of candidates it could belong to that are all mutually
+ *     within `minGap` of each other (a clique, not just individually near
+ *     one shared point).
+ *   - When comparing two candidates, if either one's cluster size is <= 5,
+ *     the larger value wins. If both exceed 5, the most recently active
+ *     line wins, using value as a tie-break.
  *
- * Cluster size MUST be computed with the same distance/chaining used by the
- * actual placement collision check, otherwise unrelated non-colliding labels
- * can inflate a genuine small tie into a "large cluster" and flip which rule
- * applies.
+ * For points on a line, a group is "mutually within minGap of each other"
+ * exactly when its Y-span (max - min) is < minGap -- so finding the largest
+ * such group containing a given candidate reduces to a sliding-window
+ * search over the Y-sorted candidates.
+ *
+ * This must NOT be computed via transitive chaining (linking every label to
+ * its neighbor's neighbor and so on): this chart can have 100+ labels packed
+ * into a couple hundred pixels of vertical space in its long tail, where
+ * nearly every adjacent pair is within minGap of the next. Chaining through
+ * that run absorbs dozens of unrelated labels (very different values,
+ * nothing actually tied) into one giant "cluster", making the small-cluster
+ * (value-wins) rule unreachable for almost everything below the sparse top
+ * of the chart. Nor is it enough to count how many OTHER candidates sit
+ * within minGap of a single candidate's own position: two candidates can
+ * each individually have several close neighbors on opposite sides without
+ * those neighbors being close to each other, which isn't a real group tie.
+ * Requiring the whole group's span to be < minGap (a true mutual clique)
+ * avoids both failure modes.
  */
 export function orderLabelsByPriority<T extends LabelPriorityCandidate>(
   candidates: T[],
@@ -70,26 +85,29 @@ export function orderLabelsByPriority<T extends LabelPriorityCandidate>(
 ): T[] {
   if (candidates.length === 0) return [];
 
-  // Sort by Y to find clusters via transitive chaining.
   const byY = [...candidates].sort((a, b) => a.y - b.y);
-  const clusterSizes = new Map<number, number>(); // index in byY -> cluster size
+  const n = byY.length;
 
-  for (let i = 0; i < byY.length; i++) {
-    if (clusterSizes.has(i)) continue;
-    let clusterEnd = i;
-    while (clusterEnd + 1 < byY.length && byY[clusterEnd + 1].y - byY[clusterEnd].y < minGap) {
-      clusterEnd++;
-    }
-    const size = clusterEnd - i + 1;
-    for (let j = i; j <= clusterEnd; j++) {
-      clusterSizes.set(j, size);
-    }
+  // maxHi[lo] = the largest index hi such that byY[hi].y - byY[lo].y < minGap
+  // (the farthest-reaching window that starts at lo and stays a clique).
+  const maxHi: number[] = new Array(n);
+  let hi = 0;
+  for (let lo = 0; lo < n; lo++) {
+    if (hi < lo) hi = lo;
+    while (hi + 1 < n && byY[hi + 1].y - byY[lo].y < minGap) hi++;
+    maxHi[lo] = hi;
   }
 
-  // Map each lineId to its cluster size
+  // For each candidate, the largest clique (contiguous window with span
+  // < minGap) that contains it.
   const lineClusterSize = new Map<string, number>();
-  for (let i = 0; i < byY.length; i++) {
-    lineClusterSize.set(byY[i].lineId, clusterSizes.get(i) ?? 1);
+  for (let i = 0; i < n; i++) {
+    let best = 1;
+    for (let lo = 0; lo <= i; lo++) {
+      if (maxHi[lo] < i) continue; // window starting at lo doesn't reach i
+      best = Math.max(best, maxHi[lo] - lo + 1);
+    }
+    lineClusterSize.set(byY[i].lineId, best);
   }
 
   const maxValue = Math.max(...candidates.map(c => c.finalValue));

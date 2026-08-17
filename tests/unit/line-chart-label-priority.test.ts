@@ -111,6 +111,44 @@ describe('orderLabelsByPriority', () => {
     expect(redredIndex).toBeLessThan(paradiseIndex);
   });
 
+  it('regression (real data, frame 3, isolated pair): an isolated 2-way tie must NOT be contaminated by an unrelated large pile-up elsewhere in the chart', () => {
+    // Real values captured with nothing else within 30px of either REDRED
+    // or Paradise of Rumors (a clean, isolated 2-way tie, 2.58px apart).
+    // This is the bug a global per-pair-branching comparator produced: even
+    // though this pair is genuinely isolated, REDRED still ranked 68 places
+    // behind Paradise (76 vs 8) in the live app, because Array.prototype.sort
+    // compared REDRED against unrelated candidates that WERE part of some
+    // real pile-up elsewhere in the full 144-line dataset, tripping the
+    // recency branch for those comparisons and sinking REDRED's rank for
+    // reasons that had nothing to do with its own situation. A handful of
+    // unrelated, distant, genuinely-packed candidates (a real pile-up of 6,
+    // far away in Y) are included here to reproduce that exact shape.
+    const candidates = [
+      candidate({ lineId: 'suddenly', y: 40, finalValue: 115936, lastActivityIdx: 57 }),
+      candidate({ lineId: 'redred', y: 414.52, finalValue: 50346, lastActivityIdx: 55 }),
+      candidate({ lineId: 'paradise', y: 417.1, finalValue: 49895, lastActivityIdx: 57 }),
+      // An unrelated, genuine pile-up far away in Y (span 2.5px, under the
+      // default tight pileupGap, all mutually close), where recency
+      // correctly overrides value -- but that must stay contained to this
+      // group and not leak into REDRED's rank.
+      candidate({ lineId: 'pileup-1', y: 900, finalValue: 600, lastActivityIdx: 5 }),
+      candidate({ lineId: 'pileup-2', y: 900.5, finalValue: 500, lastActivityIdx: 5 }),
+      candidate({ lineId: 'pileup-3', y: 901, finalValue: 400, lastActivityIdx: 5 }),
+      candidate({ lineId: 'pileup-4', y: 901.5, finalValue: 300, lastActivityIdx: 90 }),
+      candidate({ lineId: 'pileup-5', y: 902, finalValue: 200, lastActivityIdx: 5 }),
+      candidate({ lineId: 'pileup-6', y: 902.5, finalValue: 100, lastActivityIdx: 5 }),
+    ];
+
+    const ordered = orderLabelsByPriority(candidates);
+    const redredIndex = ordered.findIndex(c => c.lineId === 'redred');
+    const paradiseIndex = ordered.findIndex(c => c.lineId === 'paradise');
+    expect(redredIndex).toBeLessThan(paradiseIndex);
+    // Sanity check: the unrelated pile-up's own recency override still works.
+    const pileup4Index = ordered.findIndex(c => c.lineId === 'pileup-4');
+    const pileup1Index = ordered.findIndex(c => c.lineId === 'pileup-1');
+    expect(pileup4Index).toBeLessThan(pileup1Index);
+  });
+
   it('a genuine near-tie is NOT treated as a large pile-up merely because it sits inside a long run of merely-adjacent, unrelated labels', () => {
     // "x" and "y" are 1px apart -- a genuine near-tie. They sit in the
     // middle of a chain where every adjacent pair is 15px apart (using a

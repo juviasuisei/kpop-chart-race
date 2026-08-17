@@ -51,14 +51,17 @@ export interface LabelPriorityCandidate {
  * one is placed first and wins the slot.
  *
  * Rule:
- *   - The single highest-value ("#1") line always wins, regardless of cluster.
- *   - Otherwise, each candidate has a "pile-up size": the size of the
- *     LARGEST group of candidates it could belong to that are all mutually
- *     within `pileupGap` of each other (a clique, not just individually near
- *     one shared point).
- *   - When comparing two candidates, if either one's pile-up size is <= 5,
- *     the larger value wins. If both exceed 5, the most recently active
- *     line wins, using value as a tie-break.
+ *   - The base order is value descending -- in this chart's linear
+ *     value->pixel mapping, that is exactly the same order as Y ascending,
+ *     so this is also already "most prominent/highest value first", with
+ *     no extra work needed for the <= 5 (value-wins) case.
+ *   - Find genuine pile-ups: contiguous runs (in that Y/value order) whose
+ *     members are all mutually within `pileupGap` of each other (a clique,
+ *     i.e. the run's Y-span is < pileupGap). Within a pile-up run of size
+ *     > 5, and ONLY within that run, override the order to prefer the most
+ *     recently active line, using value as a tie-break.
+ *   - The single highest-value ("#1") line is then pinned to the very
+ *     front, in case it was swept into some pile-up run's reordering.
  *
  * `pileupGap` is deliberately much tighter than the MIN_GAP used to decide
  * whether a label needs to be hidden at all. MIN_GAP is about how much
@@ -72,19 +75,23 @@ export interface LabelPriorityCandidate {
  * much tighter kind of crowding, while the actual show/hide collision test
  * for placement keeps using the wider MIN_GAP.
  *
- * For points on a line, a group is "mutually within pileupGap of each
- * other" exactly when its Y-span (max - min) is < pileupGap -- so finding
- * the largest such group containing a given candidate reduces to a
- * sliding-window search over the Y-sorted candidates.
- *
- * This must NOT be computed via transitive chaining (linking every label to
- * its neighbor's neighbor and so on), nor by counting how many OTHER
- * candidates sit within pileupGap of a single candidate's own position:
- * both approaches let a long run of merely-adjacent, unrelated labels (or
- * labels that are each individually close to a shared point but not close
- * to each other) balloon into one "cluster" that isn't a real tie.
- * Requiring the whole group's span to be < pileupGap (a true mutual clique)
- * avoids that.
+ * This is deliberately NOT implemented as a single global sort comparator
+ * that branches per-pair on "does either side belong to some pile-up"
+ * (`aCluster > 5 || bCluster > 5`). `Array.prototype.sort` calls its
+ * comparator on many arbitrary pairs while sorting, including candidates
+ * that aren't anywhere near each other -- so a candidate that isn't part of
+ * any pile-up itself can still get compared, mid-sort, against some
+ * unrelated candidate that IS part of a real pile-up elsewhere in the
+ * chart, tripping the recency branch for that comparison and contaminating
+ * its rank for no reason connected to its own situation. That comparator
+ * also isn't a valid total order (whether recency or value applies depends
+ * on which two items happen to be compared), which is undefined behavior
+ * for sort and produced wildly wrong results (e.g. an isolated, genuinely
+ * 2-way tied pair ranked 70+ places apart). Reordering only within
+ * self-contained runs -- and never touching anything outside a run's own
+ * slice -- avoids all of this: two lines are only compared to each other
+ * using the recency rule if they are actually both part of the same
+ * genuine pile-up.
  */
 export function orderLabelsByPriority<T extends LabelPriorityCandidate>(
   candidates: T[],
@@ -92,53 +99,51 @@ export function orderLabelsByPriority<T extends LabelPriorityCandidate>(
 ): T[] {
   if (candidates.length === 0) return [];
 
-  const byY = [...candidates].sort((a, b) => a.y - b.y);
-  const n = byY.length;
+  // Base order: Y ascending == value descending in this chart's linear
+  // mapping, i.e. "highest value first" with no further work.
+  const result = [...candidates].sort((a, b) => a.y - b.y);
+  const n = result.length;
 
-  // maxHi[lo] = the largest index hi such that byY[hi].y - byY[lo].y <
-  // pileupGap (the farthest-reaching window that starts at lo and stays a
-  // clique).
+  // maxHi[lo] = the largest index hi such that result[hi].y - result[lo].y
+  // < pileupGap (the farthest-reaching window starting at lo that stays a
+  // mutual clique).
   const maxHi: number[] = new Array(n);
   let hi = 0;
   for (let lo = 0; lo < n; lo++) {
     if (hi < lo) hi = lo;
-    while (hi + 1 < n && byY[hi + 1].y - byY[lo].y < pileupGap) hi++;
+    while (hi + 1 < n && result[hi + 1].y - result[lo].y < pileupGap) hi++;
     maxHi[lo] = hi;
   }
 
-  // For each candidate, the largest clique (contiguous window with span
-  // < pileupGap) that contains it.
-  const lineClusterSize = new Map<string, number>();
-  for (let i = 0; i < n; i++) {
-    let best = 1;
-    for (let lo = 0; lo <= i; lo++) {
-      if (maxHi[lo] < i) continue; // window starting at lo doesn't reach i
-      best = Math.max(best, maxHi[lo] - lo + 1);
+  // Walk left to right, taking the largest run STARTING at each position.
+  // Any position that could belong to a larger run starting earlier has
+  // already been consumed by that earlier run, so this partitions the
+  // array into non-overlapping runs.
+  let i = 0;
+  while (i < n) {
+    const runEnd = maxHi[i];
+    const runSize = runEnd - i + 1;
+    if (runSize > 5) {
+      // Genuine pile-up: re-sort just this slice by recency (value as
+      // tie-break), without touching anything outside it.
+      const slice = result.slice(i, runEnd + 1);
+      slice.sort((a, b) => b.lastActivityIdx - a.lastActivityIdx || b.finalValue - a.finalValue);
+      for (let k = 0; k < slice.length; k++) result[i + k] = slice[k];
+      i = runEnd + 1;
+    } else {
+      i++;
     }
-    lineClusterSize.set(byY[i].lineId, best);
   }
 
+  // #1 always wins, even if it got swept into some pile-up run's reorder.
   const maxValue = Math.max(...candidates.map(c => c.finalValue));
-  const ordered = [...candidates];
-  ordered.sort((a, b) => {
-    // #1 always wins
-    const aIsTop = a.finalValue === maxValue ? 1 : 0;
-    const bIsTop = b.finalValue === maxValue ? 1 : 0;
-    if (aIsTop !== bIsTop) return bIsTop - aIsTop;
+  const topIndex = result.findIndex(c => c.finalValue === maxValue);
+  if (topIndex > 0) {
+    const [top] = result.splice(topIndex, 1);
+    result.unshift(top);
+  }
 
-    const aCluster = lineClusterSize.get(a.lineId) ?? 1;
-    const bCluster = lineClusterSize.get(b.lineId) ?? 1;
-    const inLargeCluster = aCluster > 5 || bCluster > 5;
-
-    if (inLargeCluster) {
-      // Large cluster: recency first, then score
-      return b.lastActivityIdx - a.lastActivityIdx || b.finalValue - a.finalValue;
-    }
-    // Small cluster: score first
-    return b.finalValue - a.finalValue;
-  });
-
-  return ordered;
+  return result;
 }
 
 /**

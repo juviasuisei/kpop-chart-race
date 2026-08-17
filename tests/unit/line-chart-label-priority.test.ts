@@ -17,20 +17,20 @@ function candidate(overrides: Partial<LabelPriorityCandidate>): LabelPriorityCan
 }
 
 describe('orderLabelsByPriority', () => {
-  it('picks the highest value ("#1") first regardless of clustering', () => {
+  it('picks the highest value ("#1") first regardless of pile-up', () => {
     const candidates = [
       candidate({ lineId: 'a', y: 0, finalValue: 100, lastActivityIdx: 0 }),
       candidate({ lineId: 'b', y: 500, finalValue: 50, lastActivityIdx: 99 }),
     ];
 
-    const [first] = orderLabelsByPriority(candidates, 18);
+    const [first] = orderLabelsByPriority(candidates);
     expect(first.lineId).toBe('a');
   });
 
-  it('in a small (<=5) local cluster, the largest value wins even if less recent', () => {
+  it('in a small (<=5) mutual clique, the largest value wins even if less recent', () => {
     // Two entries whose endpoints are 2px apart -- a genuine collision.
     // "b" has more recent activity but a lower value; per the rule, the
-    // larger value should win when local cluster size is <= 5.
+    // larger value should win when pile-up size is <= 5.
     const candidates = [
       candidate({ lineId: 'a', y: 100, finalValue: 66912, lastActivityIdx: 5 }),
       candidate({ lineId: 'b', y: 102, finalValue: 61311, lastActivityIdx: 50 }),
@@ -38,21 +38,87 @@ describe('orderLabelsByPriority', () => {
       candidate({ lineId: 'top', y: 0, finalValue: 999999, lastActivityIdx: 0 }),
     ];
 
-    const ordered = orderLabelsByPriority(candidates, 18);
+    const ordered = orderLabelsByPriority(candidates);
     const aIndex = ordered.findIndex(c => c.lineId === 'a');
     const bIndex = ordered.findIndex(c => c.lineId === 'b');
     expect(aIndex).toBeLessThan(bIndex);
   });
 
-  it('a genuine near-tie is NOT treated as a large cluster merely because it sits inside a long run of merely-adjacent, unrelated labels', () => {
-    // Regression test for the chaining bug: "x" and "y" are 1px apart -- a
-    // genuine near-tie. They sit in the middle of a chain where every
-    // adjacent pair is 15px apart (< 18px minGap), so a transitive/chained
-    // clustering algorithm would link the ENTIRE run of 12 labels into one
-    // "cluster" of size 12 (> 5), wrongly flipping x/y to recency-based
-    // tie-breaking. But x's and y's own immediate neighborhoods (within
-    // 18px of each of them specifically) only include their two nearest
-    // chain neighbors plus each other -- a local cluster of 4, well under
+  it('regression (real data, frame 1): REDRED beats Paradise of Rumors despite sitting inside the chart\'s dense long tail', () => {
+    // Real reported values from the 2026-07-22 frame (songs mode). REDRED
+    // (50,346, last active 2026-07-17) and Paradise of Rumors (49,895, last
+    // active 2026-07-20) are 0.87px apart -- essentially an exact tie -- but
+    // both sit inside a long run of other, unrelated songs (Boompala,
+    // Viral, Catch Catch, ...) each only 3-17px away. Using the wide
+    // MIN_GAP (18px) as the pile-up threshold swept several of those
+    // meaningfully-different-valued neighbors into the same "cluster" as
+    // the pair, misclassifying it as a large (>5) pile-up and flipping the
+    // tie-break to recency. The default (tight) pileupGap keeps this a
+    // clean 2-way value tie.
+    const candidates = [
+      candidate({ lineId: 'suddenly', y: 40, finalValue: 115936, lastActivityIdx: 57 }),
+      candidate({ lineId: 'boompala', y: 145.07, finalValue: 61311, lastActivityIdx: 57 }),
+      candidate({ lineId: 'lemon-tang', y: 148.85, finalValue: 59344, lastActivityIdx: 57 }),
+      candidate({ lineId: 'do-your-dance', y: 149.09, finalValue: 59220, lastActivityIdx: 56 }),
+      candidate({ lineId: 'viral', y: 153.6, finalValue: 56876, lastActivityIdx: 56 }),
+      candidate({ lineId: 'redred', y: 166.16, finalValue: 50346, lastActivityIdx: 55 }),
+      candidate({ lineId: 'paradise', y: 167.03, finalValue: 49895, lastActivityIdx: 57 }),
+      candidate({ lineId: 'catch-catch', y: 180.34, finalValue: 42972, lastActivityIdx: 57 }),
+      candidate({ lineId: 'wda', y: 183.66, finalValue: 41247, lastActivityIdx: 57 }),
+      candidate({ lineId: 'rude', y: 189.92, finalValue: 37996, lastActivityIdx: 57 }),
+      candidate({ lineId: 'joy-sorrow', y: 199.31, finalValue: 33111, lastActivityIdx: 57 }),
+      candidate({ lineId: 'landing-in-love', y: 202.52, finalValue: 31443, lastActivityIdx: 57 }),
+      candidate({ lineId: 'drowning', y: 203.53, finalValue: 30920, lastActivityIdx: 57 }),
+      candidate({ lineId: 'run-to-you', y: 205.62, finalValue: 29829, lastActivityIdx: 57 }),
+      candidate({ lineId: 'pretty-girl', y: 206.68, finalValue: 29279, lastActivityIdx: 57 }),
+      candidate({ lineId: 'bang-bang', y: 207.49, finalValue: 28859, lastActivityIdx: 57 }),
+      candidate({ lineId: '404', y: 210.04, finalValue: 27535, lastActivityIdx: 57 }),
+      candidate({ lineId: 'love-attack', y: 210.31, finalValue: 27395, lastActivityIdx: 57 }),
+    ];
+
+    // No explicit pileupGap -- exercise the real default used in production.
+    const ordered = orderLabelsByPriority(candidates);
+    const redredIndex = ordered.findIndex(c => c.lineId === 'redred');
+    const paradiseIndex = ordered.findIndex(c => c.lineId === 'paradise');
+    expect(redredIndex).toBeLessThan(paradiseIndex);
+  });
+
+  it('regression (real data, frame 2): REDRED still beats Paradise of Rumors at a different animation frame\'s scale', () => {
+    // Same real pair, captured from a second console dump at a slightly
+    // different render scale (the chart's value->pixel mapping drifts a
+    // little between animation frames). This is the exact data that broke
+    // the mutual-clique fix when it used the wide MIN_GAP (18px): the
+    // group {Boompala, Lemon Tang, Do Your Dance, Viral, REDRED, Paradise}
+    // spanned just under 18px at this scale, forming a clique of 6 and
+    // flipping the tie-break to recency even though REDRED/Paradise on
+    // their own are still just a clean 2-way tie (0.63px apart).
+    const candidates = [
+      candidate({ lineId: 'suddenly', y: 40, finalValue: 115936, lastActivityIdx: 57 }),
+      candidate({ lineId: 'boompala', y: 116.33, finalValue: 61311, lastActivityIdx: 57 }),
+      candidate({ lineId: 'lemon-tang', y: 119.08, finalValue: 59344, lastActivityIdx: 57 }),
+      candidate({ lineId: 'do-your-dance', y: 119.25, finalValue: 59220, lastActivityIdx: 56 }),
+      candidate({ lineId: 'viral', y: 122.53, finalValue: 56876, lastActivityIdx: 56 }),
+      candidate({ lineId: 'redred', y: 131.65, finalValue: 50346, lastActivityIdx: 55 }),
+      candidate({ lineId: 'paradise', y: 132.28, finalValue: 49895, lastActivityIdx: 57 }),
+      candidate({ lineId: 'catch-catch', y: 141.95, finalValue: 42972, lastActivityIdx: 57 }),
+      candidate({ lineId: 'wda', y: 144.36, finalValue: 41247, lastActivityIdx: 57 }),
+      candidate({ lineId: 'rude', y: 148.91, finalValue: 37996, lastActivityIdx: 57 }),
+    ];
+
+    const ordered = orderLabelsByPriority(candidates);
+    const redredIndex = ordered.findIndex(c => c.lineId === 'redred');
+    const paradiseIndex = ordered.findIndex(c => c.lineId === 'paradise');
+    expect(redredIndex).toBeLessThan(paradiseIndex);
+  });
+
+  it('a genuine near-tie is NOT treated as a large pile-up merely because it sits inside a long run of merely-adjacent, unrelated labels', () => {
+    // "x" and "y" are 1px apart -- a genuine near-tie. They sit in the
+    // middle of a chain where every adjacent pair is 15px apart (using a
+    // wide, 18px pileupGap here to exercise the same failure mode the real
+    // data hit): a transitive/chained algorithm would link the ENTIRE run
+    // of 12 labels into one cluster (> 5), wrongly flipping x/y to
+    // recency-based tie-breaking. The mutual-clique definition correctly
+    // finds that x/y's own reachable clique tops out at 3 -- well under
     // the threshold -- so the larger value ("x") must still win.
     const candidates = [
       candidate({ lineId: 'n1', y: 0, finalValue: 10, lastActivityIdx: 1 }),
@@ -76,46 +142,10 @@ describe('orderLabelsByPriority', () => {
     expect(xIndex).toBeLessThan(yIndex);
   });
 
-  it('regression: REDRED beats Paradise of Rumors despite sitting inside the chart\'s dense long tail', () => {
-    // Real reported values from the 2026-07-22 frame (songs mode). REDRED
-    // (50,346, last active 2026-07-17) and Paradise of Rumors (49,895, last
-    // active 2026-07-20) are 0.87px apart -- essentially an exact tie -- but
-    // both sit inside a long run of other, unrelated songs where every
-    // adjacent Y gap is also under the 18px minGap. This is the exact shape
-    // that broke the previous (chained) clustering fix: the whole run got
-    // treated as one cluster and Paradise won on recency despite the pair
-    // being, on their own, a clean 2-way value tie.
-    const candidates = [
-      candidate({ lineId: 'suddenly', y: 40, finalValue: 115936, lastActivityIdx: 57 }),
-      candidate({ lineId: 'boompala', y: 145.07, finalValue: 61311, lastActivityIdx: 57 }),
-      candidate({ lineId: 'lemon-tang', y: 148.85, finalValue: 59344, lastActivityIdx: 57 }),
-      candidate({ lineId: 'do-your-dance', y: 149.09, finalValue: 59220, lastActivityIdx: 56 }),
-      candidate({ lineId: 'viral', y: 153.6, finalValue: 56876, lastActivityIdx: 56 }),
-      candidate({ lineId: 'redred', y: 166.16, finalValue: 50346, lastActivityIdx: 55 }),
-      candidate({ lineId: 'paradise', y: 167.03, finalValue: 49895, lastActivityIdx: 57 }),
-      candidate({ lineId: 'catch-catch', y: 180.34, finalValue: 42972, lastActivityIdx: 57 }),
-      candidate({ lineId: 'wda', y: 183.66, finalValue: 41247, lastActivityIdx: 57 }),
-      candidate({ lineId: 'rude', y: 189.92, finalValue: 37996, lastActivityIdx: 57 }),
-      candidate({ lineId: 'joy-sorrow', y: 199.31, finalValue: 33111, lastActivityIdx: 57 }),
-      candidate({ lineId: 'landing-in-love', y: 202.52, finalValue: 31443, lastActivityIdx: 57 }),
-      candidate({ lineId: 'drowning', y: 203.53, finalValue: 30920, lastActivityIdx: 57 }),
-      candidate({ lineId: 'run-to-you', y: 205.62, finalValue: 29829, lastActivityIdx: 57 }),
-      candidate({ lineId: 'pretty-girl', y: 206.68, finalValue: 29279, lastActivityIdx: 57 }),
-      candidate({ lineId: 'bang-bang', y: 207.49, finalValue: 28859, lastActivityIdx: 57 }),
-      candidate({ lineId: '404', y: 210.04, finalValue: 27535, lastActivityIdx: 57 }),
-      candidate({ lineId: 'love-attack', y: 210.31, finalValue: 27395, lastActivityIdx: 57 }),
-    ];
-
-    const ordered = orderLabelsByPriority(candidates, 18);
-    const redredIndex = ordered.findIndex(c => c.lineId === 'redred');
-    const paradiseIndex = ordered.findIndex(c => c.lineId === 'paradise');
-    expect(redredIndex).toBeLessThan(paradiseIndex);
-  });
-
   it('in a genuine large (>5) mutual clique, the most recently active line wins', () => {
     // Six entries spaced 3px apart -- the whole group's span is 15px, under
-    // the 18px minGap, so every pair here is mutually within minGap of each
-    // other: a true clique of size 6.
+    // an 18px pileupGap, so every pair here is mutually within range of
+    // each other: a true clique of size 6.
     const candidates = [
       candidate({ lineId: 'top', y: -1000, finalValue: 999999, lastActivityIdx: 0 }),
       candidate({ lineId: 'p1', y: 100, finalValue: 300, lastActivityIdx: 5 }),
@@ -152,8 +182,32 @@ describe('orderLabelsByPriority', () => {
     expect(aIndex).toBeLessThan(bIndex);
   });
 
+  it('with the default (tight) pileupGap, a real pile-up needs lines within a couple pixels, not a whole label-height', () => {
+    // The same six-entry clique from the ">5 mutual clique" test (3px
+    // apart, span 15px) is NOT a pile-up under the tighter production
+    // default -- it only becomes one under a wide 18px pileupGap. This
+    // documents the intentional gap between MIN_GAP (label placement) and
+    // the default pileupGap (tie-break pile-up detection).
+    const candidates = [
+      candidate({ lineId: 'top', y: -1000, finalValue: 999999, lastActivityIdx: 0 }),
+      candidate({ lineId: 'p1', y: 100, finalValue: 300, lastActivityIdx: 5 }),
+      candidate({ lineId: 'p2', y: 103, finalValue: 250, lastActivityIdx: 5 }),
+      candidate({ lineId: 'a', y: 106, finalValue: 500, lastActivityIdx: 10 }),
+      candidate({ lineId: 'b', y: 109, finalValue: 100, lastActivityIdx: 90 }),
+      candidate({ lineId: 'p3', y: 112, finalValue: 200, lastActivityIdx: 5 }),
+      candidate({ lineId: 'p4', y: 115, finalValue: 150, lastActivityIdx: 5 }),
+    ];
+
+    const ordered = orderLabelsByPriority(candidates); // default pileupGap
+    // "a" has the largest value; with the tight default, this group isn't
+    // dense enough to count as a pile-up, so value wins and "a" beats "b".
+    const aIndex = ordered.findIndex(c => c.lineId === 'a');
+    const bIndex = ordered.findIndex(c => c.lineId === 'b');
+    expect(aIndex).toBeLessThan(bIndex);
+  });
+
   it('returns an empty array for no candidates', () => {
-    expect(orderLabelsByPriority([], 18)).toEqual([]);
+    expect(orderLabelsByPriority([])).toEqual([]);
   });
 });
 

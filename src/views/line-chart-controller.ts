@@ -47,59 +47,67 @@ export interface LabelPriorityCandidate {
 
 /**
  * Order label candidates by display priority so that, when two or more
- * labels collide (endpoints closer together than `minGap`), the correct
+ * labels collide (endpoints closer together than MIN_GAP), the correct
  * one is placed first and wins the slot.
  *
  * Rule:
  *   - The single highest-value ("#1") line always wins, regardless of cluster.
- *   - Otherwise, each candidate has a "cluster size": the size of the
+ *   - Otherwise, each candidate has a "pile-up size": the size of the
  *     LARGEST group of candidates it could belong to that are all mutually
- *     within `minGap` of each other (a clique, not just individually near
+ *     within `pileupGap` of each other (a clique, not just individually near
  *     one shared point).
- *   - When comparing two candidates, if either one's cluster size is <= 5,
+ *   - When comparing two candidates, if either one's pile-up size is <= 5,
  *     the larger value wins. If both exceed 5, the most recently active
  *     line wins, using value as a tie-break.
  *
- * For points on a line, a group is "mutually within minGap of each other"
- * exactly when its Y-span (max - min) is < minGap -- so finding the largest
- * such group containing a given candidate reduces to a sliding-window
- * search over the Y-sorted candidates.
+ * `pileupGap` is deliberately much tighter than the MIN_GAP used to decide
+ * whether a label needs to be hidden at all. MIN_GAP is about how much
+ * vertical space a label needs to avoid overlapping another label -- wide
+ * enough that, in the busier parts of this chart, it also sweeps in several
+ * meaningfully different-valued lines that just happen to be nearby, which
+ * a human looking at the chart would never consider "tied". A genuine
+ * pile-up (e.g. dozens of songs sitting near zero at the very start of the
+ * race) has lines within a couple pixels of each other, not within a whole
+ * label-height -- so the >5/recency exception should only fire for that
+ * much tighter kind of crowding, while the actual show/hide collision test
+ * for placement keeps using the wider MIN_GAP.
+ *
+ * For points on a line, a group is "mutually within pileupGap of each
+ * other" exactly when its Y-span (max - min) is < pileupGap -- so finding
+ * the largest such group containing a given candidate reduces to a
+ * sliding-window search over the Y-sorted candidates.
  *
  * This must NOT be computed via transitive chaining (linking every label to
- * its neighbor's neighbor and so on): this chart can have 100+ labels packed
- * into a couple hundred pixels of vertical space in its long tail, where
- * nearly every adjacent pair is within minGap of the next. Chaining through
- * that run absorbs dozens of unrelated labels (very different values,
- * nothing actually tied) into one giant "cluster", making the small-cluster
- * (value-wins) rule unreachable for almost everything below the sparse top
- * of the chart. Nor is it enough to count how many OTHER candidates sit
- * within minGap of a single candidate's own position: two candidates can
- * each individually have several close neighbors on opposite sides without
- * those neighbors being close to each other, which isn't a real group tie.
- * Requiring the whole group's span to be < minGap (a true mutual clique)
- * avoids both failure modes.
+ * its neighbor's neighbor and so on), nor by counting how many OTHER
+ * candidates sit within pileupGap of a single candidate's own position:
+ * both approaches let a long run of merely-adjacent, unrelated labels (or
+ * labels that are each individually close to a shared point but not close
+ * to each other) balloon into one "cluster" that isn't a real tie.
+ * Requiring the whole group's span to be < pileupGap (a true mutual clique)
+ * avoids that.
  */
 export function orderLabelsByPriority<T extends LabelPriorityCandidate>(
   candidates: T[],
-  minGap: number = MIN_GAP
+  pileupGap: number = PILEUP_GAP
 ): T[] {
   if (candidates.length === 0) return [];
 
   const byY = [...candidates].sort((a, b) => a.y - b.y);
   const n = byY.length;
 
-  // maxHi[lo] = the largest index hi such that byY[hi].y - byY[lo].y < minGap
-  // (the farthest-reaching window that starts at lo and stays a clique).
+  // maxHi[lo] = the largest index hi such that byY[hi].y - byY[lo].y <
+  // pileupGap (the farthest-reaching window that starts at lo and stays a
+  // clique).
   const maxHi: number[] = new Array(n);
   let hi = 0;
   for (let lo = 0; lo < n; lo++) {
     if (hi < lo) hi = lo;
-    while (hi + 1 < n && byY[hi + 1].y - byY[lo].y < minGap) hi++;
+    while (hi + 1 < n && byY[hi + 1].y - byY[lo].y < pileupGap) hi++;
     maxHi[lo] = hi;
   }
 
   // For each candidate, the largest clique (contiguous window with span
-  // < minGap) that contains it.
+  // < pileupGap) that contains it.
   const lineClusterSize = new Map<string, number>();
   for (let i = 0; i < n; i++) {
     let best = 1;
@@ -175,6 +183,18 @@ export const HIT_RADIUS = 8;
 const EVENT_DOT_SIZE = 8;
 const MIN_GAP = 18;
 const MAX_LABEL_WIDTH = 175;
+/**
+ * Tight pixel threshold used only to decide whether candidates form a
+ * genuine visual pile-up for the endpoint-label tie-break rule (see
+ * orderLabelsByPriority). Deliberately much smaller than MIN_GAP: MIN_GAP
+ * is about how much vertical space a label needs to not overlap another
+ * label, which is generous enough to also sweep in several meaningfully
+ * different-valued, merely-nearby lines in the busier parts of the chart.
+ * A real pile-up (e.g. dozens of songs sitting near zero at the very start
+ * of the race) has lines within a couple pixels of each other, not within
+ * a whole label-height.
+ */
+const PILEUP_GAP = 4;
 
 /** Artist type display labels */
 const ARTIST_TYPE_LABELS: Record<string, string> = {

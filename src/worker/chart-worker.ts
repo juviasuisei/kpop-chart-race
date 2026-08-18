@@ -19,6 +19,7 @@ import type {
   Viewport,
   CanvasLayer,
 } from "./messages.ts";
+import { findFirstPlaceLineId, resolveLineOpacity } from "./visibility.ts";
 
 // --- Internal state ---
 /** All date strings, indexed by position */
@@ -27,8 +28,6 @@ let lines: SerializedLineData[] = [];
 let selectedLineIds: Set<string> = new Set();
 
 // --- Constants ---
-const FADE_START_DAYS = 7;
-const BASE_FADE_END_DAYS = 28;
 const Z_INDEX_DAY_MULTIPLIER = 1_000_000_000;
 const MAX_DAYS = 36500;
 
@@ -86,16 +85,6 @@ function getValueAtDate(changePoints: [number, number][], dateIndex: number): nu
 function getLastActivityDateIndex(changePoints: [number, number][]): number {
   if (changePoints.length === 0) return -1;
   return changePoints[changePoints.length - 1][0];
-}
-
-/**
- * Compute opacity based on days since last activity and filter ceiling.
- */
-function computeOpacity(daysSinceActivity: number, filterCount: number): number {
-  const ceiling = BASE_FADE_END_DAYS * Math.pow(2, filterCount);
-  if (daysSinceActivity <= FADE_START_DAYS) return 1.0;
-  if (daysSinceActivity >= ceiling) return 0.0;
-  return 1.0 - (daysSinceActivity - FADE_START_DAYS) / (ceiling - FADE_START_DAYS);
 }
 
 /**
@@ -283,17 +272,13 @@ function computeFrame(msg: ComputeFrameMessage): void {
   const foreground: LineDrawCommand[] = [];
   const highlight: LineDrawCommand[] = [];
 
-  // Find the #1 line (highest cumulative value at current date) — never dims
-  let firstPlaceLineId: string | null = null;
-  let firstPlaceValue = 0;
-  for (const line of lines) {
-    if (line.changePoints.length === 0) continue;
-    const val = getValueAtDate(line.changePoints, effectiveDateIndex);
-    if (val > firstPlaceValue) {
-      firstPlaceValue = val;
-      firstPlaceLineId = line.lineId;
-    }
-  }
+  // Find the #1 line (highest cumulative value at current date) — never dims.
+  // Recomputed every frame, so immunity ends the instant it's surpassed.
+  const firstPlaceLineId = findFirstPlaceLineId(
+    lines
+      .filter(line => line.changePoints.length > 0)
+      .map(line => ({ lineId: line.lineId, value: getValueAtDate(line.changePoints, effectiveDateIndex) })),
+  );
 
   interface ScoredLine {
     cmd: LineDrawCommand;
@@ -322,18 +307,14 @@ function computeFrame(msg: ComputeFrameMessage): void {
 
     const isSelected = selectedLineIds.has(line.lineId);
 
-    // Compute visibility
-    let opacity: number;
-    const isFirstPlace = line.lineId === firstPlaceLineId;
-    if (isSelected) {
-      opacity = 1.0;
-    } else if (isFirstPlace) {
-      opacity = 1.0; // #1 never dims from inactivity
-    } else if (visibility.artistFilterActive) {
-      opacity = 1.0;
-    } else {
-      opacity = computeOpacity(daysSinceActivity, visibility.filterCount);
-    }
+    // Compute visibility (see resolveLineOpacity for the override order)
+    let opacity = resolveLineOpacity({
+      isSelected,
+      isFirstPlace: line.lineId === firstPlaceLineId,
+      artistFilterActive: visibility.artistFilterActive,
+      daysSinceActivity,
+      filterCount: visibility.filterCount,
+    });
 
     if (opacity <= 0 && !isSelected) continue;
 

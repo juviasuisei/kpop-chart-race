@@ -31,7 +31,7 @@ const SPECIFIC_SOURCES: ChartSource[] = [
 ];
 const ZOOM_LEVELS = [10, "all"] as const;
 const VIEWS = ["race", "yearly"] as const;
-const METRICS = ["points", "wins"] as const;
+const METRICS = ["points", "wins", "appearances"] as const;
 
 /** Generates a valid FilterState combination */
 const arbFilterState = fc.record({

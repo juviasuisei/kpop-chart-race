@@ -1057,6 +1057,21 @@ body {
   color: #213547;
 }
 
+/* All-time aggregate cell: visually distinguished and placed first (leftmost
+   in landscape grid, top in portrait single-column). */
+.yearly-view__cell--all-time {
+  background: rgba(0, 100, 200, 0.06);
+  border-color: rgba(0, 100, 200, 0.25);
+}
+
+.yearly-view__cell--all-time .yearly-view__year {
+  color: #0072B2;
+}
+
+.yearly-treemap__block--all-time .yearly-treemap__year {
+  color: #0072B2;
+}
+
 .yearly-view__empty {
   color: rgba(0, 0, 0, 0.4);
   font-style: italic;
@@ -2369,11 +2384,11 @@ body {
 
 .artist-timeline__stats {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 16px;
   margin-top: 12px;
   width: 100%;
-  max-width: 500px;
+  max-width: 640px;
 }
 
 .artist-timeline__stat {
@@ -2558,7 +2573,7 @@ body {
 
 @media (max-width: 767px) {
   .artist-timeline__stats {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 12px;
   }
 

@@ -176,16 +176,17 @@ export class Toolbar {
       this.sourceSelect.value = state.source;
     }
 
-    // Metric toggle (wins/points)
+    // Metric segmented control (points/wins/appearances)
     const metricControl = this.wrapper.querySelector('[data-control="metric"]') as HTMLElement | null;
     if (metricControl) {
-      const track = metricControl.querySelector(".view-switcher__track");
-      const labels = metricControl.querySelectorAll(".view-switcher__label");
-      const isPoints = state.metric === "points";
-      track?.classList.toggle("view-switcher__track--on", isPoints);
-      // labels[0] = Wins, labels[1] = Points
-      labels[0]?.classList.toggle("view-switcher__label--active", !isPoints);
-      labels[1]?.classList.toggle("view-switcher__label--active", isPoints);
+      const buttons = metricControl.querySelectorAll(".toolbar__metric-btn");
+      buttons.forEach((btn) => {
+        const btnEl = btn as HTMLElement;
+        btnEl.classList.toggle(
+          "toolbar__view-btn--active",
+          btnEl.dataset.metric === state.metric,
+        );
+      });
     }
 
     // Zoom toggle (all/10)
@@ -554,44 +555,35 @@ export class Toolbar {
   }
 
   private createMetricControl(): HTMLElement {
+    // Segmented control (three options don't fit a two-position toggle)
     const group = document.createElement("div");
     group.setAttribute("data-control", "metric");
-    group.className = "toolbar__control view-switcher";
-    group.setAttribute("role", "switch");
+    group.className = "toolbar__control toolbar__view-group toolbar__metric-group";
+    group.setAttribute("role", "group");
     group.setAttribute("aria-label", "Metric");
-    group.tabIndex = 0;
 
-    const winsLabel = document.createElement("span");
-    winsLabel.className = "view-switcher__label";
-    winsLabel.textContent = "Wins";
+    const metrics: { value: "points" | "wins" | "appearances"; label: string }[] = [
+      { value: "points", label: "Points" },
+      { value: "wins", label: "Wins" },
+      { value: "appearances", label: "Appearances" },
+    ];
 
-    const track = document.createElement("div");
-    track.className = "view-switcher__track view-switcher__track--on";
-    const thumb = document.createElement("div");
-    thumb.className = "view-switcher__thumb";
-    track.appendChild(thumb);
+    const current = this.filterState.getState().metric;
 
-    const pointsLabel = document.createElement("span");
-    pointsLabel.className = "view-switcher__label view-switcher__label--active";
-    pointsLabel.textContent = "Points";
-
-    group.appendChild(winsLabel);
-    group.appendChild(track);
-    group.appendChild(pointsLabel);
-
-    const toggle = () => {
-      const isPoints = track.classList.contains("view-switcher__track--on");
-      const newMetric = isPoints ? "wins" : "points";
-      track.classList.toggle("view-switcher__track--on", !isPoints);
-      pointsLabel.classList.toggle("view-switcher__label--active", !isPoints);
-      winsLabel.classList.toggle("view-switcher__label--active", isPoints);
-      this.filterState.update({ metric: newMetric });
-    };
-
-    group.addEventListener("click", toggle);
-    group.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); }
-    });
+    for (const m of metrics) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "toolbar__view-btn toolbar__metric-btn" + (m.value === current ? " toolbar__view-btn--active" : "");
+      btn.textContent = m.label;
+      btn.dataset.metric = m.value;
+      btn.addEventListener("click", () => {
+        const buttons = group.querySelectorAll(".toolbar__metric-btn");
+        buttons.forEach((b) => b.classList.remove("toolbar__view-btn--active"));
+        btn.classList.add("toolbar__view-btn--active");
+        this.filterState.update({ metric: m.value });
+      });
+      group.appendChild(btn);
+    }
 
     return group;
   }

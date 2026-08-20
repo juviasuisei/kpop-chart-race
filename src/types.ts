@@ -77,5 +77,5 @@ export interface FilterState {
   artist: string; // artist ID | "all"
   zoom: ZoomLevel; // 10 | "all"
   view: "race" | "episodes" | "yearly" | "line" | "artist-timeline";
-  metric: "points" | "wins"; // yearly-view only
+  metric: "points" | "wins" | "appearances"; // yearly-view only
 }

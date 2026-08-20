@@ -101,9 +101,11 @@ describe('YearlyView', () => {
     ]);
     view.mount(container, dataStore);
     const headings = container.querySelectorAll('.yearly-view__year');
-    expect(headings.length).toBe(2);
-    expect(headings[0].textContent).toBe('2026');
-    expect(headings[1].textContent).toBe('2025');
+    // With >1 year of data, an All-Time aggregate cell is prepended.
+    expect(headings.length).toBe(3);
+    expect(headings[0].textContent).toBe('All-Time');
+    expect(headings[1].textContent).toBe('2026');
+    expect(headings[2].textContent).toBe('2025');
   });
 
   it('shows top 10 artists per year sorted by points', () => {
@@ -136,16 +138,18 @@ describe('YearlyView', () => {
     ]);
     view.mount(container, dataStore);
 
+    // Cells: [All-Time, 2026, 2025]
     const cells = container.querySelectorAll('.yearly-view__cell');
-    expect(cells.length).toBe(2);
+    expect(cells.length).toBe(3);
+    expect(cells[0].classList.contains('yearly-view__cell--all-time')).toBe(true);
 
-    // 2026 cell (first, newest): Artist B should be #1 with 8000
-    const rows2026 = cells[0].querySelectorAll('.yearly-view__row');
+    // 2026 cell (index 1): Artist B should be #1 with 8000
+    const rows2026 = cells[1].querySelectorAll('.yearly-view__row');
     const firstBar2026 = rows2026[0].querySelector('.yearly-view__bar');
     expect(firstBar2026?.textContent).toContain('Artist B');
 
-    // 2025 cell: Artist A should be #1 with 5000
-    const rows2025 = cells[1].querySelectorAll('.yearly-view__row');
+    // 2025 cell (index 2): Artist A should be #1 with 5000
+    const rows2025 = cells[2].querySelectorAll('.yearly-view__row');
     const firstBar2025 = rows2025[0].querySelector('.yearly-view__bar');
     expect(firstBar2025?.textContent).toContain('Artist A');
   });
@@ -161,13 +165,15 @@ describe('YearlyView', () => {
     ]);
     view.mount(container, dataStore);
 
+    // Cells: [All-Time, 2026, 2025]. Global max is 10000 across all columns.
     const cells = container.querySelectorAll('.yearly-view__cell');
+
     // 2026 bar should be 50% width (5000/10000)
-    const bar2026 = cells[0].querySelector('.yearly-view__bar') as HTMLElement;
+    const bar2026 = cells[1].querySelector('.yearly-view__bar') as HTMLElement;
     expect(bar2026.style.width).toBe('50%');
 
     // 2025 bar should be 100% width (10000/10000)
-    const bar2025 = cells[1].querySelector('.yearly-view__bar') as HTMLElement;
+    const bar2025 = cells[2].querySelector('.yearly-view__bar') as HTMLElement;
     expect(bar2025.style.width).toBe('100%');
   });
 
@@ -897,6 +903,236 @@ describe('YearlyView — Source Filter in Grid Mode', () => {
 
     const rows = container.querySelectorAll('.yearly-view__row');
     expect(rows.length).toBe(0);
+  });
+});
+
+describe('YearlyView — Appearances Metric', () => {
+  let container: HTMLElement;
+  let view: YearlyView;
+
+  beforeEach(() => {
+    container = document.createElement('div');
+    document.body.appendChild(container);
+    view = new YearlyView();
+  });
+
+  afterEach(() => {
+    view.unmount();
+    document.body.removeChild(container);
+  });
+
+  /** Builds a single-year artist that charted on multiple dates/sources. */
+  function makeStore(artists: ParsedArtist[]): DataStore {
+    const artistMap = new Map(artists.map(a => [a.id, a]));
+    const allDates = new Set<string>();
+    for (const artist of artists) {
+      for (const release of artist.releases) {
+        for (const date of release.dailyValues.keys()) allDates.add(date);
+      }
+    }
+    const dates = Array.from(allDates).sort();
+    return {
+      artists: artistMap,
+      dates,
+      startDate: dates[0] ?? '',
+      endDate: dates[dates.length - 1] ?? '',
+      firstAppearance: new Map(),
+      chartWins: new Map(),
+    };
+  }
+
+  it('counts one appearance per (date, source) chart entry (artists mode)', () => {
+    const artist: ParsedArtist = {
+      id: 'a', name: 'Artist A', artistType: 'girl_group', generation: 4,
+      logoUrl: 'assets/logos/a.svg', albumReleases: [],
+      releases: [{
+        id: 'r1', title: 'Song', embeds: new Map(),
+        dailyValues: new Map([
+          ['2025-06-01', { value: 5000, source: 'inkigayo', episode: 1 }],
+          ['2025-06-02', { value: 3000, source: 'music_bank', episode: 2 }],
+          ['2025-06-03', { value: 2000, source: 'inkigayo', episode: 3 }],
+        ]),
+      }],
+    };
+    const ds = makeStore([artist]);
+    view.mount(container, ds);
+    view.setMetric('appearances');
+
+    const stats = container.querySelector('.yearly-view__stats');
+    expect(stats?.textContent).toBe('3 appearances');
+  });
+
+  it('artist gets one credit per song even when two songs chart the same day', () => {
+    const artist: ParsedArtist = {
+      id: 'a', name: 'Artist A', artistType: 'boy_group', generation: 4,
+      logoUrl: 'assets/logos/a.svg', albumReleases: [],
+      releases: [
+        {
+          id: 'r1', title: 'Song 1', embeds: new Map(),
+          dailyValues: new Map([['2025-06-01', { value: 5000, source: 'inkigayo', episode: 1 }]]),
+        },
+        {
+          id: 'r2', title: 'Song 2', embeds: new Map(),
+          dailyValues: new Map([['2025-06-01', { value: 4000, source: 'inkigayo', episode: 1 }]]),
+        },
+      ],
+    };
+    const ds = makeStore([artist]);
+    view.mount(container, ds);
+    view.setMetric('appearances');
+
+    // Both songs charted on the same (date, source) → 2 credits
+    const stats = container.querySelector('.yearly-view__stats');
+    expect(stats?.textContent).toBe('2 appearances');
+  });
+
+  it('counts one appearance per (date, source) entry in songs mode', () => {
+    const artist: ParsedArtist = {
+      id: 'a', name: 'Artist A', artistType: 'girl_group', generation: 4,
+      logoUrl: 'assets/logos/a.svg', albumReleases: [],
+      releases: [{
+        id: 'r1', title: 'Song', embeds: new Map(), artistIds: ['a'],
+        dailyValues: new Map([
+          ['2025-06-01', { value: 5000, source: 'inkigayo', episode: 1 }],
+          ['2025-06-08', { value: 3000, source: 'inkigayo', episode: 2 }],
+        ]),
+      }] as any,
+    };
+    const ds = makeStore([artist]);
+    view.mount(container, ds);
+    view.setDisplayMode('songs');
+    view.setMetric('appearances');
+
+    const stats = container.querySelector('.yearly-view__stats');
+    expect(stats?.textContent).toBe('2 appearances');
+  });
+
+  it('filters appearances by source', () => {
+    const artist: ParsedArtist = {
+      id: 'a', name: 'Artist A', artistType: 'girl_group', generation: 4,
+      logoUrl: 'assets/logos/a.svg', albumReleases: [],
+      releases: [{
+        id: 'r1', title: 'Song', embeds: new Map(),
+        dailyValues: new Map([
+          ['2025-06-01', { value: 5000, source: 'inkigayo', episode: 1 }],
+          ['2025-06-02', { value: 3000, source: 'music_bank', episode: 2 }],
+        ]),
+      }],
+    };
+    const ds = makeStore([artist]);
+    view.mount(container, ds);
+    view.setMetric('appearances');
+    view.setSourceFilter('inkigayo');
+
+    const stats = container.querySelector('.yearly-view__stats');
+    expect(stats?.textContent).toBe('1 appearance');
+  });
+});
+
+describe('YearlyView — All-Time Aggregate', () => {
+  let container: HTMLElement;
+  let view: YearlyView;
+
+  beforeEach(() => {
+    container = document.createElement('div');
+    document.body.appendChild(container);
+    view = new YearlyView();
+  });
+
+  afterEach(() => {
+    view.unmount();
+    document.body.removeChild(container);
+  });
+
+  function makeStore(artists: ParsedArtist[]): DataStore {
+    const artistMap = new Map(artists.map(a => [a.id, a]));
+    const allDates = new Set<string>();
+    for (const artist of artists) {
+      for (const release of artist.releases) {
+        for (const date of release.dailyValues.keys()) allDates.add(date);
+      }
+    }
+    const dates = Array.from(allDates).sort();
+    return {
+      artists: artistMap,
+      dates,
+      startDate: dates[0] ?? '',
+      endDate: dates[dates.length - 1] ?? '',
+      firstAppearance: new Map(),
+      chartWins: new Map(),
+    };
+  }
+
+  function artistAcrossYears(): ParsedArtist {
+    return {
+      id: 'a', name: 'Artist A', artistType: 'girl_group', generation: 4,
+      logoUrl: 'assets/logos/a.svg', albumReleases: [],
+      releases: [{
+        id: 'r1', title: 'Song', embeds: new Map(),
+        dailyValues: new Map([
+          ['2025-06-01', { value: 5000, source: 'inkigayo', episode: 1 }],
+          ['2026-06-01', { value: 3000, source: 'inkigayo', episode: 2 }],
+        ]),
+      }],
+    };
+  }
+
+  it('prepends an All-Time cell when there is more than one year of data', () => {
+    const ds = makeStore([artistAcrossYears()]);
+    view.mount(container, ds);
+
+    const headings = Array.from(container.querySelectorAll('.yearly-view__year')).map(h => h.textContent);
+    expect(headings).toEqual(['All-Time', '2026', '2025']);
+
+    const firstCell = container.querySelector('.yearly-view__cell');
+    expect(firstCell?.classList.contains('yearly-view__cell--all-time')).toBe(true);
+  });
+
+  it('does NOT show All-Time when there is only one year of data', () => {
+    const singleYear: ParsedArtist = {
+      id: 'a', name: 'Artist A', artistType: 'girl_group', generation: 4,
+      logoUrl: 'assets/logos/a.svg', albumReleases: [],
+      releases: [{
+        id: 'r1', title: 'Song', embeds: new Map(),
+        dailyValues: new Map([['2025-06-01', { value: 5000, source: 'inkigayo', episode: 1 }]]),
+      }],
+    };
+    const ds = makeStore([singleYear]);
+    view.mount(container, ds);
+
+    const headings = Array.from(container.querySelectorAll('.yearly-view__year')).map(h => h.textContent);
+    expect(headings).toEqual(['2025']);
+    expect(container.querySelector('.yearly-view__cell--all-time')).toBeNull();
+  });
+
+  it('All-Time cell aggregates points across all years', () => {
+    const ds = makeStore([artistAcrossYears()]);
+    view.mount(container, ds);
+
+    // First cell is All-Time: 5000 + 3000 = 8000
+    const allTimeCell = container.querySelector('.yearly-view__cell--all-time');
+    const stats = allTimeCell?.querySelector('.yearly-view__stats');
+    expect(stats?.textContent).toBe('8,000');
+  });
+
+  it('All-Time cell aggregates appearances across all years', () => {
+    const ds = makeStore([artistAcrossYears()]);
+    view.mount(container, ds);
+    view.setMetric('appearances');
+
+    const allTimeCell = container.querySelector('.yearly-view__cell--all-time');
+    const stats = allTimeCell?.querySelector('.yearly-view__stats');
+    expect(stats?.textContent).toBe('2 appearances');
+  });
+
+  it('All-Time treemap block is present in "all" zoom with multiple years', () => {
+    const ds = makeStore([artistAcrossYears()]);
+    view.mount(container, ds);
+    view.setZoom('all');
+
+    const headings = Array.from(container.querySelectorAll('.yearly-treemap__year')).map(h => h.textContent);
+    expect(headings[0]).toBe('All-Time');
+    expect(container.querySelector('.yearly-treemap__block--all-time')).not.toBeNull();
   });
 });
 

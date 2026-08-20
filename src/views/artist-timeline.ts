@@ -199,6 +199,7 @@ export class ArtistTimeline {
     statsEl.className = "artist-timeline__stats";
     statsEl.innerHTML = `
       <div class="artist-timeline__stat"><span class="artist-timeline__stat-value">${stats.totalPoints.toLocaleString()}</span><span class="artist-timeline__stat-label">Points</span></div>
+      <div class="artist-timeline__stat"><span class="artist-timeline__stat-value">${stats.totalAppearances.toLocaleString()}</span><span class="artist-timeline__stat-label">Chart Appearances</span></div>
       <div class="artist-timeline__stat"><span class="artist-timeline__stat-value">${stats.totalWins}</span><span class="artist-timeline__stat-label">Wins</span></div>
       <div class="artist-timeline__stat"><span class="artist-timeline__stat-value">${stats.releaseCount}</span><span class="artist-timeline__stat-label">Releases</span></div>
     `;
@@ -210,15 +211,20 @@ export class ArtistTimeline {
   private computeStats(artist: ParsedArtist): {
     totalPoints: number;
     totalWins: number;
+    totalAppearances: number;
     releaseCount: number;
   } {
     let totalPoints = 0;
     let totalWins = 0;
+    // Total chart appearances: one credit per (release, date, source) chart entry —
+    // so if two songs charted on the same show/day, both are counted.
+    let totalAppearances = 0;
 
     for (const release of artist.releases) {
       for (const [, dv] of release.dailyValues) {
         if (this.sourceFilter !== "all" && dv.source !== this.sourceFilter) continue;
         totalPoints += dv.value;
+        totalAppearances += 1;
       }
     }
 
@@ -244,7 +250,7 @@ export class ArtistTimeline {
       ).length;
     }
 
-    return { totalPoints, totalWins, releaseCount };
+    return { totalPoints, totalWins, totalAppearances, releaseCount };
   }
 
   private buildDateMap(artist: ParsedArtist): Map<string, TimelineEntry[]> {

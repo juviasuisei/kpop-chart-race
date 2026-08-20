@@ -27,6 +27,7 @@ interface YearlyArtistEntry {
   artistType: string;
   points: number;
   wins: number;
+  appearances: number;
 }
 
 /** Entry for Songs mode: one per release */
@@ -39,10 +40,15 @@ interface YearlySongEntry {
   artistType: string;
   points: number;
   wins: number;
+  appearances: number;
   coArtists: ResolvedArtist[];
 }
 
-export type YearlyMetric = "points" | "wins";
+export type YearlyMetric = "points" | "wins" | "appearances";
+
+/** Sentinel year value representing the all-time aggregate across all years */
+const ALL_TIME = "all-time" as const;
+type YearOrAllTime = number | typeof ALL_TIME;
 
 export class YearlyView {
   private wrapper: HTMLDivElement | null = null;
@@ -135,39 +141,47 @@ export class YearlyView {
     this.wrapper.innerHTML = "";
 
     const years = this.getYears();
+    // Prepend an all-time aggregate across all years, but only when there is
+    // more than one year of data (otherwise all-time == the single year).
+    const columns: YearOrAllTime[] = years.length > 1 ? [ALL_TIME, ...years] : years;
 
     if (this.zoom === "all") {
       this.wrapper.className = "yearly-view yearly-view--treemap";
       if (this.displayMode === "songs") {
-        this.renderStackedSongs(years);
+        this.renderStackedSongs(columns);
       } else {
-        this.renderStacked(years);
+        this.renderStacked(columns);
       }
     } else {
       this.wrapper.className = "yearly-view";
       if (this.displayMode === "songs") {
-        this.renderGridSongs(years);
+        this.renderGridSongs(columns);
       } else {
-        this.renderGrid(years);
+        this.renderGrid(columns);
       }
     }
   }
 
-  private renderGrid(years: number[]): void {
-    if (!this.wrapper || !this.dataStore) return;
-    const yearData = new Map<number, YearlyArtistEntry[]>();
+  /** Human-readable heading for a year column (all-time gets a special label) */
+  private columnLabel(year: YearOrAllTime): string {
+    return year === ALL_TIME ? "All-Time" : String(year);
+  }
 
-    // Compute data for all years
+  private renderGrid(years: YearOrAllTime[]): void {
+    if (!this.wrapper || !this.dataStore) return;
+    const yearData = new Map<YearOrAllTime, YearlyArtistEntry[]>();
+
+    // Compute data for all columns (all-time is aggregated across every year)
     for (const year of years) {
-      const entries = this.computeYearData(year, 10);
-      yearData.set(year, entries);
+      const entries = this.computeYearData(year, year === ALL_TIME ? Infinity : 10);
+      yearData.set(year, entries.slice(0, 10));
     }
 
     // Find global max based on current metric
     let globalMax = 0;
     for (const entries of yearData.values()) {
       if (entries.length > 0) {
-        const topValue = this.metric === "wins" ? entries[0].wins : entries[0].points;
+        const topValue = this.metricValueOf(entries[0]);
         if (topValue > globalMax) globalMax = topValue;
       }
     }
@@ -175,11 +189,12 @@ export class YearlyView {
     for (const year of years) {
       const entries = yearData.get(year) ?? [];
       const cell = this.createYearCell(year, entries, globalMax);
+      if (year === ALL_TIME) cell.classList.add("yearly-view__cell--all-time");
       this.wrapper.appendChild(cell);
     }
   }
 
-  private renderStacked(years: number[]): void {
+  private renderStacked(years: YearOrAllTime[]): void {
     if (!this.wrapper || !this.dataStore) return;
 
     for (const year of years) {
@@ -188,10 +203,11 @@ export class YearlyView {
 
       const yearBlock = document.createElement("div");
       yearBlock.className = "yearly-treemap__block";
+      if (year === ALL_TIME) yearBlock.classList.add("yearly-treemap__block--all-time");
 
       const heading = document.createElement("h3");
       heading.className = "yearly-treemap__year";
-      heading.textContent = String(year);
+      heading.textContent = this.columnLabel(year);
       yearBlock.appendChild(heading);
 
       const mapContainer = document.createElement("div");
@@ -207,13 +223,13 @@ export class YearlyView {
         const height = mapContainer.clientHeight;
         if (width === 0 || height === 0) return;
 
-        const values = entries.map(e => this.metric === "wins" ? e.wins : e.points);
+        const values = entries.map(e => this.metricValueOf(e));
         const rects = squarify(values, width, height);
 
         for (let i = 0; i < entries.length; i++) {
           const entry = entries[i];
           const rect = rects[i];
-          const value = this.metric === "wins" ? entry.wins : entry.points;
+          const value = this.metricValueOf(entry);
           if (value === 0) continue;
 
           const cell = document.createElement("div");
@@ -240,6 +256,8 @@ export class YearlyView {
           const indicator = ARTIST_TYPE_INDICATORS[entry.artistType as ArtistType] ?? "";
           const tooltipText = this.metric === "wins"
             ? `#${rank} · ${entry.name} ${indicator} · ${entry.wins} ${entry.wins === 1 ? "win" : "wins"}`
+            : this.metric === "appearances"
+            ? `#${rank} · ${entry.name} ${indicator} · ${entry.appearances} ${entry.appearances === 1 ? "appearance" : "appearances"}`
             : `#${rank} · ${entry.name} ${indicator} · ${entry.points.toLocaleString()} pts`;
 
           cell.addEventListener("mouseenter", () => {
@@ -277,19 +295,19 @@ export class YearlyView {
   }
 
   /** Songs mode: grid with release-level entries ("Top 10" zoom) */
-  private renderGridSongs(years: number[]): void {
+  private renderGridSongs(years: YearOrAllTime[]): void {
     if (!this.wrapper || !this.dataStore) return;
-    const yearData = new Map<number, YearlySongEntry[]>();
+    const yearData = new Map<YearOrAllTime, YearlySongEntry[]>();
 
     for (const year of years) {
-      const entries = this.computeYearDataSongs(year, 10);
-      yearData.set(year, entries);
+      const entries = this.computeYearDataSongs(year, year === ALL_TIME ? Infinity : 10);
+      yearData.set(year, entries.slice(0, 10));
     }
 
     let globalMax = 0;
     for (const entries of yearData.values()) {
       if (entries.length > 0) {
-        const topValue = this.metric === "wins" ? entries[0].wins : entries[0].points;
+        const topValue = this.metricValueOf(entries[0]);
         if (topValue > globalMax) globalMax = topValue;
       }
     }
@@ -297,12 +315,13 @@ export class YearlyView {
     for (const year of years) {
       const entries = yearData.get(year) ?? [];
       const cell = this.createYearCellSongs(year, entries, globalMax);
+      if (year === ALL_TIME) cell.classList.add("yearly-view__cell--all-time");
       this.wrapper.appendChild(cell);
     }
   }
 
   /** Songs mode: treemap with per-release cells ("All" zoom) */
-  private renderStackedSongs(years: number[]): void {
+  private renderStackedSongs(years: YearOrAllTime[]): void {
     if (!this.wrapper || !this.dataStore) return;
 
     for (const year of years) {
@@ -311,10 +330,11 @@ export class YearlyView {
 
       const yearBlock = document.createElement("div");
       yearBlock.className = "yearly-treemap__block";
+      if (year === ALL_TIME) yearBlock.classList.add("yearly-treemap__block--all-time");
 
       const heading = document.createElement("h3");
       heading.className = "yearly-treemap__year";
-      heading.textContent = String(year);
+      heading.textContent = this.columnLabel(year);
       yearBlock.appendChild(heading);
 
       const mapContainer = document.createElement("div");
@@ -329,13 +349,13 @@ export class YearlyView {
         const height = mapContainer.clientHeight;
         if (width === 0 || height === 0) return;
 
-        const values = capturedEntries.map(e => this.metric === "wins" ? e.wins : e.points);
+        const values = capturedEntries.map(e => this.metricValueOf(e));
         const rects = squarify(values, width, height);
 
         for (let i = 0; i < capturedEntries.length; i++) {
           const entry = capturedEntries[i];
           const rect = rects[i];
-          const value = this.metric === "wins" ? entry.wins : entry.points;
+          const value = this.metricValueOf(entry);
           if (value === 0) continue;
 
           const cell = document.createElement("div");
@@ -370,6 +390,8 @@ export class YearlyView {
           const artistLabel = entry.coArtists.map(a => `${a.name} ${ARTIST_TYPE_INDICATORS[a.artistType as ArtistType] ?? ""}`).join(" • ");
           const tooltipText = this.metric === "wins"
             ? `#${rank} · ${entry.title} · ${artistLabel} · ${entry.wins} ${entry.wins === 1 ? "win" : "wins"}`
+            : this.metric === "appearances"
+            ? `#${rank} · ${entry.title} · ${artistLabel} · ${entry.appearances} ${entry.appearances === 1 ? "appearance" : "appearances"}`
             : `#${rank} · ${entry.title} · ${artistLabel} · ${entry.points.toLocaleString()} pts`;
 
           cell.addEventListener("mouseenter", () => {
@@ -406,13 +428,13 @@ export class YearlyView {
   }
 
   /** Creates a year cell for Songs mode grid */
-  private createYearCellSongs(year: number, entries: YearlySongEntry[], globalMax: number): HTMLDivElement {
+  private createYearCellSongs(year: YearOrAllTime, entries: YearlySongEntry[], globalMax: number): HTMLDivElement {
     const cell = document.createElement("div");
     cell.className = "yearly-view__cell";
 
     const heading = document.createElement("h2");
     heading.className = "yearly-view__year";
-    heading.textContent = String(year);
+    heading.textContent = this.columnLabel(year);
     cell.appendChild(heading);
 
     if (entries.length === 0) {
@@ -445,7 +467,7 @@ export class YearlyView {
       const bar = document.createElement("div");
       bar.className = "yearly-view__bar";
       bar.style.backgroundColor = ARTIST_TYPE_COLORS[primaryType as keyof typeof ARTIST_TYPE_COLORS] ?? "#555";
-      const metricValue = this.metric === "wins" ? entry.wins : entry.points;
+      const metricValue = this.metricValueOf(entry);
       const widthPct = globalMax > 0 ? (metricValue / globalMax) * 100 : 0;
       bar.style.width = `${widthPct}%`;
 
@@ -478,9 +500,7 @@ export class YearlyView {
       indicator.dataset.color = ARTIST_TYPE_COLORS[primaryType as keyof typeof ARTIST_TYPE_COLORS] ?? "#555";
       bar.appendChild(indicator);
 
-      const statsText = this.metric === "wins"
-        ? (entry.wins > 0 ? `${entry.wins} ${entry.wins === 1 ? "win" : "wins"}` : "")
-        : entry.points.toLocaleString();
+      const statsText = this.formatStatsText(entry);
 
       const stats = document.createElement("span");
       stats.className = "yearly-view__stats";
@@ -610,9 +630,8 @@ export class YearlyView {
   }
 
   /** Compute release-level year data for Songs mode */
-  private computeYearDataSongs(year: number, limit: number = 10): YearlySongEntry[] {
+  private computeYearDataSongs(year: YearOrAllTime, limit: number = 10): YearlySongEntry[] {
     if (!this.dataStore) return [];
-    const yearStr = String(year);
     const entries: YearlySongEntry[] = [];
     const processedReleases = new Set<string>();
 
@@ -628,10 +647,13 @@ export class YearlyView {
 
         let points = 0;
         let wins = 0;
+        let appearances = 0;
         for (const [date, entry] of release.dailyValues) {
-          if (date.startsWith(yearStr)) {
+          if (this.dateInYear(date, year)) {
             if (this.sourceFilter === "all" || entry.source === this.sourceFilter) {
               points += entry.value;
+              // Appearances: one credit per (date, source) chart entry for this release
+              appearances += 1;
             }
 
             // Count wins: check if this artist won on this (date, source)
@@ -688,6 +710,7 @@ export class YearlyView {
           artistType: resolved[0]?.artistType ?? artist.artistType,
           points,
           wins,
+          appearances,
           coArtists: resolved,
         });
       }
@@ -696,6 +719,9 @@ export class YearlyView {
     entries.sort((a, b) => {
       if (this.metric === "wins") {
         return b.wins - a.wins || b.points - a.points;
+      }
+      if (this.metric === "appearances") {
+        return b.appearances - a.appearances || b.points - a.points;
       }
       return b.points - a.points;
     });
@@ -715,33 +741,61 @@ export class YearlyView {
     return Array.from(yearSet).sort((a, b) => b - a); // newest first
   }
 
-  private computeYearData(year: number, limit: number = 10): YearlyArtistEntry[] {
+  /** Whether a date string belongs to the given year (or any year for all-time) */
+  private dateInYear(date: string, year: YearOrAllTime): boolean {
+    return year === ALL_TIME || date.startsWith(String(year));
+  }
+
+  /** Returns the metric value for an entry under the current metric */
+  private metricValueOf(entry: { points: number; wins: number; appearances: number }): number {
+    if (this.metric === "wins") return entry.wins;
+    if (this.metric === "appearances") return entry.appearances;
+    return entry.points;
+  }
+
+  /** Formats the trailing stats label for a bar under the current metric */
+  private formatStatsText(entry: { points: number; wins: number; appearances: number }): string {
+    if (this.metric === "wins") {
+      return entry.wins > 0 ? `${entry.wins} ${entry.wins === 1 ? "win" : "wins"}` : "";
+    }
+    if (this.metric === "appearances") {
+      return `${entry.appearances} ${entry.appearances === 1 ? "appearance" : "appearances"}`;
+    }
+    return entry.points.toLocaleString();
+  }
+
+  private computeYearData(year: YearOrAllTime, limit: number = 10): YearlyArtistEntry[] {
     if (!this.dataStore) return [];
-    const yearStr = String(year);
     const artistPoints = new Map<string, number>();
     const artistWins = new Map<string, number>();
+    const artistAppearances = new Map<string, number>();
 
-    // Sum points per artist for this year (filtered by source and artist if set)
+    // Sum points and count appearances per artist (filtered by source and artist if set).
+    // Appearances: one credit per (release, date, source) chart entry — so if two songs
+    // charted on the same show/day the artist gets two credits.
     for (const [artistId, artist] of this.dataStore.artists) {
       if (this.artistFilter !== "all" && artistId !== this.artistFilter) continue;
       let points = 0;
+      let appearances = 0;
       for (const release of artist.releases) {
         for (const [date, entry] of release.dailyValues) {
-          if (date.startsWith(yearStr)) {
+          if (this.dateInYear(date, year)) {
             if (this.sourceFilter === "all" || entry.source === this.sourceFilter) {
               points += entry.value;
+              appearances += 1;
             }
           }
         }
       }
       if (points > 0) {
         artistPoints.set(artistId, points);
+        artistAppearances.set(artistId, appearances);
       }
     }
 
-    // Count wins per artist for this year (filtered by source and artist if set)
+    // Count wins per artist (filtered by source and artist if set)
     for (const [date, sourceMap] of this.dataStore.chartWins) {
-      if (!date.startsWith(yearStr)) continue;
+      if (!this.dateInYear(date, year)) continue;
       for (const [source, winData] of sourceMap) {
         if (this.sourceFilter !== "all" && source !== this.sourceFilter) continue;
         for (const artistId of winData.artistIds) {
@@ -763,6 +817,7 @@ export class YearlyView {
         artistType: artist.artistType,
         points,
         wins: artistWins.get(artistId) ?? 0,
+        appearances: artistAppearances.get(artistId) ?? 0,
       });
     }
 
@@ -770,6 +825,9 @@ export class YearlyView {
       if (this.metric === "wins") {
         // Sort by wins descending, break ties with points
         return b.wins - a.wins || b.points - a.points;
+      }
+      if (this.metric === "appearances") {
+        return b.appearances - a.appearances || b.points - a.points;
       }
       return b.points - a.points;
     });
@@ -780,13 +838,13 @@ export class YearlyView {
     return entries.slice(0, limit);
   }
 
-  private createYearCell(year: number, entries: YearlyArtistEntry[], globalMax: number): HTMLDivElement {
+  private createYearCell(year: YearOrAllTime, entries: YearlyArtistEntry[], globalMax: number): HTMLDivElement {
     const cell = document.createElement("div");
     cell.className = "yearly-view__cell";
 
     const heading = document.createElement("h2");
     heading.className = "yearly-view__year";
-    heading.textContent = String(year);
+    heading.textContent = this.columnLabel(year);
     cell.appendChild(heading);
 
     if (entries.length === 0) {
@@ -816,12 +874,11 @@ export class YearlyView {
       const bar = document.createElement("div");
       bar.className = "yearly-view__bar";
       bar.style.backgroundColor = ARTIST_TYPE_COLORS[entry.artistType as keyof typeof ARTIST_TYPE_COLORS] ?? "#555";
-      const metricValue = this.metric === "wins" ? entry.wins : entry.points;
+      const metricValue = this.metricValueOf(entry);
       const widthPct = globalMax > 0 ? (metricValue / globalMax) * 100 : 0;
       bar.style.width = `${widthPct}%`;
 
-      const winsText = entry.wins > 0 ? `${entry.wins} ${entry.wins === 1 ? "win" : "wins"}` : "";
-      const statsText = this.metric === "wins" ? winsText : entry.points.toLocaleString();
+      const statsText = this.formatStatsText(entry);
 
       // Logo always goes inside the bar
       const logo = document.createElement("img");

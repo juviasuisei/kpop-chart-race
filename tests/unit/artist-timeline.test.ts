@@ -165,6 +165,71 @@ describe("ArtistTimeline — Rendering", () => {
     timeline.unmount();
   });
 
+  it("renders total chart appearances stat (one credit per date/source entry)", () => {
+    const artist = createTestArtist();
+    const artists = new Map([["aespa", artist]]);
+    const dataStore = createMockDataStore(artists);
+
+    const timeline = new ArtistTimeline();
+    timeline.mount(container, dataStore, "aespa");
+
+    const labels = Array.from(
+      container.querySelectorAll(".artist-timeline__stat-label"),
+    ).map((l) => l.textContent);
+    expect(labels).toContain("Chart Appearances");
+
+    // Find the Chart Appearances stat and check its value.
+    // Supernova charts on 2 dates + Drama on 1 date = 3 appearances.
+    const statEls = Array.from(container.querySelectorAll(".artist-timeline__stat"));
+    const appearancesStat = statEls.find(
+      (el) => el.querySelector(".artist-timeline__stat-label")?.textContent === "Chart Appearances",
+    );
+    expect(appearancesStat?.querySelector(".artist-timeline__stat-value")?.textContent).toBe("3");
+
+    timeline.unmount();
+  });
+
+  it("chart appearances counts each song separately when multiple chart the same day", () => {
+    const artist: ParsedArtist = {
+      id: "aespa",
+      name: "aespa",
+      artistType: "girl_group",
+      generation: 4,
+      logoUrl: "assets/logos/aespa.svg",
+      releases: [
+        {
+          id: "song1",
+          title: "Song 1",
+          artistIds: ["aespa"],
+          dailyValues: new Map([["2024-01-15", { value: 8000, source: "inkigayo", episode: 101 }]]),
+          embeds: new Map(),
+        },
+        {
+          id: "song2",
+          title: "Song 2",
+          artistIds: ["aespa"],
+          dailyValues: new Map([["2024-01-15", { value: 4000, source: "inkigayo", episode: 101 }]]),
+          embeds: new Map(),
+        },
+      ],
+      albumReleases: [],
+    };
+    const artists = new Map([["aespa", artist]]);
+    const dataStore = createMockDataStore(artists);
+
+    const timeline = new ArtistTimeline();
+    timeline.mount(container, dataStore, "aespa");
+
+    const statEls = Array.from(container.querySelectorAll(".artist-timeline__stat"));
+    const appearancesStat = statEls.find(
+      (el) => el.querySelector(".artist-timeline__stat-label")?.textContent === "Chart Appearances",
+    );
+    // Two songs on the same date/source → 2 appearances
+    expect(appearancesStat?.querySelector(".artist-timeline__stat-value")?.textContent).toBe("2");
+
+    timeline.unmount();
+  });
+
   it("groups entries by date with date headers in reverse chronological order", () => {
     const artist = createTestArtist();
     const artists = new Map([["aespa", artist]]);

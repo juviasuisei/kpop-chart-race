@@ -849,9 +849,16 @@ body {
 
 .chart-race__title-header {
   display: flex;
-  flex-wrap: nowrap;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+}
+
+.chart-race__title-line {
+  display: inline-flex;
   align-items: baseline;
   gap: 0.5rem;
+  white-space: nowrap;
 }
 
 .chart-race__title-text {
@@ -859,6 +866,26 @@ body {
   font-weight: 700;
   white-space: nowrap;
   color: #213547;
+  /* Rendered as a <button> so it can reset to the default view on click */
+  appearance: none;
+  -webkit-appearance: none;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font-family: inherit;
+  line-height: inherit;
+  cursor: pointer;
+}
+
+.chart-race__title-text:hover {
+  color: #0072B2;
+}
+
+.chart-race__title-text:focus-visible {
+  outline: 2px solid #0072B2;
+  outline-offset: 2px;
+  border-radius: 3px;
 }
 
 .chart-race__version-badge {
@@ -868,10 +895,9 @@ body {
 }
 
 .chart-race__data-note {
-  width: 100%;
   font-size: 0.7rem;
   color: #888;
-  margin-top: -0.25rem;
+  margin-top: 0;
 }
 
 .chart-race__data-note-toggle {

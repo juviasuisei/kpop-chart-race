@@ -20,7 +20,7 @@ export class LoadingScreen {
 
     const title = document.createElement("h1");
     title.className = "loading-screen__title";
-    title.textContent = "K-Pop Chart Race";
+    title.textContent = "K-Pop Chart Explorer";
     wrapper.appendChild(title);
 
     this.progressText = document.createElement("p");

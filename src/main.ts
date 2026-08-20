@@ -108,12 +108,24 @@ async function main(): Promise<void> {
   topBar.className = "chart-race__top-bar";
   const titleHeader = document.createElement("div");
   titleHeader.className = "chart-race__title-header";
-  const titleText = document.createElement("span");
+  // Title + version badge stay together on one line (their own row);
+  // the data-note can then wrap or stack beneath as a separate item.
+  const titleLine = document.createElement("span");
+  titleLine.className = "chart-race__title-line";
+  const titleText = document.createElement("button");
+  titleText.type = "button";
   titleText.className = "chart-race__title-text";
-  titleText.textContent = "K-Pop Chart Race";
+  titleText.textContent = "K-Pop Chart Explorer";
+  titleText.title = "Reset to the default view";
+  // Clicking the title resets to the default view: race, no filters, songs mode.
+  titleText.addEventListener("click", () => {
+    filterStateManager.reset();
+  });
   const versionBadge = document.createElement("span");
   versionBadge.className = "chart-race__version-badge";
   versionBadge.textContent = `v${pkg.version}`;
+  titleLine.appendChild(titleText);
+  titleLine.appendChild(versionBadge);
   const dataNote = document.createElement("span");
   dataNote.className = "chart-race__data-note";
   let totalPoints = 0;
@@ -124,9 +136,8 @@ async function main(): Promise<void> {
       }
     }
   }
-  dataNote.textContent = `— ${totalPoints.toLocaleString()} total points from ${dataStore.startDate} forward`;
-  titleHeader.appendChild(titleText);
-  titleHeader.appendChild(versionBadge);
+  dataNote.textContent = `${totalPoints.toLocaleString()} total points from ${dataStore.startDate} forward`;
+  titleHeader.appendChild(titleLine);
   titleHeader.appendChild(dataNote);
   topBar.appendChild(titleHeader);
 

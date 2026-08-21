@@ -95,7 +95,8 @@ export interface LabelPriorityCandidate {
  */
 export function orderLabelsByPriority<T extends LabelPriorityCandidate>(
   candidates: T[],
-  pileupGap: number = PILEUP_GAP
+  pileupGap: number = PILEUP_GAP,
+  pinnedLineId?: string,
 ): T[] {
   if (candidates.length === 0) return [];
 
@@ -141,6 +142,16 @@ export function orderLabelsByPriority<T extends LabelPriorityCandidate>(
   if (topIndex > 0) {
     const [top] = result.splice(topIndex, 1);
     result.unshift(top);
+  }
+
+  // The pinned artist wins the top label slot outright — above even #1 — so
+  // the artist the user filtered to always gets its label placed.
+  if (pinnedLineId !== undefined) {
+    const pinIndex = result.findIndex(c => c.lineId === pinnedLineId);
+    if (pinIndex > 0) {
+      const [pinned] = result.splice(pinIndex, 1);
+      result.unshift(pinned);
+    }
   }
 
   return result;
@@ -262,6 +273,8 @@ interface LineChartState {
   filterCount: number;
   artistFilterActive: boolean;
   displayMode: "songs" | "artists";
+  /** Pinned artist (Artists-mode filter): always visible + top label priority. */
+  pinnedArtistId: string;
 }
 
 export class LineChartController {
@@ -293,6 +306,7 @@ export class LineChartController {
     filterCount: 0,
     artistFilterActive: false,
     displayMode: "songs",
+    pinnedArtistId: "all",
   };
 
   /** Map of lineId → metadata for tooltips and selection */
@@ -541,6 +555,20 @@ export class LineChartController {
     this.requestFrame();
   }
 
+  /**
+   * Set the "pinned" artist (from the Artists-mode artist filter). Their line
+   * is treated like #1 for visibility — always full opacity and top label
+   * priority — without the clicked-selection highlight styling. "all" clears
+   * the pin. Does not rebuild line data (all lines stay present); only affects
+   * per-frame visibility, so a lightweight frame request suffices.
+   */
+  setPinnedArtist(artistId: string): void {
+    if (this.state.pinnedArtistId === artistId) return;
+    this.state.pinnedArtistId = artistId;
+    this.backgroundDirty = true;
+    this.requestFrame();
+  }
+
   selectLine(lineId: string, multiSelect = false): void {
     if (multiSelect) {
       const idx = this.state.selectedLineIds.indexOf(lineId);
@@ -687,7 +715,7 @@ export class LineChartController {
           });
           const artistLabel = formatOxfordComma(artistNames);
           const label = `${release.title} \u2014 ${artistLabel}`;
-          serialized.push({ lineId, label, color, changePoints: series.toArray() });
+          serialized.push({ lineId, label, color, changePoints: series.toArray(), artistId: release.artistIds[0] });
           this.lineMetadata.set(lineId, { label, artistId: release.artistIds[0], releaseId: release.id });
         }
       }
@@ -723,7 +751,7 @@ export class LineChartController {
 
         const lineId = artist.id;
         const label = artist.name;
-        serialized.push({ lineId, label, color, changePoints: merged.toArray() });
+        serialized.push({ lineId, label, color, changePoints: merged.toArray(), artistId: artist.id });
         this.lineMetadata.set(lineId, { label, artistId: artist.id });
       }
     }
@@ -843,6 +871,7 @@ export class LineChartController {
       filterCount: this.state.filterCount,
       artistFilterActive: this.state.artistFilterActive,
       selectedLineIds: this.state.selectedLineIds,
+      pinnedArtistId: this.state.pinnedArtistId,
     };
 
     this.workerClient.requestFrame(this.state.currentDateIndex, viewport, visibility);
@@ -990,7 +1019,16 @@ export class LineChartController {
 
     // Order candidates so that, when endpoints collide, the correct one
     // wins the slot (see orderLabelsByPriority for the tie-break rule).
-    const prioritized = orderLabelsByPriority(labeled.map(l => ({ ...l, y: l.endPoint.y })));
+    // The pinned artist (Artists-mode filter) wins the top slot outright.
+    // In Artists mode lineId === artistId, so the pinned artist id doubles as
+    // its line id.
+    const pinnedLineId =
+      this.state.pinnedArtistId !== "all" ? this.state.pinnedArtistId : undefined;
+    const prioritized = orderLabelsByPriority(
+      labeled.map(l => ({ ...l, y: l.endPoint.y })),
+      PILEUP_GAP,
+      pinnedLineId,
+    );
 
     // Place labels: process in priority order, place at their Y if no collision
     const resolvedPositions: { y: number; lineId: string; endPoint: PixelPoint; color: string; opacity: number; finalValue: number }[] = [];

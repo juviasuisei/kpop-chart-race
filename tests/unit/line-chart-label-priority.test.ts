@@ -247,6 +247,37 @@ describe('orderLabelsByPriority', () => {
   it('returns an empty array for no candidates', () => {
     expect(orderLabelsByPriority([])).toEqual([]);
   });
+
+  it('pins the given line to the top slot, above #1', () => {
+    const candidates = [
+      candidate({ lineId: 'top', y: 0, finalValue: 1000, lastActivityIdx: 99 }),
+      candidate({ lineId: 'pinned', y: 500, finalValue: 5, lastActivityIdx: 0 }),
+      candidate({ lineId: 'mid', y: 200, finalValue: 300, lastActivityIdx: 10 }),
+    ];
+
+    const ordered = orderLabelsByPriority(candidates, undefined, 'pinned');
+    expect(ordered[0].lineId).toBe('pinned');
+  });
+
+  it('leaves #1 first when no pinned line is given', () => {
+    const candidates = [
+      candidate({ lineId: 'top', y: 0, finalValue: 1000, lastActivityIdx: 99 }),
+      candidate({ lineId: 'other', y: 500, finalValue: 5, lastActivityIdx: 0 }),
+    ];
+
+    const ordered = orderLabelsByPriority(candidates);
+    expect(ordered[0].lineId).toBe('top');
+  });
+
+  it('is a no-op when the pinned line id is not among the candidates', () => {
+    const candidates = [
+      candidate({ lineId: 'top', y: 0, finalValue: 1000, lastActivityIdx: 99 }),
+      candidate({ lineId: 'other', y: 500, finalValue: 5, lastActivityIdx: 0 }),
+    ];
+
+    const ordered = orderLabelsByPriority(candidates, undefined, 'nonexistent');
+    expect(ordered[0].lineId).toBe('top');
+  });
 });
 
 /** Convenience builder for a minimal LineDrawCommand. */

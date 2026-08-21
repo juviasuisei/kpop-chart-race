@@ -6,19 +6,9 @@
  */
 
 import type { DataStore, ResolvedArtist } from "./models.ts";
-import type { ArtistType } from "./types.ts";
 import { ARTIST_TYPE_COLORS } from "./colors.ts";
 import { resolveArtists } from "./co-artist-resolver.ts";
 import { generateFallbackLogoDataUri } from "./utils.ts";
-
-/** Secondary indicator icons per ArtistType */
-const ARTIST_TYPE_INDICATORS: Record<ArtistType, string> = {
-  boy_group: "▲",
-  girl_group: "●",
-  solo_male: "◆",
-  solo_female: "★",
-  mixed_group: "■",
-};
 
 interface YearlyArtistEntry {
   artistId: string;
@@ -46,6 +36,15 @@ interface YearlySongEntry {
 
 export type YearlyMetric = "points" | "wins" | "appearances";
 
+/** A row in a grid year cell: an entry with its true rank and pin flag. */
+interface GridRow {
+  entry: YearlyArtistEntry;
+  /** 1-based rank within the full year ranking. */
+  rank: number;
+  /** True when this row is the pinned artist appended after the top 10. */
+  isPinned: boolean;
+}
+
 /** Sentinel year value representing the all-time aggregate across all years */
 const ALL_TIME = "all-time" as const;
 type YearOrAllTime = number | typeof ALL_TIME;
@@ -59,6 +58,12 @@ export class YearlyView {
   private displayMode: "songs" | "artists" = "artists";
   private generationFilter: number | "all" = "all";
   private artistFilter: string = "all";
+  /** Artist to "pin" in Artists mode: shown at their true rank even when
+   *  outside the top 10 (grid zoom only). "all" means no pin. */
+  private pinnedArtist: string = "all";
+
+  /** Fired when an artist bar/cell is clicked in Artists mode. */
+  onArtistClick: ((artistId: string) => void) | null = null;
 
   mount(container: HTMLElement, dataStore: DataStore): void {
     this.dataStore = dataStore;
@@ -136,6 +141,16 @@ export class YearlyView {
     return this.artistFilter;
   }
 
+  setPinnedArtist(artist: string): void {
+    if (artist === this.pinnedArtist) return;
+    this.pinnedArtist = artist;
+    this.render();
+  }
+
+  getPinnedArtist(): string {
+    return this.pinnedArtist;
+  }
+
   private render(): void {
     if (!this.wrapper || !this.dataStore) return;
     this.wrapper.innerHTML = "";
@@ -169,26 +184,43 @@ export class YearlyView {
 
   private renderGrid(years: YearOrAllTime[]): void {
     if (!this.wrapper || !this.dataStore) return;
-    const yearData = new Map<YearOrAllTime, YearlyArtistEntry[]>();
+    const yearRows = new Map<YearOrAllTime, GridRow[]>();
 
-    // Compute data for all columns (all-time is aggregated across every year)
+    // The pin only applies in Artists mode at the top-10 (grid) zoom.
+    const pinId = this.displayMode === "artists" ? this.pinnedArtist : "all";
+
     for (const year of years) {
-      const entries = this.computeYearData(year, year === ALL_TIME ? Infinity : 10);
-      yearData.set(year, entries.slice(0, 10));
+      // Full ranking for the year (Infinity limit), so we know a pinned
+      // artist's true rank even when they sit outside the top 10.
+      const ranked = this.computeYearData(year, Infinity);
+      const rows: GridRow[] = ranked
+        .slice(0, 10)
+        .map((entry, i) => ({ entry, rank: i + 1, isPinned: false }));
+
+      // Append the pinned artist at their true rank if they appear this year
+      // but fell outside the top 10.
+      if (pinId !== "all") {
+        const pinIndex = ranked.findIndex(e => e.artistId === pinId);
+        if (pinIndex >= 10) {
+          rows.push({ entry: ranked[pinIndex], rank: pinIndex + 1, isPinned: true });
+        }
+      }
+
+      yearRows.set(year, rows);
     }
 
-    // Find global max based on current metric
+    // Find global max based on current metric (across all rows, including pins)
     let globalMax = 0;
-    for (const entries of yearData.values()) {
-      if (entries.length > 0) {
-        const topValue = this.metricValueOf(entries[0]);
-        if (topValue > globalMax) globalMax = topValue;
+    for (const rows of yearRows.values()) {
+      for (const row of rows) {
+        const value = this.metricValueOf(row.entry);
+        if (value > globalMax) globalMax = value;
       }
     }
 
     for (const year of years) {
-      const entries = yearData.get(year) ?? [];
-      const cell = this.createYearCell(year, entries, globalMax);
+      const rows = yearRows.get(year) ?? [];
+      const cell = this.createYearCell(year, rows, globalMax);
       if (year === ALL_TIME) cell.classList.add("yearly-view__cell--all-time");
       this.wrapper.appendChild(cell);
     }
@@ -253,12 +285,18 @@ export class YearlyView {
 
           // Tooltip on hover
           const rank = i + 1;
-          const indicator = ARTIST_TYPE_INDICATORS[entry.artistType as ArtistType] ?? "";
           const tooltipText = this.metric === "wins"
-            ? `#${rank} · ${entry.name} ${indicator} · ${entry.wins} ${entry.wins === 1 ? "win" : "wins"}`
+            ? `#${rank} · ${entry.name} · ${entry.wins} ${entry.wins === 1 ? "win" : "wins"}`
             : this.metric === "appearances"
-            ? `#${rank} · ${entry.name} ${indicator} · ${entry.appearances} ${entry.appearances === 1 ? "appearance" : "appearances"}`
-            : `#${rank} · ${entry.name} ${indicator} · ${entry.points.toLocaleString()} pts`;
+            ? `#${rank} · ${entry.name} · ${entry.appearances} ${entry.appearances === 1 ? "appearance" : "appearances"}`
+            : `#${rank} · ${entry.name} · ${entry.points.toLocaleString()} pts`;
+
+          // Click through to the artist's timeline (Artists mode treemap).
+          const artistId = entry.artistId;
+          cell.style.cursor = "pointer";
+          cell.addEventListener("click", () => {
+            this.onArtistClick?.(artistId);
+          });
 
           cell.addEventListener("mouseenter", () => {
             let tooltip = document.querySelector(".yearly-treemap__tooltip") as HTMLElement | null;
@@ -387,7 +425,7 @@ export class YearlyView {
 
           // Tooltip on hover: shows release info
           const rank = i + 1;
-          const artistLabel = entry.coArtists.map(a => `${a.name} ${ARTIST_TYPE_INDICATORS[a.artistType as ArtistType] ?? ""}`).join(" • ");
+          const artistLabel = entry.coArtists.map(a => a.name).join(" • ");
           const tooltipText = this.metric === "wins"
             ? `#${rank} · ${entry.title} · ${artistLabel} · ${entry.wins} ${entry.wins === 1 ? "win" : "wins"}`
             : this.metric === "appearances"
@@ -493,13 +531,6 @@ export class YearlyView {
       name.textContent = labelText;
       bar.appendChild(name);
 
-      // Type indicator
-      const indicator = document.createElement("span");
-      indicator.className = "yearly-view__indicator";
-      indicator.textContent = ARTIST_TYPE_INDICATORS[primaryType as ArtistType] ?? "";
-      indicator.dataset.color = ARTIST_TYPE_COLORS[primaryType as keyof typeof ARTIST_TYPE_COLORS] ?? "#555";
-      bar.appendChild(indicator);
-
       const statsText = this.formatStatsText(entry);
 
       const stats = document.createElement("span");
@@ -523,7 +554,6 @@ export class YearlyView {
         const bar = row.querySelector(".yearly-view__bar") as HTMLElement | null;
         const barTrack = row.querySelector(".yearly-view__bar-track") as HTMLElement | null;
         const name = bar?.querySelector(".yearly-view__name") as HTMLElement | null;
-        const indicator = bar?.querySelector(".yearly-view__indicator") as HTMLElement | null;
         const stats = bar?.querySelector(".yearly-view__stats") as HTMLElement | null;
         if (!bar || !barTrack || !name || !stats) return;
 
@@ -554,18 +584,13 @@ export class YearlyView {
 
           if (stillOverflows) {
             bar.removeChild(name);
-            if (indicator) bar.removeChild(indicator);
             const nameSpan = document.createElement("span");
             nameSpan.className = "yearly-view__name yearly-view__name--outside";
             nameSpan.textContent = name.textContent ?? "";
-            const indSpan = document.createElement("span");
-            indSpan.className = "yearly-view__indicator yearly-view__indicator--outside";
-            indSpan.textContent = indicator?.textContent ?? "";
             const statsSpan = document.createElement("span");
             statsSpan.className = "yearly-view__overflow-stats";
             statsSpan.textContent = stats.textContent ?? "";
             overflow.appendChild(nameSpan);
-            overflow.appendChild(indSpan);
             overflow.appendChild(statsSpan);
           } else {
             const statsSpan = document.createElement("span");
@@ -584,7 +609,6 @@ export class YearlyView {
         const bar = row.querySelector(".yearly-view__bar") as HTMLElement | null;
         const barTrack = row.querySelector(".yearly-view__bar-track") as HTMLElement | null;
         const nameEl = bar?.querySelector(".yearly-view__name") as HTMLElement | null;
-        const indicatorEl = bar?.querySelector(".yearly-view__indicator") as HTMLElement | null;
         const statsEl = bar?.querySelector(".yearly-view__stats") as HTMLElement | null;
         if (!bar || !barTrack) return;
 
@@ -602,7 +626,6 @@ export class YearlyView {
 
           if (statsEl && bar.contains(statsEl)) bar.removeChild(statsEl);
           bar.removeChild(nameEl);
-          if (indicatorEl && bar.contains(indicatorEl)) bar.removeChild(indicatorEl);
 
           const overflow = document.createElement("span");
           overflow.className = "yearly-view__overflow-text";
@@ -611,14 +634,10 @@ export class YearlyView {
           const nameSpan = document.createElement("span");
           nameSpan.className = "yearly-view__name yearly-view__name--outside";
           nameSpan.textContent = nameEl.textContent ?? "";
-          const indSpan = document.createElement("span");
-          indSpan.className = "yearly-view__indicator yearly-view__indicator--outside";
-          indSpan.textContent = indicatorEl?.textContent ?? "";
           const statsSpan = document.createElement("span");
           statsSpan.className = "yearly-view__overflow-stats";
           statsSpan.textContent = statsEl?.textContent ?? (existingOverflow?.querySelector(".yearly-view__overflow-stats")?.textContent ?? "");
           overflow.appendChild(nameSpan);
-          overflow.appendChild(indSpan);
           overflow.appendChild(statsSpan);
 
           barTrack.appendChild(overflow);
@@ -838,7 +857,7 @@ export class YearlyView {
     return entries.slice(0, limit);
   }
 
-  private createYearCell(year: YearOrAllTime, entries: YearlyArtistEntry[], globalMax: number): HTMLDivElement {
+  private createYearCell(year: YearOrAllTime, rows: GridRow[], globalMax: number): HTMLDivElement {
     const cell = document.createElement("div");
     cell.className = "yearly-view__cell";
 
@@ -847,7 +866,7 @@ export class YearlyView {
     heading.textContent = this.columnLabel(year);
     cell.appendChild(heading);
 
-    if (entries.length === 0) {
+    if (rows.length === 0) {
       const empty = document.createElement("div");
       empty.className = "yearly-view__empty";
       empty.textContent = "No data";
@@ -858,14 +877,30 @@ export class YearlyView {
     const barsContainer = document.createElement("div");
     barsContainer.className = "yearly-view__bars";
 
-    for (let i = 0; i < entries.length; i++) {
-      const entry = entries[i];
+    for (let i = 0; i < rows.length; i++) {
+      const { entry, rank: displayRank, isPinned } = rows[i];
+
+      // Half-bar-height gap before the pinned (out-of-top-10) row.
+      if (isPinned) {
+        const gap = document.createElement("div");
+        gap.className = "yearly-view__pin-gap";
+        barsContainer.appendChild(gap);
+      }
+
       const row = document.createElement("div");
       row.className = "yearly-view__row";
+      if (isPinned) row.classList.add("yearly-view__row--pinned");
+
+      // Click through to the artist's timeline (Artists mode grid).
+      const rowArtistId = entry.artistId;
+      row.style.cursor = "pointer";
+      row.addEventListener("click", () => {
+        this.onArtistClick?.(rowArtistId);
+      });
 
       const rank = document.createElement("span");
       rank.className = "yearly-view__rank";
-      rank.textContent = `#${i + 1}`;
+      rank.textContent = `#${displayRank}`;
       rank.style.backgroundColor = ARTIST_TYPE_COLORS[entry.artistType as keyof typeof ARTIST_TYPE_COLORS] ?? "#555";
 
       const barTrack = document.createElement("div");
@@ -897,12 +932,6 @@ export class YearlyView {
       name.textContent = entry.name;
       bar.appendChild(name);
 
-      const indicator = document.createElement("span");
-      indicator.className = "yearly-view__indicator";
-      indicator.textContent = ARTIST_TYPE_INDICATORS[entry.artistType as ArtistType] ?? "";
-      indicator.dataset.color = ARTIST_TYPE_COLORS[entry.artistType as keyof typeof ARTIST_TYPE_COLORS] ?? "#555";
-      bar.appendChild(indicator);
-
       const stats = document.createElement("span");
       stats.className = "yearly-view__stats";
       stats.textContent = statsText;
@@ -926,7 +955,6 @@ export class YearlyView {
         const bar = row.querySelector(".yearly-view__bar") as HTMLElement | null;
         const barTrack = row.querySelector(".yearly-view__bar-track") as HTMLElement | null;
         const name = bar?.querySelector(".yearly-view__name") as HTMLElement | null;
-        const indicator = bar?.querySelector(".yearly-view__indicator") as HTMLElement | null;
         const stats = bar?.querySelector(".yearly-view__stats") as HTMLElement | null;
         if (!bar || !barTrack || !name || !stats) return;
 
@@ -962,18 +990,13 @@ export class YearlyView {
           if (stillOverflows) {
             // Name doesn't fit either — move it outside too
             bar.removeChild(name);
-            if (indicator) bar.removeChild(indicator);
             const nameSpan = document.createElement("span");
             nameSpan.className = "yearly-view__name yearly-view__name--outside";
             nameSpan.textContent = name.textContent ?? "";
-            const indSpan = document.createElement("span");
-            indSpan.className = "yearly-view__indicator yearly-view__indicator--outside";
-            indSpan.textContent = indicator?.textContent ?? "";
             const statsSpan = document.createElement("span");
             statsSpan.className = "yearly-view__overflow-stats";
             statsSpan.textContent = stats.textContent ?? "";
             overflow.appendChild(nameSpan);
-            overflow.appendChild(indSpan);
             overflow.appendChild(statsSpan);
           } else {
             // Name fits, just stats outside
@@ -993,7 +1016,6 @@ export class YearlyView {
         const bar = row.querySelector(".yearly-view__bar") as HTMLElement | null;
         const barTrack = row.querySelector(".yearly-view__bar-track") as HTMLElement | null;
         const nameEl = bar?.querySelector(".yearly-view__name") as HTMLElement | null;
-        const indicatorEl = bar?.querySelector(".yearly-view__indicator") as HTMLElement | null;
         const statsEl = bar?.querySelector(".yearly-view__stats") as HTMLElement | null;
         if (!bar || !barTrack) return;
 
@@ -1010,7 +1032,6 @@ export class YearlyView {
 
           if (statsEl && bar.contains(statsEl)) bar.removeChild(statsEl);
           bar.removeChild(nameEl);
-          if (indicatorEl && bar.contains(indicatorEl)) bar.removeChild(indicatorEl);
 
           const overflow = document.createElement("span");
           overflow.className = "yearly-view__overflow-text";
@@ -1019,14 +1040,10 @@ export class YearlyView {
           const nameSpan = document.createElement("span");
           nameSpan.className = "yearly-view__name yearly-view__name--outside";
           nameSpan.textContent = nameEl.textContent ?? "";
-          const indSpan = document.createElement("span");
-          indSpan.className = "yearly-view__indicator yearly-view__indicator--outside";
-          indSpan.textContent = indicatorEl?.textContent ?? "";
           const statsSpan = document.createElement("span");
           statsSpan.className = "yearly-view__overflow-stats";
           statsSpan.textContent = statsEl?.textContent ?? (existingOverflow?.querySelector(".yearly-view__overflow-stats")?.textContent ?? "");
           overflow.appendChild(nameSpan);
-          overflow.appendChild(indSpan);
           overflow.appendChild(statsSpan);
 
           barTrack.appendChild(overflow);

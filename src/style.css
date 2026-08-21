@@ -158,12 +158,6 @@ body {
   white-space: nowrap;
 }
 
-.bar__type-indicator {
-  font-size: 0.7rem;
-  color: rgba(255, 255, 255, 0.9);
-  flex-shrink: 0;
-}
-
 .bar__value {
   font-size: 0.8rem;
   font-weight: 700;
@@ -205,13 +199,6 @@ body {
 .bar__gen--outside {
   color: #888;
   font-size: 0.65rem;
-  cursor: pointer;
-  margin-left: 0.25rem;
-}
-
-.bar__type-indicator--outside {
-  color: #888;
-  font-size: 0.7rem;
   cursor: pointer;
   margin-left: 0.25rem;
 }
@@ -1116,6 +1103,13 @@ body {
   gap: 0;
 }
 
+/* Half-bar-height gap separating the pinned (out-of-top-10) artist row from
+   the top 10 above it. */
+.yearly-view__pin-gap {
+  height: 20px;
+  flex-shrink: 0;
+}
+
 .yearly-view__rank {
   flex-shrink: 0;
   width: 38px;
@@ -1160,20 +1154,6 @@ body {
   font-weight: 600;
   color: #fff;
   white-space: nowrap;
-}
-
-.yearly-view__indicator {
-  font-size: 0.55rem;
-  color: #fff;
-  margin-left: 6px;
-  flex-shrink: 0;
-}
-
-.yearly-view__indicator--outside {
-  font-size: 0.55rem;
-  margin-left: 3px;
-  flex-shrink: 0;
-  color: #999;
 }
 
 .yearly-view__stats {

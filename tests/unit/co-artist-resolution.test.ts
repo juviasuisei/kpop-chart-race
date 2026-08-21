@@ -264,54 +264,24 @@ describe('formatCoArtistLabel — co-artist name formatting', () => {
     };
   }
 
-  it('formats a single boy_group artist as "Name ▲"', () => {
+  it('formats a single artist as just their name (no type shape)', () => {
     const artists: ResolvedArtist[] = [
       makeResolvedArtist({ name: 'BTS', artistType: 'boy_group' }),
     ];
 
     const result = formatCoArtistLabel(artists);
 
-    expect(result).toBe('BTS ▲');
+    expect(result).toBe('BTS');
   });
 
-  it('formats a single girl_group artist as "Name ●"', () => {
-    const artists: ResolvedArtist[] = [
-      makeResolvedArtist({ name: 'aespa', artistType: 'girl_group' }),
+  it('does not append any artist-type shape symbol', () => {
+    const types: ResolvedArtist['artistType'][] = [
+      'boy_group', 'girl_group', 'solo_male', 'solo_female', 'mixed_group',
     ];
-
-    const result = formatCoArtistLabel(artists);
-
-    expect(result).toBe('aespa ●');
-  });
-
-  it('formats a single solo_male artist as "Name ◆"', () => {
-    const artists: ResolvedArtist[] = [
-      makeResolvedArtist({ name: 'Baekhyun', artistType: 'solo_male' }),
-    ];
-
-    const result = formatCoArtistLabel(artists);
-
-    expect(result).toBe('Baekhyun ◆');
-  });
-
-  it('formats a single solo_female artist as "Name ★"', () => {
-    const artists: ResolvedArtist[] = [
-      makeResolvedArtist({ name: 'IU', artistType: 'solo_female' }),
-    ];
-
-    const result = formatCoArtistLabel(artists);
-
-    expect(result).toBe('IU ★');
-  });
-
-  it('formats a single mixed_group artist as "Name ■"', () => {
-    const artists: ResolvedArtist[] = [
-      makeResolvedArtist({ name: 'KARD', artistType: 'mixed_group' }),
-    ];
-
-    const result = formatCoArtistLabel(artists);
-
-    expect(result).toBe('KARD ■');
+    for (const artistType of types) {
+      const result = formatCoArtistLabel([makeResolvedArtist({ name: 'X', artistType })]);
+      expect(result).toBe('X');
+    }
   });
 
   it('formats two artists with bullet separator preserving order', () => {
@@ -322,7 +292,7 @@ describe('formatCoArtistLabel — co-artist name formatting', () => {
 
     const result = formatCoArtistLabel(artists);
 
-    expect(result).toBe('BTS ▲ • aespa ●');
+    expect(result).toBe('BTS • aespa');
   });
 
   it('formats three artists with bullet separators preserving order', () => {
@@ -334,20 +304,7 @@ describe('formatCoArtistLabel — co-artist name formatting', () => {
 
     const result = formatCoArtistLabel(artists);
 
-    expect(result).toBe('IU ★ • BTS ▲ • KARD ■');
-  });
-
-  it('formats four artists preserving all type indicators and order', () => {
-    const artists: ResolvedArtist[] = [
-      makeResolvedArtist({ name: 'Baekhyun', artistType: 'solo_male' }),
-      makeResolvedArtist({ name: 'IU', artistType: 'solo_female' }),
-      makeResolvedArtist({ name: 'BTS', artistType: 'boy_group' }),
-      makeResolvedArtist({ name: 'aespa', artistType: 'girl_group' }),
-    ];
-
-    const result = formatCoArtistLabel(artists);
-
-    expect(result).toBe('Baekhyun ◆ • IU ★ • BTS ▲ • aespa ●');
+    expect(result).toBe('IU • BTS • KARD');
   });
 
   it('preserves original array order regardless of artist type', () => {
@@ -359,6 +316,6 @@ describe('formatCoArtistLabel — co-artist name formatting', () => {
     const result = formatCoArtistLabel(artists);
 
     // Order comes from the array, not alphabetical or type-based
-    expect(result).toBe('Second ● • First ▲');
+    expect(result).toBe('Second • First');
   });
 });

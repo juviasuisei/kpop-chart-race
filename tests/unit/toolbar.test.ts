@@ -138,6 +138,101 @@ describe('Toolbar — Points/Wins Toggle Visibility', () => {
   });
 });
 
+describe('Toolbar — Artist Filter Visibility', () => {
+  let container: HTMLElement;
+
+  beforeEach(() => {
+    container = document.createElement('div');
+    document.body.appendChild(container);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(container);
+  });
+
+  function isHidden(el: HTMLElement | null): boolean {
+    if (!el) return false;
+    return el.hidden ||
+      el.style.display === 'none' ||
+      el.classList.contains('toolbar__control--hidden');
+  }
+
+  // The artist filter now acts as a "pin" in Artists mode rather than a hard
+  // filter, so it stays visible in race/line and in yearly at the top-10 zoom.
+  // It is only hidden in yearly "all" zoom (treemap), where pinning has no
+  // visible effect. In Songs mode it always shows.
+
+  it('artist filter is visible in race mode (Songs)', () => {
+    const { toolbar, filterState } = createToolbar();
+    toolbar.mount(container);
+    filterState.update({ view: 'line', displayMode: 'songs' });
+
+    const artistControl = container.querySelector('[data-control="artist"]') as HTMLElement;
+    expect(isHidden(artistControl)).toBe(false);
+
+    toolbar.unmount();
+  });
+
+  it('artist filter is visible in race mode (Artists) — acts as a pin', () => {
+    const { toolbar, filterState } = createToolbar();
+    toolbar.mount(container);
+    filterState.update({ view: 'line', displayMode: 'artists' });
+
+    const artistControl = container.querySelector('[data-control="artist"]') as HTMLElement;
+    expect(isHidden(artistControl)).toBe(false);
+
+    toolbar.unmount();
+  });
+
+  it('artist filter is visible in yearly Artists mode at the top-10 zoom', () => {
+    const { toolbar, filterState } = createToolbar();
+    toolbar.mount(container);
+    filterState.update({ view: 'yearly', displayMode: 'artists', zoom: 10 });
+
+    const artistControl = container.querySelector('[data-control="artist"]') as HTMLElement;
+    expect(isHidden(artistControl)).toBe(false);
+
+    toolbar.unmount();
+  });
+
+  it('artist filter is hidden in yearly Artists mode at the "all" zoom', () => {
+    const { toolbar, filterState } = createToolbar();
+    toolbar.mount(container);
+    filterState.update({ view: 'yearly', displayMode: 'artists', zoom: 'all' });
+
+    const artistControl = container.querySelector('[data-control="artist"]') as HTMLElement;
+    expect(isHidden(artistControl)).toBe(true);
+
+    toolbar.unmount();
+  });
+
+  it('artist filter is visible in yearly mode when display toggle is on Songs', () => {
+    const { toolbar, filterState } = createToolbar();
+    toolbar.mount(container);
+    filterState.update({ view: 'yearly', displayMode: 'songs', zoom: 'all' });
+
+    const artistControl = container.querySelector('[data-control="artist"]') as HTMLElement;
+    expect(isHidden(artistControl)).toBe(false);
+
+    toolbar.unmount();
+  });
+
+  it('changing zoom in yearly Artists mode shows/hides the artist filter', () => {
+    const { toolbar, filterState } = createToolbar();
+    toolbar.mount(container);
+    filterState.update({ view: 'yearly', displayMode: 'artists', zoom: 10 });
+
+    let artistControl = container.querySelector('[data-control="artist"]') as HTMLElement;
+    expect(isHidden(artistControl)).toBe(false);
+
+    filterState.update({ zoom: 'all' });
+    artistControl = container.querySelector('[data-control="artist"]') as HTMLElement;
+    expect(isHidden(artistControl)).toBe(true);
+
+    toolbar.unmount();
+  });
+});
+
 describe('Toolbar — Generation Filter Dropdown', () => {
   let container: HTMLElement;
 

@@ -411,8 +411,7 @@ export function computeSnapshotSongs(
         rank: 0,
         previousRank,
         featuredRelease: { releaseId: release.id, title: coArtists.map(a => {
-          const indicator = ({ boy_group: '▲', girl_group: '●', solo_male: '◆', solo_female: '★', mixed_group: '■' })[a.artistType] ?? '';
-          return `${a.name} ${toRomanNumeral(a.generation)} ${indicator}`;
+          return `${a.name} ${toRomanNumeral(a.generation)}`;
         }).join(' • ') },
         isGoalpost: false,
         releaseKey,

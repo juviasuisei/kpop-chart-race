@@ -270,14 +270,8 @@ describe('Property 6: Artist resolution preserves order and completeness', () =>
 // **Validates: Requirements 2.3**
 // ============================================================
 
-/** Type indicator symbols mapping */
-const TYPE_INDICATORS: Record<ArtistType, string> = {
-  boy_group: '▲',
-  girl_group: '●',
-  solo_male: '◆',
-  solo_female: '★',
-  mixed_group: '■',
-};
+/** Artist-type shape symbols that must NOT appear in labels (removed). */
+const TYPE_SHAPES = ['▲', '●', '◆', '★', '■'];
 
 /** Generate an array of 1–20 ResolvedArtist entries */
 const arbResolvedArtistArray: fc.Arbitrary<ResolvedArtist[]> = fc
@@ -322,15 +316,12 @@ describe('Property 5: Co-artist name formatting preserves order', () => {
     );
   });
 
-  it('each name is followed by the correct type indicator', () => {
+  it('never contains an artist-type shape symbol', () => {
     fc.assert(
       fc.property(arbResolvedArtistArray, (artists) => {
         const result = formatCoArtistLabel(artists);
-
-        for (const artist of artists) {
-          const expectedIndicator = TYPE_INDICATORS[artist.artistType];
-          const expectedFragment = `${artist.name} ${expectedIndicator}`;
-          expect(result).toContain(expectedFragment);
+        for (const shape of TYPE_SHAPES) {
+          expect(result).not.toContain(shape);
         }
       }),
       { numRuns: 100 },
@@ -361,8 +352,7 @@ describe('Property 5: Co-artist name formatting preserves order', () => {
           const result = formatCoArtistLabel(artists);
 
           expect(result).not.toContain(' • ');
-          const expectedIndicator = TYPE_INDICATORS[artists[0].artistType];
-          expect(result).toBe(`${artists[0].name} ${expectedIndicator}`);
+          expect(result).toBe(artists[0].name);
         },
       ),
       { numRuns: 100 },

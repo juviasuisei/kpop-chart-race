@@ -11,63 +11,12 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { FilterStateManager } from '../../src/filter-state-manager.ts';
 import { EventBus } from '../../src/event-bus.ts';
 import { LiveRegionAnnouncer } from '../../src/live-region.ts';
+import { encodeStateToHash, parseHashToState } from '../../src/url-state.ts';
 import type { FilterState } from '../../src/types.ts';
 
 // ============================================================
-// URL State Encoding / Decoding (extracted logic for testability)
+// URL State Encoding / Decoding (see src/url-state.ts)
 // ============================================================
-
-const DEFAULT_FILTER_VALUES: Partial<FilterState> = {
-  view: 'line',
-  generation: 'all',
-  source: 'all',
-  artist: 'all',
-  displayMode: 'songs',
-};
-
-function encodeStateToHash(state: FilterState): string {
-  const params: string[] = [];
-  if (state.view !== DEFAULT_FILTER_VALUES.view) params.push(`view=${state.view}`);
-  if (state.generation !== DEFAULT_FILTER_VALUES.generation) params.push(`gen=${state.generation}`);
-  if (state.source !== DEFAULT_FILTER_VALUES.source) params.push(`source=${state.source}`);
-  if (state.artist !== DEFAULT_FILTER_VALUES.artist) params.push(`artist=${state.artist}`);
-  if (state.displayMode !== DEFAULT_FILTER_VALUES.displayMode) params.push(`mode=${state.displayMode}`);
-  return params.length > 0 ? `#${params.join('&')}` : '';
-}
-
-function parseHashToState(hash: string): Partial<FilterState> {
-  const partial: Partial<FilterState> = {};
-  if (!hash || hash === '#') return partial;
-
-  const raw = hash.startsWith('#') ? hash.slice(1) : hash;
-  const pairs = raw.split('&');
-  for (const pair of pairs) {
-    const [key, value] = pair.split('=');
-    if (!key || !value) continue;
-    switch (key) {
-      case 'view':
-        if (['line', 'race', 'yearly', 'episodes', 'artist-timeline'].includes(value)) {
-          partial.view = value as FilterState['view'];
-        }
-        break;
-      case 'gen':
-        partial.generation = value === 'all' ? 'all' : parseInt(value, 10);
-        break;
-      case 'source':
-        partial.source = value;
-        break;
-      case 'artist':
-        partial.artist = value;
-        break;
-      case 'mode':
-        if (value === 'songs' || value === 'artists') {
-          partial.displayMode = value;
-        }
-        break;
-    }
-  }
-  return partial;
-}
 
 describe('URL State Encoding', () => {
   const defaultState: FilterState = {
@@ -108,6 +57,16 @@ describe('URL State Encoding', () => {
     it('encodes display mode', () => {
       const state = { ...defaultState, displayMode: 'artists' as const };
       expect(encodeStateToHash(state)).toBe('#mode=artists');
+    });
+
+    it('encodes zoom', () => {
+      const state = { ...defaultState, zoom: 'all' as const };
+      expect(encodeStateToHash(state)).toBe('#zoom=all');
+    });
+
+    it('encodes metric', () => {
+      const state = { ...defaultState, metric: 'appearances' as const };
+      expect(encodeStateToHash(state)).toBe('#metric=appearances');
     });
 
     it('encodes multiple non-default values', () => {
@@ -164,6 +123,21 @@ describe('URL State Encoding', () => {
       expect(parseHashToState('#mode=artists')).toEqual({ displayMode: 'artists' });
     });
 
+    it('parses zoom "all" and "10"', () => {
+      expect(parseHashToState('#zoom=all')).toEqual({ zoom: 'all' });
+      expect(parseHashToState('#zoom=10')).toEqual({ zoom: 10 });
+    });
+
+    it('parses metric values', () => {
+      expect(parseHashToState('#metric=wins')).toEqual({ metric: 'wins' });
+      expect(parseHashToState('#metric=appearances')).toEqual({ metric: 'appearances' });
+    });
+
+    it('ignores invalid zoom and metric values', () => {
+      expect(parseHashToState('#zoom=5')).toEqual({});
+      expect(parseHashToState('#metric=bogus')).toEqual({});
+    });
+
     it('parses multiple params', () => {
       const result = parseHashToState('#view=episodes&source=music_bank&gen=3');
       expect(result).toEqual({
@@ -190,19 +164,23 @@ describe('URL State Encoding', () => {
     it('encodeStateToHash → parseHashToState preserves state', () => {
       const state: FilterState = {
         ...defaultState,
-        view: 'episodes',
+        view: 'yearly',
         generation: 4,
         source: 'inkigayo',
         artist: 'aespa',
         displayMode: 'artists',
+        zoom: 'all',
+        metric: 'appearances',
       };
       const hash = encodeStateToHash(state);
       const parsed = parseHashToState(hash);
-      expect(parsed.view).toBe('episodes');
+      expect(parsed.view).toBe('yearly');
       expect(parsed.generation).toBe(4);
       expect(parsed.source).toBe('inkigayo');
       expect(parsed.artist).toBe('aespa');
       expect(parsed.displayMode).toBe('artists');
+      expect(parsed.zoom).toBe('all');
+      expect(parsed.metric).toBe('appearances');
     });
   });
 });

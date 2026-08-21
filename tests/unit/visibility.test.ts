@@ -80,6 +80,7 @@ describe('computeInactivityOpacity', () => {
 describe('resolveLineOpacity', () => {
   const base = {
     isSelected: false,
+    isPinnedArtist: false,
     isFirstPlace: false,
     artistFilterActive: false,
     daysSinceActivity: 999, // long-inactive: would fully fade if not immune
@@ -103,6 +104,18 @@ describe('resolveLineOpacity', () => {
 
   it('keeps everything visible when an artist filter is active', () => {
     expect(resolveLineOpacity({ ...base, artistFilterActive: true })).toBe(1.0);
+  });
+
+  it('keeps the pinned artist fully visible even when long-inactive and not #1', () => {
+    // The pinned artist (Artists-mode filter) is treated like #1 for
+    // visibility: immune to the inactivity fade regardless of recency.
+    expect(resolveLineOpacity({ ...base, isPinnedArtist: true })).toBe(1.0);
+  });
+
+  it('pinned-artist immunity does not require being #1 or selected', () => {
+    const stale = { ...base, daysSinceActivity: 500, isFirstPlace: false, isSelected: false };
+    expect(resolveLineOpacity({ ...stale, isPinnedArtist: true })).toBe(1.0);
+    expect(resolveLineOpacity({ ...stale, isPinnedArtist: false })).toBe(0.0);
   });
 
   it('otherwise defers to the inactivity fade', () => {

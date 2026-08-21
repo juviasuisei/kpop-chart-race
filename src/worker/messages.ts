@@ -55,6 +55,13 @@ export interface VisibilityParams {
   artistFilterActive: boolean;
   /** Currently selected line IDs (rendered on highlight layer) */
   selectedLineIds: string[];
+  /**
+   * Artist "pinned" via the Artists-mode artist filter. Their line is treated
+   * like the current #1 for visibility: always full opacity and top label
+   * priority, but WITHOUT the clicked-selection highlight styling. "all" (or
+   * omitted) means no pin.
+   */
+  pinnedArtistId?: string;
 }
 
 // --- Main → Worker messages ---
@@ -77,6 +84,12 @@ export interface SerializedLineData {
   color: string;
   /** Change-point entries: [dateIndex, cumulativeValue][] */
   changePoints: [number, number][];
+  /**
+   * Primary artist ID for this line. In Artists mode lineId === artistId; in
+   * Songs mode it is the first credited artist. Used by the worker to match
+   * the pinned artist for visibility.
+   */
+  artistId: string;
 }
 
 /** Request a computed frame for a given date */

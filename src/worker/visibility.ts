@@ -62,6 +62,12 @@ export interface LineOpacityInput {
   isSelected: boolean;
   /** Whether this line is the current #1 (see findFirstPlaceLineId). */
   isFirstPlace: boolean;
+  /**
+   * Whether this line belongs to the pinned artist (Artists-mode filter).
+   * Treated like #1 for visibility: never dims. Distinct from isSelected so it
+   * does not get the clicked-line highlight styling.
+   */
+  isPinnedArtist: boolean;
   /** Whether an artist filter is active (forces everything visible). */
   artistFilterActive: boolean;
   /** Days since this line last had chart activity. */
@@ -74,16 +80,20 @@ export interface LineOpacityInput {
  * Resolve a line's opacity, applying the visibility overrides in priority
  * order before falling back to the inactivity fade:
  *
- *   1. Selected lines are always fully visible.
- *   2. The current #1 line is always fully visible -- immune from the
+ *   1. Selected (clicked) lines are always fully visible.
+ *   2. The pinned artist's line is always fully visible -- treated like #1,
+ *      but without the clicked-line highlight styling. Kept immune so the
+ *      user can always track the artist they filtered to.
+ *   3. The current #1 line is always fully visible -- immune from the
  *      inactivity fade for as long as it stays #1. Because #1 is decided
  *      per frame from current values, this immunity vanishes the moment the
  *      line is surpassed, and the normal fade applies again immediately.
- *   3. When an artist filter is active, everything is fully visible.
- *   4. Otherwise, the inactivity fade applies.
+ *   4. When an artist filter is active, everything is fully visible.
+ *   5. Otherwise, the inactivity fade applies.
  */
 export function resolveLineOpacity(input: LineOpacityInput): number {
   if (input.isSelected) return 1.0;
+  if (input.isPinnedArtist) return 1.0; // pinned artist never dims
   if (input.isFirstPlace) return 1.0; // #1 never dims from inactivity (until surpassed)
   if (input.artistFilterActive) return 1.0;
   return computeInactivityOpacity(input.daysSinceActivity, input.filterCount);

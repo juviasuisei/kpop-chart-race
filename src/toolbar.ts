@@ -137,6 +137,21 @@ export class Toolbar {
       generationControl?.classList.remove("toolbar__control--hidden");
     }
 
+    // Artist filter visibility. In Songs mode it always shows (hard filter).
+    // In Artists mode it acts as a "pin" (highlight the selected artist) rather
+    // than a hard filter, so it stays visible in race/line and in yearly at the
+    // top-10 zoom. It is only hidden in yearly "all" zoom (treemap), where
+    // pinning has no visible effect since every artist is already shown.
+    const artistControl = this.wrapper.querySelector(
+      '[data-control="artist"]',
+    ) as HTMLElement | null;
+    const state = this.filterState.getState();
+    const hideArtist =
+      view === "yearly" &&
+      state.displayMode === "artists" &&
+      state.zoom === "all";
+    artistControl?.classList.toggle("toolbar__control--hidden", hideArtist);
+
     // Update segmented button active states
     const viewControl = this.wrapper.querySelector('[data-control="view"]');
     if (viewControl) {

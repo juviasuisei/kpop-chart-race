@@ -5,33 +5,20 @@
  * Provides formatting utilities for co-artist display labels.
  */
 
-import type { ArtistType } from './types.ts';
 import type { ParsedArtist, DataStore, ResolvedArtist } from './models.ts';
 
 // Re-export ResolvedArtist for backward compatibility
 export type { ResolvedArtist } from './models.ts';
 
-/** Map of artist type to its display indicator symbol */
-const ARTIST_TYPE_INDICATORS: Record<ArtistType, string> = {
-  boy_group: '▲',
-  girl_group: '●',
-  solo_male: '◆',
-  solo_female: '★',
-  mixed_group: '■',
-};
-
 /**
  * Formats a co-artist label string from an array of resolved artists.
- * Each artist's name is followed by their type indicator symbol.
  * Multiple artists are joined by " • " (bullet separator).
  *
  * @param artists - Array of resolved artists (1–20 entries) in display order
- * @returns Formatted label string, e.g., "BTS ▲ • aespa ●"
+ * @returns Formatted label string, e.g., "BTS • aespa"
  */
 export function formatCoArtistLabel(artists: ResolvedArtist[]): string {
-  return artists
-    .map((artist) => `${artist.name} ${ARTIST_TYPE_INDICATORS[artist.artistType]}`)
-    .join(' • ');
+  return artists.map((artist) => artist.name).join(' • ');
 }
 
 /**

@@ -23,6 +23,7 @@ import { EpisodeBrowser } from "./views/episode-browser.ts";
 import { ArtistTimeline } from "./views/artist-timeline.ts";
 import { TimeNavigation } from "./canvas/time-navigation.ts";
 import { SearchOverlay } from "./canvas/search-overlay.ts";
+import { encodeStateToHash, parseHashToState } from "./url-state.ts";
 import type { DataStore } from "./models.ts";
 import type { FilterState } from "./types.ts";
 
@@ -195,6 +196,10 @@ async function main(): Promise<void> {
 
   // --- Yearly View ---
   const yearlyView = new YearlyView();
+  // Clicking an artist bar/cell (Artists mode) jumps to that artist's timeline.
+  yearlyView.onArtistClick = (artistId: string) => {
+    filterStateManager.update({ artist: artistId, view: "artist-timeline" });
+  };
 
   // --- Episode Browser ---
   const episodeBrowser = new EpisodeBrowser();
@@ -237,7 +242,17 @@ async function main(): Promise<void> {
       yearlyView.setDisplayMode(state.displayMode);
       yearlyView.setGenerationFilter(state.generation);
       yearlyView.setSourceFilter(state.source);
-      yearlyView.setArtistFilter(state.artist);
+      // In Songs mode the artist filter is a hard filter. In Artists mode it is
+      // a "pin" instead: the selected artist is shown at their true rank even
+      // when they fall outside the top 10 (grid zoom only), rather than
+      // narrowing the whole view to one artist.
+      if (state.displayMode === "artists") {
+        yearlyView.setArtistFilter("all");
+        yearlyView.setPinnedArtist(state.artist);
+      } else {
+        yearlyView.setArtistFilter(state.artist);
+        yearlyView.setPinnedArtist("all");
+      }
       yearlyView.setMetric(state.metric);
       yearlyView.setZoom(state.zoom === 10 ? 10 : "all");
     } else if (mode === "episodes") {
@@ -320,10 +335,21 @@ async function main(): Promise<void> {
       return;
     }
 
-    // Line view active — pass filter state to controller
+    // Line view active — pass filter state to controller.
+    // In Songs mode the artist filter is a hard filter. In Artists mode it is a
+    // "pin" instead: the selected artist's line is always shown at full opacity
+    // and wins label priority (treated like #1), while every other line uses
+    // the normal visibility logic. So in Artists mode we clear the hard filter
+    // and pass the selection as a pin.
     if (currentView === "line" || currentView === "race") {
       switchView("line");
-      lineChart.setFilters(state);
+      if (state.displayMode === "artists") {
+        lineChart.setPinnedArtist(state.artist);
+        lineChart.setFilters({ ...state, artist: "all" });
+      } else {
+        lineChart.setPinnedArtist("all");
+        lineChart.setFilters(state);
+      }
     }
   });
 
@@ -475,60 +501,6 @@ async function main(): Promise<void> {
   // =========================================================
   // Phase 7: Polish — URL State Encoding
   // =========================================================
-
-  const DEFAULT_FILTER_VALUES: Partial<FilterState> = {
-    view: "line",
-    generation: "all",
-    source: "all",
-    artist: "all",
-    displayMode: "songs",
-  };
-
-  /** Encode current filter state into URL hash */
-  function encodeStateToHash(state: FilterState): string {
-    const params: string[] = [];
-    if (state.view !== DEFAULT_FILTER_VALUES.view) params.push(`view=${state.view}`);
-    if (state.generation !== DEFAULT_FILTER_VALUES.generation) params.push(`gen=${state.generation}`);
-    if (state.source !== DEFAULT_FILTER_VALUES.source) params.push(`source=${state.source}`);
-    if (state.artist !== DEFAULT_FILTER_VALUES.artist) params.push(`artist=${state.artist}`);
-    if (state.displayMode !== DEFAULT_FILTER_VALUES.displayMode) params.push(`mode=${state.displayMode}`);
-    return params.length > 0 ? `#${params.join("&")}` : "";
-  }
-
-  /** Parse URL hash into partial filter state */
-  function parseHashToState(hash: string): Partial<FilterState> {
-    const partial: Partial<FilterState> = {};
-    if (!hash || hash === "#") return partial;
-
-    const raw = hash.startsWith("#") ? hash.slice(1) : hash;
-    const pairs = raw.split("&");
-    for (const pair of pairs) {
-      const [key, value] = pair.split("=");
-      if (!key || !value) continue;
-      switch (key) {
-        case "view":
-          if (["line", "race", "yearly", "episodes", "artist-timeline"].includes(value)) {
-            partial.view = value as FilterState["view"];
-          }
-          break;
-        case "gen":
-          partial.generation = value === "all" ? "all" : parseInt(value, 10);
-          break;
-        case "source":
-          partial.source = value;
-          break;
-        case "artist":
-          partial.artist = value;
-          break;
-        case "mode":
-          if (value === "songs" || value === "artists") {
-            partial.displayMode = value;
-          }
-          break;
-      }
-    }
-    return partial;
-  }
 
   // On load: apply hash state
   const initialHashState = parseHashToState(window.location.hash);

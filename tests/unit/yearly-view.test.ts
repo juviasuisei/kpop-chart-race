@@ -202,15 +202,14 @@ describe('YearlyView', () => {
     expect(ranks[1].textContent).toBe('#2');
   });
 
-  it('renders artist type indicator', () => {
+  it('does not render artist-type shape indicators (removed)', () => {
     const dataStore = createDataStore([
       createArtist('artist-a', 'Artist A', { '2025-06-01': { value: 5000, source: 'inkigayo', episode: 1 } }),
     ]);
     view.mount(container, dataStore);
 
-    const indicator = container.querySelector('.yearly-view__indicator');
-    expect(indicator).not.toBeNull();
-    expect(indicator?.textContent).toBe('●'); // girl_group indicator
+    // The ▲/●/◆/★/■ artist-type shapes were removed; color still distinguishes types.
+    expect(container.querySelector('.yearly-view__indicator')).toBeNull();
   });
 
   it('shows win count when artist has wins (wins mode)', () => {
@@ -1133,6 +1132,136 @@ describe('YearlyView — All-Time Aggregate', () => {
     const headings = Array.from(container.querySelectorAll('.yearly-treemap__year')).map(h => h.textContent);
     expect(headings[0]).toBe('All-Time');
     expect(container.querySelector('.yearly-treemap__block--all-time')).not.toBeNull();
+  });
+});
+
+describe('YearlyView — Artist Click Navigation', () => {
+  let container: HTMLElement;
+  let view: YearlyView;
+
+  beforeEach(() => {
+    container = document.createElement('div');
+    document.body.appendChild(container);
+    view = new YearlyView();
+  });
+
+  afterEach(() => {
+    view.unmount();
+    document.body.removeChild(container);
+  });
+
+  it('fires onArtistClick with the artist id when a grid bar is clicked (Artists mode)', () => {
+    const ds = createDataStore([
+      createArtist('artist-a', 'Artist A', { '2025-06-01': { value: 5000, source: 'inkigayo', episode: 1 } }),
+      createArtist('artist-b', 'Artist B', { '2025-06-01': { value: 3000, source: 'inkigayo', episode: 1 } }),
+    ]);
+    const clicked: string[] = [];
+    view.onArtistClick = (id) => clicked.push(id);
+    view.mount(container, ds);
+    view.setDisplayMode('artists');
+
+    const firstRow = container.querySelector('.yearly-view__row') as HTMLElement;
+    firstRow.click();
+
+    expect(clicked).toEqual(['artist-a']); // Artist A ranks #1
+  });
+
+  it('marks artist rows as clickable (pointer cursor) in Artists grid', () => {
+    const ds = createDataStore([
+      createArtist('artist-a', 'Artist A', { '2025-06-01': { value: 5000, source: 'inkigayo', episode: 1 } }),
+    ]);
+    view.mount(container, ds);
+    view.setDisplayMode('artists');
+
+    const row = container.querySelector('.yearly-view__row') as HTMLElement;
+    expect(row.style.cursor).toBe('pointer');
+  });
+});
+
+describe('YearlyView — Pinned Artist (Artists grid)', () => {
+  let container: HTMLElement;
+  let view: YearlyView;
+
+  beforeEach(() => {
+    container = document.createElement('div');
+    document.body.appendChild(container);
+    view = new YearlyView();
+  });
+
+  afterEach(() => {
+    view.unmount();
+    document.body.removeChild(container);
+  });
+
+  /** 15 artists in one year (2025), descending points so ranks are stable. */
+  function makeStore(): DataStore {
+    const artists: ParsedArtist[] = [];
+    for (let i = 1; i <= 15; i++) {
+      artists.push(
+        createArtist(`artist-${i}`, `Artist ${i}`, {
+          '2025-06-01': { value: (16 - i) * 1000, source: 'inkigayo', episode: i },
+        }),
+      );
+    }
+    // Rank order: artist-1 (15000) is #1 ... artist-15 (1000) is #15.
+    return createDataStore(artists);
+  }
+
+  it('pins an out-of-top-10 artist as an extra row at their true rank', () => {
+    const ds = makeStore();
+    view.mount(container, ds);
+    view.setDisplayMode('artists');
+    view.setPinnedArtist('artist-13'); // ranks #13, outside the top 10
+
+    const rows = container.querySelectorAll('.yearly-view__row');
+    expect(rows.length).toBe(11); // top 10 + 1 pinned
+
+    const pinnedRow = container.querySelector('.yearly-view__row--pinned');
+    expect(pinnedRow).not.toBeNull();
+    expect(pinnedRow?.querySelector('.yearly-view__rank')?.textContent).toBe('#13');
+    expect(pinnedRow?.textContent).toContain('Artist 13');
+  });
+
+  it('renders a half-bar gap element before the pinned row', () => {
+    const ds = makeStore();
+    view.mount(container, ds);
+    view.setDisplayMode('artists');
+    view.setPinnedArtist('artist-14');
+
+    expect(container.querySelector('.yearly-view__pin-gap')).not.toBeNull();
+  });
+
+  it('does not add a pinned row when the artist is already in the top 10', () => {
+    const ds = makeStore();
+    view.mount(container, ds);
+    view.setDisplayMode('artists');
+    view.setPinnedArtist('artist-3'); // ranks #3, already visible
+
+    const rows = container.querySelectorAll('.yearly-view__row');
+    expect(rows.length).toBe(10);
+    expect(container.querySelector('.yearly-view__row--pinned')).toBeNull();
+  });
+
+  it('does not pin in the "all" zoom (treemap has no top-10 cutoff)', () => {
+    const ds = makeStore();
+    view.mount(container, ds);
+    view.setDisplayMode('artists');
+    view.setPinnedArtist('artist-13');
+    view.setZoom('all');
+
+    expect(container.querySelector('.yearly-view__row--pinned')).toBeNull();
+    expect(container.querySelector('.yearly-view__pin-gap')).toBeNull();
+  });
+
+  it('does not pin an artist who does not appear that year', () => {
+    const ds = makeStore();
+    view.mount(container, ds);
+    view.setDisplayMode('artists');
+    view.setPinnedArtist('nonexistent-artist');
+
+    const rows = container.querySelectorAll('.yearly-view__row');
+    expect(rows.length).toBe(10);
+    expect(container.querySelector('.yearly-view__row--pinned')).toBeNull();
   });
 });
 

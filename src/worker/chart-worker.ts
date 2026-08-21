@@ -257,6 +257,10 @@ function computeMaxAtDate(dateIndex: number): number {
 function computeFrame(msg: ComputeFrameMessage): void {
   const startTime = performance.now();
   const { requestId, currentDateIndex, viewport, visibility } = msg;
+  const pinnedArtistId =
+    visibility.pinnedArtistId && visibility.pinnedArtistId !== "all"
+      ? visibility.pinnedArtistId
+      : undefined;
 
   // Clamp currentDateIndex to available range
   const effectiveDateIndex = Math.min(currentDateIndex, allDates.length - 1);
@@ -306,25 +310,36 @@ function computeFrame(msg: ComputeFrameMessage): void {
     if (lifetimePoints <= 0 && !isUpcoming) continue;
 
     const isSelected = selectedLineIds.has(line.lineId);
+    const isPinnedArtist =
+      pinnedArtistId !== undefined && line.artistId === pinnedArtistId;
 
     // Compute visibility (see resolveLineOpacity for the override order)
     let opacity = resolveLineOpacity({
       isSelected,
+      isPinnedArtist,
       isFirstPlace: line.lineId === firstPlaceLineId,
       artistFilterActive: visibility.artistFilterActive,
       daysSinceActivity,
       filterCount: visibility.filterCount,
     });
 
-    if (opacity <= 0 && !isSelected) continue;
+    if (opacity <= 0 && !isSelected && !isPinnedArtist) continue;
 
-    // Apply selection dimming: if any line is selected, non-selected lines get ×0.08
-    if (selectedLineIds.size > 0 && !isSelected) {
+    // Apply selection dimming: if any line is selected, non-selected lines get
+    // ×0.08. The pinned artist is exempt so it stays fully visible.
+    if (selectedLineIds.size > 0 && !isSelected && !isPinnedArtist) {
       opacity *= 0.08;
     }
 
     const layer = assignLayer(opacity, isSelected);
-    const zIndex = isSelected ? Infinity : computeZIndex(daysSinceActivity, lifetimePoints);
+    // The pinned artist draws above normal lines (so it isn't buried) but below
+    // clicked selections. It stays off the highlight layer and keeps the normal
+    // line width — it is "always visible", not "highlighted".
+    const zIndex = isSelected
+      ? Infinity
+      : isPinnedArtist
+        ? Number.MAX_SAFE_INTEGER
+        : computeZIndex(daysSinceActivity, lifetimePoints);
 
     // Build pixel coordinates
     const { points, values } = buildPixelPoints(line.changePoints, viewport, frameMaxValue);

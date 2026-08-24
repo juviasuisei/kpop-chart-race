@@ -252,3 +252,161 @@ describe("EpisodeBrowser", () => {
     browser.unmount();
   });
 });
+
+// ============================================================
+// Tie handling at the episode level (dense ranks + recency tie-break)
+// ============================================================
+
+describe("EpisodeBrowser — ties", () => {
+  let container: HTMLElement;
+
+  beforeEach(() => {
+    container = document.createElement("div");
+    document.body.appendChild(container);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(container);
+  });
+
+  /**
+   * One episode (inkigayo ep 200 on 2024-02-01) with scores 100, 90, 90, 80.
+   * The two 90s belong to releases with different earliest-chart dates so we
+   * can assert the recency tie-break (newer release ranks above older).
+   */
+  function makeTieStore(opts: { winnerArtistIds?: string[] } = {}): DataStore {
+    const EP = { source: "inkigayo", episode: 200 };
+    const D = "2024-02-01";
+
+    // Top scorer (100)
+    const top: ParsedRelease = {
+      id: "r-top", title: "Top Song", artistIds: ["a-top"], embeds: new Map(),
+      dailyValues: new Map([[D, { value: 100, ...EP }]]),
+    };
+    // Tie A (90) — older: also charted back in January
+    const tieOld: ParsedRelease = {
+      id: "r-old", title: "Old Song", artistIds: ["a-old"], embeds: new Map(),
+      dailyValues: new Map([
+        ["2024-01-01", { value: 50, ...EP, episode: 190 }],
+        [D, { value: 90, ...EP }],
+      ]),
+    };
+    // Tie B (90) — newer: first ever charted on this episode's date
+    const tieNew: ParsedRelease = {
+      id: "r-new", title: "New Song", artistIds: ["a-new"], embeds: new Map(),
+      dailyValues: new Map([[D, { value: 90, ...EP }]]),
+    };
+    // Lowest (80)
+    const low: ParsedRelease = {
+      id: "r-low", title: "Low Song", artistIds: ["a-low"], embeds: new Map(),
+      dailyValues: new Map([[D, { value: 80, ...EP }]]),
+    };
+
+    const mkArtist = (id: string, name: string, r: ParsedRelease): ParsedArtist => ({
+      id, name, artistType: "girl_group", generation: 4,
+      logoUrl: `assets/logos/${id}.svg`, releases: [r], albumReleases: [],
+    });
+
+    const artists = new Map<string, ParsedArtist>([
+      ["a-top", mkArtist("a-top", "Top", top)],
+      ["a-old", mkArtist("a-old", "Old", tieOld)],
+      ["a-new", mkArtist("a-new", "New", tieNew)],
+      ["a-low", mkArtist("a-low", "Low", low)],
+    ]);
+
+    const chartWins = new Map<string, Map<string, { artistIds: string[]; crownLevels: Map<string, number> }>>();
+    if (opts.winnerArtistIds && opts.winnerArtistIds.length > 0) {
+      const crownLevels = new Map<string, number>();
+      for (const id of opts.winnerArtistIds) crownLevels.set(id, 1);
+      chartWins.set(D, new Map([["inkigayo", { artistIds: opts.winnerArtistIds, crownLevels }]]));
+    }
+
+    return {
+      artists,
+      dates: ["2024-01-01", D],
+      startDate: "2024-01-01",
+      endDate: D,
+      firstAppearance: new Map(),
+      chartWins,
+      releaseWinDates: new Map(),
+    };
+  }
+
+  /** Find the inkigayo ep 200 card. */
+  function tieCard(): Element {
+    const cards = container.querySelectorAll(".episode-card");
+    for (const card of cards) {
+      if (card.querySelector(".episode-card__episode-num")?.textContent === "Episode #200") {
+        return card;
+      }
+    }
+    throw new Error("ep 200 card not found");
+  }
+
+  it("gives tied entries the same rank and uses dense numbering (1,2,2,3)", () => {
+    const browser = new EpisodeBrowser();
+    browser.mount(container, makeTieStore());
+
+    const card = tieCard();
+    const ranks = Array.from(card.querySelectorAll(".episode-card__chart-entry")).map(row => {
+      const rankEl = row.querySelector(".episode-card__rank");
+      return rankEl?.textContent ?? "";
+    });
+
+    // Scores 100, 90, 90, 80 → dense ranks #1, #2, #2, #3 (no skipped #3→#4)
+    expect(ranks).toEqual(["#1", "#2", "#2", "#3"]);
+
+    browser.unmount();
+  });
+
+  it("orders a tie group by recency (newer release on top)", () => {
+    const browser = new EpisodeBrowser();
+    browser.mount(container, makeTieStore());
+
+    const card = tieCard();
+    const infos = Array.from(card.querySelectorAll(".episode-card__entry-info")).map(
+      el => el.textContent ?? "",
+    );
+
+    // The two 90-point songs tie; "New" (first charted 2024-02-01) is newer than
+    // "Old" (first charted 2024-01-01), so New ranks above Old.
+    const newIdx = infos.findIndex(t => t.includes("New"));
+    const oldIdx = infos.findIndex(t => t.includes("Old"));
+    expect(newIdx).toBeGreaterThanOrEqual(0);
+    expect(newIdx).toBeLessThan(oldIdx);
+
+    browser.unmount();
+  });
+
+  it("shows a crown for every entry tied for first", () => {
+    // Both a-top and a second release tie for the top score, and both are winners.
+    const ds = makeTieStore({ winnerArtistIds: ["a-top", "a-new"] });
+    // Bump New Song to 100 so it ties a-top for first.
+    const newRelease = ds.artists.get("a-new")!.releases[0];
+    newRelease.dailyValues.set("2024-02-01", { value: 100, source: "inkigayo", episode: 200 });
+
+    const browser = new EpisodeBrowser();
+    browser.mount(container, ds);
+
+    const card = tieCard();
+    const rows = Array.from(card.querySelectorAll(".episode-card__chart-entry"));
+    const crownOf = (row: Element) => row.querySelector(".episode-card__crown");
+    const rankTextOf = (row: Element) => {
+      // A plain rank label is a .episode-card__rank WITHOUT the --crown modifier.
+      const el = row.querySelector(".episode-card__rank:not(.episode-card__rank--crown)");
+      return el?.textContent ?? null;
+    };
+
+    // First two entries tie for #1 → both crowns, neither a "#1" text label.
+    expect(crownOf(rows[0])).not.toBeNull();
+    expect(crownOf(rows[1])).not.toBeNull();
+    expect(rankTextOf(rows[0])).toBeNull();
+    expect(rankTextOf(rows[1])).toBeNull();
+
+    // The remaining entries fall to dense rank #2 with plain labels (no crown).
+    expect(crownOf(rows[2])).toBeNull();
+    expect(rankTextOf(rows[2])).toBe("#2");
+
+    browser.unmount();
+  });
+});

@@ -511,3 +511,96 @@ describe("ArtistTimeline — Entry Sorting", () => {
     timeline.unmount();
   });
 });
+
+// ============================================================
+// Album-release labels: DEBUT / SINGLE / COMEBACK
+// ============================================================
+
+describe("ArtistTimeline — album release labels", () => {
+  let container: HTMLElement;
+
+  beforeEach(() => {
+    container = document.createElement("div");
+    document.body.appendChild(container);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(container);
+  });
+
+  /** Artist with a debut date and three album releases exercising each label. */
+  function artistWithReleases(): ParsedArtist {
+    return {
+      id: "aespa",
+      name: "aespa",
+      artistType: "girl_group",
+      generation: 4,
+      logoUrl: "assets/logos/aespa.svg",
+      debut: "2020-11-17",
+      releases: [
+        {
+          id: "r1",
+          title: "Song",
+          artistIds: ["aespa"],
+          dailyValues: new Map([["2024-01-15", { value: 5000, source: "inkigayo", episode: 101 }]]),
+          embeds: new Map(),
+        },
+      ],
+      albumReleases: [
+        // On the debut date → DEBUT (even though flagged single)
+        { date: "2020-11-17", appleMusicUrl: "https://music.apple.com/debut", isSingle: true, artistIds: ["aespa"] },
+        // Single, not on debut → SINGLE
+        { date: "2022-05-02", appleMusicUrl: "https://music.apple.com/single", isSingle: true, artistIds: ["aespa"] },
+        // Non-single, not on debut → COMEBACK
+        { date: "2023-05-08", appleMusicUrl: "https://music.apple.com/album", isSingle: false, artistIds: ["aespa"] },
+      ],
+    };
+  }
+
+  function labelForDate(date: string): string | undefined {
+    const groups = Array.from(container.querySelectorAll(".artist-timeline__date-group"));
+    for (const g of groups) {
+      const header = g.querySelector(".artist-timeline__date-header")?.textContent ?? "";
+      // Date headers are humanized; match on the year+day is brittle, so instead
+      // find the group whose album-release embed URL encodes the case.
+      const label = g.querySelector(".artist-timeline__embed-type")?.textContent ?? undefined;
+      const iframe = g.querySelector("iframe");
+      if (iframe && iframe.src.includes(date)) return label;
+      void header;
+    }
+    return undefined;
+  }
+
+  it('labels a release on the artist debut date as "DEBUT"', () => {
+    const artists = new Map([["aespa", artistWithReleases()]]);
+    const ds = createMockDataStore(artists);
+    const timeline = new ArtistTimeline();
+    timeline.mount(container, ds, "aespa");
+
+    expect(labelForDate("debut")).toBe("DEBUT");
+
+    timeline.unmount();
+  });
+
+  it('labels a non-debut single as "SINGLE"', () => {
+    const artists = new Map([["aespa", artistWithReleases()]]);
+    const ds = createMockDataStore(artists);
+    const timeline = new ArtistTimeline();
+    timeline.mount(container, ds, "aespa");
+
+    expect(labelForDate("single")).toBe("SINGLE");
+
+    timeline.unmount();
+  });
+
+  it('labels a non-debut, non-single release as "COMEBACK"', () => {
+    const artists = new Map([["aespa", artistWithReleases()]]);
+    const ds = createMockDataStore(artists);
+    const timeline = new ArtistTimeline();
+    timeline.mount(container, ds, "aespa");
+
+    expect(labelForDate("album")).toBe("COMEBACK");
+
+    timeline.unmount();
+  });
+});

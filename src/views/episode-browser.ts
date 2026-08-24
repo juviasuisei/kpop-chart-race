@@ -46,8 +46,17 @@ interface EpisodeChartEntry {
   artistName: string;
   releaseTitle: string;
   value: number;
-  /** Original rank position (1-based), preserved when filtering */
+  /**
+   * Dense rank (1-based), preserved when filtering. Ties (equal value) share
+   * the same rank, and the next distinct value takes the next integer (no
+   * skipped ranks).
+   */
   originalRank: number;
+  /**
+   * Earliest date this release ever appeared on any chart (YYYY-MM-DD).
+   * Used as the tie-break so newer songs sort above older ones.
+   */
+  releaseEarliestDate: string;
   /** All artist IDs credited on this release */
   artistIds: string[];
 }
@@ -65,7 +74,6 @@ interface Episode {
   episode: number;
   date: string;
   entries: EpisodeChartEntry[];
-  winner: { artistName: string; releaseTitle: string; crownLevel: number } | null;
   performances: EpisodePerformance[];
 }
 
@@ -146,47 +154,55 @@ export class EpisodeBrowser {
     // Convert map to array, resolve winners, sort by date desc
     this.episodes = [];
     for (const ep of episodeMap.values()) {
-      // Sort entries by value desc
-      ep.entries.sort((a, b) => b.value - a.value);
+      // Sort by value desc; break ties by recency (newer release first),
+      // i.e. later earliest-chart-date on top.
+      ep.entries.sort((a, b) =>
+        b.value - a.value || b.releaseEarliestDate.localeCompare(a.releaseEarliestDate),
+      );
 
-      // Assign original ranks (1-based) before any filtering
+      // Assign dense ranks (1-based): equal values share a rank, and the next
+      // distinct value takes the next integer (no skipped ranks).
+      let rank = 0;
+      let prevValue: number | null = null;
       for (let i = 0; i < ep.entries.length; i++) {
-        ep.entries[i].originalRank = i + 1;
+        if (ep.entries[i].value !== prevValue) {
+          rank += 1;
+          prevValue = ep.entries[i].value;
+        }
+        ep.entries[i].originalRank = rank;
       }
 
-      // Resolve winner from chartWins
-      let winner: Episode["winner"] = null;
-      if (this.dataStore.chartWins.has(ep.date)) {
-        const dateWins = this.dataStore.chartWins.get(ep.date)!;
-        if (dateWins.has(ep.source)) {
-          const winData = dateWins.get(ep.source)!;
-          if (winData.artistIds.length > 0) {
-            const winnerArtistId = winData.artistIds[0];
-            const winnerArtist = this.dataStore.artists.get(winnerArtistId);
-            const crownLevel = winData.crownLevels.get(winnerArtistId) ?? 1;
-            // Find the release title from the top entry
-            const winnerEntry = ep.entries.find(e => e.artistIds.includes(winnerArtistId));
-            winner = {
-              artistName: winnerEntry?.artistName ?? winnerArtist?.name ?? winnerArtistId,
-              releaseTitle: winnerEntry?.releaseTitle ?? "",
-              crownLevel,
-            };
-          }
-        }
-      }
+      // Crowns are resolved per-entry at render time (see getEntryCrownLevel),
+      // so tied-for-first entries each show their own crown.
 
       this.episodes.push({
         source: ep.source,
         episode: ep.episode,
         date: ep.date,
         entries: ep.entries,
-        winner,
         performances: ep.performances,
       });
     }
 
     // Sort by date desc (most recent first)
     this.episodes.sort((a, b) => b.date.localeCompare(a.date));
+  }
+
+  /**
+   * Returns the crown level for a chart entry if its artist recorded a win on
+   * this episode's (date, source), otherwise null. Used to render a crown on
+   * every entry tied for first (a genuine tie yields multiple crowns).
+   */
+  private getEntryCrownLevel(episode: Episode, entry: EpisodeChartEntry): number | null {
+    const dateWins = this.dataStore?.chartWins.get(episode.date);
+    const sourceWins = dateWins?.get(episode.source);
+    if (!sourceWins) return null;
+    for (const artistId of entry.artistIds) {
+      if (sourceWins.artistIds.includes(artistId)) {
+        return sourceWins.crownLevels.get(artistId) ?? 1;
+      }
+    }
+    return null;
   }
 
   private extractFromRelease(
@@ -204,6 +220,15 @@ export class EpisodeBrowser {
       return a?.name ?? id;
     });
     const displayName = formatOxfordComma(artistNames);
+
+    // Earliest date this release ever charted (across all sources/episodes) —
+    // used as the recency tie-break: newer releases sort above older ones.
+    let releaseEarliestDate = "";
+    for (const date of release.dailyValues.keys()) {
+      if (releaseEarliestDate === "" || date < releaseEarliestDate) {
+        releaseEarliestDate = date;
+      }
+    }
 
     for (const [date, dv] of release.dailyValues) {
       const key = `${dv.source}::${dv.episode}::${date}`;
@@ -223,6 +248,7 @@ export class EpisodeBrowser {
         releaseTitle: release.title,
         value: dv.value,
         originalRank: 0, // Assigned after sorting in extractEpisodes
+        releaseEarliestDate,
         artistIds: [...release.artistIds],
       });
     }
@@ -383,9 +409,13 @@ export class EpisodeBrowser {
       row.className = "episode-card__chart-entry";
       if (i >= 3) row.classList.add("episode-card__chart-entry--hidden");
 
-      // Rank: #1 gets crown SVG, others get rank number
-      if (entry.originalRank === 1 && episode.winner) {
-        const crownLevel = Math.min(episode.winner.crownLevel, 12);
+      // Rank: every rank-1 entry that recorded a win gets a crown SVG (so
+      // 2+ releases tied for first each show a crown). Others get a rank number.
+      const entryCrownLevel = entry.originalRank === 1
+        ? this.getEntryCrownLevel(episode, entry)
+        : null;
+      if (entryCrownLevel !== null) {
+        const crownLevel = Math.min(entryCrownLevel, 12);
         // Crown height scales with level: levels 1-6 → 24px, 7-9 → 36px, 10+ → 48px
         const crownHeight = crownLevel >= 10 ? 48 : crownLevel >= 7 ? 36 : 24;
         const crownContainer = document.createElement("span");
@@ -394,7 +424,7 @@ export class EpisodeBrowser {
         const crownImg = document.createElement("img");
         crownImg.className = "episode-card__crown";
         crownImg.src = `assets/crowns/crown-${crownLevel}.svg`;
-        crownImg.alt = `${episode.winner.crownLevel} win(s)`;
+        crownImg.alt = `${entryCrownLevel} win(s)`;
         crownImg.style.height = `${crownHeight}px`;
         crownImg.style.width = "auto";
         crownContainer.appendChild(crownImg);

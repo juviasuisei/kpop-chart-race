@@ -116,7 +116,7 @@ async function main(): Promise<void> {
   const titleText = document.createElement("button");
   titleText.type = "button";
   titleText.className = "chart-race__title-text";
-  titleText.textContent = "K-Pop Chart Explorer";
+  titleText.textContent = "Korean Chart Explorer";
   titleText.title = "Reset to the default view";
   // Clicking the title resets to the default view: race, no filters, songs mode.
   titleText.addEventListener("click", () => {

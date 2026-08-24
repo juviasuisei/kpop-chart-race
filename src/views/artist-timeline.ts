@@ -68,6 +68,8 @@ interface AlbumReleaseEntry {
   type: "album-release";
   isSingle: boolean;
   appleMusicUrl: string;
+  /** Display label: "DEBUT" | "SINGLE" | "COMEBACK". */
+  label: string;
 }
 
 type TimelineEntry = MergedShowEntry | EmbedEntry | AlbumReleaseEntry;
@@ -86,12 +88,30 @@ export class ArtistTimeline {
     this.dataStore = dataStore;
     this.artistId = artistId;
     this.render();
+    this.scrollToTop();
   }
 
   setArtist(artistId: string): void {
     if (this.artistId === artistId) return;
     this.artistId = artistId;
     this.render();
+    this.scrollToTop();
+  }
+
+  /**
+   * Scroll back to the top after (re)rendering for a new artist. The scroll
+   * container is `.artist-timeline-container` on desktop (its own overflow)
+   * but the window on mobile (where #app scrolls), so reset both.
+   */
+  private scrollToTop(): void {
+    try {
+      this.container?.scrollTo?.({ top: 0 });
+      if (typeof window !== "undefined") {
+        window.scrollTo?.({ top: 0 });
+      }
+    } catch {
+      // Some environments (e.g. jsdom) don't implement scrollTo; ignore.
+    }
   }
 
   setSourceFilter(source: string): void {
@@ -201,7 +221,7 @@ export class ArtistTimeline {
       <div class="artist-timeline__stat"><span class="artist-timeline__stat-value">${stats.totalPoints.toLocaleString()}</span><span class="artist-timeline__stat-label">Points</span></div>
       <div class="artist-timeline__stat"><span class="artist-timeline__stat-value">${stats.totalAppearances.toLocaleString()}</span><span class="artist-timeline__stat-label">Chart Appearances</span></div>
       <div class="artist-timeline__stat"><span class="artist-timeline__stat-value">${stats.totalWins}</span><span class="artist-timeline__stat-label">Wins</span></div>
-      <div class="artist-timeline__stat"><span class="artist-timeline__stat-value">${stats.releaseCount}</span><span class="artist-timeline__stat-label">Releases</span></div>
+      <div class="artist-timeline__stat"><span class="artist-timeline__stat-value">${stats.releaseCount}</span><span class="artist-timeline__stat-label">Songs</span></div>
     `;
     header.appendChild(statsEl);
 
@@ -356,10 +376,21 @@ export class ArtistTimeline {
     for (const albumRelease of artist.albumReleases) {
       const date = albumRelease.date;
       if (!dateMap.has(date)) dateMap.set(date, []);
+      // Label precedence: a release on the artist's debut date is the DEBUT;
+      // otherwise a single is a SINGLE and anything else is a COMEBACK.
+      let label: string;
+      if (artist.debut && albumRelease.date === artist.debut) {
+        label = "DEBUT";
+      } else if (albumRelease.isSingle) {
+        label = "SINGLE";
+      } else {
+        label = "COMEBACK";
+      }
       dateMap.get(date)!.push({
         type: "album-release",
         isSingle: albumRelease.isSingle,
         appleMusicUrl: albumRelease.appleMusicUrl,
+        label,
       });
     }
 
@@ -492,7 +523,7 @@ export class ArtistTimeline {
       // Album/single release entry with Apple Music embed
       const typeLabel = document.createElement("div");
       typeLabel.className = "artist-timeline__embed-type";
-      typeLabel.textContent = entry.isSingle ? "Single" : "Release";
+      typeLabel.textContent = entry.label;
       el.appendChild(typeLabel);
 
       if (entry.appleMusicUrl) {

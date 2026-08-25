@@ -220,8 +220,35 @@ async function main(): Promise<void> {
     filterStateManager.update({ view: "episodes", source });
   };
 
+  // Tracks the view currently rendered, so a genuine view change (not a
+  // mid-view filter tweak) can reset scroll position.
+  let renderedView: string | null = null;
+
+  /** Scroll the page and the active view's scroll container back to the top. */
+  function scrollViewToTop(): void {
+    try {
+      if (typeof window !== "undefined") window.scrollTo?.({ top: 0 });
+      const containers = [
+        app!.querySelector(".yearly-view"),
+        episodeContainer,
+        artistTimelineContainer,
+        chartContainer,
+      ];
+      for (const el of containers) {
+        (el as HTMLElement | null)?.scrollTo?.({ top: 0 });
+      }
+    } catch {
+      // Some environments (e.g. jsdom) don't implement scrollTo; ignore.
+    }
+  }
+
   // --- Helper: switch between line, yearly, episodes, and artist-timeline views ---
   function switchView(mode: "line" | "yearly" | "episodes" | "artist-timeline"): void {
+    // Scroll to top only on a genuine view change (callers pass "line" for the
+    // race view, so no extra normalization is needed here).
+    const viewChanged = renderedView !== mode;
+    renderedView = mode;
+
     if (mode === "yearly") {
       if (playbackController.isPlaying()) {
         playbackController.pause();
@@ -305,6 +332,10 @@ async function main(): Promise<void> {
       const playbackControls = app!.querySelector(".playback-controls") as HTMLElement | null;
       if (playbackControls) playbackControls.style.display = "";
     }
+
+    // On a genuine view change, reset scroll to the top (mid-view filter
+    // tweaks keep the user's scroll position).
+    if (viewChanged) scrollViewToTop();
   }
 
   // --- EventBus wiring ---

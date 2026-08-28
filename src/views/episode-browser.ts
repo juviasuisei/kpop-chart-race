@@ -5,6 +5,8 @@
  */
 
 import type { DataStore, ParsedArtist, ParsedRelease } from "../models.ts";
+import { competitionRanks } from "../utils.ts";
+import { isNewTabIntent } from "../url-state.ts";
 
 /**
  * Format an array of names with Oxford comma.
@@ -46,10 +48,12 @@ interface EpisodeChartEntry {
   artistName: string;
   releaseTitle: string;
   value: number;
+  /** True when `value` was estimated by the score-fill curve (not published). */
+  estimated: boolean;
   /**
-   * Dense rank (1-based), preserved when filtering. Ties (equal value) share
-   * the same rank, and the next distinct value takes the next integer (no
-   * skipped ranks).
+   * Standard competition rank (1-based), preserved when filtering. Ties
+   * (equal value) share the same rank, and the next distinct value takes the
+   * rank of its position (skipping the tied slots). E.g. 1/2/2/4/5.
    */
   originalRank: number;
   /**
@@ -90,8 +94,15 @@ export class EpisodeBrowser {
   private scrollHandler: (() => void) | null = null;
   private readonly PAGE_SIZE = 20;
 
-  /** Callback when an artist name is clicked */
+  /** Callback when an artist name is clicked (plain left-click, in-place nav) */
   onArtistClick: ((artistId: string) => void) | null = null;
+
+  /**
+   * Resolver for the shareable URL an artist link points to. When provided,
+   * the link becomes a real navigable href so modifier/middle clicks open it
+   * in a new tab natively. Falls back to "#" when not set.
+   */
+  artistUrl: ((artistId: string) => string) | null = null;
 
   mount(container: HTMLElement, dataStore: DataStore): void {
     this.container = container;
@@ -160,16 +171,12 @@ export class EpisodeBrowser {
         b.value - a.value || b.releaseEarliestDate.localeCompare(a.releaseEarliestDate),
       );
 
-      // Assign dense ranks (1-based): equal values share a rank, and the next
-      // distinct value takes the next integer (no skipped ranks).
-      let rank = 0;
-      let prevValue: number | null = null;
+      // Assign standard competition ranks (1-based): equal values share a
+      // rank, and the next distinct value takes the rank of its position
+      // (skipping the tied slots). E.g. 1/2/2/4/5.
+      const ranks = competitionRanks(ep.entries, e => e.value);
       for (let i = 0; i < ep.entries.length; i++) {
-        if (ep.entries[i].value !== prevValue) {
-          rank += 1;
-          prevValue = ep.entries[i].value;
-        }
-        ep.entries[i].originalRank = rank;
+        ep.entries[i].originalRank = ranks[i];
       }
 
       // Crowns are resolved per-entry at render time (see getEntryCrownLevel),
@@ -247,6 +254,7 @@ export class EpisodeBrowser {
         artistName: displayName,
         releaseTitle: release.title,
         value: dv.value,
+        estimated: dv.estimated === true,
         originalRank: 0, // Assigned after sorting in extractEpisodes
         releaseEarliestDate,
         artistIds: [...release.artistIds],
@@ -447,8 +455,11 @@ export class EpisodeBrowser {
         const artistLink = document.createElement("a");
         artistLink.className = "episode-card__artist-link";
         artistLink.textContent = aName;
-        artistLink.href = "#";
+        artistLink.href = this.artistUrl ? this.artistUrl(aId) : "#";
         artistLink.addEventListener("click", (e) => {
+          // Let the browser handle modifier/middle clicks natively (open in a
+          // new tab/window) via the real href. Only intercept a plain click.
+          if (isNewTabIntent(e)) return;
           e.preventDefault();
           if (this.onArtistClick) {
             this.onArtistClick(aId);
@@ -474,6 +485,15 @@ export class EpisodeBrowser {
       const points = document.createElement("span");
       points.className = "episode-card__entry-points";
       points.textContent = entry.value.toLocaleString();
+      // Flag estimated scores (Music Bank ranks 21+, M Countdown ranks 2+ don't
+      // publish real scores; these are filled by a fitted curve). Italic +
+      // muted, with a tooltip explaining why.
+      if (entry.estimated) {
+        points.classList.add("episode-card__entry-points--estimated");
+        // Custom CSS tooltip (data-tooltip) rather than the native `title`
+        // attribute, which has a slow, non-configurable show delay.
+        points.setAttribute("data-tooltip", "Estimated — this show doesn't publish a score for this rank");
+      }
       row.appendChild(points);
 
       chart.appendChild(row);

@@ -18,6 +18,7 @@ import { Disambiguation } from "../canvas/disambiguation.ts";
 import { Popover } from "../canvas/popover.ts";
 import { buildSeriesFromDailyValues, mergeSeries, SparseTimeSeries } from "../worker/sparse-time-series.ts";
 import { ARTIST_TYPE_COLORS } from "../colors.ts";
+import { resolveFrameAdvance } from "../playback-frame.ts";
 import type { EventBus } from "../event-bus.ts";
 import type { DataStore } from "../models.ts";
 import type { FilterState } from "../types.ts";
@@ -219,6 +220,7 @@ const ARTIST_TYPE_LABELS: Record<string, string> = {
   solo_male: "Solo Male",
   solo_female: "Solo Female",
   mixed_group: "Mixed Group",
+  solo_non_binary: "Solo Non-Binary",
 };
 
 /** Chart source human-readable labels */
@@ -275,6 +277,8 @@ interface LineChartState {
   displayMode: "songs" | "artists";
   /** Pinned artist (Artists-mode filter): always visible + top label priority. */
   pinnedArtistId: string;
+  /** Y-axis ceiling as a fraction (0..1] of the auto max. 1 = full range. */
+  valueCeiling: number;
 }
 
 export class LineChartController {
@@ -307,6 +311,7 @@ export class LineChartController {
     artistFilterActive: false,
     displayMode: "songs",
     pinnedArtistId: "all",
+    valueCeiling: 1,
   };
 
   /** Map of lineId → metadata for tooltips and selection */
@@ -447,16 +452,11 @@ export class LineChartController {
       : PRESET_WINDOW[this.state.timeZoom];
 
     this.state.viewportEnd = index;
-    const dataStart = Math.max(0, index - zoomWindow);
-
-    // During the first 7 days, keep data compressed near the right edge
-    const revealedDates = index - dataStart;
-    const minViewportSpan = 7;
-    if (revealedDates < minViewportSpan && dataStart === 0) {
-      this.state.viewportStart = -(minViewportSpan - revealedDates);
-    } else {
-      this.state.viewportStart = dataStart > 0 ? dataStart : -1;
-    }
+    // The x-axis always spans the full zoom window so the horizontal scale is
+    // stable regardless of where the scrubber sits. Before the window is
+    // filled, viewportStart is negative — those pre-data indices map to empty
+    // left-side space rather than stretching the few revealed days full-width.
+    this.state.viewportStart = index - zoomWindow;
     this.backgroundDirty = true;
     this.requestFrame();
   }
@@ -480,6 +480,20 @@ export class LineChartController {
    */
   setSpeed(datesPerSecond: number): void {
     this.state.speed = datesPerSecond;
+  }
+
+  /**
+   * Set the y-axis value ceiling as a fraction (0..1] of the auto-computed max.
+   * Values below 1 zoom in on the lower cluster of lines (e.g. 0.1 shows the
+   * bottom 10% of the value range full-height). 1 restores the full range.
+   * Re-renders immediately so the change is visible while paused.
+   */
+  setValueCeiling(fraction: number): void {
+    const clamped = Math.max(0.01, Math.min(1, fraction));
+    if (clamped === this.state.valueCeiling) return;
+    this.state.valueCeiling = clamped;
+    this.backgroundDirty = true;
+    this.requestFrame();
   }
 
   applyTimeZoom(preset: TimeZoomPreset): void {
@@ -511,15 +525,42 @@ export class LineChartController {
     const dateDelta = Math.round((deltaX / width) * viewportRange);
 
     const totalDates = this.state.dates.length;
+    // Keep the window a fixed width while panning (shift both edges together).
     let newStart = this.state.viewportStart - dateDelta;
     let newEnd = this.state.viewportEnd - dateDelta;
 
-    if (newStart < 0) { newEnd -= newStart; newStart = 0; }
-    if (newEnd >= totalDates) { newStart -= (newEnd - totalDates + 1); newEnd = totalDates - 1; }
-    newStart = Math.max(0, newStart);
+    // The right edge can't pass the last date; the left edge is allowed to go
+    // negative (empty space before the first data day) so the window keeps its
+    // full width even near the start — matching the rolling-window scale used
+    // during playback, rather than snapping the left edge to day 0.
+    if (newEnd > totalDates - 1) {
+      const over = newEnd - (totalDates - 1);
+      newStart -= over;
+      newEnd -= over;
+    }
+    // Lower bound: don't scroll so far left that the whole window sits before
+    // the data (keep at least the first day visible at the right edge).
+    if (newEnd < 0) {
+      const under = -newEnd;
+      newStart += under;
+      newEnd += under;
+    }
 
     this.state.viewportStart = newStart;
     this.state.viewportEnd = newEnd;
+
+    // The current date follows the window's right edge. This drives both the
+    // vertical-axis max (the worker scales Y to currentDateIndex) and the
+    // scrubber position — without it, panning forward would let lines shoot off
+    // the top and leave the scrubber stale. Emit date:change so the scrubber /
+    // date label / URL stay in sync, mirroring how scrubbing behaves.
+    const newIndex = Math.max(0, Math.min(totalDates - 1, newEnd));
+    if (newIndex !== this.state.currentDateIndex) {
+      this.state.currentDateIndex = newIndex;
+      const date = this.state.dates[newIndex];
+      if (date) this.eventBus.emit("date:change", date);
+    }
+
     this.backgroundDirty = true;
     this.requestFrame();
   }
@@ -804,24 +845,38 @@ export class LineChartController {
     const emptyDayMultiplier = nextDate && !this.hasChartDataOnDate(nextDate) ? 2.5 : 1.0;
     this.animationPosition += advance * emptyDayMultiplier;
 
-    // Check if we've reached the end
+    // Resolve this frame: clamp position, derive the index, and decide whether
+    // to emit. Stop the RAF loop when the end is reached, but keep
+    // state.playing = true until AFTER the final date:change below — the
+    // date:change handler only advances the scrubber while playing, so flipping
+    // playing off first would leave the scrubber a few spots short of the edge.
     const maxIndex = this.state.dates.length - 1;
-    if (this.animationPosition >= maxIndex) {
-      this.animationPosition = maxIndex;
-      this.state.currentDateIndex = maxIndex;
+    const frame = resolveFrameAdvance(
+      this.animationPosition,
+      this.state.currentDateIndex,
+      maxIndex,
+    );
+    this.animationPosition = frame.position;
+    if (frame.reachedEnd) {
       this.stopAnimationLoop();
-      this.state.playing = false;
-      this.eventBus.emit("pause");
     }
 
-    // Update the integer date index (for scrubber sync and data lookups)
-    const newIndex = Math.max(0, Math.floor(this.animationPosition));
-    if (newIndex !== this.state.currentDateIndex && newIndex >= 0) {
-      this.state.currentDateIndex = newIndex;
+    // Emit the smooth fractional position every frame so the scrubber thumb
+    // glides continuously (date:change below only fires on integer changes).
+    this.eventBus.emit("playback:progress", frame.position);
+
+    if (frame.shouldEmit) {
+      this.state.currentDateIndex = frame.index;
       // Emit date:change so PlaybackController's scrubber stays in sync
-      if (this.state.dates[newIndex]) {
-        this.eventBus.emit("date:change", this.state.dates[newIndex]);
+      if (this.state.dates[frame.index]) {
+        this.eventBus.emit("date:change", this.state.dates[frame.index]);
       }
+    }
+
+    // Now that the scrubber has been synced to the final position, end playback.
+    if (frame.reachedEnd) {
+      this.state.playing = false;
+      this.eventBus.emit("pause");
     }
 
     // Update viewport with fractional position for smooth scrolling
@@ -831,17 +886,14 @@ export class LineChartController {
 
     // Use fractional viewportEnd for smooth line extension
     this.state.viewportEnd = Math.max(0, Math.floor(this.animationPosition));
-    const dataStart = Math.max(0, this.state.viewportEnd - zoomWindow);
 
-    // During the first 7 days, keep data compressed near the right edge
-    // by making the viewport much wider than the actual data range
-    const revealedDates = this.state.viewportEnd - dataStart;
-    const minViewportSpan = 7; // minimum "virtual" days of viewport width
-    if (revealedDates < minViewportSpan && dataStart === 0) {
-      this.state.viewportStart = -(minViewportSpan - revealedDates);
-    } else {
-      this.state.viewportStart = dataStart > 0 ? dataStart : -1;
-    }
+    // The x-axis always spans the full zoom window (e.g. 90 days), so the
+    // horizontal scale is stable from the very first frame. Early in playback
+    // the window isn't filled yet, so viewportStart is negative — those
+    // pre-data indices simply map to empty space on the left (the line grows
+    // in from the right at the correct scale) rather than stretching the few
+    // revealed days across the whole width.
+    this.state.viewportStart = this.state.viewportEnd - zoomWindow;
     this.backgroundDirty = true;
 
     this.requestFrame();
@@ -858,10 +910,20 @@ export class LineChartController {
       return;
     }
 
+    const frac = this.state.playing
+      ? this.animationPosition - Math.floor(this.animationPosition)
+      : 0;
+
     const viewport: Viewport = {
       startDateIndex: this.state.viewportStart,
       endDateIndex: this.state.viewportEnd,
-      progressToNext: this.state.playing ? (this.animationPosition - Math.floor(this.animationPosition)) : 0,
+      progressToNext: frac,
+      // Fractional day the domain has scrolled by this frame. The worker shifts
+      // the date→x mapping left by this much so the whole chart (grid, points,
+      // labels) slides smoothly at the same rate the tip advances, instead of
+      // snapping back a whole day when floor(animationPosition) increments.
+      scrollOffset: frac,
+      valueCeiling: this.state.valueCeiling,
       width,
       height,
       dpr,

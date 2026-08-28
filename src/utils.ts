@@ -231,3 +231,31 @@ export function filterByActivity(
 
   return result;
 }
+
+/**
+ * Compute standard competition ranks (1-based) for an already-sorted array.
+ *
+ * Entries with an equal value (per `valueOf`) share the same rank, and the
+ * next distinct value takes the rank of its position — skipping the tied
+ * slots. E.g. values [100, 90, 90, 80] → ranks [1, 2, 2, 4].
+ *
+ * The input MUST already be sorted in the display order (typically value
+ * descending). Returns a parallel array of ranks, one per input entry.
+ */
+export function competitionRanks<T>(
+  sorted: T[],
+  valueOf: (entry: T) => number,
+): number[] {
+  const ranks: number[] = [];
+  let rank = 0;
+  let prevValue: number | null = null;
+  for (let i = 0; i < sorted.length; i++) {
+    const value = valueOf(sorted[i]);
+    if (prevValue === null || value !== prevValue) {
+      rank = i + 1;
+      prevValue = value;
+    }
+    ranks.push(rank);
+  }
+  return ranks;
+}

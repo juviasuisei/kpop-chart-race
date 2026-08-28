@@ -15,6 +15,7 @@ import { AirtableClient } from "./airtable-client";
 import { RateLimiter } from "./rate-limiter";
 import { CacheManager } from "./cache-manager";
 import { toChartSource } from "./show-name-map";
+import { fillMissingScores } from "./score-fill";
 
 // --- Constants ---
 
@@ -32,6 +33,7 @@ const ARTIST_TYPE_MAP: Record<string, ArtistType> = {
   "Solo Male": "solo_male",
   "Solo Female": "solo_female",
   "Mixed Group": "mixed_group",
+  "Solo Non-Binary": "solo_non_binary",
 };
 
 // --- Types ---
@@ -451,6 +453,11 @@ function assembleDataStore(
   if (artists.size === 0) {
     throw new Error("No chart data available: zero valid artists after assembly.");
   }
+
+  // Fill in missing (negative-sentinel) scores for charts that don't publish
+  // their full ranking (Music Bank ranks 21–50, M Countdown ranks 2–20). This
+  // mutates the sentinel entries in place with deterministic fitted scores.
+  fillMissingScores(artists);
 
   // Collect sorted dates
   const dateSet = new Set<string>();

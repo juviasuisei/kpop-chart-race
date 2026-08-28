@@ -39,6 +39,20 @@ export interface Viewport {
   endDateIndex: number;
   /** Fractional progress toward the NEXT date (0.0 = just arrived at endDateIndex, 1.0 = about to reach endDateIndex+1) */
   progressToNext: number;
+  /**
+   * Fractional day the whole domain has scrolled left this frame (0..1).
+   * Applied only in the date→x mapping so the grid, points and labels slide
+   * smoothly during playback at the same rate the tip advances. Value/lookup
+   * logic still uses the integer start/end indices. Optional; defaults to 0.
+   */
+  scrollOffset?: number;
+  /**
+   * Fraction (0..1] of the auto-computed value max to use as the y-axis
+   * ceiling. Values below 1 "zoom in" on the lower cluster: e.g. 0.1 makes the
+   * bottom 10% of the value range fill the full height (lines above the ceiling
+   * clip off the top). Optional; defaults to 1 (full range, no zoom).
+   */
+  valueCeiling?: number;
   /** Canvas pixel width */
   width: number;
   /** Canvas pixel height */

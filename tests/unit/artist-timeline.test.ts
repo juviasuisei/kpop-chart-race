@@ -176,13 +176,13 @@ describe("ArtistTimeline — Rendering", () => {
     const labels = Array.from(
       container.querySelectorAll(".artist-timeline__stat-label"),
     ).map((l) => l.textContent);
-    expect(labels).toContain("Chart Appearances");
+    expect(labels).toContain("Chart Entries");
 
-    // Find the Chart Appearances stat and check its value.
-    // Supernova charts on 2 dates + Drama on 1 date = 3 appearances.
+    // Find the Chart Entries stat and check its value.
+    // Supernova charts on 2 dates + Drama on 1 date = 3 entries.
     const statEls = Array.from(container.querySelectorAll(".artist-timeline__stat"));
     const appearancesStat = statEls.find(
-      (el) => el.querySelector(".artist-timeline__stat-label")?.textContent === "Chart Appearances",
+      (el) => el.querySelector(".artist-timeline__stat-label")?.textContent === "Chart Entries",
     );
     expect(appearancesStat?.querySelector(".artist-timeline__stat-value")?.textContent).toBe("3");
 
@@ -222,9 +222,9 @@ describe("ArtistTimeline — Rendering", () => {
 
     const statEls = Array.from(container.querySelectorAll(".artist-timeline__stat"));
     const appearancesStat = statEls.find(
-      (el) => el.querySelector(".artist-timeline__stat-label")?.textContent === "Chart Appearances",
+      (el) => el.querySelector(".artist-timeline__stat-label")?.textContent === "Chart Entries",
     );
-    // Two songs on the same date/source → 2 appearances
+    // Two songs on the same date/source → 2 chart entries
     expect(appearancesStat?.querySelector(".artist-timeline__stat-value")?.textContent).toBe("2");
 
     timeline.unmount();

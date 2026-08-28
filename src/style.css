@@ -1101,6 +1101,10 @@ body {
   align-items: center;
   height: 40px;
   gap: 0;
+  /* Rendered as an <a> so modifier/middle/right-click open a new tab natively.
+     Reset anchor defaults so it looks identical to the old div. */
+  color: inherit;
+  text-decoration: none;
 }
 
 /* Half-bar-height gap separating the pinned (out-of-top-10) artist row from
@@ -1315,6 +1319,10 @@ body {
   border: 1.5px solid rgba(255, 255, 255, 0.7);
   cursor: default;
   transition: opacity 0.15s;
+  /* Artists-mode cells are rendered as <a> for native new-tab support.
+     Reset anchor defaults so appearance is unchanged. */
+  color: inherit;
+  text-decoration: none;
 }
 
 .yearly-treemap__cell:hover {
@@ -1544,6 +1552,7 @@ body {
     position: relative;
     top: auto;
     left: auto;
+    right: auto;
     margin-top: 4px;
     max-width: none;
     min-width: 0;
@@ -2032,6 +2041,43 @@ body {
   border-color: rgba(0, 100, 200, 0.3);
 }
 
+/* Value-axis detail selector (zoom into lower-ranked lines) */
+.time-navigation__detail {
+  padding: 4px 8px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 4px;
+  background: #fff;
+  color: #213547;
+  font-size: 0.7rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Trailing control slot in the scrubber row (e.g. value-axis detail select) */
+.playback-controls__trailing {
+  display: flex;
+  align-items: center;
+  margin-left: 8px;
+  flex-shrink: 0;
+}
+
+.playback-controls__detail {
+  appearance: none;
+  -webkit-appearance: none;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+  padding: 3px 20px 3px 6px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #213547;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23213547'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 5px center;
+  min-width: 48px;
+}
+
 /* ===== Artist Filter Dropdown ===== */
 
 .toolbar__control--artist {
@@ -2067,7 +2113,11 @@ body {
   display: none;
   position: absolute;
   top: 100%;
-  left: 0;
+  /* Right-align the panel to the trigger. The artist control is the rightmost
+     toolbar item, and the panel (min-width 180px) is wider than the trigger
+     (max 140px), so anchoring the left edge would overflow the viewport.
+     Anchoring the right edge lets the panel grow leftward into the toolbar. */
+  right: 0;
   margin-top: 4px;
   background: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.12);
@@ -2324,6 +2374,48 @@ body {
   color: #666;
   font-size: 0.72rem;
   font-variant-numeric: tabular-nums;
+}
+
+/* Estimated (curve-filled) scores: italic + lighter than real scores, with an
+   instant custom tooltip. These shows don't publish scores for lower ranks. */
+.episode-card__entry-points--estimated {
+  font-style: italic;
+  font-weight: 500;
+  color: #a0a0a0;
+  cursor: help;
+  position: relative;
+}
+
+/* Instant CSS tooltip driven by the data-tooltip attribute. Native `title`
+   tooltips have a slow, non-configurable delay, so we roll our own. */
+.episode-card__entry-points--estimated::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  right: 0;
+  z-index: 300;
+  width: max-content;
+  max-width: 220px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: #213547;
+  color: #fff;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 0.68rem;
+  line-height: 1.3;
+  text-align: left;
+  white-space: normal;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.episode-card__entry-points--estimated:hover::after,
+.episode-card__entry-points--estimated:focus-visible::after {
+  opacity: 1;
+  visibility: visible;
 }
 
 /* Old performances section removed — embeds are now inline */

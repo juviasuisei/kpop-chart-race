@@ -35,6 +35,13 @@ export interface EventMap {
   "line:hover": (event: LineHoverEvent | null) => void;
   "line:select": (lineIds: string[]) => void;
   "time:zoom": (preset: string) => void;
+  /**
+   * Fractional playback position (0 .. dates.length-1) emitted every animation
+   * frame so the scrubber thumb can glide smoothly instead of stepping one
+   * whole date at a time. Distinct from date:change, which fires only when the
+   * integer date index changes (for labels / data lookups).
+   */
+  "playback:progress": (position: number) => void;
 }
 
 type Handler = (...args: never[]) => void;

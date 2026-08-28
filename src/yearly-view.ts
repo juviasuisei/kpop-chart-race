@@ -8,7 +8,8 @@
 import type { DataStore, ResolvedArtist } from "./models.ts";
 import { ARTIST_TYPE_COLORS } from "./colors.ts";
 import { resolveArtists } from "./co-artist-resolver.ts";
-import { generateFallbackLogoDataUri } from "./utils.ts";
+import { generateFallbackLogoDataUri, competitionRanks } from "./utils.ts";
+import { isNewTabIntent } from "./url-state.ts";
 
 interface YearlyArtistEntry {
   artistId: string;
@@ -62,8 +63,15 @@ export class YearlyView {
    *  outside the top 10 (grid zoom only). "all" means no pin. */
   private pinnedArtist: string = "all";
 
-  /** Fired when an artist bar/cell is clicked in Artists mode. */
+  /** Fired when an artist bar/cell is clicked in Artists mode (plain click). */
   onArtistClick: ((artistId: string) => void) | null = null;
+
+  /**
+   * Resolver for the shareable URL an artist bar/cell points to. When set,
+   * modifier/middle clicks open that URL in a new tab instead of navigating
+   * in place. Falls back to no-op when not provided.
+   */
+  artistUrl: ((artistId: string) => string) | null = null;
 
   mount(container: HTMLElement, dataStore: DataStore): void {
     this.dataStore = dataStore;
@@ -193,16 +201,20 @@ export class YearlyView {
       // Full ranking for the year (Infinity limit), so we know a pinned
       // artist's true rank even when they sit outside the top 10.
       const ranked = this.computeYearData(year, Infinity);
+      // Standard competition ranks on the current metric over the full ranking:
+      // tied entries share a rank and the next distinct value skips the tied
+      // slots (e.g. 5,5,4 → #2,#2,#4).
+      const ranks = competitionRanks(ranked, e => this.metricValueOf(e));
       const rows: GridRow[] = ranked
         .slice(0, 10)
-        .map((entry, i) => ({ entry, rank: i + 1, isPinned: false }));
+        .map((entry, i) => ({ entry, rank: ranks[i], isPinned: false }));
 
       // Append the pinned artist at their true rank if they appear this year
       // but fell outside the top 10.
       if (pinId !== "all") {
         const pinIndex = ranked.findIndex(e => e.artistId === pinId);
         if (pinIndex >= 10) {
-          rows.push({ entry: ranked[pinIndex], rank: pinIndex + 1, isPinned: true });
+          rows.push({ entry: ranked[pinIndex], rank: ranks[pinIndex], isPinned: true });
         }
       }
 
@@ -257,6 +269,8 @@ export class YearlyView {
 
         const values = entries.map(e => this.metricValueOf(e));
         const rects = squarify(values, width, height);
+        // Standard competition ranks on the current metric (ties share a rank).
+        const ranks = competitionRanks(entries, e => this.metricValueOf(e));
 
         for (let i = 0; i < entries.length; i++) {
           const entry = entries[i];
@@ -264,8 +278,12 @@ export class YearlyView {
           const value = this.metricValueOf(entry);
           if (value === 0) continue;
 
-          const cell = document.createElement("div");
+          // Rendered as an <a> with a real href so modifier/middle/right-click
+          // open the artist's timeline in a new tab natively.
+          const artistId = entry.artistId;
+          const cell = document.createElement("a");
           cell.className = "yearly-treemap__cell";
+          cell.href = this.artistUrl ? this.artistUrl(artistId) : "#";
           cell.style.left = `${rect.x}px`;
           cell.style.top = `${rect.y}px`;
           cell.style.width = `${rect.w}px`;
@@ -284,17 +302,19 @@ export class YearlyView {
           cell.appendChild(logo);
 
           // Tooltip on hover
-          const rank = i + 1;
+          const rank = ranks[i];
           const tooltipText = this.metric === "wins"
             ? `#${rank} · ${entry.name} · ${entry.wins} ${entry.wins === 1 ? "win" : "wins"}`
             : this.metric === "appearances"
-            ? `#${rank} · ${entry.name} · ${entry.appearances} ${entry.appearances === 1 ? "appearance" : "appearances"}`
+            ? `#${rank} · ${entry.name} · ${entry.appearances} chart ${entry.appearances === 1 ? "entry" : "entries"}`
             : `#${rank} · ${entry.name} · ${entry.points.toLocaleString()} pts`;
 
-          // Click through to the artist's timeline (Artists mode treemap).
-          const artistId = entry.artistId;
+          // A plain click navigates in place; modifier/middle clicks fall
+          // through to the browser via the real href.
           cell.style.cursor = "pointer";
-          cell.addEventListener("click", () => {
+          cell.addEventListener("click", (e) => {
+            if (isNewTabIntent(e)) return;
+            e.preventDefault();
             this.onArtistClick?.(artistId);
           });
 
@@ -389,6 +409,8 @@ export class YearlyView {
 
         const values = capturedEntries.map(e => this.metricValueOf(e));
         const rects = squarify(values, width, height);
+        // Standard competition ranks on the current metric (ties share a rank).
+        const ranks = competitionRanks(capturedEntries, e => this.metricValueOf(e));
 
         for (let i = 0; i < capturedEntries.length; i++) {
           const entry = capturedEntries[i];
@@ -424,12 +446,12 @@ export class YearlyView {
           }
 
           // Tooltip on hover: shows release info
-          const rank = i + 1;
+          const rank = ranks[i];
           const artistLabel = entry.coArtists.map(a => a.name).join(" • ");
           const tooltipText = this.metric === "wins"
             ? `#${rank} · ${entry.title} · ${artistLabel} · ${entry.wins} ${entry.wins === 1 ? "win" : "wins"}`
             : this.metric === "appearances"
-            ? `#${rank} · ${entry.title} · ${artistLabel} · ${entry.appearances} ${entry.appearances === 1 ? "appearance" : "appearances"}`
+            ? `#${rank} · ${entry.title} · ${artistLabel} · ${entry.appearances} chart ${entry.appearances === 1 ? "entry" : "entries"}`
             : `#${rank} · ${entry.title} · ${artistLabel} · ${entry.points.toLocaleString()} pts`;
 
           cell.addEventListener("mouseenter", () => {
@@ -486,6 +508,11 @@ export class YearlyView {
     const barsContainer = document.createElement("div");
     barsContainer.className = "yearly-view__bars";
 
+    // Standard competition ranks on the current metric: tied entries share a
+    // rank and the next distinct value skips the tied slots (e.g. 5,5,4 →
+    // #2,#2,#4). Entries are already sorted by metric, so ties are adjacent.
+    const ranks = competitionRanks(entries, e => this.metricValueOf(e));
+
     for (let i = 0; i < entries.length; i++) {
       const entry = entries[i];
       const row = document.createElement("div");
@@ -496,7 +523,7 @@ export class YearlyView {
       const primaryType = entry.coArtists.length > 0
         ? entry.coArtists[0].artistType
         : entry.artistType;
-      rank.textContent = `#${i + 1}`;
+      rank.textContent = `#${ranks[i]}`;
       rank.style.backgroundColor = ARTIST_TYPE_COLORS[primaryType as keyof typeof ARTIST_TYPE_COLORS] ?? "#555";
 
       const barTrack = document.createElement("div");
@@ -778,7 +805,7 @@ export class YearlyView {
       return entry.wins > 0 ? `${entry.wins} ${entry.wins === 1 ? "win" : "wins"}` : "";
     }
     if (this.metric === "appearances") {
-      return `${entry.appearances} ${entry.appearances === 1 ? "appearance" : "appearances"}`;
+      return `${entry.appearances} chart ${entry.appearances === 1 ? "entry" : "entries"}`;
     }
     return entry.points.toLocaleString();
   }
@@ -794,6 +821,8 @@ export class YearlyView {
     // charted on the same show/day the artist gets two credits.
     for (const [artistId, artist] of this.dataStore.artists) {
       if (this.artistFilter !== "all" && artistId !== this.artistFilter) continue;
+      // Apply generation filter (Artists mode: match the artist's own generation).
+      if (this.generationFilter !== "all" && artist.generation !== this.generationFilter) continue;
       let points = 0;
       let appearances = 0;
       for (const release of artist.releases) {
@@ -887,14 +916,19 @@ export class YearlyView {
         barsContainer.appendChild(gap);
       }
 
-      const row = document.createElement("div");
+      // Click through to the artist's timeline (Artists mode grid). Rendered
+      // as an <a> with a real href so the browser handles modifier/middle/
+      // right-click natively (open in new tab); a plain click navigates in
+      // place via the handler below.
+      const rowArtistId = entry.artistId;
+      const row = document.createElement("a");
       row.className = "yearly-view__row";
       if (isPinned) row.classList.add("yearly-view__row--pinned");
-
-      // Click through to the artist's timeline (Artists mode grid).
-      const rowArtistId = entry.artistId;
+      row.href = this.artistUrl ? this.artistUrl(rowArtistId) : "#";
       row.style.cursor = "pointer";
-      row.addEventListener("click", () => {
+      row.addEventListener("click", (e) => {
+        if (isNewTabIntent(e)) return; // let the browser open a new tab
+        e.preventDefault();
         this.onArtistClick?.(rowArtistId);
       });
 

@@ -9,7 +9,8 @@ export type ArtistType =
   | "girl_group"
   | "solo_male"
   | "solo_female"
-  | "mixed_group";
+  | "mixed_group"
+  | "solo_non_binary";
 
 /** Known music show chart sources */
 export type ChartSource =
@@ -47,6 +48,12 @@ export interface DailyValueEntry {
   value: number;
   source: ChartSource | string;
   episode: number;
+  /**
+   * True when `value` was estimated by the score-fill curve rather than
+   * published by the chart (Music Bank ranks 21–50, M Countdown ranks 2–20).
+   * Cosmetic only — used to visually flag estimates in the episode view.
+   */
+  estimated?: boolean;
 }
 
 /** A single release (song/album) by an artist */
@@ -78,4 +85,16 @@ export interface FilterState {
   zoom: ZoomLevel; // 10 | "all"
   view: "race" | "episodes" | "yearly" | "line" | "artist-timeline";
   metric: "points" | "wins" | "appearances"; // yearly-view only
+  /**
+   * Playback position as a date string (YYYY-MM-DD), for a shareable link to a
+   * specific frame of the race. Not a filter — it's the current day of the line
+   * chart. Only encoded in the race/line view. On load we snap to the nearest
+   * available date ≤ this value. Optional/omitted when not applicable.
+   */
+  date?: string;
+  /**
+   * Value-axis detail zoom as an integer percentage (5..100) of the auto max.
+   * A race/line view setting (not a filter). 100 = full range (omitted).
+   */
+  detail?: number;
 }

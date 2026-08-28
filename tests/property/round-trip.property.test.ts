@@ -22,6 +22,7 @@ const ARTIST_TYPE_PAIRS: Array<[ArtistType, string]> = [
   ['solo_male', 'Solo Male'],
   ['solo_female', 'Solo Female'],
   ['mixed_group', 'Mixed Group'],
+  ['solo_non_binary', 'Solo Non-Binary'],
 ];
 
 const SOURCE_PAIRS: Array<[ChartSource, string]> = [

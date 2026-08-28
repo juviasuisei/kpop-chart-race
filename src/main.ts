@@ -23,7 +23,7 @@ import { EpisodeBrowser } from "./views/episode-browser.ts";
 import { ArtistTimeline } from "./views/artist-timeline.ts";
 import { TimeNavigation } from "./canvas/time-navigation.ts";
 import { SearchOverlay } from "./canvas/search-overlay.ts";
-import { encodeStateToHash, parseHashToState } from "./url-state.ts";
+import { encodeStateToHash, parseHashToState, buildShareableUrl } from "./url-state.ts";
 import type { DataStore } from "./models.ts";
 import type { FilterState } from "./types.ts";
 
@@ -171,6 +171,27 @@ async function main(): Promise<void> {
   const playbackController = new PlaybackController(eventBus, dataStore.dates);
   playbackController.mount(app);
 
+  // Value-axis "detail" zoom lives in the scrubber row, right of the end date.
+  // Selecting a percentage caps the y-axis at that fraction of the current
+  // (point-in-time) max, expanding the lower cluster. Its value persists since
+  // the element is created once and never rebuilt.
+  const detailSelect = document.createElement("select");
+  detailSelect.className = "playback-controls__detail";
+  detailSelect.setAttribute("aria-label", "Value-axis detail zoom");
+  for (const pct of [5, 10, 15, 20, 25, 30, 40, 50, 75, 100]) {
+    const opt = document.createElement("option");
+    opt.value = String(pct);
+    opt.textContent = `${pct}%`;
+    if (pct === 100) opt.selected = true;
+    detailSelect.appendChild(opt);
+  }
+  detailSelect.addEventListener("change", () => {
+    currentDetailPct = parseInt(detailSelect.value, 10);
+    lineChart.setValueCeiling(currentDetailPct / 100);
+    writeHash();
+  });
+  playbackController.setTrailingControl(detailSelect);
+
   // --- Mount Time Navigation (below scrubber, centered) ---
   const timeNav = new TimeNavigation();
   timeNav.setTotalDays(dataStore.dates.length);
@@ -197,9 +218,20 @@ async function main(): Promise<void> {
   // --- Yearly View ---
   const yearlyView = new YearlyView();
   // Clicking an artist bar/cell (Artists mode) jumps to that artist's timeline.
+  // This is a drill-in, not an explicit filter: the artist should not stick as
+  // a filter when the user later navigates back to another view.
   yearlyView.onArtistClick = (artistId: string) => {
-    filterStateManager.update({ artist: artistId, view: "artist-timeline" });
+    filterStateManager.update(
+      { artist: artistId, view: "artist-timeline" },
+      { artistExplicit: false },
+    );
   };
+  // Modifier/middle-click opens the same target in a new tab.
+  yearlyView.artistUrl = (artistId: string) =>
+    buildShareableUrl(
+      { artist: artistId, view: "artist-timeline" },
+      filterStateManager.getState(),
+    );
 
   // --- Episode Browser ---
   const episodeBrowser = new EpisodeBrowser();
@@ -215,10 +247,15 @@ async function main(): Promise<void> {
   artistTimelineContainer.style.display = "none";
   app.appendChild(artistTimelineContainer);
 
-  // Wire episode link clicks from artist timeline → switch to episodes view
+  // Wire episode link clicks from artist timeline → switch to episodes view.
+  // This is a drill-in, not an explicit filter: the source should not stick as
+  // a filter when the user later navigates away from the episodes view.
   artistTimeline.onEpisodeClick = (source, _episode, _date) => {
-    filterStateManager.update({ view: "episodes", source });
+    filterStateManager.update({ view: "episodes", source }, { sourceExplicit: false });
   };
+  // Real href for the episode link so modifier/middle-click opens a new tab.
+  artistTimeline.episodeUrl = (source, _episode, _date) =>
+    buildShareableUrl({ view: "episodes", source }, filterStateManager.getState());
 
   // Tracks the view currently rendered, so a genuine view change (not a
   // mid-view filter tweak) can reset scroll position.
@@ -300,8 +337,17 @@ async function main(): Promise<void> {
       episodeBrowser.setGenerationFilter(state.generation);
       episodeBrowser.setArtistFilter(state.artist);
       episodeBrowser.onArtistClick = (artistId: string) => {
-        filterStateManager.update({ artist: artistId, view: "artist-timeline" });
+        // Drill-in, not an explicit filter (see yearlyView.onArtistClick).
+        filterStateManager.update(
+          { artist: artistId, view: "artist-timeline" },
+          { artistExplicit: false },
+        );
       };
+      episodeBrowser.artistUrl = (artistId: string) =>
+        buildShareableUrl(
+          { artist: artistId, view: "artist-timeline" },
+          filterStateManager.getState(),
+        );
     } else if (mode === "artist-timeline") {
       if (playbackController.isPlaying()) {
         playbackController.pause();
@@ -343,6 +389,10 @@ async function main(): Promise<void> {
   // filter:change → update line chart filters, handle view switching
   eventBus.on("filter:change", (state: FilterState) => {
     const currentView = state.view;
+
+    // Implicit filters (an artist/source set by drilling in rather than chosen
+    // explicitly) are cleared inside FilterStateManager.update as part of the
+    // same update, so `state` here already reflects the final, cleared values.
 
     // Handle view switching
     if (currentView === "yearly") {
@@ -394,6 +444,11 @@ async function main(): Promise<void> {
     if (index >= 0) {
       lineChart.setDateIndex(index);
     }
+    // Keep the scrubber in sync when not playing too. This covers dragging the
+    // chart itself (which emits date:change as the window's right edge moves)
+    // as well as any other programmatic date change. syncTo updates the thumb
+    // without re-emitting date:change, so there's no feedback loop.
+    playbackController.syncTo(date);
   });
 
   // play/pause → inform line chart controller
@@ -444,12 +499,33 @@ async function main(): Promise<void> {
     }
   });
 
+  // Shareable playback date (see the URL hash writing section below). Declared
+  // here because the initial render seeds it from the URL.
+  let currentPlaybackDate: string | null = null;
+  // Value-axis detail zoom percentage (5..100), persisted in the URL.
+  let currentDetailPct = 100;
+
   // --- Initial render ---
-  // Start at the last date (current state, no animation)
+  // Start at the last date by default, OR at the shareable date from the URL
+  // (snapped to the nearest available date ≤ the requested one) when present.
   if (dataStore.dates.length > 0) {
+    const dates = dataStore.dates;
+    let startDate = dates[dates.length - 1];
+    const urlDate = parseHashToState(window.location.hash).date;
+    if (urlDate) {
+      // Nearest available date ≤ urlDate (dates are sorted ascending). If the
+      // requested date is before all data, fall back to the first date.
+      let resolved = dates[0];
+      for (const d of dates) {
+        if (d <= urlDate) resolved = d;
+        else break;
+      }
+      startDate = resolved;
+      currentPlaybackDate = resolved; // seed so the first hash write matches
+    }
+    const initialStartDate = startDate;
     requestAnimationFrame(() => {
-      const lastDate = dataStore.dates[dataStore.dates.length - 1];
-      eventBus.emit("date:change", lastDate);
+      eventBus.emit("date:change", initialStartDate);
     });
   }
 
@@ -533,17 +609,62 @@ async function main(): Promise<void> {
   // Phase 7: Polish — URL State Encoding
   // =========================================================
 
-  // On load: apply hash state
+  // On load: apply hash state. An artist present in the URL is treated as an
+  // explicit filter — whoever opened the link meant to see that artist — so it
+  // persists across view changes rather than being cleared as a drill-in.
   const initialHashState = parseHashToState(window.location.hash);
+  // The playback date is not a filter, so strip it before feeding the filter
+  // state manager — it's applied to the chart during the initial render.
+  delete initialHashState.date;
+  // The detail zoom is a view setting, not a filter. Apply it to the chart +
+  // the selector, and seed the tracker so the first hash write matches.
+  const initialDetail = initialHashState.detail;
+  delete initialHashState.detail;
+  if (initialDetail !== undefined && initialDetail !== 100) {
+    currentDetailPct = initialDetail;
+    detailSelect.value = String(initialDetail);
+    lineChart.setValueCeiling(initialDetail / 100);
+  }
   if (Object.keys(initialHashState).length > 0) {
-    filterStateManager.update(initialHashState);
+    const artistExplicit =
+      initialHashState.artist !== undefined && initialHashState.artist !== "all";
+    const sourceExplicit =
+      initialHashState.source !== undefined && initialHashState.source !== "all";
+    filterStateManager.update(initialHashState, { artistExplicit, sourceExplicit });
   }
 
-  // On filter:change: update URL hash
-  eventBus.on("filter:change", (state: FilterState) => {
-    const newHash = encodeStateToHash(state);
+  // --- URL hash writing (filters + shareable playback date) ---
+  // The playback date (currentPlaybackDate, declared earlier) is a shareable
+  // pointer to a specific day of the race. It is tracked separately (not a
+  // filter) and only encoded in the race/line view. writeHash() composes it
+  // with the filter state so neither the per-frame date updates nor filter
+  // changes clobber each other.
+  const writeHash = (): void => {
+    const state = filterStateManager.getState();
+    const inRaceView = state.view === "line" || state.view === "race";
+    const withDate: FilterState = {
+      ...state,
+      date: inRaceView && currentPlaybackDate ? currentPlaybackDate : undefined,
+      detail: inRaceView ? currentDetailPct : undefined,
+    };
+    const newHash = encodeStateToHash(withDate);
     const currentPath = window.location.pathname + window.location.search;
     history.replaceState(null, "", currentPath + newHash);
+  };
+
+  eventBus.on("filter:change", () => writeHash());
+
+  // Update the shareable date in the URL once per day-tick, debounced so rapid
+  // playback ticks don't hammer history.replaceState (which can jank playback).
+  let dateHashTimer: ReturnType<typeof setTimeout> | null = null;
+  eventBus.on("date:change", (date: string) => {
+    if (date === currentPlaybackDate) return;
+    currentPlaybackDate = date;
+    if (dateHashTimer !== null) clearTimeout(dateHashTimer);
+    dateHashTimer = setTimeout(() => {
+      dateHashTimer = null;
+      writeHash();
+    }, 150);
   });
 
   // =========================================================

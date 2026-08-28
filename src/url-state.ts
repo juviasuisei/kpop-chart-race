@@ -28,6 +28,10 @@ export function encodeStateToHash(state: FilterState): string {
   if (state.displayMode !== DEFAULT_FILTER_VALUES.displayMode) params.push(`mode=${state.displayMode}`);
   if (state.zoom !== DEFAULT_FILTER_VALUES.zoom) params.push(`zoom=${state.zoom}`);
   if (state.metric !== DEFAULT_FILTER_VALUES.metric) params.push(`metric=${state.metric}`);
+  // Playback date (race/line view only): a shareable pointer to a specific day.
+  if (state.date) params.push(`date=${state.date}`);
+  // Value-axis detail zoom (race/line view only); 100% is the default, omitted.
+  if (state.detail !== undefined && state.detail !== 100) params.push(`detail=${state.detail}`);
   return params.length > 0 ? `#${params.join("&")}` : "";
 }
 
@@ -73,7 +77,49 @@ export function parseHashToState(hash: string): Partial<FilterState> {
           partial.metric = value;
         }
         break;
+      case "date":
+        // Basic YYYY-MM-DD shape check; the loader snaps to the nearest actual date.
+        if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+          partial.date = value;
+        }
+        break;
+      case "detail": {
+        const n = parseInt(value, 10);
+        if (Number.isFinite(n) && n >= 1 && n <= 100) {
+          partial.detail = n;
+        }
+        break;
+      }
     }
   }
   return partial;
+}
+
+/**
+ * Build a full, shareable URL (origin + path + hash) for a target filter
+ * state. `target` is merged over `base` (typically the current state) so
+ * callers only need to specify the fields that change — e.g.
+ * `buildShareableUrl({ view: "artist-timeline", artist: "aespa" }, current)`.
+ *
+ * Used to open a navigation target in a new browser tab, where the hash must
+ * be a complete absolute URL rather than an in-place state mutation.
+ */
+export function buildShareableUrl(
+  target: Partial<FilterState>,
+  base: FilterState,
+): string {
+  const merged: FilterState = { ...base, ...target };
+  const hash = encodeStateToHash(merged);
+  const { origin, pathname, search } = window.location;
+  return `${origin}${pathname}${search}${hash}`;
+}
+
+/**
+ * True when a mouse event expresses intent to open a link in a new tab or
+ * window: Cmd (macOS), Ctrl (Windows/Linux), Shift (new window), or a
+ * middle-click (button 1). Mirrors the browser's native anchor behavior so
+ * our in-place navigations can honor the same gestures.
+ */
+export function isNewTabIntent(e: MouseEvent): boolean {
+  return e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1;
 }

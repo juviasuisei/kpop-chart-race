@@ -233,6 +233,89 @@ describe('Toolbar — Artist Filter Visibility', () => {
   });
 });
 
+describe('Toolbar — Display Mode Toggle Visibility', () => {
+  let container: HTMLElement;
+
+  beforeEach(() => {
+    container = document.createElement('div');
+    document.body.appendChild(container);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(container);
+  });
+
+  function isHidden(el: HTMLElement | null): boolean {
+    if (!el) return false;
+    return el.hidden ||
+      el.style.display === 'none' ||
+      el.classList.contains('toolbar__control--hidden');
+  }
+
+  // The Songs/Artists toggle only makes sense in the race/line and yearly
+  // views. The episode browser and artist timeline are inherently
+  // per-song/per-episode, so the toggle is hidden there.
+
+  it('display-mode toggle is visible in race view', () => {
+    const { toolbar, filterState } = createToolbar();
+    toolbar.mount(container);
+    filterState.update({ view: 'line' });
+
+    const displayControl = container.querySelector('[data-control="display-mode"]') as HTMLElement;
+    expect(isHidden(displayControl)).toBe(false);
+
+    toolbar.unmount();
+  });
+
+  it('display-mode toggle is visible in yearly view', () => {
+    const { toolbar, filterState } = createToolbar();
+    toolbar.mount(container);
+    filterState.update({ view: 'yearly' });
+
+    const displayControl = container.querySelector('[data-control="display-mode"]') as HTMLElement;
+    expect(isHidden(displayControl)).toBe(false);
+
+    toolbar.unmount();
+  });
+
+  it('display-mode toggle is hidden in episodes view', () => {
+    const { toolbar, filterState } = createToolbar();
+    toolbar.mount(container);
+    filterState.update({ view: 'episodes' });
+
+    const displayControl = container.querySelector('[data-control="display-mode"]') as HTMLElement;
+    expect(isHidden(displayControl)).toBe(true);
+
+    toolbar.unmount();
+  });
+
+  it('display-mode toggle is hidden in artist-timeline view', () => {
+    const { toolbar, filterState } = createToolbar();
+    toolbar.mount(container);
+    filterState.update({ view: 'artist-timeline' });
+
+    const displayControl = container.querySelector('[data-control="display-mode"]') as HTMLElement;
+    expect(isHidden(displayControl)).toBe(true);
+
+    toolbar.unmount();
+  });
+
+  it('display-mode toggle reappears when switching back from episodes to race', () => {
+    const { toolbar, filterState } = createToolbar();
+    toolbar.mount(container);
+
+    filterState.update({ view: 'episodes' });
+    let displayControl = container.querySelector('[data-control="display-mode"]') as HTMLElement;
+    expect(isHidden(displayControl)).toBe(true);
+
+    filterState.update({ view: 'line' });
+    displayControl = container.querySelector('[data-control="display-mode"]') as HTMLElement;
+    expect(isHidden(displayControl)).toBe(false);
+
+    toolbar.unmount();
+  });
+});
+
 describe('Toolbar — Generation Filter Dropdown', () => {
   let container: HTMLElement;
 

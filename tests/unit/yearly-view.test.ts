@@ -428,6 +428,45 @@ describe('YearlyView — Wins Mode', () => {
     expect(firstBar?.textContent).toContain('Artist B');
   });
 
+  it('uses standard competition ranks in wins mode (ties share a rank, next skips)', () => {
+    // A: 2 wins, B: 2 wins, C: 1 win → competition ranks #1, #1, #3.
+    const artists = [
+      createArtistWithWins('a', 'Artist A', 9000, '2025'),
+      createArtistWithWins('b', 'Artist B', 8000, '2025'),
+      createArtistWithWins('c', 'Artist C', 7000, '2025'),
+    ];
+    const wins = new Map([
+      ['2025-06-01', new Map([
+        ['inkigayo', { artistIds: ['a', 'b', 'c'], crownLevels: new Map([['a', 1], ['b', 1], ['c', 1]]) }],
+        ['music_bank', { artistIds: ['a', 'b'], crownLevels: new Map([['a', 1], ['b', 1]]) }],
+      ])],
+    ]);
+    const dataStore = createDataStoreWithWins(artists, wins);
+    view.mount(container, dataStore);
+    view.setMetric('wins');
+
+    const ranks = Array.from(container.querySelectorAll('.yearly-view__rank')).map(
+      el => el.textContent,
+    );
+    expect(ranks).toEqual(['#1', '#1', '#3']);
+  });
+
+  it('competition ranks handle a longer tie run (points metric): 5,5,4 → #1,#1,#3', () => {
+    // Points mode, Artists grid: two artists tie on points, the next distinct
+    // value skips the tied slot.
+    const dataStore = createDataStore([
+      createArtist('a', 'Artist A', { '2025-06-01': { value: 5000, source: 'inkigayo', episode: 1 } }),
+      createArtist('b', 'Artist B', { '2025-06-01': { value: 5000, source: 'music_bank', episode: 1 } }),
+      createArtist('c', 'Artist C', { '2025-06-01': { value: 4000, source: 'inkigayo', episode: 1 } }),
+    ]);
+    view.mount(container, dataStore);
+
+    const ranks = Array.from(container.querySelectorAll('.yearly-view__rank')).map(
+      el => el.textContent,
+    );
+    expect(ranks).toEqual(['#1', '#1', '#3']);
+  });
+
   it('wins mode scales bars by win count using global max', () => {
     const artists = [
       createArtistWithWins('a', 'Artist A', 10000, '2025'),
@@ -958,7 +997,7 @@ describe('YearlyView — Appearances Metric', () => {
     view.setMetric('appearances');
 
     const stats = container.querySelector('.yearly-view__stats');
-    expect(stats?.textContent).toBe('3 appearances');
+    expect(stats?.textContent).toBe('3 chart entries');
   });
 
   it('artist gets one credit per song even when two songs chart the same day', () => {
@@ -982,7 +1021,7 @@ describe('YearlyView — Appearances Metric', () => {
 
     // Both songs charted on the same (date, source) → 2 credits
     const stats = container.querySelector('.yearly-view__stats');
-    expect(stats?.textContent).toBe('2 appearances');
+    expect(stats?.textContent).toBe('2 chart entries');
   });
 
   it('counts one appearance per (date, source) entry in songs mode', () => {
@@ -1003,7 +1042,7 @@ describe('YearlyView — Appearances Metric', () => {
     view.setMetric('appearances');
 
     const stats = container.querySelector('.yearly-view__stats');
-    expect(stats?.textContent).toBe('2 appearances');
+    expect(stats?.textContent).toBe('2 chart entries');
   });
 
   it('filters appearances by source', () => {
@@ -1024,7 +1063,7 @@ describe('YearlyView — Appearances Metric', () => {
     view.setSourceFilter('inkigayo');
 
     const stats = container.querySelector('.yearly-view__stats');
-    expect(stats?.textContent).toBe('1 appearance');
+    expect(stats?.textContent).toBe('1 chart entry');
   });
 });
 
@@ -1121,7 +1160,7 @@ describe('YearlyView — All-Time Aggregate', () => {
 
     const allTimeCell = container.querySelector('.yearly-view__cell--all-time');
     const stats = allTimeCell?.querySelector('.yearly-view__stats');
-    expect(stats?.textContent).toBe('2 appearances');
+    expect(stats?.textContent).toBe('2 chart entries');
   });
 
   it('All-Time treemap block is present in "all" zoom with multiple years', () => {
@@ -1175,6 +1214,58 @@ describe('YearlyView — Artist Click Navigation', () => {
 
     const row = container.querySelector('.yearly-view__row') as HTMLElement;
     expect(row.style.cursor).toBe('pointer');
+  });
+
+  it('renders grid bars as anchors with a real href from artistUrl', () => {
+    const ds = createDataStore([
+      createArtist('artist-a', 'Artist A', { '2025-06-01': { value: 5000, source: 'inkigayo', episode: 1 } }),
+    ]);
+    view.artistUrl = (id) => `https://example.test/#view=artist-timeline&artist=${id}`;
+    view.mount(container, ds);
+    view.setDisplayMode('artists');
+
+    const row = container.querySelector('.yearly-view__row') as HTMLAnchorElement;
+    expect(row.tagName).toBe('A');
+    expect(row.getAttribute('href')).toBe(
+      'https://example.test/#view=artist-timeline&artist=artist-a',
+    );
+  });
+
+  it('lets a Cmd/Ctrl-click of a grid bar fall through to the browser (new tab)', () => {
+    const ds = createDataStore([
+      createArtist('artist-a', 'Artist A', { '2025-06-01': { value: 5000, source: 'inkigayo', episode: 1 } }),
+    ]);
+    const clicked: string[] = [];
+    view.onArtistClick = (id) => clicked.push(id);
+    view.artistUrl = (id) => `https://example.test/#artist=${id}`;
+    view.mount(container, ds);
+    view.setDisplayMode('artists');
+
+    const row = container.querySelector('.yearly-view__row') as HTMLAnchorElement;
+    const cmd = new MouseEvent('click', { metaKey: true, bubbles: true, cancelable: true });
+    row.dispatchEvent(cmd);
+
+    // Default not prevented → browser opens the href; in-place nav does not fire.
+    expect(cmd.defaultPrevented).toBe(false);
+    expect(clicked).toEqual([]);
+  });
+
+  it('navigates in place (prevents default) on a plain left-click of a grid bar', () => {
+    const ds = createDataStore([
+      createArtist('artist-a', 'Artist A', { '2025-06-01': { value: 5000, source: 'inkigayo', episode: 1 } }),
+    ]);
+    const clicked: string[] = [];
+    view.onArtistClick = (id) => clicked.push(id);
+    view.artistUrl = (id) => `https://example.test/#artist=${id}`;
+    view.mount(container, ds);
+    view.setDisplayMode('artists');
+
+    const row = container.querySelector('.yearly-view__row') as HTMLAnchorElement;
+    const plain = new MouseEvent('click', { bubbles: true, cancelable: true });
+    row.dispatchEvent(plain);
+
+    expect(plain.defaultPrevented).toBe(true);
+    expect(clicked).toEqual(['artist-a']);
   });
 });
 
@@ -1262,6 +1353,89 @@ describe('YearlyView — Pinned Artist (Artists grid)', () => {
     const rows = container.querySelectorAll('.yearly-view__row');
     expect(rows.length).toBe(10);
     expect(container.querySelector('.yearly-view__row--pinned')).toBeNull();
+  });
+});
+
+describe('YearlyView — Generation Filter (Artists mode)', () => {
+  let container: HTMLElement;
+  let view: YearlyView;
+
+  beforeEach(() => {
+    container = document.createElement('div');
+    document.body.appendChild(container);
+    view = new YearlyView();
+  });
+
+  afterEach(() => {
+    view.unmount();
+    document.body.removeChild(container);
+  });
+
+  /** Two gen-4 artists and one gen-3 artist, all charting in 2025. */
+  function makeMixedGenStore(): DataStore {
+    const mk = (id: string, gen: number, value: number): ParsedArtist => ({
+      id, name: id, artistType: 'girl_group', generation: gen,
+      logoUrl: `assets/logos/${id}.svg`, albumReleases: [],
+      releases: [{
+        id: `${id}-r`, title: 'Song', embeds: new Map(),
+        dailyValues: new Map([['2025-06-01', { value, source: 'inkigayo', episode: 1 }]]),
+      }],
+    });
+    return createDataStore([
+      mk('g4-a', 4, 5000),
+      mk('g4-b', 4, 3000),
+      mk('g3', 3, 4000),
+    ]);
+  }
+
+  it('filters Artists-mode points by generation (Top-10 grid)', () => {
+    view.mount(container, makeMixedGenStore());
+    view.setDisplayMode('artists');
+    view.setGenerationFilter(4);
+
+    const bars = Array.from(container.querySelectorAll('.yearly-view__bar')).map(b => b.textContent);
+    // Only the two gen-4 artists should show; the gen-3 artist is filtered out.
+    expect(bars.length).toBe(2);
+    expect(bars.join(' ')).toContain('g4-a');
+    expect(bars.join(' ')).toContain('g4-b');
+    expect(bars.join(' ')).not.toContain('g3');
+  });
+
+  it('shows all generations when the filter is "all"', () => {
+    view.mount(container, makeMixedGenStore());
+    view.setDisplayMode('artists');
+    view.setGenerationFilter('all');
+
+    const bars = container.querySelectorAll('.yearly-view__bar');
+    expect(bars.length).toBe(3);
+  });
+
+  it('applies the generation filter in wins mode too', () => {
+    const ds = makeMixedGenStore();
+    // Give the gen-3 artist a win; gen-4 artists none. Filtering to gen 4 should
+    // yield an empty wins chart (proves the win path respects the filter).
+    ds.chartWins = new Map([
+      ['2025-06-01', new Map([['inkigayo', { artistIds: ['g3'], crownLevels: new Map([['g3', 1]]) }]])],
+    ]);
+    view.mount(container, ds);
+    view.setDisplayMode('artists');
+    view.setMetric('wins');
+    view.setGenerationFilter(4);
+
+    // gen-3 has the only win but is filtered out → no rows.
+    const rows = container.querySelectorAll('.yearly-view__row');
+    expect(rows.length).toBe(0);
+  });
+
+  it('applies the generation filter in appearances mode', () => {
+    view.mount(container, makeMixedGenStore());
+    view.setDisplayMode('artists');
+    view.setMetric('appearances');
+    view.setGenerationFilter(3);
+
+    const bars = Array.from(container.querySelectorAll('.yearly-view__bar')).map(b => b.textContent);
+    expect(bars.length).toBe(1);
+    expect(bars.join(' ')).toContain('g3');
   });
 });
 

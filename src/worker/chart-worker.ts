@@ -114,6 +114,7 @@ function buildPixelPoints(
   maxValue: number,
 ): { points: PixelPoint[]; values: number[] } {
   const { startDateIndex, endDateIndex, width, height, progressToNext } = viewport;
+  const scrollOffset = viewport.scrollOffset ?? 0;
 
   // Compute chart area in CSS pixels (canvas context has DPR transform applied)
   const padding = { top: 40, right: 210, bottom: 40, left: 0 };
@@ -143,9 +144,12 @@ function buildPixelPoints(
     };
   }
 
-  // Helper: map a date index to x pixel position
+  // Helper: map a date index to x pixel position. scrollOffset slides the whole
+  // domain left by a fractional day so the chart scrolls smoothly during
+  // playback (see Viewport.scrollOffset). The tip's forward progressToNext
+  // cancels this offset, keeping the leading edge pinned near the right.
   const dateToX = (dateIdx: number): number => {
-    const ratio = (dateIdx - startDateIndex) / totalDateSpan;
+    const ratio = (dateIdx - startDateIndex - scrollOffset) / totalDateSpan;
     return padding.left + ratio * chartW;
   };
 
@@ -270,7 +274,11 @@ function computeFrame(msg: ComputeFrameMessage): void {
   const nextMax = effectiveDateIndex + 1 < allDates.length
     ? computeMaxAtDate(effectiveDateIndex + 1)
     : currentMax;
-  const frameMaxValue = currentMax + (nextMax - currentMax) * viewport.progressToNext;
+  const autoMax = currentMax + (nextMax - currentMax) * viewport.progressToNext;
+  // Value-ceiling zoom: cap the y-axis at a fraction of the auto max so the
+  // lower cluster of lines expands to fill the height (lines above clip off).
+  const ceiling = viewport.valueCeiling ?? 1;
+  const frameMaxValue = autoMax * (ceiling > 0 ? ceiling : 1);
 
   const background: LineDrawCommand[] = [];
   const foreground: LineDrawCommand[] = [];

@@ -232,6 +232,43 @@ describe("EpisodeBrowser", () => {
     expect(container.innerHTML).toBe("");
   });
 
+  it("gives artist links a real href from artistUrl for new-tab support", () => {
+    const browser = new EpisodeBrowser();
+    browser.artistUrl = (id) => `https://example.test/#view=artist-timeline&artist=${id}`;
+    browser.mount(container, dataStore);
+
+    const link = container.querySelector(".episode-card__artist-link") as HTMLAnchorElement;
+    expect(link).not.toBeNull();
+    expect(link.getAttribute("href")).toContain("view=artist-timeline&artist=");
+
+    browser.unmount();
+  });
+
+  it("intercepts a plain click (in-place nav) but lets a Cmd-click fall through to the browser", () => {
+    const browser = new EpisodeBrowser();
+    const clicked: string[] = [];
+    browser.artistUrl = (id) => `https://example.test/#artist=${id}`;
+    browser.onArtistClick = (id) => clicked.push(id);
+    browser.mount(container, dataStore);
+
+    const link = container.querySelector(".episode-card__artist-link") as HTMLAnchorElement;
+
+    // Plain click: default prevented (no browser navigation) and in-place nav runs.
+    const plain = new MouseEvent("click", { bubbles: true, cancelable: true });
+    link.dispatchEvent(plain);
+    expect(plain.defaultPrevented).toBe(true);
+    expect(clicked.length).toBe(1);
+
+    // Cmd-click: default NOT prevented, so the browser opens the href in a new
+    // tab; the in-place handler does not fire again.
+    const cmd = new MouseEvent("click", { bubbles: true, cancelable: true, metaKey: true });
+    link.dispatchEvent(cmd);
+    expect(cmd.defaultPrevented).toBe(false);
+    expect(clicked.length).toBe(1);
+
+    browser.unmount();
+  });
+
   it("renders episode header with show logo, name, episode number, and date", () => {
     const browser = new EpisodeBrowser();
     browser.mount(container, dataStore);
@@ -254,7 +291,7 @@ describe("EpisodeBrowser", () => {
 });
 
 // ============================================================
-// Tie handling at the episode level (dense ranks + recency tie-break)
+// Tie handling at the episode level (competition ranks + recency tie-break)
 // ============================================================
 
 describe("EpisodeBrowser — ties", () => {
@@ -343,7 +380,7 @@ describe("EpisodeBrowser — ties", () => {
     throw new Error("ep 200 card not found");
   }
 
-  it("gives tied entries the same rank and uses dense numbering (1,2,2,3)", () => {
+  it("gives tied entries the same rank and uses competition numbering (1,2,2,4)", () => {
     const browser = new EpisodeBrowser();
     browser.mount(container, makeTieStore());
 
@@ -353,8 +390,9 @@ describe("EpisodeBrowser — ties", () => {
       return rankEl?.textContent ?? "";
     });
 
-    // Scores 100, 90, 90, 80 → dense ranks #1, #2, #2, #3 (no skipped #3→#4)
-    expect(ranks).toEqual(["#1", "#2", "#2", "#3"]);
+    // Scores 100, 90, 90, 80 → competition ranks #1, #2, #2, #4 (the tied
+    // slot #3 is skipped, so the next distinct value takes #4).
+    expect(ranks).toEqual(["#1", "#2", "#2", "#4"]);
 
     browser.unmount();
   });
@@ -403,9 +441,78 @@ describe("EpisodeBrowser — ties", () => {
     expect(rankTextOf(rows[0])).toBeNull();
     expect(rankTextOf(rows[1])).toBeNull();
 
-    // The remaining entries fall to dense rank #2 with plain labels (no crown).
+    // Two entries tie for #1, so the tied slot #2 is skipped: the next entry
+    // (90 pts) takes competition rank #3 with a plain label (no crown).
     expect(crownOf(rows[2])).toBeNull();
-    expect(rankTextOf(rows[2])).toBe("#2");
+    expect(rankTextOf(rows[2])).toBe("#3");
+
+    browser.unmount();
+  });
+});
+
+// ============================================================
+// Estimated (curve-filled) score styling
+// ============================================================
+
+describe("EpisodeBrowser — estimated scores", () => {
+  let container: HTMLElement;
+
+  beforeEach(() => {
+    container = document.createElement("div");
+    document.body.appendChild(container);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(container);
+  });
+
+  /** Music Bank ep 10 with one real score and one estimated (filled) score. */
+  function makeStore(): DataStore {
+    const D = "2024-03-01";
+    const EP = { source: "music_bank", episode: 10 };
+    const real: ParsedRelease = {
+      id: "r-real", title: "Real Song", artistIds: ["a-real"], embeds: new Map(),
+      dailyValues: new Map([[D, { value: 1200, ...EP }]]),
+    };
+    const est: ParsedRelease = {
+      id: "r-est", title: "Filled Song", artistIds: ["a-est"], embeds: new Map(),
+      dailyValues: new Map([[D, { value: 900, ...EP, estimated: true }]]),
+    };
+    const mk = (id: string, name: string, r: ParsedRelease): ParsedArtist => ({
+      id, name, artistType: "girl_group", generation: 4,
+      logoUrl: `assets/logos/${id}.svg`, releases: [r], albumReleases: [],
+    });
+    return {
+      artists: new Map<string, ParsedArtist>([
+        ["a-real", mk("a-real", "Real", real)],
+        ["a-est", mk("a-est", "Est", est)],
+      ]),
+      dates: [D], startDate: D, endDate: D,
+      firstAppearance: new Map(), chartWins: new Map(), releaseWinDates: new Map(),
+    };
+  }
+
+  it("flags estimated scores with the modifier class and a tooltip", () => {
+    const browser = new EpisodeBrowser();
+    browser.mount(container, makeStore());
+
+    const est = container.querySelector(".episode-card__entry-points--estimated") as HTMLElement;
+    expect(est).not.toBeNull();
+    expect(est.textContent).toBe("900");
+    expect(est.getAttribute("data-tooltip")).toMatch(/estimated/i);
+
+    browser.unmount();
+  });
+
+  it("does not flag real (published) scores as estimated", () => {
+    const browser = new EpisodeBrowser();
+    browser.mount(container, makeStore());
+
+    const allPoints = Array.from(container.querySelectorAll(".episode-card__entry-points"));
+    const real = allPoints.find(el => el.textContent === "1,200") as HTMLElement;
+    expect(real).toBeTruthy();
+    expect(real.classList.contains("episode-card__entry-points--estimated")).toBe(false);
+    expect(real.getAttribute("data-tooltip")).toBeNull();
 
     browser.unmount();
   });

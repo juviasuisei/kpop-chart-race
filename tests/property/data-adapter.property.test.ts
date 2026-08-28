@@ -23,7 +23,7 @@ import { toChartSource } from '../../src/airtable/show-name-map.ts';
 // - debut equals the Debut value when non-empty, otherwise undefined
 // ============================================================
 
-const P4_VALID_TYPES = ['Boy Group', 'Girl Group', 'Solo Male', 'Solo Female', 'Mixed Group'] as const;
+const P4_VALID_TYPES = ['Boy Group', 'Girl Group', 'Solo Male', 'Solo Female', 'Mixed Group', 'Solo Non-Binary'] as const;
 
 /** Generate a non-empty lowercase alpha/underscore string for logo_name */
 const p4LogoNameArb = fc.string({ minLength: 1, maxLength: 20, unit: fc.constantFrom(
@@ -917,7 +917,7 @@ describe('Property 8: DataStore assembly invariants', () => {
 // ============================================================
 
 /** Valid artist types in Airtable for Property 5 */
-const VALID_ARTIST_TYPES_P5 = ['Boy Group', 'Girl Group', 'Solo Male', 'Solo Female', 'Mixed Group'] as const;
+const VALID_ARTIST_TYPES_P5 = ['Boy Group', 'Girl Group', 'Solo Male', 'Solo Female', 'Mixed Group', 'Solo Non-Binary'] as const;
 
 /** Valid show names for episodes in Property 5 */
 const VALID_SHOWS_P5 = ['The Show', 'Show Champion', 'M Countdown', 'Music Bank', 'Show! Music Core', 'Inkigayo'] as const;

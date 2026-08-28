@@ -20,6 +20,9 @@ export class PlaybackController {
   private startDateLabel: HTMLSpanElement | null = null;
   private endDateLabel: HTMLSpanElement | null = null;
   private updateCompleteHandler: (() => void) | null = null;
+  private progressHandler: ((position: number) => void) | null = null;
+  private pauseHandler: (() => void) | null = null;
+  private trailingSlot: HTMLElement | null = null;
   private playing = false;
 
   constructor(eventBus: EventBus, dates: string[]) {
@@ -48,6 +51,10 @@ export class PlaybackController {
     this.scrubber.className = "playback-controls__scrubber";
     this.scrubber.min = "0";
     this.scrubber.max = String(this.dates.length - 1);
+    // Allow fractional thumb positions so playback glides smoothly rather than
+    // snapping to whole dates. User drags still resolve to an integer index in
+    // handleScrubberInput.
+    this.scrubber.step = "any";
     this.scrubber.value = String(this.currentIndex);
     this.scrubber.setAttribute("aria-label", "Timeline scrubber");
     this.scrubber.setAttribute("aria-valuenow", initialDate);
@@ -96,7 +103,44 @@ export class PlaybackController {
     this.wrapper.appendChild(this.startDateLabel);
     this.wrapper.appendChild(scrubberContainer);
     this.wrapper.appendChild(this.endDateLabel);
+    // Trailing slot: view-specific control (e.g. the value-axis detail zoom)
+    // sits to the right of the end-date label. Populated via setTrailingControl.
+    this.trailingSlot = document.createElement("div");
+    this.trailingSlot.className = "playback-controls__trailing";
+    this.wrapper.appendChild(this.trailingSlot);
     container.appendChild(this.wrapper);
+
+    // Glide the scrubber thumb with the animation's fractional position. We
+    // only move the visual thumb here; currentIndex (the integer date used for
+    // labels and data) is still driven by date:change / syncTo. Ignore while
+    // the user is dragging so we don't fight their input.
+    this.progressHandler = (position: number) => {
+      if (!this.scrubber || this.isScrubbing) return;
+      this.scrubber.value = String(position);
+    };
+    this.eventBus.on("playback:progress", this.progressHandler);
+
+    // The animation can end on its own (reaching the last date), which emits
+    // "pause" without going through our pause(). Reset our button + playing
+    // flag so the UI reflects the stopped state. Guard against re-entry since
+    // our own pause() also emits "pause".
+    this.pauseHandler = () => {
+      if (!this.playing) return;
+      this.playing = false;
+      this.updateButtonToPlay();
+    };
+    this.eventBus.on("pause", this.pauseHandler);
+  }
+
+  /**
+   * Place a view-specific control in the scrubber row, to the right of the
+   * end-date label (e.g. the race view's value-axis detail zoom). Replaces any
+   * previously set trailing control.
+   */
+  setTrailingControl(el: HTMLElement | null): void {
+    if (!this.trailingSlot) return;
+    this.trailingSlot.innerHTML = "";
+    if (el) this.trailingSlot.appendChild(el);
   }
 
   play(): void {
@@ -152,7 +196,11 @@ export class PlaybackController {
     const index = this.dates.indexOf(date);
     if (index === -1) return;
     this.currentIndex = index;
-    this.updateScrubberAndLabel();
+    // While playing, the smooth playback:progress handler owns the thumb
+    // position, so only refresh the aria/label here — otherwise the thumb would
+    // snap back to the integer index each time the date ticks over, undoing the
+    // smoothing. When paused (e.g. keyboard step), move the thumb as usual.
+    this.updateScrubberAndLabel({ moveThumb: !this.playing });
   }
 
   isPlaying(): boolean {
@@ -186,6 +234,16 @@ export class PlaybackController {
       this.scrubber.removeEventListener("change", this.handleScrubEnd);
       this.scrubber.removeEventListener("mousemove", this.handleScrubberHover);
       this.scrubber.removeEventListener("mouseleave", this.handleScrubberLeave);
+    }
+
+    if (this.progressHandler) {
+      this.eventBus.off("playback:progress", this.progressHandler);
+      this.progressHandler = null;
+    }
+
+    if (this.pauseHandler) {
+      this.eventBus.off("pause", this.pauseHandler);
+      this.pauseHandler = null;
     }
 
     if (this.wrapper && this.wrapper.parentElement) {
@@ -290,11 +348,14 @@ export class PlaybackController {
     this.scrubberTooltip.style.opacity = "0";
   };
 
-  private updateScrubberAndLabel(): void {
+  private updateScrubberAndLabel(opts: { moveThumb?: boolean } = {}): void {
     if (!this.scrubber) return;
+    const { moveThumb = true } = opts;
 
     const date = this.dates[this.currentIndex] ?? "";
-    this.scrubber.value = String(this.currentIndex);
+    if (moveThumb) {
+      this.scrubber.value = String(this.currentIndex);
+    }
     this.scrubber.setAttribute("aria-valuenow", date);
   }
 

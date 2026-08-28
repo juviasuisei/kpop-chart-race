@@ -18,7 +18,7 @@ export class TimeNavigation {
   private activePreset: TimeZoomPreset = "daily";
   private totalDays = 0;
 
-  /** Called when a preset is selected */
+  /** Called when a time-zoom preset is selected */
   onPresetSelect: ((preset: TimeZoomPreset) => void) | null = null;
 
   /** Set the total number of days in the dataset (controls which presets are visible) */
@@ -54,35 +54,31 @@ export class TimeNavigation {
     if (!this.wrapper) return;
     this.wrapper.innerHTML = "";
     this.buttons = [];
-
-    // Determine which presets to show based on data length
-    const availablePresets = PRESETS.filter(p => this.totalDays >= p.minDays);
-
-    // Don't show if only "All" is available (not enough data for any zoom)
-    if (availablePresets.length <= 1) {
-      this.wrapper.style.display = "none";
-      return;
-    }
     this.wrapper.style.display = "";
 
-    // Label
-    const label = document.createElement("span");
-    label.className = "time-navigation__label";
-    label.textContent = "Zoom Level:";
-    this.wrapper.appendChild(label);
+    // Time-zoom preset buttons — only shown when there's enough data for more
+    // than just "All". The detail (value-axis) control below is always shown.
+    const availablePresets = PRESETS.filter(p => this.totalDays >= p.minDays);
+    if (availablePresets.length > 1) {
+      const label = document.createElement("span");
+      label.className = "time-navigation__label";
+      label.textContent = "Zoom Level:";
+      this.wrapper.appendChild(label);
 
-    // Buttons
-    for (const preset of availablePresets) {
-      const btn = document.createElement("button");
-      btn.className = "time-navigation__btn";
-      btn.textContent = preset.label;
-      btn.setAttribute("aria-pressed", preset.value === this.activePreset ? "true" : "false");
-      btn.addEventListener("click", () => this.selectPreset(preset.value));
-      this.buttons.push(btn);
-      this.wrapper.appendChild(btn);
+      for (const preset of availablePresets) {
+        const btn = document.createElement("button");
+        btn.className = "time-navigation__btn";
+        btn.textContent = preset.label;
+        btn.setAttribute("aria-pressed", preset.value === this.activePreset ? "true" : "false");
+        btn.addEventListener("click", () => this.selectPreset(preset.value));
+        this.buttons.push(btn);
+        this.wrapper.appendChild(btn);
+      }
+      this.updateActiveButton();
+    } else {
+      // No time-zoom presets available for this dataset — hide the whole bar.
+      this.wrapper.style.display = "none";
     }
-
-    this.updateActiveButton();
   }
 
   private selectPreset(preset: TimeZoomPreset): void {

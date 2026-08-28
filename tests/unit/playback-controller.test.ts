@@ -205,3 +205,86 @@ describe('Scrubber date label clicks', () => {
     controller.destroy();
   });
 });
+
+describe('Smooth scrubber (fractional playback progress)', () => {
+  let container: HTMLElement;
+  let eventBus: EventBus;
+  let controller: PlaybackController;
+  const dates = ['2024-01-01', '2024-01-02', '2024-01-03', '2024-01-04', '2024-01-05'];
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    container = document.createElement('div');
+    document.body.appendChild(container);
+    eventBus = new EventBus();
+    controller = new PlaybackController(eventBus, dates);
+    controller.mount(container);
+  });
+
+  afterEach(() => {
+    controller.destroy();
+    container.remove();
+    vi.useRealTimers();
+  });
+
+  it('allows fractional thumb positions (step="any")', () => {
+    const scrubber = container.querySelector('.playback-controls__scrubber') as HTMLInputElement;
+    expect(scrubber.step).toBe('any');
+  });
+
+  it('moves the thumb to a fractional position on playback:progress', () => {
+    const scrubber = container.querySelector('.playback-controls__scrubber') as HTMLInputElement;
+    eventBus.emit('playback:progress', 2.37);
+    expect(parseFloat(scrubber.value)).toBeCloseTo(2.37, 2);
+  });
+
+  it('does NOT snap the thumb back to the integer index when syncTo runs during playback', () => {
+    const scrubber = container.querySelector('.playback-controls__scrubber') as HTMLInputElement;
+    controller.play();
+
+    // Smooth position sets the thumb between dates 2 and 3.
+    eventBus.emit('playback:progress', 2.6);
+    expect(parseFloat(scrubber.value)).toBeCloseTo(2.6, 2);
+
+    // A date:change tick (integer date 2) arrives via syncTo — the thumb must
+    // NOT jump back to 2 while playing.
+    controller.syncTo('2024-01-03'); // index 2
+    expect(parseFloat(scrubber.value)).toBeCloseTo(2.6, 2);
+    // ...but the accessible value reflects the current date.
+    expect(scrubber.getAttribute('aria-valuenow')).toBe('2024-01-03');
+  });
+
+  it('moves the thumb to the integer index on syncTo when paused (keyboard step)', () => {
+    const scrubber = container.querySelector('.playback-controls__scrubber') as HTMLInputElement;
+    // Not playing.
+    controller.syncTo('2024-01-04'); // index 3
+    expect(parseFloat(scrubber.value)).toBeCloseTo(3, 5);
+  });
+
+  it('ignores playback:progress while the user is dragging the scrubber', () => {
+    const scrubber = container.querySelector('.playback-controls__scrubber') as HTMLInputElement;
+    // Simulate the start of a drag.
+    scrubber.dispatchEvent(new Event('mousedown'));
+    scrubber.value = '1';
+    scrubber.dispatchEvent(new Event('input'));
+
+    // A stray progress tick should not move the thumb mid-drag.
+    eventBus.emit('playback:progress', 4.0);
+    expect(parseFloat(scrubber.value)).not.toBeCloseTo(4.0, 2);
+  });
+
+  it('resets the play button when the animation ends on its own (pause event)', () => {
+    const btn = container.querySelector('.playback-controls__play-btn') as HTMLButtonElement;
+    controller.play();
+    expect(controller.isPlaying()).toBe(true);
+    expect(btn.textContent).toBe('⏸');
+
+    // The line-chart animation reaching the end emits "pause" directly on the
+    // bus (not through our pause()).
+    eventBus.emit('pause');
+
+    expect(controller.isPlaying()).toBe(false);
+    expect(btn.textContent).toBe('▶');
+    expect(btn.getAttribute('aria-label')).toBe('Play');
+  });
+});

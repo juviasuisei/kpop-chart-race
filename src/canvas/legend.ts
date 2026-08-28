@@ -34,6 +34,7 @@ export class Legend {
       { color: "#81C784", label: "Solo Male" },
       { color: "#CE93D8", label: "Solo Female" },
       { color: "#1565C0", label: "Mixed Group" },
+      { color: "#90CAF9", label: "Solo Non-Binary" },
     ];
 
     for (const t of types) {

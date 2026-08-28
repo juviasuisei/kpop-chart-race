@@ -22,6 +22,7 @@ const VALID_ARTIST_TYPES: ReadonlySet<string> = new Set<ArtistType>([
   "solo_male",
   "solo_female",
   "mixed_group",
+  "solo_non_binary",
 ]);
 
 /** Known ChartSource values that have logos */

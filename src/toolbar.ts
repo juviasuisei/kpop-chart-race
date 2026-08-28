@@ -137,6 +137,18 @@ export class Toolbar {
       generationControl?.classList.remove("toolbar__control--hidden");
     }
 
+    // Songs/Artists display-mode toggle only applies to the race/line and
+    // yearly views. It has no meaning in the episode browser or artist
+    // timeline (both are inherently per-song/per-episode), so hide it there.
+    const displayModeControl = this.wrapper.querySelector(
+      '[data-control="display-mode"]',
+    ) as HTMLElement | null;
+    if (view === "episodes" || view === "artist-timeline") {
+      displayModeControl?.classList.add("toolbar__control--hidden");
+    } else {
+      displayModeControl?.classList.remove("toolbar__control--hidden");
+    }
+
     // Artist filter visibility. In Songs mode it always shows (hard filter).
     // In Artists mode it acts as a "pin" (highlight the selected artist) rather
     // than a hard filter, so it stays visible in race/line and in yearly at the
@@ -357,7 +369,14 @@ export class Toolbar {
     }
 
     select.addEventListener("change", () => {
-      this.filterState.update({ source: select.value });
+      // Choosing a specific source from the dropdown is an explicit user action,
+      // so it persists across view changes (unlike a drill-in show click).
+      // Selecting "All Sources" is a clear, which the manager treats as
+      // non-explicit automatically.
+      this.filterState.update(
+        { source: select.value },
+        { sourceExplicit: select.value !== "all" },
+      );
       this.dismissDrawer();
     });
 
@@ -506,7 +525,9 @@ export class Toolbar {
   }
 
   private selectArtistEntry(id: string, label: string): void {
-    this.filterState.update({ artist: id });
+    // Choosing an artist from the dropdown is an explicit user action, so the
+    // filter should persist across view changes (unlike a drill-in click).
+    this.filterState.update({ artist: id }, { artistExplicit: true });
     if (this.artistTriggerEl) this.artistTriggerEl.textContent = label;
     this.closeArtistDropdown();
     this.dismissDrawer();
@@ -580,7 +601,7 @@ export class Toolbar {
     const metrics: { value: "points" | "wins" | "appearances"; label: string }[] = [
       { value: "points", label: "Points" },
       { value: "wins", label: "Wins" },
-      { value: "appearances", label: "Appearances" },
+      { value: "appearances", label: "Chart Entries" },
     ];
 
     const current = this.filterState.getState().metric;

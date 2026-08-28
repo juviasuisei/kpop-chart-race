@@ -6,6 +6,7 @@
 import type { DataStore, ParsedArtist } from "../models.ts";
 import { ARTIST_TYPE_COLORS } from "../colors.ts";
 import { generateFallbackLogoDataUri } from "../utils.ts";
+import { isNewTabIntent } from "../url-state.ts";
 
 /** Source key → logo path mapping */
 const SOURCE_LOGOS: Record<string, string> = {
@@ -34,6 +35,7 @@ const ARTIST_TYPE_LABELS: Record<string, string> = {
   solo_male: "Solo Male",
   solo_female: "Solo Female",
   mixed_group: "Mixed Group",
+  solo_non_binary: "Solo Non-Binary",
 };
 
 /** A single song line within a merged show card */
@@ -80,8 +82,15 @@ export class ArtistTimeline {
   private artistId: string | null = null;
   private sourceFilter: string = "all";
 
-  /** Callback fired when a show episode link is clicked */
+  /** Callback fired when a show episode link is clicked (plain left-click) */
   onEpisodeClick: ((source: string, episode: number, date: string) => void) | null = null;
+
+  /**
+   * Resolver for the shareable URL an episode link points to. When provided,
+   * the link becomes a real navigable href so modifier/middle clicks open it
+   * in a new tab natively. Falls back to "#" when not set.
+   */
+  episodeUrl: ((source: string, episode: number, date: string) => string) | null = null;
 
   mount(container: HTMLElement, dataStore: DataStore, artistId: string): void {
     this.container = container;
@@ -205,7 +214,9 @@ export class ArtistTimeline {
     const typeLabel = ARTIST_TYPE_LABELS[artist.artistType] ?? artist.artistType;
     let metaText = `${typeLabel} · Gen ${artist.generation}`;
     if (artist.debut) {
-      const debutPrefix = artist.artistType === "solo_male" || artist.artistType === "solo_female"
+      const debutPrefix = artist.artistType === "solo_male"
+        || artist.artistType === "solo_female"
+        || artist.artistType === "solo_non_binary"
         ? "Solo Debut"
         : "Debut";
       metaText += ` · ${debutPrefix}: ${artist.debut}`;
@@ -219,7 +230,7 @@ export class ArtistTimeline {
     statsEl.className = "artist-timeline__stats";
     statsEl.innerHTML = `
       <div class="artist-timeline__stat"><span class="artist-timeline__stat-value">${stats.totalPoints.toLocaleString()}</span><span class="artist-timeline__stat-label">Points</span></div>
-      <div class="artist-timeline__stat"><span class="artist-timeline__stat-value">${stats.totalAppearances.toLocaleString()}</span><span class="artist-timeline__stat-label">Chart Appearances</span></div>
+      <div class="artist-timeline__stat"><span class="artist-timeline__stat-value">${stats.totalAppearances.toLocaleString()}</span><span class="artist-timeline__stat-label">Chart Entries</span></div>
       <div class="artist-timeline__stat"><span class="artist-timeline__stat-value">${stats.totalWins}</span><span class="artist-timeline__stat-label">Wins</span></div>
       <div class="artist-timeline__stat"><span class="artist-timeline__stat-value">${stats.releaseCount}</span><span class="artist-timeline__stat-label">Songs</span></div>
     `;
@@ -458,8 +469,13 @@ export class ArtistTimeline {
       const showText = document.createElement("a");
       showText.className = "artist-timeline__show-text artist-timeline__show-link";
       showText.textContent = `${SOURCE_LABELS[entry.source] ?? entry.source} Ep.${entry.episode}`;
-      showText.href = "#";
+      showText.href = this.episodeUrl
+        ? this.episodeUrl(entry.source, entry.episode, entry.date)
+        : "#";
       showText.addEventListener("click", (e) => {
+        // Let the browser handle modifier/middle clicks natively (open in a
+        // new tab/window) via the real href. Only intercept a plain click.
+        if (isNewTabIntent(e)) return;
         e.preventDefault();
         if (this.onEpisodeClick) {
           this.onEpisodeClick(entry.source, entry.episode, entry.date);

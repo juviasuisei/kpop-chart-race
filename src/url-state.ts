@@ -16,6 +16,7 @@ export const DEFAULT_FILTER_VALUES: Partial<FilterState> = {
   displayMode: "songs",
   zoom: 10,
   metric: "points",
+  episodeSort: "desc",
 };
 
 /** Encode the current filter state into a URL hash (e.g. "#view=yearly&zoom=all"). */
@@ -28,6 +29,8 @@ export function encodeStateToHash(state: FilterState): string {
   if (state.displayMode !== DEFAULT_FILTER_VALUES.displayMode) params.push(`mode=${state.displayMode}`);
   if (state.zoom !== DEFAULT_FILTER_VALUES.zoom) params.push(`zoom=${state.zoom}`);
   if (state.metric !== DEFAULT_FILTER_VALUES.metric) params.push(`metric=${state.metric}`);
+  // Episode-browser sort direction (episodes view only); "desc" is the default, omitted.
+  if (state.episodeSort === "asc") params.push(`order=${state.episodeSort}`);
   // Playback date (race/line view only): a shareable pointer to a specific day.
   if (state.date) params.push(`date=${state.date}`);
   // Value-axis detail zoom (race/line view only); 100% is the default, omitted.
@@ -75,6 +78,11 @@ export function parseHashToState(hash: string): Partial<FilterState> {
       case "metric":
         if (value === "points" || value === "wins" || value === "appearances") {
           partial.metric = value;
+        }
+        break;
+      case "order":
+        if (value === "asc" || value === "desc") {
+          partial.episodeSort = value;
         }
         break;
       case "date":

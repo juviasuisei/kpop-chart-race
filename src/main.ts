@@ -333,6 +333,7 @@ async function main(): Promise<void> {
       episodeContainer.style.display = "";
       const state = filterStateManager.getState();
       episodeBrowser.mount(episodeContainer, dataStore);
+      episodeBrowser.setEpisodeSort(state.episodeSort);
       episodeBrowser.setSourceFilter(state.source);
       episodeBrowser.setGenerationFilter(state.generation);
       episodeBrowser.setArtistFilter(state.artist);
@@ -403,6 +404,7 @@ async function main(): Promise<void> {
 
     if (currentView === "episodes") {
       switchView("episodes");
+      episodeBrowser.setEpisodeSort(state.episodeSort);
       episodeBrowser.setSourceFilter(state.source);
       episodeBrowser.setGenerationFilter(state.generation);
       episodeBrowser.setArtistFilter(state.artist);

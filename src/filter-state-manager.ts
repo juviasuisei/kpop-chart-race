@@ -17,6 +17,7 @@ const DEFAULT_STATE: FilterState = {
   zoom: 10,
   view: "line",
   metric: "points",
+  episodeSort: "desc",
 };
 
 /**

@@ -125,6 +125,33 @@ describe("EpisodeBrowser", () => {
     browser.unmount();
   });
 
+  it("re-sorts episodes ascending (oldest first) when setEpisodeSort('asc') is called", () => {
+    const browser = new EpisodeBrowser();
+    browser.mount(container, dataStore);
+
+    browser.setEpisodeSort("asc");
+    const dates = container.querySelectorAll(".episode-card__date");
+    const dateTexts = Array.from(dates).map(el => el.textContent);
+    // Ascending → Jan 7 (oldest) first, Jan 14 last.
+    expect(dateTexts[0]).toBe("2024-01-07");
+    expect(dateTexts[dateTexts.length - 1]).toBe("2024-01-14");
+
+    browser.unmount();
+  });
+
+  it("returns to descending (most recent first) after toggling back to 'desc'", () => {
+    const browser = new EpisodeBrowser();
+    browser.mount(container, dataStore);
+
+    browser.setEpisodeSort("asc");
+    browser.setEpisodeSort("desc");
+    const dates = container.querySelectorAll(".episode-card__date");
+    const dateTexts = Array.from(dates).map(el => el.textContent);
+    expect(dateTexts[0]).toBe("2024-01-14");
+
+    browser.unmount();
+  });
+
   it("shows winner with crown icon on #1 rank entry", () => {
     const browser = new EpisodeBrowser();
     browser.mount(container, dataStore);

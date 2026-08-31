@@ -86,6 +86,13 @@ export interface FilterState {
   view: "race" | "episodes" | "yearly" | "line" | "artist-timeline";
   metric: "points" | "wins" | "appearances"; // yearly-view only
   /**
+   * Sort direction for the episode browser, by episode date. "desc" (most
+   * recent first) is the default; "asc" flips to oldest first. Episode-view
+   * only — the toggle occupies the toolbar slot the Songs/Artists switch uses
+   * in the race/yearly views.
+   */
+  episodeSort: "desc" | "asc";
+  /**
    * Playback position as a date string (YYYY-MM-DD), for a shareable link to a
    * specific frame of the race. Not a filter — it's the current day of the line
    * chart. Only encoded in the race/line view. On load we snap to the nearest

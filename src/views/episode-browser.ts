@@ -89,6 +89,7 @@ export class EpisodeBrowser {
   private sourceFilter = "all";
   private generationFilter: number | "all" = "all";
   private artistFilter = "all";
+  private episodeSort: "desc" | "asc" = "desc";
   private displayedCount = 0;
   private scrollContainer: HTMLElement | null = null;
   private scrollHandler: (() => void) | null = null;
@@ -129,6 +130,19 @@ export class EpisodeBrowser {
   setArtistFilter(artist: string): void {
     if (this.artistFilter === artist) return;
     this.artistFilter = artist;
+    this.applyFilter();
+    this.render();
+  }
+
+  /**
+   * Set the episode date sort direction ("desc" = most recent first, the
+   * default; "asc" = oldest first). Re-sorts the extracted episodes and
+   * re-renders. No-op if unchanged.
+   */
+  setEpisodeSort(order: "desc" | "asc"): void {
+    if (this.episodeSort === order) return;
+    this.episodeSort = order;
+    this.sortEpisodes();
     this.applyFilter();
     this.render();
   }
@@ -191,8 +205,21 @@ export class EpisodeBrowser {
       });
     }
 
-    // Sort by date desc (most recent first)
-    this.episodes.sort((a, b) => b.date.localeCompare(a.date));
+    // Order episodes by date per the current sort direction (default: most
+    // recent first).
+    this.sortEpisodes();
+  }
+
+  /**
+   * Sort the extracted episodes by date according to `episodeSort`:
+   * "desc" (default) puts the most recent first, "asc" the oldest first.
+   */
+  private sortEpisodes(): void {
+    this.episodes.sort((a, b) =>
+      this.episodeSort === "asc"
+        ? a.date.localeCompare(b.date)
+        : b.date.localeCompare(a.date),
+    );
   }
 
   /**

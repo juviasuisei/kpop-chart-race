@@ -25,6 +25,7 @@ const DEFAULT_STATE: FilterState = {
   displayMode: "songs",
   zoom: 10,
   metric: "points",
+  episodeSort: "desc",
 };
 
 describe("encode/parse round-trip", () => {
@@ -88,6 +89,35 @@ describe("encode/parse round-trip", () => {
     expect(parseHashToState("#detail=0")).toEqual({});
     expect(parseHashToState("#detail=150")).toEqual({});
     expect(parseHashToState("#detail=abc")).toEqual({});
+  });
+
+  it("omits the episode sort at the 'desc' default", () => {
+    expect(encodeStateToHash({ ...DEFAULT_STATE, episodeSort: "desc" })).toBe("");
+  });
+
+  it("encodes a non-default (asc) episode sort as order=asc", () => {
+    expect(encodeStateToHash({ ...DEFAULT_STATE, episodeSort: "asc" })).toBe("#order=asc");
+  });
+
+  it("parses order=asc back to episodeSort", () => {
+    expect(parseHashToState("#order=asc")).toEqual({ episodeSort: "asc" });
+  });
+
+  it("parses an explicit order=desc back to episodeSort", () => {
+    expect(parseHashToState("#order=desc")).toEqual({ episodeSort: "desc" });
+  });
+
+  it("ignores an invalid order value", () => {
+    expect(parseHashToState("#order=sideways")).toEqual({});
+  });
+
+  it("round-trips the episode sort alongside the episodes view", () => {
+    const hash = encodeStateToHash({ ...DEFAULT_STATE, view: "episodes", episodeSort: "asc" });
+    expect(hash).toContain("view=episodes");
+    expect(hash).toContain("order=asc");
+    const parsed = parseHashToState(hash);
+    expect(parsed.view).toBe("episodes");
+    expect(parsed.episodeSort).toBe("asc");
   });
 });
 

@@ -149,6 +149,17 @@ export class Toolbar {
       displayModeControl?.classList.remove("toolbar__control--hidden");
     }
 
+    // Episode date-sort (Asc/Desc) toggle is meaningful only in the episode
+    // browser, and takes the display-mode toggle's slot there.
+    const episodeSortControl = this.wrapper.querySelector(
+      '[data-control="episode-sort"]',
+    ) as HTMLElement | null;
+    if (view === "episodes") {
+      episodeSortControl?.classList.remove("toolbar__control--hidden");
+    } else {
+      episodeSortControl?.classList.add("toolbar__control--hidden");
+    }
+
     // Artist filter visibility. In Songs mode it always shows (hard filter).
     // In Artists mode it acts as a "pin" (highlight the selected artist) rather
     // than a hard filter, so it stays visible in race/line and in yearly at the
@@ -240,6 +251,18 @@ export class Toolbar {
       labels[1]?.classList.toggle("view-switcher__label--active", isSongs);
     }
 
+    // Episode sort toggle (asc/desc)
+    const episodeSortControl = this.wrapper.querySelector('[data-control="episode-sort"]') as HTMLElement | null;
+    if (episodeSortControl) {
+      const track = episodeSortControl.querySelector(".view-switcher__track");
+      const labels = episodeSortControl.querySelectorAll(".view-switcher__label");
+      const isDesc = state.episodeSort === "desc";
+      track?.classList.toggle("view-switcher__track--on", isDesc);
+      // labels[0] = Asc, labels[1] = Desc
+      labels[0]?.classList.toggle("view-switcher__label--active", !isDesc);
+      labels[1]?.classList.toggle("view-switcher__label--active", isDesc);
+    }
+
     // View buttons
     this.setViewMode(state.view);
 
@@ -315,7 +338,10 @@ export class Toolbar {
   }
 
   private createControls(): HTMLElement[] {
-    // DOM order (left-to-right): view (segmented), generation, source, artist, metric, zoom, display-mode
+    // DOM order (left-to-right): view (segmented), generation, source, artist,
+    // metric, zoom, display-mode, episode-sort. The episode-sort toggle sits in
+    // the same trailing slot as display-mode; exactly one of the two shows at a
+    // time (episode-sort in the episodes view, display-mode elsewhere).
     return [
       this.createViewControl(),
       this.createGenerationControl(),
@@ -324,6 +350,7 @@ export class Toolbar {
       this.createMetricControl(),
       this.createZoomControl(),
       this.createDisplayModeControl(),
+      this.createEpisodeSortControl(),
     ];
   }
 
@@ -748,6 +775,52 @@ export class Toolbar {
       songsLabel.classList.toggle("view-switcher__label--active", !isSongs);
       artistsLabel.classList.toggle("view-switcher__label--active", isSongs);
       this.filterState.update({ displayMode: newMode });
+    };
+
+    group.addEventListener("click", toggle);
+    group.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); }
+    });
+
+    return group;
+  }
+
+  private createEpisodeSortControl(): HTMLElement {
+    // Episode-browser date sort. Mirrors the display-mode switch and occupies
+    // the same trailing slot (shown only in the episodes view). "Desc" (newest
+    // first) is the default and maps to the switch's "on" position.
+    const group = document.createElement("div");
+    group.setAttribute("data-control", "episode-sort");
+    group.className = "toolbar__control view-switcher";
+    group.setAttribute("role", "switch");
+    group.setAttribute("aria-label", "Episode sort order");
+    group.tabIndex = 0;
+
+    const ascLabel = document.createElement("span");
+    ascLabel.className = "view-switcher__label";
+    ascLabel.textContent = "Asc";
+
+    const track = document.createElement("div");
+    track.className = "view-switcher__track view-switcher__track--on";
+    const thumb = document.createElement("div");
+    thumb.className = "view-switcher__thumb";
+    track.appendChild(thumb);
+
+    const descLabel = document.createElement("span");
+    descLabel.className = "view-switcher__label view-switcher__label--active";
+    descLabel.textContent = "Desc";
+
+    group.appendChild(ascLabel);
+    group.appendChild(track);
+    group.appendChild(descLabel);
+
+    const toggle = () => {
+      const isDesc = track.classList.contains("view-switcher__track--on");
+      const newOrder = isDesc ? "asc" : "desc";
+      track.classList.toggle("view-switcher__track--on", !isDesc);
+      descLabel.classList.toggle("view-switcher__label--active", !isDesc);
+      ascLabel.classList.toggle("view-switcher__label--active", isDesc);
+      this.filterState.update({ episodeSort: newOrder });
     };
 
     group.addEventListener("click", toggle);

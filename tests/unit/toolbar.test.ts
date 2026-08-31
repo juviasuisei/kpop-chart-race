@@ -54,7 +54,7 @@ describe('Toolbar — Rendering and Control Order', () => {
     // In DOM order (left-to-right reading), this means:
     // Generation, Source, Points/Wins, View, Zoom, Songs/Artists
     const controls = container.querySelectorAll('[data-control]');
-    expect(controls.length).toBeGreaterThanOrEqual(7);
+    expect(controls.length).toBeGreaterThanOrEqual(8);
 
     const order = Array.from(controls).map(el => el.getAttribute('data-control'));
     expect(order).toEqual([
@@ -65,6 +65,7 @@ describe('Toolbar — Rendering and Control Order', () => {
       'metric',
       'zoom',
       'display-mode',
+      'episode-sort',
     ]);
 
     toolbar.unmount();
@@ -311,6 +312,97 @@ describe('Toolbar — Display Mode Toggle Visibility', () => {
     filterState.update({ view: 'line' });
     displayControl = container.querySelector('[data-control="display-mode"]') as HTMLElement;
     expect(isHidden(displayControl)).toBe(false);
+
+    toolbar.unmount();
+  });
+
+  // The Asc/Desc episode-sort toggle is the mirror image of display-mode: it
+  // only appears in the episodes view and occupies the same trailing slot.
+
+  it('episode-sort toggle is hidden in race view', () => {
+    const { toolbar, filterState } = createToolbar();
+    toolbar.mount(container);
+    filterState.update({ view: 'line' });
+
+    const sortControl = container.querySelector('[data-control="episode-sort"]') as HTMLElement;
+    expect(isHidden(sortControl)).toBe(true);
+
+    toolbar.unmount();
+  });
+
+  it('episode-sort toggle is hidden in yearly and artist-timeline views', () => {
+    const { toolbar, filterState } = createToolbar();
+    toolbar.mount(container);
+
+    filterState.update({ view: 'yearly' });
+    let sortControl = container.querySelector('[data-control="episode-sort"]') as HTMLElement;
+    expect(isHidden(sortControl)).toBe(true);
+
+    filterState.update({ view: 'artist-timeline' });
+    sortControl = container.querySelector('[data-control="episode-sort"]') as HTMLElement;
+    expect(isHidden(sortControl)).toBe(true);
+
+    toolbar.unmount();
+  });
+
+  it('episode-sort toggle is visible in episodes view (where display-mode is hidden)', () => {
+    const { toolbar, filterState } = createToolbar();
+    toolbar.mount(container);
+    filterState.update({ view: 'episodes' });
+
+    const sortControl = container.querySelector('[data-control="episode-sort"]') as HTMLElement;
+    const displayControl = container.querySelector('[data-control="display-mode"]') as HTMLElement;
+    expect(isHidden(sortControl)).toBe(false);
+    // Exactly one of the two trailing toggles shows at a time.
+    expect(isHidden(displayControl)).toBe(true);
+
+    toolbar.unmount();
+  });
+
+  it('defaults to Desc (the switch "on" position) and reflects state', () => {
+    const { toolbar, filterState } = createToolbar();
+    toolbar.mount(container);
+    filterState.update({ view: 'episodes' });
+
+    const sortControl = container.querySelector('[data-control="episode-sort"]') as HTMLElement;
+    const track = sortControl.querySelector('.view-switcher__track') as HTMLElement;
+    const labels = sortControl.querySelectorAll('.view-switcher__label');
+    // Desc default → track on, "Desc" label (index 1) active.
+    expect(track.classList.contains('view-switcher__track--on')).toBe(true);
+    expect(labels[1].classList.contains('view-switcher__label--active')).toBe(true);
+    expect(labels[0].classList.contains('view-switcher__label--active')).toBe(false);
+
+    toolbar.unmount();
+  });
+
+  it('clicking the toggle flips episodeSort between desc and asc', () => {
+    const { toolbar, filterState } = createToolbar();
+    toolbar.mount(container);
+    filterState.update({ view: 'episodes' });
+
+    const sortControl = container.querySelector('[data-control="episode-sort"]') as HTMLElement;
+    expect(filterState.getState().episodeSort).toBe('desc');
+
+    sortControl.click();
+    expect(filterState.getState().episodeSort).toBe('asc');
+
+    sortControl.click();
+    expect(filterState.getState().episodeSort).toBe('desc');
+
+    toolbar.unmount();
+  });
+
+  it('reflects an asc episodeSort set on state (labels + track flipped)', () => {
+    const { toolbar, filterState } = createToolbar();
+    toolbar.mount(container);
+    filterState.update({ view: 'episodes', episodeSort: 'asc' });
+
+    const sortControl = container.querySelector('[data-control="episode-sort"]') as HTMLElement;
+    const track = sortControl.querySelector('.view-switcher__track') as HTMLElement;
+    const labels = sortControl.querySelectorAll('.view-switcher__label');
+    expect(track.classList.contains('view-switcher__track--on')).toBe(false);
+    expect(labels[0].classList.contains('view-switcher__label--active')).toBe(true); // Asc
+    expect(labels[1].classList.contains('view-switcher__label--active')).toBe(false); // Desc
 
     toolbar.unmount();
   });

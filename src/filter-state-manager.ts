@@ -21,6 +21,28 @@ const DEFAULT_STATE: FilterState = {
 };
 
 /**
+ * Produce the full reset state: the default filter values and the default
+ * playback date. The playback date resets to `null` — meaning "no date
+ * pinned," which the app interprets as "start at the latest available date."
+ * This keeps the URL clean so a refresh always picks up the current latest
+ * date rather than a stale snapshot from the last reset.
+ *
+ * The playback date is tracked outside FilterState (it's a view-level concern,
+ * not a filter), so `FilterStateManager.reset()` alone doesn't clear it. This
+ * pure helper captures the "what should a complete reset look like?" contract
+ * so both the wiring code and tests can agree on the answer.
+ */
+export function buildFullResetState(): {
+  filters: FilterState;
+  playbackDate: null;
+} {
+  return {
+    filters: { ...DEFAULT_STATE },
+    playbackDate: null,
+  };
+}
+
+/**
  * Decide whether an implicitly-set artist filter should be cleared when the
  * app settles on `view`. An artist set by drilling in (clicking a name to open
  * the timeline) is "implicit" and must not linger as a filter once the user

@@ -1,4 +1,4 @@
-import { FilterStateManager, shouldClearImplicitArtist, shouldClearImplicitSource } from '../../src/filter-state-manager.ts';
+import { FilterStateManager, shouldClearImplicitArtist, shouldClearImplicitSource, buildFullResetState } from '../../src/filter-state-manager.ts';
 import type { FilterState } from '../../src/types.ts';
 import { EventBus } from '../../src/event-bus.ts';
 
@@ -430,5 +430,37 @@ describe('shouldClearImplicitSource', () => {
 
   it('is a no-op when there is no source filter', () => {
     expect(shouldClearImplicitSource('yearly', 'all', false)).toBe(false);
+  });
+});
+
+describe('buildFullResetState()', () => {
+  it('returns the default filter state with null playbackDate', () => {
+    const { filters, playbackDate } = buildFullResetState();
+
+    expect(filters.displayMode).toBe('songs');
+    expect(filters.generation).toBe('all');
+    expect(filters.source).toBe('all');
+    expect(filters.artist).toBe('all');
+    expect(filters.zoom).toBe(10);
+    expect(filters.view).toBe('line');
+    expect(filters.metric).toBe('points');
+    expect(filters.episodeSort).toBe('desc');
+    // The playback date resets to null — "no date pinned" — so the URL stays
+    // clean and a refresh always starts at the latest available date.
+    expect(playbackDate).toBeNull();
+  });
+
+  it('does not include a date field in the filter state', () => {
+    // The playback date is a separate concern — it must not leak into the
+    // filter state, which would cause it to persist as a filter.
+    const { filters } = buildFullResetState();
+    expect(filters.date).toBeUndefined();
+  });
+
+  it('returns a fresh object each call (no shared mutation)', () => {
+    const a = buildFullResetState();
+    const b = buildFullResetState();
+    expect(a.filters).not.toBe(b.filters);
+    expect(a.filters).toEqual(b.filters);
   });
 });

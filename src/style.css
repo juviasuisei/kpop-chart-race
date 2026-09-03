@@ -1316,7 +1316,7 @@ body {
   justify-content: center;
   overflow: hidden;
   box-sizing: border-box;
-  border: 1.5px solid rgba(255, 255, 255, 0.7);
+  border: 0.5px solid rgba(255, 255, 255, 0.7);
   cursor: default;
   transition: opacity 0.15s;
   /* Artists-mode cells are rendered as <a> for native new-tab support.

@@ -119,8 +119,24 @@ async function main(): Promise<void> {
   titleText.textContent = "Korean Chart Explorer";
   titleText.title = "Reset to the default view";
   // Clicking the title resets to the default view: race, no filters, songs mode.
+  // The playback date lives outside the filter state (in currentPlaybackDate),
+  // so reset() alone leaves the race parked on the current day and writeHash()
+  // re-persists it. We null currentPlaybackDate BEFORE reset() so that the
+  // synchronous writeHash() triggered by filter:change sees null and omits the
+  // date param from the URL. A refresh then always starts at the latest date
+  // (the app's default when no date is in the URL) rather than a stale snapshot.
+  // We then seek the chart + scrubber directly, bypassing date:change to avoid
+  // re-setting currentPlaybackDate.
   titleText.addEventListener("click", () => {
+    currentPlaybackDate = null;
     filterStateManager.reset();
+    const dates = dataStore.dates;
+    if (dates.length > 0) {
+      const lastDate = dates[dates.length - 1];
+      const index = lineChart.getDateIndex(lastDate);
+      if (index >= 0) lineChart.setDateIndex(index);
+      playbackController.syncTo(lastDate);
+    }
   });
   const versionBadge = document.createElement("span");
   versionBadge.className = "chart-race__version-badge";
@@ -644,9 +660,18 @@ async function main(): Promise<void> {
   const writeHash = (): void => {
     const state = filterStateManager.getState();
     const inRaceView = state.view === "line" || state.view === "race";
+    // Only encode the playback date when it differs from the default (the last
+    // available date). When the user is sitting on the latest date — whether
+    // from a fresh load, title reset, or natural playback end — omitting the
+    // param keeps the URL clean so a future refresh always starts at whatever
+    // the latest date is at that time, rather than a stale snapshot.
+    const lastDate = dataStore.dates.length > 0
+      ? dataStore.dates[dataStore.dates.length - 1]
+      : null;
+    const isDefaultDate = !currentPlaybackDate || currentPlaybackDate === lastDate;
     const withDate: FilterState = {
       ...state,
-      date: inRaceView && currentPlaybackDate ? currentPlaybackDate : undefined,
+      date: inRaceView && !isDefaultDate ? currentPlaybackDate! : undefined,
       detail: inRaceView ? currentDetailPct : undefined,
     };
     const newHash = encodeStateToHash(withDate);

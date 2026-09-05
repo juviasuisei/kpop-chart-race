@@ -110,7 +110,7 @@ export class Toolbar {
   }
 
   /** Show/hide yearly-only controls (Points/Wins metric toggle) */
-  setViewMode(view: "race" | "episodes" | "yearly" | "line" | "artist-timeline"): void {
+  setViewMode(view: "race" | "episodes" | "mvs" | "yearly" | "line" | "artist-timeline"): void {
     if (!this.wrapper) return;
     const metricControl = this.wrapper.querySelector(
       '[data-control="metric"]',
@@ -143,21 +143,33 @@ export class Toolbar {
     const displayModeControl = this.wrapper.querySelector(
       '[data-control="display-mode"]',
     ) as HTMLElement | null;
-    if (view === "episodes" || view === "artist-timeline") {
+    if (view === "episodes" || view === "mvs" || view === "artist-timeline") {
       displayModeControl?.classList.add("toolbar__control--hidden");
     } else {
       displayModeControl?.classList.remove("toolbar__control--hidden");
     }
 
-    // Episode date-sort (Asc/Desc) toggle is meaningful only in the episode
-    // browser, and takes the display-mode toggle's slot there.
+    // Date-sort (Asc/Desc) toggle is meaningful only in the episode browser
+    // and the MV timeline (where it orders date groups), and takes the
+    // display-mode toggle's slot there.
     const episodeSortControl = this.wrapper.querySelector(
       '[data-control="episode-sort"]',
     ) as HTMLElement | null;
-    if (view === "episodes") {
+    if (view === "episodes" || view === "mvs") {
       episodeSortControl?.classList.remove("toolbar__control--hidden");
     } else {
       episodeSortControl?.classList.add("toolbar__control--hidden");
+    }
+
+    // Source filter has no meaning for MVs (a music video isn't tied to a chart
+    // show), so hide it in the MV timeline. It stays visible everywhere else.
+    const sourceControl = this.wrapper.querySelector(
+      '[data-control="source"]',
+    ) as HTMLElement | null;
+    if (view === "mvs") {
+      sourceControl?.classList.add("toolbar__control--hidden");
+    } else {
+      sourceControl?.classList.remove("toolbar__control--hidden");
     }
 
     // Artist filter visibility. In Songs mode it always shows (hard filter).
@@ -660,6 +672,7 @@ export class Toolbar {
 
     const views: { value: string; label: string; filterValue: string }[] = [
       { value: "race", label: "Race", filterValue: "line" },
+      { value: "mvs", label: "MVs", filterValue: "mvs" },
       { value: "episodes", label: "Episodes", filterValue: "episodes" },
       { value: "artist-timeline", label: "Artist", filterValue: "artist-timeline" },
       { value: "yearly", label: "Yearly", filterValue: "yearly" },
@@ -680,7 +693,7 @@ export class Toolbar {
         buttons.forEach((b) => b.classList.remove("toolbar__view-btn--active"));
         btn.classList.add("toolbar__view-btn--active");
 
-        const newView = v.filterValue as "line" | "episodes" | "yearly" | "artist-timeline";
+        const newView = v.filterValue as "line" | "episodes" | "mvs" | "yearly" | "artist-timeline";
         this.filterState.update({ view: newView });
         this.setViewMode(newView);
         this.dismissDrawer();

@@ -83,13 +83,14 @@ export interface FilterState {
   source: string; // ChartSource | "all"
   artist: string; // artist ID | "all"
   zoom: ZoomLevel; // 10 | "all"
-  view: "race" | "episodes" | "yearly" | "line" | "artist-timeline";
+  view: "race" | "episodes" | "mvs" | "yearly" | "line" | "artist-timeline";
   metric: "points" | "wins" | "appearances"; // yearly-view only
   /**
-   * Sort direction for the episode browser, by episode date. "desc" (most
-   * recent first) is the default; "asc" flips to oldest first. Episode-view
-   * only — the toggle occupies the toolbar slot the Songs/Artists switch uses
-   * in the race/yearly views.
+   * Sort direction by date, shared by the episode browser (episode date) and
+   * the MV browser (MV release date). "desc" (most recent first) is the
+   * default; "asc" flips to oldest first. Used only in those two views — the
+   * toggle occupies the toolbar slot the Songs/Artists switch uses in the
+   * race/yearly views.
    */
   episodeSort: "desc" | "asc";
   /**

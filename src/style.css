@@ -2683,3 +2683,149 @@ body {
     padding: 12px;
   }
 }
+
+/* ===== MV Timeline (MV Browser) ===== */
+
+.mv-browser-container {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  height: calc(100vh - 120px);
+}
+
+.mv-browser {
+  padding: 16px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.mv-browser__empty {
+  padding: 48px 16px;
+  text-align: center;
+  color: #999;
+  font-size: 0.9rem;
+}
+
+.mv-card {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  margin-bottom: 16px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.mv-card__header {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.mv-card__date {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #213547;
+  font-variant-numeric: tabular-nums;
+}
+
+.mv-card__count {
+  font-size: 0.72rem;
+  color: #999;
+  margin-left: auto;
+}
+
+.mv-card__list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.mv-card__item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mv-card__item-info {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  color: #213547;
+  font-size: 0.82rem;
+}
+
+.mv-card__artist-link {
+  color: #0072B2;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.mv-card__artist-link:hover {
+  text-decoration: underline;
+}
+
+.mv-card__item-score {
+  margin-left: auto;
+  font-weight: 600;
+  color: #666;
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+  cursor: help;
+  position: relative;
+  white-space: nowrap;
+}
+
+/* Instant CSS tooltip for the total-score badge (mirrors the episode view). */
+.mv-card__item-score::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  right: 0;
+  z-index: 300;
+  width: max-content;
+  max-width: 220px;
+  padding: 6px 8px;
+  background: #213547;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 500;
+  font-style: normal;
+  border-radius: 6px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.08s ease;
+  pointer-events: none;
+}
+
+.mv-card__item-score:hover::after,
+.mv-card__item-score:focus-visible::after {
+  opacity: 1;
+  visibility: visible;
+}
+
+.mv-card__embed {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.mv-card__embed iframe {
+  width: 100%;
+  aspect-ratio: 16/9;
+  border: none;
+  border-radius: 8px;
+}
+
+.mv-card__watch-link {
+  align-self: flex-start;
+  color: #0072B2;
+  text-decoration: none;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.mv-card__watch-link:hover {
+  text-decoration: underline;
+}

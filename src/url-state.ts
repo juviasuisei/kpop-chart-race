@@ -50,7 +50,7 @@ export function parseHashToState(hash: string): Partial<FilterState> {
     if (!key || !value) continue;
     switch (key) {
       case "view":
-        if (["line", "race", "yearly", "episodes", "artist-timeline"].includes(value)) {
+        if (["line", "race", "yearly", "episodes", "mvs", "artist-timeline"].includes(value)) {
           partial.view = value as FilterState["view"];
         }
         break;

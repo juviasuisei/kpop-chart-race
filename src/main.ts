@@ -20,6 +20,7 @@ import { ScreenReaderPacedMode } from "./screen-reader-paced-mode.ts";
 import { YearlyView } from "./yearly-view.ts";
 import { LineChartController } from "./views/line-chart-controller.ts";
 import { EpisodeBrowser } from "./views/episode-browser.ts";
+import { MvBrowser } from "./views/mv-browser.ts";
 import { ArtistTimeline } from "./views/artist-timeline.ts";
 import { TimeNavigation } from "./canvas/time-navigation.ts";
 import { SearchOverlay } from "./canvas/search-overlay.ts";
@@ -256,6 +257,27 @@ async function main(): Promise<void> {
   episodeContainer.style.display = "none";
   app.appendChild(episodeContainer);
 
+  // --- MV Browser ---
+  const mvBrowser = new MvBrowser();
+  const mvContainer = document.createElement("div");
+  mvContainer.className = "mv-browser-container";
+  mvContainer.style.display = "none";
+  app.appendChild(mvContainer);
+
+  // Drill-in from an MV artist link → open that artist's timeline. Implicit
+  // filter (not sticky), same convention as the episode browser / yearly view.
+  mvBrowser.onArtistClick = (artistId: string) => {
+    filterStateManager.update(
+      { artist: artistId, view: "artist-timeline" },
+      { artistExplicit: false },
+    );
+  };
+  mvBrowser.artistUrl = (artistId: string) =>
+    buildShareableUrl(
+      { artist: artistId, view: "artist-timeline" },
+      filterStateManager.getState(),
+    );
+
   // --- Artist Timeline ---
   const artistTimeline = new ArtistTimeline();
   const artistTimelineContainer = document.createElement("div");
@@ -284,6 +306,7 @@ async function main(): Promise<void> {
       const containers = [
         app!.querySelector(".yearly-view"),
         episodeContainer,
+        mvContainer,
         artistTimelineContainer,
         chartContainer,
       ];
@@ -296,7 +319,7 @@ async function main(): Promise<void> {
   }
 
   // --- Helper: switch between line, yearly, episodes, and artist-timeline views ---
-  function switchView(mode: "line" | "yearly" | "episodes" | "artist-timeline"): void {
+  function switchView(mode: "line" | "yearly" | "episodes" | "mvs" | "artist-timeline"): void {
     // Scroll to top only on a genuine view change (callers pass "line" for the
     // race view, so no extra normalization is needed here).
     const viewChanged = renderedView !== mode;
@@ -308,8 +331,10 @@ async function main(): Promise<void> {
       }
       chartContainer.style.display = "none";
       episodeContainer.style.display = "none";
+      mvContainer.style.display = "none";
       artistTimelineContainer.style.display = "none";
       episodeBrowser.unmount();
+      mvBrowser.unmount();
       artistTimeline.unmount();
       const playbackControls = app!.querySelector(".playback-controls") as HTMLElement | null;
       if (playbackControls) playbackControls.style.display = "none";
@@ -341,7 +366,9 @@ async function main(): Promise<void> {
       }
       yearlyView.unmount();
       artistTimeline.unmount();
+      mvBrowser.unmount();
       chartContainer.style.display = "none";
+      mvContainer.style.display = "none";
       artistTimelineContainer.style.display = "none";
       const playbackControls = app!.querySelector(".playback-controls") as HTMLElement | null;
       if (playbackControls) playbackControls.style.display = "none";
@@ -365,13 +392,34 @@ async function main(): Promise<void> {
           { artist: artistId, view: "artist-timeline" },
           filterStateManager.getState(),
         );
+    } else if (mode === "mvs") {
+      if (playbackController.isPlaying()) {
+        playbackController.pause();
+      }
+      yearlyView.unmount();
+      episodeBrowser.unmount();
+      artistTimeline.unmount();
+      chartContainer.style.display = "none";
+      episodeContainer.style.display = "none";
+      artistTimelineContainer.style.display = "none";
+      const playbackControls = app!.querySelector(".playback-controls") as HTMLElement | null;
+      if (playbackControls) playbackControls.style.display = "none";
+
+      mvContainer.style.display = "";
+      const state = filterStateManager.getState();
+      mvBrowser.mount(mvContainer, dataStore);
+      mvBrowser.setDateSort(state.episodeSort);
+      mvBrowser.setGenerationFilter(state.generation);
+      mvBrowser.setArtistFilter(state.artist);
     } else if (mode === "artist-timeline") {
       if (playbackController.isPlaying()) {
         playbackController.pause();
       }
       yearlyView.unmount();
       episodeBrowser.unmount();
+      mvBrowser.unmount();
       episodeContainer.style.display = "none";
+      mvContainer.style.display = "none";
       chartContainer.style.display = "none";
       const playbackControls = app!.querySelector(".playback-controls") as HTMLElement | null;
       if (playbackControls) playbackControls.style.display = "none";
@@ -388,8 +436,10 @@ async function main(): Promise<void> {
     } else {
       yearlyView.unmount();
       episodeBrowser.unmount();
+      mvBrowser.unmount();
       artistTimeline.unmount();
       episodeContainer.style.display = "none";
+      mvContainer.style.display = "none";
       artistTimelineContainer.style.display = "none";
       chartContainer.style.display = "";
       const playbackControls = app!.querySelector(".playback-controls") as HTMLElement | null;
@@ -424,6 +474,16 @@ async function main(): Promise<void> {
       episodeBrowser.setSourceFilter(state.source);
       episodeBrowser.setGenerationFilter(state.generation);
       episodeBrowser.setArtistFilter(state.artist);
+      return;
+    }
+
+    if (currentView === "mvs") {
+      switchView("mvs");
+      // The date-sort toggle (episodeSort) reorders MV date groups; artist and
+      // generation filters narrow the MVs. Source has no meaning for MVs.
+      mvBrowser.setDateSort(state.episodeSort);
+      mvBrowser.setGenerationFilter(state.generation);
+      mvBrowser.setArtistFilter(state.artist);
       return;
     }
 
@@ -704,6 +764,7 @@ async function main(): Promise<void> {
     race: "Race",
     yearly: "Yearly Summary",
     episodes: "Episode Browser",
+    mvs: "MV Timeline",
     "artist-timeline": "Artist Timeline",
   };
 

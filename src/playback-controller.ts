@@ -146,6 +146,16 @@ export class PlaybackController {
   play(): void {
     if (this.playing) return;
 
+    // Starting playback means any prior scrub interaction is over. Clear the
+    // scrubbing flags synchronously so the playback:progress handler isn't
+    // suppressed by a still-set isScrubbing guard — otherwise, if the user
+    // clicks the scrubber to seek and immediately presses play (before the
+    // deferred scrub:end / 100ms fallback in handleScrubEnd fires), every
+    // progress frame is dropped and the thumb stays frozen at the clicked spot
+    // even though the animation is advancing.
+    this.scrubEndPending = false;
+    this.isScrubbing = false;
+
     // If at the last date, reset to the beginning before starting playback
     const isWrapping = this.currentIndex >= this.dates.length - 1;
     if (isWrapping) {

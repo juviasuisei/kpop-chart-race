@@ -273,6 +273,27 @@ describe('Smooth scrubber (fractional playback progress)', () => {
     expect(parseFloat(scrubber.value)).not.toBeCloseTo(4.0, 2);
   });
 
+  it('animates the thumb on playback:progress after seeking via the scrubber then playing', () => {
+    const scrubber = container.querySelector('.playback-controls__scrubber') as HTMLInputElement;
+
+    // User clicks the scrubber to seek to a random point. mousedown sets the
+    // scrubbing flag; input applies the new position (deferred via rAF).
+    scrubber.dispatchEvent(new Event('mousedown'));
+    scrubber.value = '1';
+    scrubber.dispatchEvent(new Event('input'));
+    // The change event only marks scrub-end as pending; isScrubbing is NOT
+    // cleared synchronously (it waits on a deferred callback / 100ms timeout).
+    scrubber.dispatchEvent(new Event('change'));
+
+    // User immediately presses play — before the deferred scrub:end fires.
+    controller.play();
+
+    // Playback advances and emits a smooth fractional position. The thumb must
+    // follow it; if isScrubbing were still set, the guard would drop this.
+    eventBus.emit('playback:progress', 2.5);
+    expect(parseFloat(scrubber.value)).toBeCloseTo(2.5, 2);
+  });
+
   it('resets the play button when the animation ends on its own (pause event)', () => {
     const btn = container.querySelector('.playback-controls__play-btn') as HTMLButtonElement;
     controller.play();

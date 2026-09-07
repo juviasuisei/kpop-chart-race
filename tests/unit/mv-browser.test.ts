@@ -340,3 +340,91 @@ describe("MvBrowser", () => {
     expect(container.innerHTML).toBe("");
   });
 });
+
+// ============================================================
+// Estimated (curve-filled) total-score styling
+// ============================================================
+
+describe("MvBrowser — estimated scores", () => {
+  let container: HTMLElement;
+
+  beforeEach(() => {
+    container = document.createElement("div");
+    document.body.appendChild(container);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(container);
+  });
+
+  /**
+   * Store with two MVs on the same date:
+   * - "Real" total is fully published (no estimated daily values)
+   * - "Est"  total includes at least one estimated (curve-filled) daily value
+   */
+  function makeStore(): DataStore {
+    const real: ParsedRelease = {
+      id: "r-real",
+      title: "Real Song",
+      artistIds: ["artist-a"],
+      dailyValues: new Map([
+        ["2024-02-05", { value: 100, source: "inkigayo", episode: 1 }],
+      ]),
+      embeds: new Map([
+        ["2024-02-01", [{ type: "mv", url: "https://youtu.be/AAAAAAAAAAA" }]],
+      ]),
+    };
+    const est: ParsedRelease = {
+      id: "r-est",
+      title: "Est Song",
+      artistIds: ["artist-b"],
+      dailyValues: new Map([
+        ["2024-02-05", { value: 40, source: "music_bank", episode: 10 }],
+        ["2024-02-12", { value: 30, source: "music_bank", episode: 11, estimated: true }],
+      ]),
+      embeds: new Map([
+        ["2024-02-01", [{ type: "mv", url: "https://youtu.be/BBBBBBBBBBB" }]],
+      ]),
+    };
+
+    const artists = new Map<string, ParsedArtist>();
+    artists.set("artist-a", mkArtist("artist-a", "Artist Alpha", 4, [real]));
+    artists.set("artist-b", mkArtist("artist-b", "Artist Beta", 4, [est]));
+
+    return {
+      artists,
+      dates: ["2024-02-01"],
+      startDate: "2024-02-01",
+      endDate: "2024-02-12",
+      firstAppearance: new Map(),
+      chartWins: new Map(),
+      releaseWinDates: new Map(),
+    };
+  }
+
+  it("flags totals containing estimated scores with the modifier class and a tooltip", () => {
+    const browser = new MvBrowser();
+    browser.mount(container, makeStore());
+
+    const est = container.querySelector(".mv-card__item-score--estimated") as HTMLElement;
+    expect(est).not.toBeNull();
+    // 40 + 30 = 70
+    expect(est.textContent).toBe("70");
+    expect(est.getAttribute("data-tooltip")).toMatch(/estimated/i);
+
+    browser.unmount();
+  });
+
+  it("does not flag fully-published totals as estimated", () => {
+    const browser = new MvBrowser();
+    browser.mount(container, makeStore());
+
+    const scores = Array.from(container.querySelectorAll(".mv-card__item-score"));
+    const real = scores.find((el) => el.textContent === "100") as HTMLElement;
+    expect(real).toBeTruthy();
+    expect(real.classList.contains("mv-card__item-score--estimated")).toBe(false);
+    expect(real.getAttribute("data-tooltip")).toBe("Total chart score across all appearances");
+
+    browser.unmount();
+  });
+});

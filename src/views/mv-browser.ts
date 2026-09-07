@@ -26,6 +26,11 @@ interface MvItem {
   url: string;
   /** Sum of all the release's daily chart values — the within-date sort key. */
   totalScore: number;
+  /**
+   * True when any of the summed daily values was estimated by the score-fill
+   * curve (not published), so the total is partly an estimate.
+   */
+  estimated: boolean;
   /** All artist IDs credited on this release. */
   artistIds: string[];
 }
@@ -132,8 +137,10 @@ export class MvBrowser {
     // Total chart score for this release: sum of every daily value across all
     // sources/episodes. This is the within-date ordering key.
     let totalScore = 0;
+    let estimated = false;
     for (const dv of release.dailyValues.values()) {
       totalScore += dv.value;
+      if (dv.estimated === true) estimated = true;
     }
 
     // One MV item per `mv` embed (keyed by its date). A release usually has a
@@ -148,6 +155,7 @@ export class MvBrowser {
           releaseTitle: release.title,
           url: embed.url,
           totalScore,
+          estimated,
           artistIds: [...release.artistIds],
         });
       }
@@ -329,7 +337,14 @@ export class MvBrowser {
     const score = document.createElement("span");
     score.className = "mv-card__item-score";
     score.textContent = item.totalScore.toLocaleString();
-    score.setAttribute("data-tooltip", "Total chart score across all appearances");
+    // Flag totals that include estimated (curve-filled) scores. Italic + muted,
+    // with a tooltip explaining why.
+    if (item.estimated) {
+      score.classList.add("mv-card__item-score--estimated");
+      score.setAttribute("data-tooltip", "Estimated — includes scores this show doesn't publish for lower ranks");
+    } else {
+      score.setAttribute("data-tooltip", "Total chart score across all appearances");
+    }
     info.appendChild(score);
 
     row.appendChild(info);

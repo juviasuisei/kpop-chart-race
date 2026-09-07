@@ -604,3 +604,87 @@ describe("ArtistTimeline — album release labels", () => {
     timeline.unmount();
   });
 });
+
+// ============================================================
+// Estimated (curve-filled) score styling
+// ============================================================
+
+describe("ArtistTimeline — estimated scores", () => {
+  let container: HTMLElement;
+
+  beforeEach(() => {
+    container = document.createElement("div");
+    document.body.appendChild(container);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(container);
+  });
+
+  /** Artist with one real score and one estimated (curve-filled) score. */
+  function artistWithEstimate(): ParsedArtist {
+    return {
+      id: "aespa",
+      name: "aespa",
+      artistType: "girl_group",
+      generation: 4,
+      logoUrl: "assets/logos/aespa.svg",
+      releases: [
+        {
+          id: "real",
+          title: "Real Song",
+          artistIds: ["aespa"],
+          dailyValues: new Map([
+            ["2024-03-01", { value: 1200, source: "music_bank", episode: 10 }],
+          ]),
+          embeds: new Map(),
+        },
+        {
+          id: "est",
+          title: "Filled Song",
+          artistIds: ["aespa"],
+          dailyValues: new Map([
+            ["2024-03-02", { value: 900, source: "music_bank", episode: 11, estimated: true }],
+          ]),
+          embeds: new Map(),
+        },
+      ],
+      albumReleases: [],
+    };
+  }
+
+  it("flags estimated scores with the modifier class and a tooltip", () => {
+    const artists = new Map([["aespa", artistWithEstimate()]]);
+    const timeline = new ArtistTimeline();
+    timeline.mount(container, createMockDataStore(artists), "aespa");
+
+    const est = container.querySelector(
+      ".artist-timeline__entry-points--estimated",
+    ) as HTMLElement;
+    expect(est).not.toBeNull();
+    expect(est.textContent).toContain("900");
+    expect(est.getAttribute("data-tooltip")).toMatch(/estimated/i);
+
+    timeline.unmount();
+  });
+
+  it("does not flag real (published) scores as estimated", () => {
+    const artists = new Map([["aespa", artistWithEstimate()]]);
+    const timeline = new ArtistTimeline();
+    timeline.mount(container, createMockDataStore(artists), "aespa");
+
+    const allPoints = Array.from(
+      container.querySelectorAll(".artist-timeline__entry-points"),
+    );
+    const real = allPoints.find((el) =>
+      el.textContent?.includes("1,200"),
+    ) as HTMLElement;
+    expect(real).toBeTruthy();
+    expect(
+      real.classList.contains("artist-timeline__entry-points--estimated"),
+    ).toBe(false);
+    expect(real.getAttribute("data-tooltip")).toBeNull();
+
+    timeline.unmount();
+  });
+});

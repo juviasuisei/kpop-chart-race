@@ -2377,8 +2377,11 @@ body {
 }
 
 /* Estimated (curve-filled) scores: italic + lighter than real scores, with an
-   instant custom tooltip. These shows don't publish scores for lower ranks. */
-.episode-card__entry-points--estimated {
+   instant custom tooltip. These shows don't publish scores for lower ranks.
+   Shared across the episode, artist, and MV timeline views. */
+.episode-card__entry-points--estimated,
+.artist-timeline__entry-points--estimated,
+.mv-card__item-score--estimated {
   font-style: italic;
   font-weight: 500;
   color: #a0a0a0;
@@ -2388,7 +2391,8 @@ body {
 
 /* Instant CSS tooltip driven by the data-tooltip attribute. Native `title`
    tooltips have a slow, non-configurable delay, so we roll our own. */
-.episode-card__entry-points--estimated::after {
+.episode-card__entry-points--estimated::after,
+.artist-timeline__entry-points--estimated::after {
   content: attr(data-tooltip);
   position: absolute;
   bottom: calc(100% + 6px);
@@ -2413,7 +2417,9 @@ body {
 }
 
 .episode-card__entry-points--estimated:hover::after,
-.episode-card__entry-points--estimated:focus-visible::after {
+.episode-card__entry-points--estimated:focus-visible::after,
+.artist-timeline__entry-points--estimated:hover::after,
+.artist-timeline__entry-points--estimated:focus-visible::after {
   opacity: 1;
   visibility: visible;
 }

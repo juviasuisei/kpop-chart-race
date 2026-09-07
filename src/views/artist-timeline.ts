@@ -42,6 +42,8 @@ const ARTIST_TYPE_LABELS: Record<string, string> = {
 interface SongLine {
   releaseTitle: string;
   value: number;
+  /** True when `value` was estimated by the score-fill curve (not published). */
+  estimated: boolean;
   isWin: boolean;
   crownLevel: number;
   /** Live performance URL for this song (if available) */
@@ -325,6 +327,7 @@ export class ArtistTimeline {
         dateShows.get(showKey)!.songs.push({
           releaseTitle: release.title,
           value: dv.value,
+          estimated: dv.estimated === true,
           isWin,
           crownLevel,
         });
@@ -513,6 +516,13 @@ export class ArtistTimeline {
         const points = document.createElement("span");
         points.className = "artist-timeline__entry-points";
         points.textContent = song.value.toLocaleString() + " pts";
+        // Flag estimated scores (Music Bank ranks 21+, M Countdown ranks 2+ don't
+        // publish real scores; these are filled by a fitted curve). Italic +
+        // muted, with a tooltip explaining why.
+        if (song.estimated) {
+          points.classList.add("artist-timeline__entry-points--estimated");
+          points.setAttribute("data-tooltip", "Estimated — this show doesn't publish a score for this rank");
+        }
         pointsWrap.appendChild(points);
 
         songRow.appendChild(pointsWrap);

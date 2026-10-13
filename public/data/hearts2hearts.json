@@ -6,21 +6,6 @@
   "debut": "2025-02-24",
   "releases": [
     {
-      "title": "FOCUS",
-      "dailyValues": {
-        "2025-10-29": { "value": 4250, "source": "show_champion", "episode": 575 },
-        "2025-10-28": { "value": 8743, "source": "the_show", "episode": 391 }
-      },
-      "embeds": {
-        "2025-10-29": [{ "type": "live_performance", "url": "https://youtu.be/ea5OsYhdLIs?si=P-CewSuErsreYIK-" }],
-        "2025-10-28": [{ "type": "live_performance", "url": "https://youtu.be/82WKTlJMJiY?si=zefXyp1JC_t3c9QU" }],
-        "2025-10-20": [
-          { "type": "release_date", "url": "https://music.apple.com/us/album/focus-the-1st-mini-album-ep/1841828519" },
-          { "type": "mv", "url": "https://youtu.be/Ur7aK4FvK-U?si=2sobk7C9frHRQfy1" }
-        ]
-      }
-    },
-    {
       "title": "The Chase",
       "dailyValues": {
         "2025-03-12": { "value": 1992, "source": "show_champion", "episode": 546 },

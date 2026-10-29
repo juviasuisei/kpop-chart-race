@@ -1,0 +1,5 @@
+# Logos that the logo whitening pipeline must skip (hand-made; do not re-process).
+# One artistId per line (the logo file stem under public/assets/logos/). Lines starting with # are comments.
+
+# Hand-traced from the .webp (green + pink letter fills only, filled white) as a one-off exception approved by the owner.
+super_junior_super_juniorhappy

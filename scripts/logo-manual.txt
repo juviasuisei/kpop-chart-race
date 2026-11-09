@@ -3,3 +3,6 @@
 
 # Hand-traced from the .webp (green + pink letter fills only, filled white) as a one-off exception approved by the owner.
 super_junior_super_juniorhappy
+
+# Hand-traced from the .png (letter fills solid white, grid + halo as white lines, ~3px gap around letters) as a one-off exception approved by the owner.
+ledapple

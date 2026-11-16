@@ -147,6 +147,18 @@ export function buildPixelPoints(
       ? getValueAtDate(changePoints, nextDateIndex)
       : endValue;
 
+    // The playhead may sit inside a gap: the last emitted point is then days
+    // behind endDateIndex. Hold the value flat up to endDateIndex first, so the
+    // tip rises only over the arrival day instead of sloping across the gap
+    // (the loop above only emits this flat point once the new value is reached).
+    if (endValue > 0 && prevIdx < endDateIndex) {
+      points.push({
+        x: dateToX(endDateIndex),
+        y: padding.top + chartH - (endValue / effectiveMax) * chartH,
+      });
+      values.push(endValue);
+    }
+
     // Interpolate value between current end and next
     const tipValue = endValue + (nextValue - endValue) * progressToNext;
     // Tip x position: between endDateIndex and endDateIndex+1 positions

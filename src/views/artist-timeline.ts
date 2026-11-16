@@ -7,6 +7,7 @@ import type { DataStore, ParsedArtist } from "../models.ts";
 import { ARTIST_TYPE_COLORS } from "../colors.ts";
 import { generateFallbackLogoDataUri } from "../utils.ts";
 import { isNewTabIntent } from "../url-state.ts";
+import { createTrophyRow, deriveTrophies } from "./artist-trophies.ts";
 
 /** Source key → logo path mapping */
 const SOURCE_LOGOS: Record<string, string> = {
@@ -225,6 +226,15 @@ export class ArtistTimeline {
     }
     meta.textContent = metaText;
     header.appendChild(meta);
+
+    // Trophies: one per music-show win, oldest first (omitted when none)
+    if (this.dataStore) {
+      const trophyRow = createTrophyRow(
+        deriveTrophies(artist, this.dataStore, this.sourceFilter),
+        SOURCE_LABELS,
+      );
+      if (trophyRow) header.appendChild(trophyRow);
+    }
 
     // Stats (without Active)
     const stats = this.computeStats(artist);

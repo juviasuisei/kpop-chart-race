@@ -42,3 +42,34 @@ export function resolveFrameAdvance(
   const shouldEmit = index >= 0 && (index !== prevIndex || reachedEnd);
   return { position, index, reachedEnd, shouldEmit };
 }
+
+/**
+ * Global race playback speed-up. Every pace in the race animation (base
+ * dates/sec, the faster first step, the empty-day boost, and the 1-5 key
+ * speed presets) is scaled by this ONE constant. 1 = original pace, 3 = default (3x faster).
+ */
+export const RACE_SPEED_MULTIPLIER = 3;
+
+/** Original first-step (D0 to D1) speed in dates per second. */
+export const FIRST_STEP_SPEED = 2.0;
+/** Extra boost through dates with no chart data. */
+export const EMPTY_DAY_MULTIPLIER = 2.5;
+
+/**
+ * How far (in date-index units) the animation position advances for one frame.
+ *
+ * @param deltaMs        wall-clock ms since the previous frame
+ * @param baseSpeed      user-selected speed in dates/sec (before scaling)
+ * @param isFirstStep    true while position < 1 (D0 to D1)
+ * @param nextDateEmpty  true when the next date has no chart data
+ */
+export function computeFrameAdvance(
+  deltaMs: number,
+  baseSpeed: number,
+  isFirstStep: boolean,
+  nextDateEmpty: boolean,
+): number {
+  const speed = isFirstStep ? FIRST_STEP_SPEED : baseSpeed;
+  const boost = nextDateEmpty ? EMPTY_DAY_MULTIPLIER : 1.0;
+  return (deltaMs / 1000) * speed * boost * RACE_SPEED_MULTIPLIER;
+}

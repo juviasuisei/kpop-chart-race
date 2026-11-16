@@ -19,6 +19,7 @@ import { Popover } from "../canvas/popover.ts";
 import { buildSeriesFromDailyValues, mergeSeries, SparseTimeSeries } from "../worker/sparse-time-series.ts";
 import { ARTIST_TYPE_COLORS } from "../colors.ts";
 import { resolveFrameAdvance } from "../playback-frame.ts";
+import { getReleaseWinOnDate } from "../chart-engine.ts";
 import type { EventBus } from "../event-bus.ts";
 import type { DataStore } from "../models.ts";
 import type { FilterState } from "../types.ts";
@@ -1305,6 +1306,9 @@ export class LineChartController {
     const filteredWinDates = this.currentSourceFilter === "all"
       ? allWinDates
       : allWinDates.filter(winDate => {
+          if (meta.releaseId) {
+            return !!getReleaseWinOnDate(this.dataStore!, meta.artistId, meta.releaseId, winDate, this.currentSourceFilter);
+          }
           const dateWins = this.dataStore!.chartWins.get(winDate);
           if (!dateWins) return false;
           for (const [source, winData] of dateWins) {
@@ -1325,8 +1329,13 @@ export class LineChartController {
       const y = this.getPixelYForDateOnLine(cmd, dateIdx);
 
       let crownLevel = 1;
+      const songWin = meta.releaseId
+        ? getReleaseWinOnDate(this.dataStore, meta.artistId, meta.releaseId, winDate, this.currentSourceFilter)
+        : undefined;
       const dateWins = this.dataStore.chartWins.get(winDate);
-      if (dateWins) {
+      if (songWin) {
+        crownLevel = songWin.crownLevel;
+      } else if (dateWins) {
         for (const [source, winData] of dateWins) {
           if (this.currentSourceFilter !== "all" && source !== this.currentSourceFilter) continue;
           if (winData.artistIds.includes(meta.artistId)) {
@@ -1534,6 +1543,9 @@ export class LineChartController {
     for (const winDate of releaseWinDates) {
       // Apply source filter
       if (this.currentSourceFilter !== "all") {
+        if (meta.releaseId) {
+          if (!getReleaseWinOnDate(this.dataStore, meta.artistId, meta.releaseId, winDate, this.currentSourceFilter)) continue;
+        } else {
         const dateWins = this.dataStore.chartWins.get(winDate);
         if (!dateWins) continue;
         let matchesSource = false;
@@ -1544,6 +1556,7 @@ export class LineChartController {
           }
         }
         if (!matchesSource) continue;
+        }
       }
       const dateIdx = this.state.dates.indexOf(winDate);
       if (dateIdx >= viewStart && dateIdx <= viewEnd) {
@@ -2071,7 +2084,18 @@ export class LineChartController {
 
     // Check if this date is a chart win for this release (respecting source filter)
     let winInfo: { crownLevel: number; crownLabel: string; crownSvgUrl: string } | undefined;
-    if (this.dataStore && meta.artistId) {
+    if (this.dataStore && meta.artistId && meta.releaseId) {
+      // Songs mode: only the song that actually won gets the crown (sibling songs of
+      // the same artist must not inherit it from the artist-keyed chartWins).
+      const win = getReleaseWinOnDate(this.dataStore, meta.artistId, meta.releaseId, hoveredDate, this.currentSourceFilter);
+      if (win) {
+        winInfo = {
+          crownLevel: win.crownLevel,
+          crownLabel: this.getCrownLabel(win.crownLevel),
+          crownSvgUrl: `assets/crowns/crown-${Math.min(win.crownLevel, 12)}.svg`,
+        };
+      }
+    } else if (this.dataStore && meta.artistId) {
       const dateWins = this.dataStore.chartWins.get(hoveredDate);
       if (dateWins) {
         for (const [source, winData] of dateWins) {
@@ -2110,20 +2134,10 @@ export class LineChartController {
             // Check if this release won on this date
             const releaseKey = `${meta.artistId}::${release.id}`;
             const isWin = this.dataStore?.releaseWinDates?.get(releaseKey)?.includes(hoveredDate) ?? false;
-            // Get crown level for this win from chartWins
-            let crownLevel: number | undefined;
-            if (isWin) {
-              const dateWins = this.dataStore?.chartWins.get(hoveredDate);
-              if (dateWins) {
-                for (const [source, winData] of dateWins) {
-                  if (this.currentSourceFilter !== "all" && source !== this.currentSourceFilter) continue;
-                  if (winData.artistIds.includes(meta.artistId)) {
-                    crownLevel = winData.crownLevels.get(meta.artistId) ?? 1;
-                    break;
-                  }
-                }
-              }
-            }
+            // Crown level of this song's own win (not the artist's first winning source)
+            const crownLevel = isWin && this.dataStore
+              ? getReleaseWinOnDate(this.dataStore, meta.artistId, release.id, hoveredDate, this.currentSourceFilter)?.crownLevel
+              : undefined;
             breakdown.push({ title: release.title, value: entry.value, isWin, crownLevel });
           }
         }
@@ -2202,18 +2216,8 @@ export class LineChartController {
       let count = 0;
       for (const winDate of winDates) {
         if (winDate > currentDate) continue;
-        if (this.currentSourceFilter === "all") {
+        if (this.currentSourceFilter === "all" || getReleaseWinOnDate(this.dataStore, meta.artistId, meta.releaseId, winDate, this.currentSourceFilter)) {
           count++;
-        } else {
-          const dateWins = this.dataStore.chartWins.get(winDate);
-          if (dateWins) {
-            for (const [source, winData] of dateWins) {
-              if (source === this.currentSourceFilter && winData.artistIds.includes(meta.artistId)) {
-                count++;
-                break;
-              }
-            }
-          }
         }
       }
       return count;

@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { CacheManager } from "../../src/airtable/cache-manager";
+import { CacheManager, CACHE_VERSION } from "../../src/airtable/cache-manager";
 import type { DataStore } from "../../src/models";
+import pkg from "../../package.json";
 
 /**
  * Helper to build a minimal valid DataStore for testing.
@@ -106,6 +107,16 @@ describe("CacheManager", () => {
   });
 
   describe("cache version mismatch invalidation", () => {
+    it("keys the cache version to the app version so each deploy retires old entries", () => {
+      expect(CACHE_VERSION).toBe(`airtable-v2@${pkg.version}`);
+      expect(CACHE_VERSION).not.toContain("undefined");
+    });
+
+    it("rejects an entry written under the pre-2.21.3 version string", () => {
+      sessionStorage.setItem("airtable-v2", JSON.stringify({ version: "airtable-v2", timestamp: Date.now(), data: { artists: [["a", { id: "a", name: "A", artistType: "boy_group", generation: 5, logoUrl: "x.svg", releases: [] }]], dates: ["2024-01-01"], startDate: "2024-01-01", endDate: "2024-01-01", firstAppearance: [], chartWins: [] } }));
+      expect(cacheManager.get()).toBeNull();
+    });
+
     it("returns null and clears storage when version does not match", () => {
       // Write an entry with a mismatched version directly to sessionStorage
       const invalidVersionEntry = {
@@ -233,7 +244,7 @@ describe("CacheManager", () => {
 
     it("returns null and clears storage when data structure is missing required fields", () => {
       const incompleteEntry = {
-        version: "airtable-v2",
+        version: CACHE_VERSION,
         timestamp: Date.now(),
         data: {
           artists: [], // empty artists — fails structural validation
@@ -254,7 +265,7 @@ describe("CacheManager", () => {
 
     it("returns null and clears storage when dates array is empty", () => {
       const noDateEntry = {
-        version: "airtable-v2",
+        version: CACHE_VERSION,
         timestamp: Date.now(),
         data: {
           artists: [["test", { id: "test", name: "Test", artistType: "boy_group", generation: 5, logoUrl: "x.svg", releases: [] }]],

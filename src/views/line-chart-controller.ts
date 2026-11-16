@@ -23,6 +23,7 @@ import { getReleaseWinOnDate } from "../chart-engine.ts";
 import type { EventBus } from "../event-bus.ts";
 import type { DataStore } from "../models.ts";
 import type { FilterState } from "../types.ts";
+import { rankLabelCandidates, lastActivityAtOrBefore, buildWinnersByDate } from "../label-priority.ts";
 import type { SerializedLineData, FrameResultMessage, Viewport, VisibilityParams, LineDrawCommand, PixelPoint } from "../worker/messages.ts";
 
 /**
@@ -36,127 +37,6 @@ function formatOxfordComma(names: string[]): string {
   if (names.length === 1) return names[0];
   if (names.length === 2) return `${names[0]} and ${names[1]}`;
   return `${names.slice(0, -1).join(", ")}, and ${names[names.length - 1]}`;
-}
-
-/** Minimal shape needed to compute endpoint label display priority. */
-export interface LabelPriorityCandidate {
-  lineId: string;
-  /** Pixel Y position of the label's anchor point. */
-  y: number;
-  finalValue: number;
-  lastActivityIdx: number;
-}
-
-/**
- * Order label candidates by display priority so that, when two or more
- * labels collide (endpoints closer together than MIN_GAP), the correct
- * one is placed first and wins the slot.
- *
- * Rule:
- *   - The base order is value descending -- in this chart's linear
- *     value->pixel mapping, that is exactly the same order as Y ascending,
- *     so this is also already "most prominent/highest value first", with
- *     no extra work needed for the <= 5 (value-wins) case.
- *   - Find genuine pile-ups: contiguous runs (in that Y/value order) whose
- *     members are all mutually within `pileupGap` of each other (a clique,
- *     i.e. the run's Y-span is < pileupGap). Within a pile-up run of size
- *     > 5, and ONLY within that run, override the order to prefer the most
- *     recently active line, using value as a tie-break.
- *   - The single highest-value ("#1") line is then pinned to the very
- *     front, in case it was swept into some pile-up run's reordering.
- *
- * `pileupGap` is deliberately much tighter than the MIN_GAP used to decide
- * whether a label needs to be hidden at all. MIN_GAP is about how much
- * vertical space a label needs to avoid overlapping another label -- wide
- * enough that, in the busier parts of this chart, it also sweeps in several
- * meaningfully different-valued lines that just happen to be nearby, which
- * a human looking at the chart would never consider "tied". A genuine
- * pile-up (e.g. dozens of songs sitting near zero at the very start of the
- * race) has lines within a couple pixels of each other, not within a whole
- * label-height -- so the >5/recency exception should only fire for that
- * much tighter kind of crowding, while the actual show/hide collision test
- * for placement keeps using the wider MIN_GAP.
- *
- * This is deliberately NOT implemented as a single global sort comparator
- * that branches per-pair on "does either side belong to some pile-up"
- * (`aCluster > 5 || bCluster > 5`). `Array.prototype.sort` calls its
- * comparator on many arbitrary pairs while sorting, including candidates
- * that aren't anywhere near each other -- so a candidate that isn't part of
- * any pile-up itself can still get compared, mid-sort, against some
- * unrelated candidate that IS part of a real pile-up elsewhere in the
- * chart, tripping the recency branch for that comparison and contaminating
- * its rank for no reason connected to its own situation. That comparator
- * also isn't a valid total order (whether recency or value applies depends
- * on which two items happen to be compared), which is undefined behavior
- * for sort and produced wildly wrong results (e.g. an isolated, genuinely
- * 2-way tied pair ranked 70+ places apart). Reordering only within
- * self-contained runs -- and never touching anything outside a run's own
- * slice -- avoids all of this: two lines are only compared to each other
- * using the recency rule if they are actually both part of the same
- * genuine pile-up.
- */
-export function orderLabelsByPriority<T extends LabelPriorityCandidate>(
-  candidates: T[],
-  pileupGap: number = PILEUP_GAP,
-  pinnedLineId?: string,
-): T[] {
-  if (candidates.length === 0) return [];
-
-  // Base order: Y ascending == value descending in this chart's linear
-  // mapping, i.e. "highest value first" with no further work.
-  const result = [...candidates].sort((a, b) => a.y - b.y);
-  const n = result.length;
-
-  // maxHi[lo] = the largest index hi such that result[hi].y - result[lo].y
-  // < pileupGap (the farthest-reaching window starting at lo that stays a
-  // mutual clique).
-  const maxHi: number[] = new Array(n);
-  let hi = 0;
-  for (let lo = 0; lo < n; lo++) {
-    if (hi < lo) hi = lo;
-    while (hi + 1 < n && result[hi + 1].y - result[lo].y < pileupGap) hi++;
-    maxHi[lo] = hi;
-  }
-
-  // Walk left to right, taking the largest run STARTING at each position.
-  // Any position that could belong to a larger run starting earlier has
-  // already been consumed by that earlier run, so this partitions the
-  // array into non-overlapping runs.
-  let i = 0;
-  while (i < n) {
-    const runEnd = maxHi[i];
-    const runSize = runEnd - i + 1;
-    if (runSize > 5) {
-      // Genuine pile-up: re-sort just this slice by recency (value as
-      // tie-break), without touching anything outside it.
-      const slice = result.slice(i, runEnd + 1);
-      slice.sort((a, b) => b.lastActivityIdx - a.lastActivityIdx || b.finalValue - a.finalValue);
-      for (let k = 0; k < slice.length; k++) result[i + k] = slice[k];
-      i = runEnd + 1;
-    } else {
-      i++;
-    }
-  }
-
-  // #1 always wins, even if it got swept into some pile-up run's reorder.
-  const maxValue = Math.max(...candidates.map(c => c.finalValue));
-  const topIndex = result.findIndex(c => c.finalValue === maxValue);
-  if (topIndex > 0) {
-    const [top] = result.splice(topIndex, 1);
-    result.unshift(top);
-  }
-
-  // The pinned artist wins the top label slot outright — above even #1 — so
-  // the artist the user filtered to always gets its label placed.
-  if (pinnedLineId !== undefined) {
-    const pinIndex = result.findIndex(c => c.lineId === pinnedLineId);
-    if (pinIndex > 0) {
-      const [pinned] = result.splice(pinIndex, 1);
-      result.unshift(pinned);
-    }
-  }
-
-  return result;
 }
 
 /**
@@ -201,19 +81,6 @@ export const HIT_RADIUS = 8;
 const EVENT_DOT_SIZE = 8;
 const MIN_GAP = 18;
 const MAX_LABEL_WIDTH = 175;
-/**
- * Tight pixel threshold used only to decide whether candidates form a
- * genuine visual pile-up for the endpoint-label tie-break rule (see
- * orderLabelsByPriority). Deliberately much smaller than MIN_GAP: MIN_GAP
- * is about how much vertical space a label needs to not overlap another
- * label, which is generous enough to also sweep in several meaningfully
- * different-valued, merely-nearby lines in the busier parts of the chart.
- * A real pile-up (e.g. dozens of songs sitting near zero at the very start
- * of the race) has lines within a couple pixels of each other, not within
- * a whole label-height.
- */
-const PILEUP_GAP = 4;
-
 /** Artist type display labels */
 const ARTIST_TYPE_LABELS: Record<string, string> = {
   boy_group: "Boy Group",
@@ -330,8 +197,10 @@ export class LineChartController {
   private backgroundDirty = true;
   /** Cached set of dates that have chart data (for animation speed-up) */
   private datesWithData: Set<string> = new Set();
-  /** Cached last activity date index per lineId (for label priority) */
-  private lastActivityByLine: Map<string, number> = new Map();
+  /** Ascending date indices with points, per lineId (label priority rule 3) */
+  private activityIdxByLine: Map<string, number[]> = new Map();
+  /** date -> lineIds that won a chart show that day (label priority rule 2) */
+  private winnersByDate: Map<string, Set<string>> = new Map();
   /** Whether popover is currently open */
   private popoverOpen = false;
   /** Current generation filter */
@@ -1069,28 +938,47 @@ export class LineChartController {
       .filter(cmd => cmd.points.length >= 2 && cmd.opacity > 0.05)
       .map(cmd => {
         const finalValue = cmd.values.length > 0 ? cmd.values[cmd.values.length - 1] : 0;
-        const lastActivityIdx = this.lastActivityByLine.get(cmd.lineId) ?? 0;
+        const meta = this.lineMetadata.get(cmd.lineId);
+        const artistId = meta?.artistId ?? cmd.lineId;
         return {
           lineId: cmd.lineId,
           endPoint: cmd.points[cmd.points.length - 1],
           color: cmd.color,
           opacity: cmd.opacity,
           finalValue,
-          lastActivityIdx,
+          total: finalValue,
+          lastActivityIdx: lastActivityAtOrBefore(
+            this.activityIdxByLine.get(cmd.lineId) ?? [],
+            this.state.currentDateIndex,
+          ),
+          artistId,
+          title: (meta && this.getReleaseTitleFromMeta(meta)) ?? meta?.label ?? cmd.lineId,
+          artistName: this.dataStore?.artists.get(artistId)?.name ?? "",
         };
       });
+    // Rule 5: an artist's songs summed as of now. Sums every line in the
+    // frame (faded ones included), grouped by the line's primary artist.
+    const artistTotals = new Map<string, number>();
+    for (const cmd of commands) {
+      if (cmd.values.length === 0) continue;
+      const aId = this.lineMetadata.get(cmd.lineId)?.artistId ?? cmd.lineId;
+      artistTotals.set(aId, (artistTotals.get(aId) ?? 0) + cmd.values[cmd.values.length - 1]);
+    }
 
-    // Order candidates so that, when endpoints collide, the correct one
-    // wins the slot (see orderLabelsByPriority for the tie-break rule).
+    // Order candidates so that, when endpoints collide, the highest-priority
+    // one wins the slot (see src/label-priority.ts for the rules).
     // The pinned artist (Artists-mode filter) wins the top slot outright.
     // In Artists mode lineId === artistId, so the pinned artist id doubles as
     // its line id.
     const pinnedLineId =
       this.state.pinnedArtistId !== "all" ? this.state.pinnedArtistId : undefined;
-    const prioritized = orderLabelsByPriority(
-      labeled.map(l => ({ ...l, y: l.endPoint.y })),
-      PILEUP_GAP,
-      pinnedLineId,
+    const prioritized = rankLabelCandidates(
+      labeled.map(l => ({ ...l, y: l.endPoint.y, artistTotal: artistTotals.get(l.artistId) ?? 0 })),
+      {
+        nowDate: this.state.dates[this.state.currentDateIndex] ?? "",
+        winnersByDate: this.winnersByDate,
+        pinnedLineId,
+      },
     );
 
     // Place labels: process in priority order, place at their Y if no collision
@@ -2246,22 +2134,26 @@ export class LineChartController {
 
   /** Precompute last activity date index per line for label prioritization */
   private buildLastActivityCache(dataStore: DataStore): void {
-    this.lastActivityByLine.clear();
+    this.activityIdxByLine.clear();
+    const dateIndex = new Map<string, number>();
+    this.state.dates.forEach((d, i) => dateIndex.set(d, i));
     for (const [lineId, meta] of this.lineMetadata) {
       const artist = dataStore.artists.get(meta.artistId);
       if (!artist) continue;
       const releases = meta.releaseId
         ? artist.releases.filter(r => r.id === meta.releaseId)
         : artist.releases;
-      let lastIdx = 0;
+      const idxs = new Set<number>();
       for (const release of releases) {
-        for (const date of release.dailyValues.keys()) {
-          const idx = this.state.dates.indexOf(date);
-          if (idx > lastIdx) lastIdx = idx;
+        for (const [date, entry] of release.dailyValues) {
+          if (this.currentSourceFilter !== "all" && entry.source !== this.currentSourceFilter) continue;
+          const idx = dateIndex.get(date);
+          if (idx !== undefined) idxs.add(idx);
         }
       }
-      this.lastActivityByLine.set(lineId, lastIdx);
+      this.activityIdxByLine.set(lineId, [...idxs].sort((x, y) => x - y));
     }
+    this.winnersByDate = buildWinnersByDate(dataStore.artists, dataStore.releaseWinDates, this.state.displayMode, this.currentSourceFilter);
   }
 
   private getReleaseTitleFromMeta(meta: { label: string; artistId: string; releaseId?: string }): string | undefined {

@@ -17,7 +17,7 @@ export interface Trophy {
   source: string;
   episode: number;
   songTitle: string;
-  /** Cumulative win level for the crown icon (>= 1). */
+  /** The artist's win count for this song on this show (crown icon level, >= 1). */
   crownLevel: number;
 }
 
@@ -61,7 +61,9 @@ export function deriveTrophies(
     }
   }
 
-  trophies.sort((a, b) => a.date.localeCompare(b.date) || a.source.localeCompare(b.source));
+  // Plain code-unit comparison (not localeCompare) so the order never varies by locale.
+  const cmp = (x: string, y: string): number => (x < y ? -1 : x > y ? 1 : 0);
+  trophies.sort((a, b) => cmp(a.date, b.date) || cmp(a.source, b.source));
   return trophies;
 }
 

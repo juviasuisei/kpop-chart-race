@@ -317,6 +317,25 @@ describe("trophy tooltip interaction", () => {
     remove.mockRestore();
   });
 
+  it("detaches document listeners when the row is removed while the tooltip is open", () => {
+    a.click();
+    const remove = vi.spyOn(document, "removeEventListener");
+    row.remove();
+    document.body.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    expect(remove).toHaveBeenCalledWith("click", expect.any(Function));
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "a" }));
+    expect(remove).toHaveBeenCalledWith("keydown", expect.any(Function));
+    remove.mockRestore();
+  });
+
+  it("keeps a pinned tooltip on mouseout, and hides on focusout with no related target", () => {
+    a.click();
+    out(a);
+    expect(tip.hidden).toBe(false);
+    focusOut(a, null);
+    expect(tip.hidden).toBe(true);
+  });
+
   it("clamps the tooltip inside the row near the right edge", () => {
     Object.defineProperty(row, "clientWidth", { value: 200, configurable: true });
     Object.defineProperty(tip, "offsetWidth", { value: 120, configurable: true });

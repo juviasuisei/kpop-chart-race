@@ -1546,16 +1546,16 @@ export class LineChartController {
         if (meta.releaseId) {
           if (!getReleaseWinOnDate(this.dataStore, meta.artistId, meta.releaseId, winDate, this.currentSourceFilter)) continue;
         } else {
-        const dateWins = this.dataStore.chartWins.get(winDate);
-        if (!dateWins) continue;
-        let matchesSource = false;
-        for (const [source, winData] of dateWins) {
-          if (source === this.currentSourceFilter && winData.artistIds.includes(meta.artistId)) {
-            matchesSource = true;
-            break;
+          const dateWins = this.dataStore.chartWins.get(winDate);
+          if (!dateWins) continue;
+          let matchesSource = false;
+          for (const [source, winData] of dateWins) {
+            if (source === this.currentSourceFilter && winData.artistIds.includes(meta.artistId)) {
+              matchesSource = true;
+              break;
+            }
           }
-        }
-        if (!matchesSource) continue;
+          if (!matchesSource) continue;
         }
       }
       const dateIdx = this.state.dates.indexOf(winDate);

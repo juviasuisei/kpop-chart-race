@@ -55,6 +55,11 @@ describe('getReleaseWinOnDate', () => {
               expect(dv).toBeDefined();
               if (src !== 'all') expect(dv.source).toBe(src);
               expect(ds.chartWins.get(date)!.get(dv.source)!.artistIds).toContain(artistId);
+              // the credited song is the artist's strongest on that (date, source)
+              for (const o of artist.releases) {
+                const odv = o.dailyValues.get(date);
+                if (odv && odv.source === dv.source) expect(dv.value).toBeGreaterThanOrEqual(odv.value);
+              }
             }
           }
         }

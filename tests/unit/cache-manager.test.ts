@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { CacheManager } from "../../src/airtable/cache-manager";
+import { CacheManager, CACHE_VERSION } from "../../src/airtable/cache-manager";
 import type { DataStore } from "../../src/models";
 
 /**
@@ -233,7 +233,7 @@ describe("CacheManager", () => {
 
     it("returns null and clears storage when data structure is missing required fields", () => {
       const incompleteEntry = {
-        version: "airtable-v2",
+        version: CACHE_VERSION,
         timestamp: Date.now(),
         data: {
           artists: [], // empty artists — fails structural validation
@@ -254,7 +254,7 @@ describe("CacheManager", () => {
 
     it("returns null and clears storage when dates array is empty", () => {
       const noDateEntry = {
-        version: "airtable-v2",
+        version: CACHE_VERSION,
         timestamp: Date.now(),
         data: {
           artists: [["test", { id: "test", name: "Test", artistType: "boy_group", generation: 5, logoUrl: "x.svg", releases: [] }]],

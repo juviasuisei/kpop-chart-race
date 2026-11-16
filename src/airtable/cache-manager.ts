@@ -5,6 +5,7 @@ import type {
   ParsedRelease,
 } from "../models";
 import type { DailyValueEntry } from "../types";
+import pkg from "../../package.json";
 
 /**
  * Serialized representation of the DataStore for sessionStorage.
@@ -47,6 +48,14 @@ const STORAGE_KEY = "airtable-v2";
 const TTL_MS = 3_600_000; // 1 hour
 
 /**
+ * Cache entries hold values the score-fill step already derived, so an entry
+ * written by an older build carries that build's fill results. Keying the
+ * version to the app version retires every cached entry on each deploy, so a
+ * fill-logic change reaches tabs that cached the store within the last TTL.
+ */
+export const CACHE_VERSION = `airtable-v2@${pkg.version}`;
+
+/**
  * Manages caching of DataStore in sessionStorage with TTL-based expiry
  * and version-based invalidation. Handles serialization of Map instances
  * to JSON-compatible [key, value][] arrays.
@@ -54,7 +63,7 @@ const TTL_MS = 3_600_000; // 1 hour
 export class CacheManager {
   private readonly storageKey: string = STORAGE_KEY;
   private readonly ttlMs: number = TTL_MS;
-  private readonly cacheVersion: string = "airtable-v2";
+  private readonly cacheVersion: string = CACHE_VERSION;
 
   constructor() {}
 

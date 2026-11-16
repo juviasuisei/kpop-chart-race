@@ -11,10 +11,15 @@
  *  - Music Bank publishes ranks 1–20; ranks 21–50 are missing. We extend the
  *    chart's own decay with a power-law tail (fit from real Music Bank data),
  *    anchored to the real rank-20 score.
- *  - M Countdown publishes only rank 1; ranks 2–20 are missing. Its #1 carries
- *    a large winner boost, so we borrow the decay SHAPE of Show! Music Core
- *    (the closest comparable chart) and anchor it to a de-spiked implied #2
- *    (25% below the real #1) so #2 doesn't ride up against the boosted #1.
+ *  - M Countdown publishes only the top ranks; the rest are missing. We borrow
+ *    the decay SHAPE of Show! Music Core (the closest comparable chart).
+ *    Older episodes publish only rank 1: its #1 carries a large winner boost,
+ *    so the shape is anchored to a de-spiked implied #2 (25% below the real
+ *    #1). Newer episodes publish ranks 1 and 2: the real #2 anchors the shape
+ *    directly (no de-spike needed) and ranks 3+ follow it.
+ *
+ * The negative sentinels only encode rank ORDER (-1 is ranked above -2); their
+ * magnitudes are never used, so -10/-20/-30 fills identically to -1/-2/-3.
  *
  * All fills are deterministic (same inputs → same outputs), produced as
  * strictly-decreasing integers so ranks never tie or invert, with an absolute
@@ -133,6 +138,31 @@ export function fillMCountdown(
   return enforceStrictDescending(slots, realScoreAtRank1, lastRank);
 }
 
+/**
+ * M Countdown when two or more real scores are published: ranks
+ * `realScores.length + 1 .. lastRank` follow the SMC shape anchored on the LAST
+ * real score (the real #2 in the usual two-value case), i.e.
+ * score(r) = lastReal × SHAPE(r) / SHAPE(k) with k = realScores.length.
+ * `realScores` are the real scores in rank order (descending). With a single
+ * real score this is exactly {@link fillMCountdown}.
+ */
+export function fillMCountdownFromReals(
+  realScores: readonly number[],
+  lastRank: number,
+): Array<{ rank: number; score: number }> {
+  const k = realScores.length;
+  if (k === 0) return fillMCountdown(SCORE_FLOOR + lastRank, 1, lastRank);
+  if (k === 1) return fillMCountdown(realScores[0], 2, lastRank);
+  const anchorScore = realScores[k - 1];
+  const anchorShape = SMC_SHAPE_REL2[k] ?? SMC_SHAPE_REL2[20];
+  const slots: RawSlot[] = [];
+  for (let r = k + 1; r <= lastRank; r++) {
+    const ratio = (SMC_SHAPE_REL2[r] ?? SMC_SHAPE_REL2[20]) / anchorShape;
+    slots.push({ rank: r, raw: anchorScore * ratio });
+  }
+  return enforceStrictDescending(slots, anchorScore, lastRank);
+}
+
 /** One chart entry seen while grouping: the shared entry object + its date. */
 interface EpisodeEntry {
   date: string;
@@ -199,9 +229,15 @@ function fillEpisode(source: string, entries: EpisodeEntry[]): void {
     const anchor = reals.length > 0 ? reals[reals.length - 1].entry.value : SCORE_FLOOR + lastRank;
     filled = fillMusicBankTail(anchor, firstMissingRank, lastRank);
   } else {
-    // m_countdown: anchor to the real #1.
-    const anchor = reals.length > 0 ? reals[0].entry.value : SCORE_FLOOR + lastRank;
-    filled = fillMCountdown(anchor, firstMissingRank, lastRank);
+    // m_countdown: one real value (older episodes) anchors on a de-spiked #2;
+    // two or more anchor on the last real value (the real #2).
+    filled = reals.length >= 2
+      ? fillMCountdownFromReals(reals.map(r => r.entry.value), lastRank)
+      : fillMCountdown(
+          reals.length > 0 ? reals[0].entry.value : SCORE_FLOOR + lastRank,
+          firstMissingRank,
+          lastRank,
+        );
   }
 
   // Write filled scores back onto the sentinel entries, in rank order, and

@@ -11,6 +11,7 @@ import pkg from "../package.json";
 import { EventBus } from "./event-bus.ts";
 import { loadFromAirtable } from "./airtable/data-adapter.ts";
 import { computeChartWins, extractGenerations } from "./chart-engine.ts";
+import { fillCalendarDays } from "./calendar-days.ts";
 import { FilterStateManager } from "./filter-state-manager.ts";
 import { Toolbar } from "./toolbar.ts";
 import { LoadingScreen } from "./loading-screen.ts";
@@ -77,25 +78,8 @@ async function main(): Promise<void> {
     dataStore.chartWins = chartWinsResult.chartWins;
     dataStore.releaseWinDates = chartWinsResult.releaseWinDates;
 
-    // Fill in ALL calendar days from one day before the first date to the last date.
-    // This ensures every day is represented (consistent x-spacing, hoverable).
-    const firstRealDate = dataStore.dates[0];
-    const lastRealDate = dataStore.dates[dataStore.dates.length - 1];
-    if (firstRealDate && lastRealDate) {
-      try {
-        const start = new Date(firstRealDate + "T00:00:00");
-        start.setDate(start.getDate() - 1); // zero-day
-        const end = new Date(lastRealDate + "T00:00:00");
-        const allDays: string[] = [];
-        const current = new Date(start);
-        while (current <= end) {
-          allDays.push(current.toISOString().split("T")[0]);
-          current.setDate(current.getDate() + 1);
-        }
-        dataStore.dates = allDays;
-        dataStore.startDate = allDays[0];
-      } catch { /* leave as-is */ }
-    }
+    // Pad the timeline with every calendar day plus a leading zero-day.
+    fillCalendarDays(dataStore);
 
     await loadingScreen.onComplete();
   } catch (_err) {

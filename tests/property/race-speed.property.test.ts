@@ -6,13 +6,13 @@ describe("computeFrameAdvance (property)", () => {
   it("is exactly RACE_SPEED_MULTIPLIER x the original 1x pace", () => {
     fc.assert(
       fc.property(
-        fc.integer({ min: 1, max: 24 }), // keeps first-step x empty-day (30 dates/s) under the 1-date cap
+        fc.integer({ min: 1, max: 24 }), // keeps first-step x empty-day (20 dates/s) under the 1-date cap
         fc.double({ min: 0.1, max: 1, noNaN: true }),
         fc.boolean(),
         fc.boolean(),
         (ms, speed, first, empty) => {
           const original = (ms / 1000) * (first ? 2.0 : speed) * (empty ? 2.5 : 1);
-          expect(computeFrameAdvance(ms, speed, first, empty)).toBeCloseTo(original * 6, 8);
+          expect(computeFrameAdvance(ms, speed, first, empty)).toBeCloseTo(original * 4, 8);
         },
       ),
     );

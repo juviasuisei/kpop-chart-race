@@ -137,6 +137,32 @@ export function computeReleaseWins(
 }
 
 /**
+ * Did this specific release win a chart show on `date`?
+ *
+ * Win credit belongs to the release (song), never to every release of the
+ * winning artist: `chartWins` is keyed by artist, so it cannot tell sibling
+ * songs apart. `releaseWinDates` is the per-release record.
+ *
+ * @param sourceFilter - "all", or a chart source the win must have happened on
+ * @returns the win's source and crown level, or undefined if the release did not win
+ */
+export function getReleaseWinOnDate(
+  dataStore: DataStore,
+  artistId: string,
+  releaseId: string,
+  date: string,
+  sourceFilter: string = "all",
+): { source: string; crownLevel: number } | undefined {
+  if (!dataStore.releaseWinDates?.get(`${artistId}::${releaseId}`)?.includes(date)) return undefined;
+  const release = dataStore.artists.get(artistId)?.releases.find((r) => r.id === releaseId);
+  const dv = release?.dailyValues.get(date);
+  if (!dv) return undefined;
+  if (sourceFilter !== "all" && dv.source !== sourceFilter) return undefined;
+  const crownLevel = dataStore.chartWins.get(date)?.get(dv.source)?.crownLevels.get(artistId) ?? 1;
+  return { source: dv.source, crownLevel };
+}
+
+/**
  * Returns the number of elements in a sorted array that are ≤ target.
  * Uses binary search for O(log n) performance.
  */

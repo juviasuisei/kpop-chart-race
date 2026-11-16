@@ -46,9 +46,9 @@ export function resolveFrameAdvance(
 /**
  * Global race playback speed-up. Every pace in the race animation (base
  * dates/sec, the faster first step, the empty-day boost, and the 1-5 key
- * speed presets) is scaled by this ONE constant. 1 = original pace, 8 = default (8x faster).
+ * speed presets) is scaled by this ONE constant. 1 = original pace, 6 = default (6x faster).
  */
-export const RACE_SPEED_MULTIPLIER = 8;
+export const RACE_SPEED_MULTIPLIER = 6;
 
 /** Original first-step (D0 to D1) speed in dates per second. */
 export const FIRST_STEP_SPEED = 2.0;

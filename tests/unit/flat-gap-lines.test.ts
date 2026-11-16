@@ -7,7 +7,7 @@ const vp = (start: number, end: number): Viewport =>
 
 describe("buildPixelPoints gap handling", () => {
   it("steps on the day before a new value after a multi-day gap", () => {
-    // value 10 on day 2, value 30 on day 12; 11 days drawn (0..11 span 12)
+    // value 10 on day 2, value 30 on day 12; viewport days 0..12 (span 13)
     const { points, values } = buildPixelPoints([[2, 10], [12, 30]], vp(0, 12), 30, 20);
     const total = 13;
     const x = (d: number) => (d / total) * 1000;
@@ -22,5 +22,20 @@ describe("buildPixelPoints gap handling", () => {
     const { points } = buildPixelPoints([[2, 10], [3, 30]], vp(0, 3), 30, 10);
     // zero-origin(1), 2, 3 only
     expect(points).toHaveLength(3);
+  });
+
+  it("keeps the animated tip flat while the playhead is inside a gap", () => {
+    const view = { ...vp(0, 8), progressToNext: 0.5 } as Viewport;
+    const { points } = buildPixelPoints([[2, 10], [12, 30]], view, 30, 20);
+    const ys = points.slice(-2).map((p) => p.y);
+    expect(ys[0]).toBeCloseTo(ys[1], 6);
+  });
+
+  it("places the flat point with the same scroll offset as the other points", () => {
+    const view = { ...vp(0, 12), scrollOffset: 0.5 } as Viewport;
+    const { points } = buildPixelPoints([[2, 10], [12, 30]], view, 30, 20);
+    const x = (d: number) => ((d - 0.5) / 13) * 1000;
+    expect(points.some((p) => Math.abs(p.x - x(11)) < 1e-6)).toBe(true);
+    expect(points.some((p) => Math.abs(p.x - x(12)) < 1e-6)).toBe(true);
   });
 });

@@ -12,27 +12,43 @@ import {
 } from "../../src/playback-frame.ts";
 
 describe("race playback speed", () => {
-  it("defaults to 3x", () => {
-    expect(RACE_SPEED_MULTIPLIER).toBe(3);
+  it("defaults to 8x", () => {
+    expect(RACE_SPEED_MULTIPLIER).toBe(8);
   });
 
-  it("base speed 0.8 dates/s advances 2.4 dates in one second", () => {
-    expect(computeFrameAdvance(1000, 0.8, false, false)).toBeCloseTo(2.4, 10);
+  it("base speed 0.8 dates/s advances 0.32 dates in a 50 ms frame", () => {
+    expect(computeFrameAdvance(50, 0.8, false, false)).toBeCloseTo(0.32, 10);
   });
 
-  it("first step runs at 2.0 dates/s x3 = 6 dates/s", () => {
-    expect(computeFrameAdvance(1000, 0.8, true, false)).toBeCloseTo(6, 10);
+  it("first step runs at 2.0 dates/s x8 = 16 dates/s (0.8 dates in a 50 ms frame)", () => {
+    expect(computeFrameAdvance(50, 0.8, true, false)).toBeCloseTo(0.8, 10);
   });
 
   it("empty days keep their 2.5x boost on top of the global multiplier", () => {
-    expect(computeFrameAdvance(1000, 0.8, false, true)).toBeCloseTo(0.8 * 2.5 * 3, 10);
+    expect(computeFrameAdvance(50, 0.8, false, true)).toBeCloseTo(0.8 * 2.5 * 8 * 0.05, 10);
   });
 
   it("speed presets 1-5 stay proportional (0.5 .. 2.0 dates/s, scaled)", () => {
     const presets = [0.5, 0.8, 1.0, 1.5, 2.0];
     for (const p of presets) {
-      expect(computeFrameAdvance(1000, p, false, false)).toBeCloseTo(p * RACE_SPEED_MULTIPLIER, 10);
+      expect(computeFrameAdvance(50, p, false, false)).toBeCloseTo(0.05 * p * 8, 10);
     }
+  });
+});
+
+describe("per-frame advance cap (no skipped dates at 8x)", () => {
+  it("never advances more than one date in a frame, even after a long stall", () => {
+    expect(computeFrameAdvance(5000, 2.0, true, true)).toBe(1);
+    expect(computeFrameAdvance(500, 0.8, false, false)).toBe(1);
+  });
+
+  it("key 5 on an empty day with a 33 ms (30 fps) frame stays at the cap", () => {
+    // 2.0 * 2.5 * 8 = 40 dates/s -> 1.32 uncapped
+    expect(computeFrameAdvance(33, 2.0, false, true)).toBe(1);
+  });
+
+  it("does not change advances already below the cap", () => {
+    expect(computeFrameAdvance(16, 0.8, false, false)).toBeCloseTo(0.016 * 0.8 * 8, 10);
   });
 });
 

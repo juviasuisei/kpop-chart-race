@@ -46,14 +46,21 @@ export function resolveFrameAdvance(
 /**
  * Global race playback speed-up. Every pace in the race animation (base
  * dates/sec, the faster first step, the empty-day boost, and the 1-5 key
- * speed presets) is scaled by this ONE constant. 1 = original pace, 3 = default (3x faster).
+ * speed presets) is scaled by this ONE constant. 1 = original pace, 8 = default (8x faster).
  */
-export const RACE_SPEED_MULTIPLIER = 3;
+export const RACE_SPEED_MULTIPLIER = 8;
 
 /** Original first-step (D0 to D1) speed in dates per second. */
 export const FIRST_STEP_SPEED = 2.0;
 /** Extra boost through dates with no chart data. */
 export const EMPTY_DAY_MULTIPLIER = 2.5;
+
+/**
+ * Upper bound on how far the position may advance in one frame. Keeping it at
+ * one date guarantees every date is processed (date:change emitted, line
+ * extended one day at a time) even at high multipliers or after a frame stall.
+ */
+export const MAX_FRAME_ADVANCE = 1;
 
 /**
  * How far (in date-index units) the animation position advances for one frame.
@@ -71,5 +78,6 @@ export function computeFrameAdvance(
 ): number {
   const speed = isFirstStep ? FIRST_STEP_SPEED : baseSpeed;
   const boost = nextDateEmpty ? EMPTY_DAY_MULTIPLIER : 1.0;
-  return (deltaMs / 1000) * speed * boost * RACE_SPEED_MULTIPLIER;
+  const advance = (deltaMs / 1000) * speed * boost * RACE_SPEED_MULTIPLIER;
+  return Math.min(advance, MAX_FRAME_ADVANCE);
 }

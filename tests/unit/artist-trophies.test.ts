@@ -7,7 +7,7 @@
  * same-day wins, zero wins), rendered DOM / aria text, and header placement.
  */
 
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import {
   deriveTrophies,
   formatTrophyLabel,
@@ -172,6 +172,8 @@ describe("trophy row DOM", () => {
     const items = row.querySelectorAll<HTMLElement>(".artist-trophies__item");
     expect(items).toHaveLength(2);
     expect(items[0].tagName).toBe("BUTTON");
+    expect(items[0].hasAttribute("role")).toBe(false); // keeps its native button role
+    expect(items[0].parentElement!.getAttribute("role")).toBe("listitem");
     expect(items[0].getAttribute("type")).toBe("button");
     expect(items[0].getAttribute("aria-label")).toBe("Supernova - SBS Inkigayo - Jan 15, 2024");
     expect(items[1].getAttribute("aria-label")).toBe("Drama - KBS Music Bank - Feb 20, 2024");
@@ -230,6 +232,109 @@ describe("trophy row DOM", () => {
     )!;
     expect(row.querySelectorAll("img")).toHaveLength(1); // only the crown icon
     expect(row.querySelector(".artist-trophies__item")!.getAttribute("aria-label")).toContain("<img");
+  });
+});
+
+
+describe("trophy tooltip interaction", () => {
+  const artist = makeArtist([
+    { title: "One", date: "2024-01-15", source: "inkigayo", episode: 1, value: 1 },
+    { title: "Two", date: "2024-02-20", source: "music_bank", episode: 2, value: 1 },
+  ]);
+  const store = makeStore(artist, [
+    { date: "2024-01-15", source: "inkigayo" },
+    { date: "2024-02-20", source: "music_bank" },
+  ]);
+  let row: HTMLElement;
+  let tip: HTMLElement;
+  let a: HTMLElement;
+  let b: HTMLElement;
+
+  beforeEach(() => {
+    row = createTrophyRow(deriveTrophies(artist, store), LABELS)!;
+    document.body.appendChild(row);
+    tip = row.querySelector<HTMLElement>(".artist-trophies__tip")!;
+    [a, b] = Array.from(row.querySelectorAll<HTMLElement>(".artist-trophies__item"));
+  });
+  afterEach(() => row.remove());
+
+  const over = (el: HTMLElement) => el.dispatchEvent(new MouseEvent("mouseover", { bubbles: true }));
+  const out = (el: HTMLElement) => el.dispatchEvent(new MouseEvent("mouseout", { bubbles: true }));
+  const focusIn = (el: HTMLElement) => el.dispatchEvent(new FocusEvent("focusin", { bubbles: true }));
+  const focusOut = (el: HTMLElement, to: Element | null) =>
+    el.dispatchEvent(new FocusEvent("focusout", { bubbles: true, relatedTarget: to }));
+  // A real tap fires mouseover, then click.
+  const tap = (el: HTMLElement) => { over(el); el.click(); };
+
+  it("a second tap on the same trophy dismisses it (mouseover then click)", () => {
+    tap(a);
+    expect(tip.hidden).toBe(false);
+    tap(a);
+    expect(tip.hidden).toBe(true);
+  });
+
+  it("hovering another trophy after a pin replaces the tooltip and unpins", () => {
+    a.click();
+    over(b);
+    expect(tip.textContent).toContain("Two");
+    out(b);
+    expect(tip.hidden).toBe(true);
+  });
+
+  it("Enter on one trophy, Tab to the next, Tab out leaves no stuck tooltip", () => {
+    a.click();
+    focusOut(a, b);
+    focusIn(b);
+    expect(tip.textContent).toContain("Two");
+    focusOut(b, document.body);
+    expect(tip.hidden).toBe(true);
+  });
+
+  it("Escape anywhere in the document closes a visible tooltip", () => {
+    a.click();
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+    expect(tip.hidden).toBe(true);
+  });
+
+  it("a click outside the row closes a pinned tooltip; inside does not", () => {
+    a.click();
+    row.querySelector(".artist-trophies__count")!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    expect(tip.hidden).toBe(false);
+    document.body.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    expect(tip.hidden).toBe(true);
+  });
+
+  it("registers document listeners only while visible and removes them on hide", () => {
+    const add = vi.spyOn(document, "addEventListener");
+    const remove = vi.spyOn(document, "removeEventListener");
+    a.click();
+    expect(add).toHaveBeenCalledWith("keydown", expect.any(Function));
+    expect(add).toHaveBeenCalledWith("click", expect.any(Function));
+    a.click();
+    expect(remove).toHaveBeenCalledWith("keydown", expect.any(Function));
+    expect(remove).toHaveBeenCalledWith("click", expect.any(Function));
+    add.mockRestore();
+    remove.mockRestore();
+  });
+
+  it("clamps the tooltip inside the row near the right edge", () => {
+    Object.defineProperty(row, "clientWidth", { value: 200, configurable: true });
+    Object.defineProperty(tip, "offsetWidth", { value: 120, configurable: true });
+    Object.defineProperty(b, "offsetLeft", { value: 190, configurable: true });
+    Object.defineProperty(b, "offsetWidth", { value: 10, configurable: true });
+    over(b);
+    expect(tip.style.left).toBe("80px"); // 200 - 120
+    Object.defineProperty(a, "offsetLeft", { value: 0, configurable: true });
+    Object.defineProperty(a, "offsetWidth", { value: 10, configurable: true });
+    over(a);
+    expect(tip.style.left).toBe("0px");
+  });
+});
+
+describe("source label lookup", () => {
+  it("does not read inherited Object.prototype properties as a show label", () => {
+    const t = { date: "2024-01-01", source: "constructor", episode: 1, songTitle: "S", crownLevel: 1 };
+    expect(formatTrophyLabel(t, LABELS)).toBe("S - constructor - Jan 1, 2024");
   });
 });
 

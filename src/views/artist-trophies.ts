@@ -74,7 +74,8 @@ export function formatTrophyDate(date: string): string {
 
 /** "Song - Show - Date", used for both the tooltip and the aria-label. */
 export function formatTrophyLabel(t: Trophy, sourceLabels: Record<string, string>): string {
-  const show = sourceLabels[t.source] ?? t.source;
+  // own-property check: a data-controlled key like "constructor" must not hit Object.prototype.
+  const show = Object.prototype.hasOwnProperty.call(sourceLabels, t.source) ? sourceLabels[t.source] : t.source;
   return `${t.songTitle} - ${show} - ${formatTrophyDate(t.date)}`;
 }
 
@@ -109,10 +110,25 @@ export function createTrophyRow(
   tip.hidden = true;
   row.appendChild(tip);
 
-  let pinned: HTMLElement | null = null; // item opened by tap / click
+  let pinned: HTMLElement | null = null; // item pinned by tap / click
 
   const itemFrom = (target: EventTarget | null): HTMLElement | null =>
     target instanceof Element ? target.closest<HTMLElement>(".artist-trophies__item") : null;
+
+  // Document-level dismissal (Escape, click outside) is attached only while the
+  // tooltip is visible, so hidden rows leave no listeners behind.
+  const onDocKeydown = (e: KeyboardEvent): void => {
+    if (!row.isConnected) return detach();
+    if (e.key === "Escape") hide();
+  };
+  const onDocClick = (e: Event): void => {
+    if (!row.isConnected) return detach();
+    if (!row.contains(e.target as Node)) hide();
+  };
+  function detach(): void {
+    document.removeEventListener("keydown", onDocKeydown);
+    document.removeEventListener("click", onDocClick);
+  }
 
   const show = (item: HTMLElement): void => {
     tip.textContent = item.getAttribute("aria-label") ?? "";
@@ -123,19 +139,25 @@ export function createTrophyRow(
     const left = rowW > 0 ? Math.min(Math.max(center - tipW / 2, 0), Math.max(rowW - tipW, 0)) : 0;
     tip.style.left = `${left}px`;
     tip.style.top = `${item.offsetTop + item.offsetHeight + 6}px`;
+    document.addEventListener("keydown", onDocKeydown);
+    document.addEventListener("click", onDocClick);
   };
 
-  const hide = (): void => {
+  function hide(): void {
     tip.hidden = true;
     pinned = null;
-  };
+    detach();
+  }
 
   for (const t of trophies) {
     const label = formatTrophyLabel(t, sourceLabels);
+    // The wrapper carries the list-item role so the button keeps its own role.
+    const cell = document.createElement("div");
+    cell.setAttribute("role", "listitem");
+
     const item = document.createElement("button");
     item.type = "button";
     item.className = "artist-trophies__item";
-    item.setAttribute("role", "listitem");
     item.setAttribute("aria-label", label);
 
     const img = document.createElement("img");
@@ -146,24 +168,36 @@ export function createTrophyRow(
     img.loading = "lazy";
     item.appendChild(img);
 
-    list.appendChild(item);
+    cell.appendChild(item);
+    list.appendChild(cell);
   }
 
+  // Hovering or focusing a trophy previews it and drops any pin on another
+  // trophy. The pinned trophy itself is left alone so a second tap (which
+  // fires mouseover then click on touch) toggles it off.
+  const preview = (item: HTMLElement): void => {
+    if (pinned === item) return;
+    pinned = null;
+    show(item);
+  };
   row.addEventListener("mouseover", (e) => {
     const item = itemFrom(e.target);
-    if (item && !pinned) show(item);
+    if (item) preview(item);
   });
   row.addEventListener("mouseout", (e) => {
-    if (itemFrom(e.target) && !pinned) tip.hidden = true;
+    if (itemFrom(e.target) && !pinned) hide();
   });
   row.addEventListener("focusin", (e) => {
     const item = itemFrom(e.target);
-    if (item) show(item);
+    if (item) preview(item);
   });
   row.addEventListener("focusout", (e) => {
-    if (itemFrom(e.target) && !pinned) tip.hidden = true;
+    if (!itemFrom(e.target)) return;
+    const next = (e as FocusEvent).relatedTarget as Node | null;
+    // Moving to another trophy is handled by its focusin; leaving the row hides.
+    if (!next || !row.contains(next)) hide();
   });
-  // Tap / click toggles a pinned tooltip so touch devices (no hover) work.
+  // Click / tap / Enter / Space toggles a pinned tooltip so touch (no hover) works.
   row.addEventListener("click", (e) => {
     const item = itemFrom(e.target);
     if (!item) return;
@@ -174,19 +208,6 @@ export function createTrophyRow(
       show(item);
     }
   });
-  row.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") hide();
-  });
-  // Tapping elsewhere dismisses a pinned tooltip.
-  const onDocClick = (e: Event): void => {
-    if (!row.isConnected) {
-      // The row was re-rendered away; stop listening.
-      document.removeEventListener("click", onDocClick);
-      return;
-    }
-    if (pinned && !row.contains(e.target as Node)) hide();
-  };
-  document.addEventListener("click", onDocClick);
 
   return row;
 }

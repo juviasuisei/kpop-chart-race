@@ -59,6 +59,9 @@ export const EMPTY_DAY_MULTIPLIER = 2.5;
  * Upper bound on how far the position may advance in one frame. Keeping it at
  * one date guarantees every date is processed (date:change emitted, line
  * extended one day at a time) even at high multipliers or after a frame stall.
+ * Do not raise above 1: that reintroduces skipped date:change events (lost wins,
+ * labels, dots). Trade-off: pace tops out at one date per frame, and a stall
+ * loses time instead of catching up.
  */
 export const MAX_FRAME_ADVANCE = 1;
 

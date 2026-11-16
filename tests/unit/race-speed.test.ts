@@ -1,6 +1,6 @@
 /**
  * Pins the race playback pace. The whole race is scaled by ONE constant,
- * RACE_SPEED_MULTIPLIER (default 3), applied in computeFrameAdvance.
+ * RACE_SPEED_MULTIPLIER (default 8), applied in computeFrameAdvance.
  * Original (1x) pace: 0.8 dates/s base, 2.0 dates/s first step, 2.5x empty days.
  */
 import { describe, it, expect } from "vitest";

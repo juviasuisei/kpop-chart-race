@@ -18,7 +18,7 @@ import { Disambiguation } from "../canvas/disambiguation.ts";
 import { Popover } from "../canvas/popover.ts";
 import { buildSeriesFromDailyValues, mergeSeries, SparseTimeSeries } from "../worker/sparse-time-series.ts";
 import { ARTIST_TYPE_COLORS } from "../colors.ts";
-import { resolveFrameAdvance } from "../playback-frame.ts";
+import { resolveFrameAdvance, computeFrameAdvance } from "../playback-frame.ts";
 import { getReleaseWinOnDate } from "../chart-engine.ts";
 import type { EventBus } from "../event-bus.ts";
 import type { DataStore } from "../models.ts";
@@ -346,7 +346,8 @@ export class LineChartController {
 
   /**
    * Set animation speed (dates per second) for the rAF loop.
-   * Default is 0.8. Higher values = faster playback.
+   * Default is 0.8. Higher values = faster playback. The value is scaled by
+   * RACE_SPEED_MULTIPLIER (playback-frame.ts) inside the loop.
    */
   setSpeed(datesPerSecond: number): void {
     this.state.speed = datesPerSecond;
@@ -703,17 +704,13 @@ export class LineChartController {
     if (deltaMs < 16) return; // cap at ~60fps
     this.lastFrameTime = now;
 
-    // Advance position smoothly
-    // First step (D0→D1) is 2x faster, all others use configurable speed
+    // Advance position smoothly. All pace constants (first-step speed, empty-day
+    // boost, global RACE_SPEED_MULTIPLIER) live in playback-frame.ts.
     const isFirstStep = this.animationPosition < 1;
-    const speed = isFirstStep ? 2.0 : this.state.speed;
-    const advance = (deltaMs / 1000) * speed;
-
-    // Speed up 2.5x through dates with no chart data (empty days between shows)
     const nextDateIdx = Math.min(Math.floor(this.animationPosition) + 1, this.state.dates.length - 1);
     const nextDate = this.state.dates[nextDateIdx];
-    const emptyDayMultiplier = nextDate && !this.hasChartDataOnDate(nextDate) ? 2.5 : 1.0;
-    this.animationPosition += advance * emptyDayMultiplier;
+    const nextDateEmpty = !!nextDate && !this.hasChartDataOnDate(nextDate);
+    this.animationPosition += computeFrameAdvance(deltaMs, this.state.speed, isFirstStep, nextDateEmpty);
 
     // Resolve this frame: clamp position, derive the index, and decide whether
     // to emit. Stop the RAF loop when the end is reached, but keep

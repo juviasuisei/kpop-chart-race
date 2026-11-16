@@ -88,6 +88,10 @@ export function buildPixelPoints(
   // Determine where this line starts relative to the viewport
   const firstChangeIdx = changePoints[0][0];
   const lineStartsBeforeViewport = firstChangeIdx < startDateIndex;
+  // Date index and value of the previously emitted point, so a gap of days
+  // with no value is drawn flat and then steps (not a diagonal to the next value).
+  let prevIdx = startDateIndex;
+  let prevValue = 0;
 
   if (lineStartsBeforeViewport) {
     const startValue = getValueAtDate(changePoints, startDateIndex);
@@ -97,6 +101,7 @@ export function buildPixelPoints(
         y: padding.top + chartH - (startValue / effectiveMax) * chartH,
       });
       values.push(startValue);
+      prevValue = startValue;
     }
   } else {
     // Line starts within the viewport — add zero-origin point
@@ -107,6 +112,7 @@ export function buildPixelPoints(
       points.push({ x: padding.left, y: padding.top + chartH });
     }
     values.push(0);
+    prevIdx = Math.max(zeroDateIdx, startDateIndex);
   }
 
   // Add each change-point up to and including endDateIndex
@@ -114,11 +120,22 @@ export function buildPixelPoints(
     if (dateIdx < startDateIndex) continue;
     if (dateIdx > endDateIndex) break;
 
+    // Days between the previous point and this one had no value: hold the
+    // previous value flat up to the day before, then step on this day.
+    if (prevValue > 0 && dateIdx - prevIdx > 1) {
+      points.push({
+        x: dateToX(dateIdx - 1),
+        y: padding.top + chartH - (prevValue / effectiveMax) * chartH,
+      });
+      values.push(prevValue);
+    }
     points.push({
       x: dateToX(dateIdx),
       y: padding.top + chartH - (value / effectiveMax) * chartH,
     });
     values.push(value);
+    prevIdx = dateIdx;
+    prevValue = value;
   }
 
   // Animated tip: extend from endDateIndex value toward endDateIndex+1 value

@@ -163,6 +163,40 @@ export function getReleaseWinOnDate(
 }
 
 /**
+ * Which of an artist's songs is credited with the artist's win on one show/day?
+ *
+ * `chartWins` is keyed by artist, so it only says the artist won. The song is the one
+ * `releaseWinDates` records (see getReleaseWinOnDate). When that per-release record is
+ * absent, fall back to the artist's highest-scoring song on that show (first one on a
+ * tie), which is the song computeChartWins would have recorded.
+ *
+ * @returns the credited release id and the win's crown level, or undefined when the
+ *          artist did not win that show on that date
+ */
+export function getWinningReleaseOnShow(
+  dataStore: DataStore,
+  artist: ParsedArtist,
+  date: string,
+  source: string,
+): { releaseId: string; crownLevel: number } | undefined {
+  const artistId = artist.id;
+  const win = dataStore.chartWins.get(date)?.get(source);
+  if (!win || !win.artistIds.includes(artistId)) return undefined;
+  const crownLevel = Math.max(1, win.crownLevels.get(artistId) ?? 1);
+
+  let best: { releaseId: string; value: number } | undefined;
+  for (const release of artist.releases) {
+    const dv = release.dailyValues.get(date);
+    if (!dv || dv.source !== source) continue;
+    if (getReleaseWinOnDate(dataStore, artistId, release.id, date, source)) {
+      return { releaseId: release.id, crownLevel };
+    }
+    if (!best || dv.value > best.value) best = { releaseId: release.id, value: dv.value };
+  }
+  return best ? { releaseId: best.releaseId, crownLevel } : undefined;
+}
+
+/**
  * Returns the number of elements in a sorted array that are ≤ target.
  * Uses binary search for O(log n) performance.
  */

@@ -7,6 +7,7 @@ import type { DataStore, ParsedArtist } from "../models.ts";
 import { ARTIST_TYPE_COLORS } from "../colors.ts";
 import { generateFallbackLogoDataUri } from "../utils.ts";
 import { isNewTabIntent } from "../url-state.ts";
+import { getWinningReleaseOnShow } from "../chart-engine.ts";
 import { createTrophyRow, deriveTrophies } from "./artist-trophies.ts";
 
 /** Source key → logo path mapping */
@@ -317,19 +318,14 @@ export class ArtistTimeline {
 
         const showKey = `${dv.source}::${dv.episode}::${date}`;
 
-        // Check if this is a win
-        let isWin = false;
-        let crownLevel = 0;
-        if (this.dataStore?.chartWins.has(date)) {
-          const dateWins = this.dataStore.chartWins.get(date)!;
-          if (dateWins.has(dv.source)) {
-            const winData = dateWins.get(dv.source)!;
-            if (winData.artistIds.includes(artist.id)) {
-              isWin = true;
-              crownLevel = winData.crownLevels.get(artist.id) ?? 1;
-            }
-          }
-        }
+        // Win credit belongs to the one song that won, not to every song the artist had
+        // on the winning show (chartWins is artist-keyed). Same rule as the race view and
+        // the trophy row.
+        const songWin = this.dataStore
+          ? getWinningReleaseOnShow(this.dataStore, artist, date, dv.source)
+          : undefined;
+        const isWin = songWin?.releaseId === release.id;
+        const crownLevel = isWin ? songWin!.crownLevel : 0;
 
         if (!dateShows.has(showKey)) {
           dateShows.set(showKey, { source: dv.source, episode: dv.episode, songs: [] });

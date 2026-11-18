@@ -7,6 +7,7 @@
  * song titles come from the data files.
  */
 
+import { getWinningReleaseOnShow } from "../chart-engine.ts";
 import type { DataStore, ParsedArtist } from "../models.ts";
 
 /** One music-show win. */
@@ -27,8 +28,8 @@ const MAX_CROWN_ICON = 12;
 /**
  * Derive the artist's trophies, oldest first. Ties on the same day are ordered
  * by source key so the result is deterministic. When more than one of the
- * artist's songs charted on the winning show that day, the highest-scoring one
- * gets the credit (one trophy per win, not per song).
+ * artist's songs charted on the winning show that day, only the song the win is
+ * recorded against gets the credit (one trophy per win, not per song).
  */
 export function deriveTrophies(
   artist: ParsedArtist,
@@ -42,14 +43,11 @@ export function deriveTrophies(
       if (sourceFilter !== "all" && source !== sourceFilter) continue;
       if (!win.artistIds.includes(artist.id)) continue;
 
-      let best: { title: string; value: number; episode: number } | null = null;
-      for (const release of artist.releases) {
-        const dv = release.dailyValues.get(date);
-        if (!dv || dv.source !== source) continue;
-        if (!best || dv.value > best.value) {
-          best = { title: release.title, value: dv.value, episode: dv.episode };
-        }
-      }
+      // Credit the same song the artist view crowns (shared rule, see chart-engine).
+      const credited = getWinningReleaseOnShow(dataStore, artist, date, source);
+      const release = credited && artist.releases.find((r) => r.id === credited.releaseId);
+      const dv = release?.dailyValues.get(date);
+      const best = release && dv ? { title: release.title, episode: dv.episode } : null;
 
       trophies.push({
         date,

@@ -18,13 +18,38 @@ import type {
   CanvasLayer,
 } from "./messages.ts";
 import { buildPixelPoints, getValueAtDate } from "./pixel-points.ts";
-import { findFirstPlaceLineId, resolveLineOpacity } from "./visibility.ts";
+import {
+  findFirstPlaceLineId,
+  resolveLineOpacity,
+  buildActivityLevels,
+  activityOpacityFromLevels,
+  blendOpacity,
+  lastIndexAtOrBefore,
+} from "./visibility.ts";
 
 // --- Internal state ---
 /** All date strings, indexed by position */
 let allDates: string[] = [];
 let lines: SerializedLineData[] = [];
 let selectedLineIds: Set<string> = new Set();
+/** Per-line calendar-day numbers of each change point (parallel to changePoints), for the fade. */
+let activityDaysByLine: Map<string, number[]> = new Map();
+/** Per filterCount: per-line fade level on each activity day (built lazily, cleared on init). */
+let activityLevelsCache: Map<number, Map<string, Float64Array>> = new Map();
+
+function getActivityLevels(lineId: string, days: number[], filterCount: number): Float64Array {
+  let perLine = activityLevelsCache.get(filterCount);
+  if (!perLine) {
+    perLine = new Map();
+    activityLevelsCache.set(filterCount, perLine);
+  }
+  let levels = perLine.get(lineId);
+  if (!levels) {
+    levels = buildActivityLevels(days, filterCount);
+    perLine.set(lineId, levels);
+  }
+  return levels;
+}
 
 // --- Constants ---
 const Z_INDEX_DAY_MULTIPLIER = 1_000_000_000;
@@ -32,24 +57,18 @@ const MAX_DAYS = 36500;
 
 // --- Helpers ---
 
-/**
- * Compute the number of calendar days between two date indices.
- * Uses the actual date strings from allDates for accurate day counting.
- */
-function calendarDaysBetween(fromIndex: number, toIndex: number): number {
-  if (fromIndex >= toIndex) return 0;
-  if (fromIndex < 0 || toIndex >= allDates.length) return 0;
+/** Calendar-day number of each date (NaN when the date string does not parse); set on init-data. */
+let parsedDays: number[] = [];
 
-  const fromDate = allDates[fromIndex];
-  const toDate = allDates[toIndex];
-  if (!fromDate || !toDate) return 0;
+/** True when this date and the next both exist and parse (so both day numbers share one unit). */
+function hasNextParsableDate(index: number): boolean {
+  return index + 1 < parsedDays.length && !isNaN(parsedDays[index]) && !isNaN(parsedDays[index + 1]);
+}
 
-  // Parse YYYY-MM-DD strings to compute day difference
-  const from = Date.parse(fromDate);
-  const to = Date.parse(toDate);
-  if (isNaN(from) || isNaN(to)) return toIndex - fromIndex; // fallback to index diff
-
-  return Math.round((to - from) / 86400000);
+/** Calendar-day number of a date index (falls back to the index when unparsable). */
+function dayNumber(index: number): number {
+  const t = parsedDays[index];
+  return t === undefined || isNaN(t) ? index : t;
 }
 
 /**
@@ -140,6 +159,8 @@ function computeFrame(msg: ComputeFrameMessage): void {
   }
 
   const scored: ScoredLine[] = [];
+  const currentDay = dayNumber(effectiveDateIndex);
+  const nextDay = hasNextParsableDate(effectiveDateIndex) ? dayNumber(effectiveDateIndex + 1) : currentDay;
 
   for (const line of lines) {
     const lastActivity = getLastActivityDateIndex(line.changePoints);
@@ -152,7 +173,21 @@ function computeFrame(msg: ComputeFrameMessage): void {
 
     if (firstAppearance > effectiveDateIndex && !isUpcoming) continue;
 
-    const daysSinceActivity = calendarDaysBetween(lastActivity, effectiveDateIndex);
+    // Causal: the latest activity on or before the current date (the final
+    // change point can lie in the future when the line re-charts later).
+    const activityDays = activityDaysByLine.get(line.lineId) ?? [];
+    const causalIdx = lastIndexAtOrBefore(activityDays, currentDay);
+    const daysSinceActivity = causalIdx < 0 ? 0 : currentDay - activityDays[causalIdx];
+    // Fade level is blended toward the next date by progressToNext so it moves
+    // smoothly between dates (the z-order above stays per date). No next date
+    // (last one) means no blend.
+    const levels = getActivityLevels(line.lineId, activityDays, visibility.filterCount);
+    const dateOpacity = activityOpacityFromLevels(activityDays, levels, currentDay, visibility.filterCount);
+    const progress = viewport.progressToNext;
+    const activityOpacity = nextDay > currentDay && progress > 0
+      ? blendOpacity(dateOpacity, activityOpacityFromLevels(activityDays, levels, nextDay, visibility.filterCount), progress)
+      : dateOpacity;
+
     const lifetimePoints = getValueAtDate(line.changePoints, effectiveDateIndex);
 
     // Skip lines with 0 lifetime points UNLESS they're upcoming (about to appear)
@@ -170,6 +205,7 @@ function computeFrame(msg: ComputeFrameMessage): void {
       artistFilterActive: visibility.artistFilterActive,
       daysSinceActivity,
       filterCount: visibility.filterCount,
+      activityOpacity,
     });
 
     if (opacity <= 0 && !isSelected && !isPinnedArtist) continue;
@@ -180,7 +216,19 @@ function computeFrame(msg: ComputeFrameMessage): void {
       opacity *= 0.08;
     }
 
-    const layer = assignLayer(opacity, isSelected);
+    // Layer (foreground/background) follows the per-date opacity, not the
+    // blended one, so a line never changes draw layer part-way through a span.
+    let layerOpacity = resolveLineOpacity({
+      isSelected,
+      isPinnedArtist,
+      isFirstPlace: line.lineId === firstPlaceLineId,
+      artistFilterActive: visibility.artistFilterActive,
+      daysSinceActivity,
+      filterCount: visibility.filterCount,
+      activityOpacity: dateOpacity,
+    });
+    if (selectedLineIds.size > 0 && !isSelected && !isPinnedArtist) layerOpacity *= 0.08;
+    const layer = assignLayer(layerOpacity, isSelected);
     // The pinned artist draws above normal lines (so it isn't buried) but below
     // clicked selections. It stays off the highlight layer and keeps the normal
     // line width — it is "always visible", not "highlighted".
@@ -255,8 +303,19 @@ self.onmessage = (event: MessageEvent<MainToWorkerMessage>) => {
   switch (msg.type) {
     case "init-data": {
       allDates = msg.dates;
+      parsedDays = allDates.map(d => { const t = Date.parse(d); return isNaN(t) ? NaN : Math.round(t / 86400000); });
       lines = msg.lines;
       selectedLineIds = new Set();
+      // Ascending, finite calendar-day numbers of each line's activity.
+      activityDaysByLine = new Map(lines.map(l => {
+        const days: number[] = [];
+        for (const cp of l.changePoints) {
+          const d = Array.isArray(cp) ? dayNumber(cp[0]) : NaN;
+          if (Number.isFinite(d) && (days.length === 0 || d > days[days.length - 1])) days.push(d);
+        }
+        return [l.lineId, days] as [string, number[]];
+      }));
+      activityLevelsCache = new Map();
       recomputeGlobalMax();
 
       const ready: WorkerToMainMessage = { type: "worker-ready" };

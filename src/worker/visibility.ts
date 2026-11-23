@@ -107,6 +107,33 @@ export function activityOpacityFromLevels(
 }
 
 /**
+ * Opacity part-way between two dates: a straight line from the value on
+ * `day0` to the value on `day1`, by `progress` (0..1; NaN counts as 0, values
+ * outside are clamped). Pure in (day0, day1, progress), so a seek or jump to
+ * the same position gives the same value as playing through it. When there is
+ * no next date pass day1 = day0 and nothing is blended.
+ */
+export function activityOpacityBlended(
+  activityDays: ArrayLike<number>,
+  levels: Float64Array,
+  day0: number,
+  day1: number,
+  progress: number,
+  filterCount: number,
+): number {
+  const a = activityOpacityFromLevels(activityDays, levels, day0, filterCount);
+  const p = Number.isFinite(progress) ? Math.min(1, Math.max(0, progress)) : 0;
+  if (p === 0 || !(day1 > day0)) return a;
+  return blendOpacity(a, activityOpacityFromLevels(activityDays, levels, day1, filterCount), p);
+}
+
+/** Straight line from `a` to `b` by `progress`; NaN counts as 0, outside 0..1 is clamped. */
+export function blendOpacity(a: number, b: number, progress: number): number {
+  const p = Number.isFinite(progress) ? Math.min(1, Math.max(0, progress)) : 0;
+  return a + (b - a) * p;
+}
+
+/**
  * Opacity of a line as of `currentDay`, given the calendar-day numbers of all
  * its activity (ascending). Fades out AND back in, as a pure function of the
  * date (no animation state), so scrubbing to any date gives the right value.

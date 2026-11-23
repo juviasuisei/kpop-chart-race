@@ -1,6 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import {
   computeActivityOpacity,
+  buildActivityLevels,
+  activityOpacityBlended,
+  blendOpacity,
   computeInactivityOpacity,
   resolveLineOpacity,
   FADE_START_DAYS,
@@ -83,5 +86,44 @@ describe('resolveLineOpacity keeps its override order with the activity opacity'
     for (const o of [{ isFirstPlace: true }, { isPinnedArtist: true }, { isSelected: true }, { artistFilterActive: true }]) {
       expect(resolveLineOpacity({ ...base, ...o, activityOpacity: 0 })).toBe(1);
     }
+  });
+});
+
+describe('activityOpacityBlended: smooth within a date span', () => {
+  const days = [0, 1, 60];
+  const levels = buildActivityLevels(days, 0);
+  const at = (d0: number, d1: number, p: number) => activityOpacityBlended(days, levels, d0, d1, p, 0);
+  it('equals the per-date value at progress 0 and approaches the next date at progress 1', () => {
+    for (const d of [5, 20, 35, 59, 60, 70]) {
+      close(at(d, d + 1, 0), computeActivityOpacity(days, d, 0));
+      close(at(d, d + 1, 1), computeActivityOpacity(days, d + 1, 0));
+    }
+  });
+  it('is the straight line between the two dates', () => {
+    const a = computeActivityOpacity(days, 20, 0);
+    const b = computeActivityOpacity(days, 21, 0);
+    close(at(20, 21, 0.25), a + (b - a) * 0.25);
+  });
+  it('a line whose activity is on the next date starts rising across this span, from hidden', () => {
+    expect(at(59, 60, 0)).toBe(0);
+    close(at(59, 60, 0.5), 0.5 / L);
+    close(at(59, 60, 1), 1 / L);
+  });
+  it('the last date (no next date) is not blended', () => {
+    close(at(20, 20, 0.7), computeActivityOpacity(days, 20, 0));
+  });
+  it('clamps progress outside 0..1 and ignores NaN progress', () => {
+    close(at(20, 21, -3), at(20, 21, 0));
+    close(at(20, 21, 9), at(20, 21, 1));
+    close(at(20, 21, NaN), at(20, 21, 0));
+  });
+});
+
+describe('blendOpacity', () => {
+  it('is a straight line, clamps progress and treats NaN as 0', () => {
+    close(blendOpacity(0.2, 0.8, 0.5), 0.5);
+    close(blendOpacity(0.2, 0.8, 2), 0.8);
+    close(blendOpacity(0.2, 0.8, -1), 0.2);
+    close(blendOpacity(0.2, 0.8, NaN), 0.2);
   });
 });

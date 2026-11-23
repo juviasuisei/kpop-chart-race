@@ -2,6 +2,8 @@ import { describe, it, expect } from 'vitest';
 import fc from 'fast-check';
 import {
   computeActivityOpacity,
+  buildActivityLevels,
+  activityOpacityBlended,
   computeInactivityOpacity,
   FADE_START_DAYS,
   BASE_FADE_END_DAYS,
@@ -69,6 +71,25 @@ describe('activity fade properties', () => {
   it('with no later activity it equals the legacy inactivity fade', () => {
     fc.assert(fc.property(fc.integer({ min: 0, max: 100 }), fc.integer({ min: 0, max: 200 }), (a, k) => {
       expect(computeActivityOpacity([a], a + k, 0)).toBeCloseTo(computeInactivityOpacity(k, 0), 9);
+    }));
+  });
+
+  it('blended opacity is continuous in progress, equals the date value at 0 and the next at 1', () => {
+    fc.assert(fc.property(daysArb, fc.integer({ min: 0, max: 2 }), fc.integer({ min: 0, max: 450 }), (days, f, d) => {
+      const levels = buildActivityLevels(days, f);
+      const step = 1 / (BASE_FADE_END_DAYS * 2 ** f - FADE_START_DAYS);
+      const a = computeActivityOpacity(days, d, f);
+      const b = computeActivityOpacity(days, d + 1, f);
+      expect(activityOpacityBlended(days, levels, d, d + 1, 0, f)).toBeCloseTo(a, 9);
+      expect(activityOpacityBlended(days, levels, d, d + 1, 1, f)).toBeCloseTo(b, 9);
+      let prev = a;
+      for (let i = 1; i <= 20; i++) {
+        const cur = activityOpacityBlended(days, levels, d, d + 1, i / 20, f);
+        expect(Math.abs(cur - prev)).toBeLessThanOrEqual(step / 20 + 1e-9); // no pop, even across a reactivation
+        expect(cur).toBeGreaterThanOrEqual(Math.min(a, b) - 1e-9);
+        expect(cur).toBeLessThanOrEqual(Math.max(a, b) + 1e-9);
+        prev = cur;
+      }
     }));
   });
 });
